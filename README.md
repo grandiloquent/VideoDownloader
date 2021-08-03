@@ -1,2 +1,3 @@
-"# vanilla-html5-video-player" 
-"# vanilla-html5-video-player" 
+# 视频浏览器
+
+一个解析网站视频地址的浏览器
