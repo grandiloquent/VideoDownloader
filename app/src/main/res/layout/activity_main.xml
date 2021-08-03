@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#f2f2f2"
+        android:orientation="horizontal"
+        android:weightSum="9">
+
+        <ImageButton
+            android:id="@+id/bookmark2_button"
+            style="@style/ImageButton"
+            android:src="@drawable/ic_action_bookmark_border" />
+
+        <ImageButton
+            android:id="@+id/refresh_button"
+            style="@style/ImageButton"
+            android:src="@drawable/ic_action_refresh" />
+
+        <ImageButton
+            android:id="@+id/copy_button"
+            style="@style/ImageButton"
+            android:src="@drawable/ic_action_content_copy" />
+
+        <ImageButton
+            android:id="@+id/edit_button"
+            style="@style/ImageButton"
+            android:src="@drawable/ic_action_edit" />
+        <ImageButton
+            android:id="@+id/event_note_button"
+            style="@style/ImageButton"
+            android:src="@drawable/ic_action_event_note" />
+
+    </LinearLayout>
+
+
+    <WebView
+        android:id="@+id/web"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
