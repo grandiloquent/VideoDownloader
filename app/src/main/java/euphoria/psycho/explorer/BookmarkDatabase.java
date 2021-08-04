@@ -22,7 +22,7 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
     public static final String CREATE_AT = "createAt";
     public static final String UPDATE_AT = "updateAt";
 
-    public class Bookmark {
+    public static class Bookmark {
         public int Id;
         public String Name;
         public String Url;
@@ -45,9 +45,9 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
                 CREATE_AT + " INTEGER," +
                 UPDATE_AT + " INTEGER" +
                 ")");
-        insert("YouTube", "https://m.youtube.com",db);
-        insert("回形针", "https://lucidu.cn",db);
-        insert("XVideos", "https://xvideos.com",db);
+        insert("YouTube", "https://m.youtube.com", db);
+        insert("回形针", "https://lucidu.cn", db);
+        insert("XVideos", "https://xvideos.com", db);
     }
 
     @Override
@@ -73,17 +73,34 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
         getWritableDatabase().insert(TABLE, null, contentValues);
     }
 
+    public void update(Bookmark bookmark) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NAME, bookmark.Name);
+        contentValues.put(UPDATE_AT, System.currentTimeMillis() / 1000L);
+        getWritableDatabase().update(TABLE, contentValues, "id=?", new String[]{
+                Integer.toString(bookmark.Id)
+        });
+    }
+
+    public void deleteBookmark(Bookmark bookmark) {
+        getWritableDatabase().delete(TABLE, "id=?", new String[]{
+                Integer.toString(bookmark.Id)
+        });
+    }
+
     public List<Bookmark> getBookmarkList() {
         Cursor cursor = getReadableDatabase().query(TABLE,
                 new String[]{
+                        "id",
                         NAME,
                         URL,
                 }, null, null, null, null, null);
         List<Bookmark> bookmarks = new ArrayList<>();
         while (cursor.moveToNext()) {
             Bookmark bookmark = new Bookmark();
-            bookmark.Name = cursor.getString(0);
-            bookmark.Url = cursor.getString(1);
+            bookmark.Id=cursor.getInt(0);
+            bookmark.Name = cursor.getString(1);
+            bookmark.Url = cursor.getString(2);
             bookmarks.add(bookmark);
         }
         cursor.close();

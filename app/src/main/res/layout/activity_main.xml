@@ -12,6 +12,16 @@
         android:weightSum="9">
 
         <ImageButton
+            android:id="@+id/add_link"
+            style="@style/ImageButton"
+            android:src="@drawable/ic_action_add_link" />
+
+        <ImageButton
+            android:id="@+id/favorite_border"
+            style="@style/ImageButton"
+            android:src="@drawable/ic_action_favorite_border" />
+
+        <ImageButton
             android:id="@+id/bookmark2_button"
             style="@style/ImageButton"
             android:src="@drawable/ic_action_bookmark_border" />
@@ -27,13 +37,14 @@
             android:src="@drawable/ic_action_content_copy" />
 
         <ImageButton
-            android:id="@+id/edit_button"
+            android:id="@+id/file_download"
             style="@style/ImageButton"
-            android:src="@drawable/ic_action_edit" />
+            android:src="@drawable/ic_action_file_download" />
+
         <ImageButton
-            android:id="@+id/event_note_button"
+            android:id="@+id/help_outline"
             style="@style/ImageButton"
-            android:src="@drawable/ic_action_event_note" />
+            android:src="@drawable/ic_action_help_outline" />
 
     </LinearLayout>
 

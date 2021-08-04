@@ -8,60 +8,144 @@ import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
-import android.webkit.DownloadListener;
 import android.webkit.PermissionRequest;
 import android.webkit.URLUtil;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.prefs.Preferences;
-import java.util.zip.GZIPInputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.ThreadShare;
 import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.share.XVideosShare;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ClientInterface {
     private static final int REQUEST_PERMISSION = 66;
     private WebView mWebView;
-    private File mCacheDirectory;
-    private boolean mIsLog = false;
     private BookmarkDatabase mBookmarkDatabase;
+    private String mVideoUrl;
 
+    @Override
+    public void onVideoUrl(String uri) {
+        Share.setClipboardText(this, uri);
+        mVideoUrl = uri;
+    }
+
+    //
+    public boolean parsingXVideos() {
+        String uri = mWebView.getUrl();
+        if (uri.contains(".xvideos.")) {
+            ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.show();
+            XVideosShare.performTask(uri, value -> MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (value != null) {
+                        Share.setClipboardText(MainActivity.this, value);
+                        Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
+                        try {
+                            mWebView.loadUrl("http://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                        progressDialog.dismiss();
+                    } else {
+                        progressDialog.dismiss();
+                    }
+                }
+            }));
+
+            return true;
+        }
+        return false;
+    }
+
+    public boolean parsing91Porn() {
+        String uri = mWebView.getUrl();
+        if (uri.contains("91porn.com/")) {
+            ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.show();
+            Porn91Share.performTask(uri, value -> MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (value != null) {
+                        String script = FileShare.readAssetString(MainActivity.this, "encode.js");
+                        mWebView.evaluateJavascript(script + value, new ValueCallback<String>() {
+                            @Override
+                            public void onReceiveValue(String value) {
+
+                                Pattern pattern = Pattern.compile("(?<=src=').*?(?=')");
+                                Matcher matcher = pattern.matcher(value);
+
+
+                                Log.e("TAG/", "Debug: onReceiveValue, \n" + value);
+
+                                if (matcher.find()) {
+
+
+                                    Log.e("TAG/", "Debug: onReceiveValue, \n" + matcher.group());
+
+                                    value = matcher.group();
+                                    Share.setClipboardText(MainActivity.this, value);
+                                    Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
+                                    try {
+                                        mWebView.loadUrl("http://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8"));
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+
+                            }
+                        });
+
+                        progressDialog.dismiss();
+                    } else {
+                        progressDialog.dismiss();
+                    }
+                }
+            }));
+
+            return true;
+        }
+        return false;
+    }
+
+    private void addBookmark() {
+        String name = mWebView.getTitle();
+        String url = mWebView.getUrl();
+        Bookmark bookmark = new Bookmark();
+        bookmark.Name = name;
+        bookmark.Url = url;
+        mBookmarkDatabase.insert(bookmark);
+    }
 
     private void initialize() {
         setContentView(R.layout.activity_main);
@@ -78,26 +162,14 @@ public class MainActivity extends Activity {
 
             }
         });
-        mCacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
-        if (!mCacheDirectory.isDirectory()) {
-            mCacheDirectory.mkdirs();
+        File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
+        if (!cacheDirectory.isDirectory()) {
+            cacheDirectory.mkdirs();
         }
 
 
         mWebView = findViewById(R.id.web);
-//        mUrlEditText.setOnKeyListener(new OnKeyListener() {
-//            @Override
-//            public boolean onKey(View v, int keyCode, KeyEvent event) {
-//                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-//                    String url = mUrlEditText.getText().toString();
-//                    mWebView.loadUrl(url);
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
-
-        Helper.setWebView(mWebView, mCacheDirectory.getAbsolutePath());
+        Helper.setWebView(mWebView, cacheDirectory.getAbsolutePath());
 
         mWebView.setWebViewClient(new CustomWebViewClient(this));
         mWebView.setWebChromeClient(new CustomWebChromeClient(this));
@@ -106,19 +178,40 @@ public class MainActivity extends Activity {
         if (getIntent().getData() != null) {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
-            mWebView.loadUrl("https://www.xvideos.red/video63171345/_20_8_sp_5_pts-408_2_?sxcaf=4353LFJE75");
+            mWebView.loadUrl("https://m.youtube.com");
         }
 
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptThirdPartyCookies(mWebView, true);
 
+        getWebViewVersion();
+
+
+    }
+
+    private void getWebViewVersion() {
         PackageInfo webViewPackageInfo;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
             webViewPackageInfo = WebView.getCurrentWebViewPackage();
             Log.e("TAG/", "Debug: initialize, " + webViewPackageInfo.versionName);
         }
+    }
 
+    private void openUrlDialog(View v) {
+        EditText editText = new EditText(v.getContext());
+        AlertDialog alertDialog = new AlertDialog.Builder(v.getContext())
+                .setView(editText)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    mWebView.loadUrl(editText.getText().toString());
+                })
+                .create();
+        alertDialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        alertDialog.show();
+    }
 
+    private void refreshPage() {
+        mWebView.clearCache(true);
+        mWebView.reload();
     }
 
     @Override
@@ -140,10 +233,20 @@ public class MainActivity extends Activity {
         initialize();
 
 
+        findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
+        findViewById(R.id.favorite_border).setOnClickListener(v -> {
+            addBookmark();
+        });
         findViewById(R.id.bookmark2_button).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builderSingle = new AlertDialog.Builder(MainActivity.this);
+                AlertDialog.Builder builderSingle = new AlertDialog.Builder(MainActivity.this).setPositiveButton(
+                        android.R.string.ok,
+                        (dialog, which) -> {
+                            Intent intent = new Intent(MainActivity.this, BookmarkActivity.class);
+                            startActivity(intent);
+                        }
+                );
                 List<Bookmark> bookmarkList = mBookmarkDatabase.getBookmarkList();
                 final ArrayAdapter<Bookmark> arrayAdapter = new ArrayAdapter<Bookmark>(MainActivity.this, android.R.layout.simple_list_item_1) {
                     @Override
@@ -164,33 +267,35 @@ public class MainActivity extends Activity {
         });
 
 
-        findViewById(R.id.refresh_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mWebView.clearCache(true);
-                mWebView.reload();
-            }
+        findViewById(R.id.refresh_button).setOnClickListener(v -> {
+            refreshPage();
         });
+
 
         findViewById(R.id.copy_button).setOnClickListener(v -> getSystemService(ClipboardManager.class)
                 .setPrimaryClip(ClipData.newPlainText(null, mWebView.getUrl())));
-        findViewById(R.id.edit_button).setOnClickListener(v -> {
-            if (mWebView.getUrl().contains("xvideos.red/")) {
-                ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-                progressDialog.show();
-
-                ThreadShare.postOnBackgroundThread(() -> {
-                    String url = XVideosShare.getUrl(mWebView.getUrl(), null);
-                    ThreadShare.postOnUiThread(() -> {
-                        progressDialog.dismiss();
-                        if (url != null) {
-                            mWebView.loadUrl(url);
-                        }
-                    });
-                });
+        findViewById(R.id.file_download).setOnClickListener(v -> {
+            if (parsingXVideos()) return;
+            if (parsing91Porn()) return;
+            if (mWebView.getUrl().contains("youtube.com/watch")) {
+                Intent intent = new Intent(this, SampleDownloadActivity.class);
+                intent.setAction(Intent.ACTION_SEND);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, mWebView.getUrl());
+                startActivity(intent);
+                return;
             }
+            if (mVideoUrl != null) {
+                try {
+                    mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
         });
-        findViewById(R.id.event_note_button).setOnClickListener(v -> mIsLog = !mIsLog);
         mWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
             String fileName = URLUtil.guessFileName(url, contentDisposition, WebViewShare.getFileType(MainActivity.this, url));
             WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
@@ -234,22 +339,11 @@ public class MainActivity extends Activity {
 
 
             //Log.e("TAG/", "Debug: onConsoleMessage, \n" + consoleMessage.message());
-            if (mIsLog) {
+            boolean isLog = false;
+            if (isLog) {
                 Toast.makeText(MainActivity.this, consoleMessage.message(), Toast.LENGTH_LONG).show();
             }
             return super.onConsoleMessage(consoleMessage);
-        }
-
-        @Override
-        public void onReceivedTitle(WebView view, String title) {
-            mActivity.setTitle(title);
-
-        }
-
-        @Override
-        public void onRequestFocus(WebView view) {
-            super.onRequestFocus(view);
-
         }
 
         @Override
@@ -268,6 +362,18 @@ public class MainActivity extends Activity {
                 }
             }
             request.grant(request.getResources());
+        }
+
+        @Override
+        public void onReceivedTitle(WebView view, String title) {
+            mActivity.setTitle(title);
+
+        }
+
+        @Override
+        public void onRequestFocus(WebView view) {
+            super.onRequestFocus(view);
+
         }
     }
 }
