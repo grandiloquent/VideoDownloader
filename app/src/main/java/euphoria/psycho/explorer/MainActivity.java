@@ -10,6 +10,7 @@ import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -203,7 +204,7 @@ public class MainActivity extends Activity implements ClientInterface {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
             mWebView.loadUrl(PreferenceShare.getPreferences()
-                    .getString(LAST_ACCESSED, "https://m.youtube.com"));
+                    .getString(LAST_ACCESSED, HTTPS_LUCIDU_CN_ARTICLE_JQDKGL));
         }
     }
 
@@ -322,8 +323,14 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        for (String permission : permissions) {
-            Logger.d(String.format("请求权限回调，权限 = %s", permission));
+        for (int i = 0; i < permissions.length; i++) {
+            boolean result = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+            Logger.d(String.format("请求权限回调: 权限 = %s, 允许 = %b", permissions[i], result));
+            if (!result) {
+                Toast.makeText(this, "缺少必要权限，程序无法运行", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
         }
         initialize();
     }
