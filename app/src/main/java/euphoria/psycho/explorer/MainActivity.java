@@ -7,12 +7,17 @@ import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
@@ -32,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
+import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
@@ -52,6 +58,7 @@ public class MainActivity extends Activity implements ClientInterface {
         String uri = mWebView.getUrl();
         if (uri.contains("91porn.com/")) {
             ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("解析...");
             progressDialog.show();
             Porn91Share.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
@@ -73,6 +80,7 @@ public class MainActivity extends Activity implements ClientInterface {
         String uri = mWebView.getUrl();
         if (uri.contains(".xvideos.")) {
             ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("解析...");
             progressDialog.show();
             XVideosShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
@@ -120,12 +128,19 @@ public class MainActivity extends Activity implements ClientInterface {
         }
     }
 
+
     private void getVideo(String value) {
         copyUrl(value);
         try {
-            mWebView.loadUrl("http://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            String uri = "http://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
+            DialogShare.createAlertDialogBuilder(this, "打开视频链接", (dialog, which) -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(uri));
+                Intent.createChooser(intent, "打开视频链接");
+            }, (dialog, which) -> {
+                mWebView.loadUrl(uri);
+            });
+        } catch (UnsupportedEncodingException ignored) {
         }
     }
 
@@ -238,6 +253,7 @@ public class MainActivity extends Activity implements ClientInterface {
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     if (editText.getText().toString().contains("douyin.com")) {
                         ProgressDialog progressDialog = new ProgressDialog(this);
+                        progressDialog.setTitle("解析...");
                         progressDialog.show();
                         String id = matchTikTokVideoId(editText.getText().toString());
                         if (id == null) return;
@@ -249,7 +265,7 @@ public class MainActivity extends Activity implements ClientInterface {
                                     openDownloadDialog(value);
                                 }
                                 progressDialog.dismiss();
-                                
+
                             });
                         });
                     } else {
@@ -324,7 +340,6 @@ public class MainActivity extends Activity implements ClientInterface {
     public void onVideoUrl(String uri) {
         Share.setClipboardText(this, uri);
         mVideoUrl = uri;
-        Toast.makeText(this, "嗅探到视频地址：" + uri, Toast.LENGTH_LONG).show();
     }
 
 
