@@ -85,6 +85,8 @@ public class MainActivity extends Activity implements ClientInterface {
             XVideosShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
                     getVideo(value);
+                } else {
+                    Toast.makeText(this, "无法解析视频", Toast.LENGTH_LONG).show();
                 }
                 progressDialog.dismiss();
             }));
@@ -105,7 +107,7 @@ public class MainActivity extends Activity implements ClientInterface {
         }, (dialog, which) -> {
             dialog.dismiss();
         })
-                .setMessage(String.format("是否添\n%s\n%s\n为书签？", name, url))
+                .setMessage(String.format("是否添\n\n\"%s\"\n\"%s\"\n\n为书签？", name, url))
                 .show();
 
     }
@@ -133,7 +135,7 @@ public class MainActivity extends Activity implements ClientInterface {
         if (matcher.find()) {
             value = matcher.group();
             getVideo(value);
-        } // 
+        } //
     }
 
 

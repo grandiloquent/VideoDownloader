@@ -38,16 +38,7 @@ public class CustomWebViewClient extends WebViewClient {
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         super.onPageStarted(view, url, favicon);
-        if (url.contains("xvideos.red/")) {
-            view.evaluateJavascript("const n=()=>{return 3;}; n();", new ValueCallback<String>() {
-                @Override
-                public void onReceiveValue(String value) {
-
-                    Log.e("TAG/", "Debug: onReceiveValue, \n" + value);
-
-                }
-            });
-        }
+        // 
     }
 
     @Override
