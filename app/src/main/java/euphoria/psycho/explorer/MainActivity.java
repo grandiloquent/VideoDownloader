@@ -1,6 +1,5 @@
 package euphoria.psycho.explorer;
 
-import android.Manifest;
 import android.Manifest.permission;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,29 +7,26 @@ import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
-import android.webkit.ConsoleMessage;
-import android.webkit.CookieManager;
-import android.webkit.PermissionRequest;
 import android.webkit.URLUtil;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -39,10 +35,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
+import euphoria.psycho.explorer.XVideosShare.Callback;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.share.ThreadShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
 
 public class MainActivity extends Activity implements ClientInterface {
@@ -138,6 +135,7 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void initialize() {
+        setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
         findViewById(R.id.favorite_border).setOnClickListener(v -> {
@@ -172,17 +170,16 @@ public class MainActivity extends Activity implements ClientInterface {
                 }
             }
         });
+        mWebView = findViewById(R.id.web);
         mWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
             String fileName = URLUtil.guessFileName(url, contentDisposition, WebViewShare.getFileType(MainActivity.this, url));
             WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
         });
-        setContentView(R.layout.activity_main);
         mBookmarkDatabase = new BookmarkDatabase(this);
         File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
         if (!cacheDirectory.isDirectory()) {
             cacheDirectory.mkdirs();
         }
-        mWebView = findViewById(R.id.web);
         Helper.setWebView(mWebView, cacheDirectory.getAbsolutePath());
         mWebView.setWebViewClient(new CustomWebViewClient(this));
         mWebView.setWebChromeClient(new CustomWebChromeClient(this));
@@ -222,7 +219,22 @@ public class MainActivity extends Activity implements ClientInterface {
         AlertDialog alertDialog = new AlertDialog.Builder(v.getContext())
                 .setView(editText)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    mWebView.loadUrl(editText.getText().toString());
+                    if (editText.getText().toString().contains("douyin.com")) {
+                        ProgressDialog progressDialog = new ProgressDialog(this);
+                        progressDialog.show();
+                        DouYinShare.performTask(StringShare.substringAfterLast(editText.getText().toString(), "/"), value -> {
+                            MainActivity.this.runOnUiThread(() -> {
+                                if (value != null) {
+                                    getVideo(value);
+                                    progressDialog.dismiss();
+                                } else {
+                                    progressDialog.dismiss();
+                                }
+                            });
+                        });
+                    } else {
+                        mWebView.loadUrl(editText.getText().toString());
+                    }
                 })
                 .create();
         alertDialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);

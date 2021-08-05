@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="euphoria.psycho.explorer">
+    package="euphoria.psycho.explorer"
+    android:versionCode="1"
+    android:versionName="1.0.0">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -14,9 +16,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true">
-<!--        <uses-library-->
-<!--            android:name="org.apache.http.legacy"-->
-<!--            android:required="false" />-->
+        <!--        <uses-library-->
+        <!--            android:name="org.apache.http.legacy"-->
+        <!--            android:required="false" />-->
         <activity
             android:name=".MainActivity"
             android:theme="@android:style/Theme.NoTitleBar"

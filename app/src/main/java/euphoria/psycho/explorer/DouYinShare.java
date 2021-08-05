@@ -1,6 +1,10 @@
 package euphoria.psycho.explorer;
 
+import android.os.Process;
 import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,10 +16,45 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import euphoria.psycho.explorer.XVideosShare.Callback;
+
 public class DouYinShare {
-    public static String getVideoId(String uri) throws IOException {
+    public static void performTask(String uri, Callback callback) {
+        new Thread(() -> {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            String response = null;
+            try {
+                response = DouYinShare.getVideoId("https://v.douyin.com/" + uri);
+                Pattern pattern = Pattern.compile("video/(\\d+)");
+                Matcher matcher = null;
+                if (response != null) {
+                    matcher = pattern.matcher(response);
+                }
+                if (matcher != null && matcher.find()) {
+                    String requestUri = "https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=" + matcher.group(1);
+                    response = DouYinShare.getUrl(requestUri);
+                    JSONObject jsonObject = new JSONObject(response);
+                    JSONArray itemList = jsonObject.getJSONArray("item_list");
+                    jsonObject = itemList.getJSONObject(0).getJSONObject("video");
+                    jsonObject = jsonObject.getJSONObject("play_addr");
+                    itemList = jsonObject.getJSONArray("url_list");
+                    response = itemList.getString(0).replace("playwm", "play");
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (callback != null)
+                callback.run(response);
+        }).start();
+    }
+
+    private static String getVideoId(String uri) throws IOException {
         URL url = new URL(uri);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Connection", "keep-alive");
@@ -35,7 +74,25 @@ public class DouYinShare {
         for (Entry<String, List<String>> header : listMap.entrySet()) {
             Log.e("TAG/", header.getKey() + ": " + Share.join(",", header.getValue()));
         }
-        return null;
+        if (code < 400 && code >= 200) {
+            StringBuilder sb = new StringBuilder();
+            InputStream in;
+            String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
+            if (contentEncoding != null && contentEncoding.equals("gzip")) {
+                in = new GZIPInputStream(urlConnection.getInputStream());
+            } else {
+                in = urlConnection.getInputStream();
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\r\n");
+            }
+            reader.close();
+            return sb.toString();
+        } else {
+            return null;
+        }
     }
 
     private static String getUrl(String uri) throws IOException {
