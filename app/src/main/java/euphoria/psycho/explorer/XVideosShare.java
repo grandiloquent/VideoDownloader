@@ -17,6 +17,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import euphoria.psycho.share.NetShare;
+
 public class XVideosShare {
 
     public static final String DEFAULT_SESSION_TOKEN = "5af577b26ae5f6bdxfygNhQgx7oZQu05cfbg8ZXU7xwOuBnWLCzP1p6MJAMWJ6H71IXjdZN3zMeVqiyqF_AtIbks7seX5P9bgh2MTLutiKCwucH7efUlG85EzoJZnCAvok2efoArP2wCrS1vm1VLQeUj1rvz3DEbP9oBOmP5IbCDfbITo9zcQ9gTZWO4SO2F__QuD9GR_0BHbkRbgt1WSTa4rFOj4ibROL6su9w2AEHoMXgf6uA-mLmM8Hwarx43nC9kEAYadnXeXvS2kNmYZTPaGroDhNT9kbT2NZHw7xiveTyb0H2fBcmwTVt_p9KcpxUx_N9hQ4sXYFqTzT83_ojnZ59JRP310dKC5o0Tq_1uZv3nwDSETWieIycK8B8M5f46BqCJFtoeYaPAqGlZYOe8nd5V1LU83CiRCn-rbsMf1No0I9GCwgprfw_1r1HDvhBCCy-n9dkUShZzmVW9FhBcPisp3eNteZtgmOJx3WP3iiMJNDtvCAyhks9dvYyJs2awRuMOfxzuhjqHZngXctAyv2RqN8uBc2zj6w%3D%3D";
@@ -54,21 +56,7 @@ public class XVideosShare {
         int code = urlConnection.getResponseCode();
 
         if (code < 400 && code >= 200) {
-            StringBuilder sb = new StringBuilder();
-            InputStream in;
-            String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
-            if (contentEncoding != null && contentEncoding.equals("gzip")) {
-                in = new GZIPInputStream(urlConnection.getInputStream());
-            } else {
-                in = urlConnection.getInputStream();
-            }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "utf-8"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\r\n");
-            }
-            reader.close();
-            return sb.toString();
+            return NetShare.readString(urlConnection);
         } else {
             return null;
         }

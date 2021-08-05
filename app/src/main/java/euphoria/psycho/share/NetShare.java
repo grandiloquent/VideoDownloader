@@ -1,6 +1,5 @@
 package euphoria.psycho.share;
 
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -11,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
-
-import euphoria.psycho.explorer.Share;
 
 public class NetShare {
     public static String readString(HttpURLConnection connection) {
@@ -42,13 +39,12 @@ public class NetShare {
         return sb.toString();
     }
 
-    public static boolean iterateResponseHeader(HttpURLConnection connection) {
+    public static void iterateResponseHeader(HttpURLConnection connection) {
         Map<String, List<String>> listMap = connection.getHeaderFields();
         for (Entry<String, List<String>> header : listMap.entrySet()) {
         }
-        return false;
     }
 
- // 
+ //
 }
 

@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import euphoria.psycho.explorer.XVideosShare.Callback;
+import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
 
 public class Porn91Share {
@@ -49,10 +50,7 @@ public class Porn91Share {
     }
 
     private static String getUrl(String uri) throws IOException {
-
-
         Log.e("TAG/", "Debug: getUrl, \n" + uri);
-
         URL url = new URL(uri);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
@@ -68,31 +66,17 @@ public class Porn91Share {
         urlConnection.setRequestProperty("Upgrade-Insecure-Requests", "1");
         urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1");
         int code = urlConnection.getResponseCode();
-
         Map<String, List<String>> listMap = urlConnection.getHeaderFields();
-        for(Entry<String,List<String>> header:listMap.entrySet()){
-
-            Log.e("TAG/", header.getKey()+": "+ Share.join(",",header.getValue()));
+        for (Entry<String, List<String>> header : listMap.entrySet()) {
+            Log.e("TAG/", header.getKey() + ": " + Share.join(",", header.getValue()));
 
         }
         if (code < 400 && code >= 200) {
-            StringBuilder sb = new StringBuilder();
-            InputStream in;
-            String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
-            if (contentEncoding != null && contentEncoding.equals("gzip")) {
-                in = new GZIPInputStream(urlConnection.getInputStream());
-            } else {
-                in = urlConnection.getInputStream();
-            }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "utf-8"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\r\n");
-            }
-            reader.close();
-            return sb.toString();
+            return NetShare.readString(urlConnection);
         } else {
             return null;
         }
+
+        // 
     }
 }
