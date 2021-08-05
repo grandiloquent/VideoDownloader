@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.explorer.XVideosShare.Callback;
 import euphoria.psycho.share.FileShare;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -133,8 +134,7 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void getVideo(String value) {
-        Share.setClipboardText(MainActivity.this, value);
-        Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
+        copyUrl(value);
         try {
             mWebView.loadUrl("http://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
@@ -185,6 +185,7 @@ public class MainActivity extends Activity implements ClientInterface {
         });
         mBookmarkDatabase = new BookmarkDatabase(this);
         File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
+        Logger.d(String.format("浏览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
         if (!cacheDirectory.isDirectory()) {
             cacheDirectory.mkdirs();
         }
@@ -225,12 +226,22 @@ public class MainActivity extends Activity implements ClientInterface {
     private void openDownloadDialog(String url) {
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    WebViewShare.downloadFile(MainActivity.this, StringShare.substringAfterLast(StringShare.substringBeforeLast(url,"?"),"/"), url, NetShare.DEFAULT_USER_AGENT);
+                    WebViewShare.downloadFile(MainActivity.this, StringShare.substringAfterLast(StringShare.substringBeforeLast(url, "?"), "/"), url, NetShare.DEFAULT_USER_AGENT);
                     dialog.dismiss();
                 })
                 .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
                 .create();
         alertDialog.show();
+    }
+
+    public static String matchTikTokVideoId(String input) {
+        if (input == null) return null;
+        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        return null;
     }
 
     private void openUrlDialog(View v) {
@@ -241,24 +252,20 @@ public class MainActivity extends Activity implements ClientInterface {
                     if (editText.getText().toString().contains("douyin.com")) {
                         ProgressDialog progressDialog = new ProgressDialog(this);
                         progressDialog.show();
-                        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
-                        Matcher matcher = pattern.matcher(editText.getText().toString());
-                        if (matcher.find()) {
-                            DouYinShare.performTask(matcher.group(), value -> {
-                                MainActivity.this.runOnUiThread(() -> {
-                                    if (value != null) {
-                                        Share.setClipboardText(MainActivity.this, value);
-                                        Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
-                                        mWebView.loadUrl(value);
-                                        progressDialog.dismiss();
-                                        openDownloadDialog(value);
-                                    } else {
-                                        progressDialog.dismiss();
-                                    }
-                                });
+                        String id = matchTikTokVideoId(editText.getText().toString());
+                        if (id == null) return;
+                        DouYinShare.performTask(id, value -> {
+                            MainActivity.this.runOnUiThread(() -> {
+                                if (value != null) {
+                                    copyUrl(value);
+                                    mWebView.loadUrl(value);
+                                    progressDialog.dismiss();
+                                    openDownloadDialog(value);
+                                } else {
+                                    progressDialog.dismiss();
+                                }
                             });
-                        }
-
+                        });
                     } else {
                         mWebView.loadUrl(editText.getText().toString());
                     }
@@ -266,6 +273,11 @@ public class MainActivity extends Activity implements ClientInterface {
                 .create();
         alertDialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         alertDialog.show();
+    }
+
+    private void copyUrl(String value) {
+        Share.setClipboardText(MainActivity.this, value);
+        Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
     }
 
     private boolean parseYouTube() {
@@ -294,7 +306,8 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     protected void onPause() {
-        PreferenceShare.putString(LAST_ACCESSED, mWebView.getUrl());
+        if (mWebView != null)
+            PreferenceShare.putString(LAST_ACCESSED, mWebView.getUrl());
         super.onPause();
     }
 
@@ -309,6 +322,9 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        for (String permission : permissions) {
+            Logger.d(String.format("请求权限回调，权限 = %s", permission));
+        }
         initialize();
     }
 
@@ -318,6 +334,6 @@ public class MainActivity extends Activity implements ClientInterface {
         mVideoUrl = uri;
         Toast.makeText(this, "嗅探到视频地址：" + uri, Toast.LENGTH_LONG).show();
     }
- // 
+
 
 }
