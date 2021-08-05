@@ -3,6 +3,7 @@ package euphoria.psycho.explorer;
 import android.Manifest.permission;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -44,6 +45,7 @@ import euphoria.psycho.share.WebViewShare;
 
 public class MainActivity extends Activity implements ClientInterface {
     public static final String LAST_ACCESSED = "lastAccessed";
+    public static final String HTTPS_LUCIDU_CN_ARTICLE_JQDKGL = "https://lucidu.cn/article/jqdkgl";
     private static final int REQUEST_PERMISSION = 66;
     private WebView mWebView;
     private BookmarkDatabase mBookmarkDatabase;
@@ -105,6 +107,9 @@ public class MainActivity extends Activity implements ClientInterface {
         List<String> needPermissions = new ArrayList<>();
         if (!PermissionShare.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE)) {
             needPermissions.add(permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (!PermissionShare.checkSelfPermission(this, permission.INTERNET)) {
+            needPermissions.add(permission.INTERNET);
         }
         if (needPermissions.size() > 0) {
             if (VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -216,22 +221,29 @@ public class MainActivity extends Activity implements ClientInterface {
 
     private void openUrlDialog(View v) {
         EditText editText = new EditText(v.getContext());
-        AlertDialog alertDialog = new AlertDialog.Builder(v.getContext())
+        AlertDialog alertDialog = new Builder(v.getContext())
                 .setView(editText)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     if (editText.getText().toString().contains("douyin.com")) {
                         ProgressDialog progressDialog = new ProgressDialog(this);
                         progressDialog.show();
-                        DouYinShare.performTask(StringShare.substringAfterLast(editText.getText().toString(), "/"), value -> {
-                            MainActivity.this.runOnUiThread(() -> {
-                                if (value != null) {
-                                    getVideo(value);
-                                    progressDialog.dismiss();
-                                } else {
-                                    progressDialog.dismiss();
-                                }
+                        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
+                        Matcher matcher = pattern.matcher(editText.getText().toString());
+                        if (matcher.find()) {
+                            DouYinShare.performTask(matcher.group(), value -> {
+                                MainActivity.this.runOnUiThread(() -> {
+                                    if (value != null) {
+                                        Share.setClipboardText(MainActivity.this, value);
+                                        Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
+                                        mWebView.loadUrl(value);
+                                        progressDialog.dismiss();
+                                    } else {
+                                        progressDialog.dismiss();
+                                    }
+                                });
                             });
-                        });
+                        }
+
                     } else {
                         mWebView.loadUrl(editText.getText().toString());
                     }
@@ -255,7 +267,7 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void setHelpListener() {
-        findViewById(R.id.help_outline).setOnClickListener(v -> mWebView.loadUrl("https://lucidu.cn/article/jqdkgl"));
+        findViewById(R.id.help_outline).setOnClickListener(v -> mWebView.loadUrl(HTTPS_LUCIDU_CN_ARTICLE_JQDKGL));
     }
 
     @Override

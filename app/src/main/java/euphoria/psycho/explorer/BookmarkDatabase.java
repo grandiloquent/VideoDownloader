@@ -21,6 +21,7 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
     public static final String URL = "url";
     public static final String CREATE_AT = "createAt";
     public static final String UPDATE_AT = "updateAt";
+    public static final String ID = "id";
 
     public static class Bookmark {
         public int Id;
@@ -32,9 +33,6 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
 
     public BookmarkDatabase(Context context) {
         super(context, new File(context.getExternalCacheDir(), "bookmark.db").getPath(), null, DATABASE_VERSION);
-        if (VERSION.SDK_INT >= VERSION_CODES.N) {
-            Log.e("TAG/", "Debug: BookmarkDatabase, " + context.getExternalFilesDirs(Environment.DIRECTORY_DOWNLOADS)[0]);
-        }
     }
 
     @Override
@@ -47,12 +45,10 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
                 ")");
         insert("YouTube", "https://m.youtube.com", db);
         insert("回形针", "https://lucidu.cn", db);
-        insert("XVideos", "https://xvideos.com", db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
     }
 
     public void insert(String name, String url, SQLiteDatabase db) {
@@ -77,13 +73,13 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(NAME, bookmark.Name);
         contentValues.put(UPDATE_AT, System.currentTimeMillis() / 1000L);
-        getWritableDatabase().update(TABLE, contentValues, "id=?", new String[]{
+        getWritableDatabase().update(TABLE, contentValues, ID + "=?", new String[]{
                 Integer.toString(bookmark.Id)
         });
     }
 
     public void deleteBookmark(Bookmark bookmark) {
-        getWritableDatabase().delete(TABLE, "id=?", new String[]{
+        getWritableDatabase().delete(TABLE, ID + "=?", new String[]{
                 Integer.toString(bookmark.Id)
         });
     }
@@ -91,14 +87,14 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
     public List<Bookmark> getBookmarkList() {
         Cursor cursor = getReadableDatabase().query(TABLE,
                 new String[]{
-                        "id",
+                        ID,
                         NAME,
                         URL,
                 }, null, null, null, null, null);
         List<Bookmark> bookmarks = new ArrayList<>();
         while (cursor.moveToNext()) {
             Bookmark bookmark = new Bookmark();
-            bookmark.Id=cursor.getInt(0);
+            bookmark.Id = cursor.getInt(0);
             bookmark.Name = cursor.getString(1);
             bookmark.Url = cursor.getString(2);
             bookmarks.add(bookmark);
