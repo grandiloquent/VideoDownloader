@@ -7,6 +7,8 @@ import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build.VERSION;
@@ -38,6 +40,7 @@ import java.util.regex.Pattern;
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.explorer.XVideosShare.Callback;
 import euphoria.psycho.share.FileShare;
+import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
@@ -219,9 +222,17 @@ public class MainActivity extends Activity implements ClientInterface {
         return arrayAdapter;
     }
 
-    private void  openDownloadDialog(){
-        
+    private void openDownloadDialog(String url) {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    WebViewShare.downloadFile(MainActivity.this, StringShare.substringAfterLast(StringShare.substringBeforeLast(url,"?"),"/"), url, NetShare.DEFAULT_USER_AGENT);
+                    dialog.dismiss();
+                })
+                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
+                .create();
+        alertDialog.show();
     }
+
     private void openUrlDialog(View v) {
         EditText editText = new EditText(v.getContext());
         AlertDialog alertDialog = new Builder(v.getContext())
@@ -240,6 +251,7 @@ public class MainActivity extends Activity implements ClientInterface {
                                         Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
                                         mWebView.loadUrl(value);
                                         progressDialog.dismiss();
+                                        openDownloadDialog(value);
                                     } else {
                                         progressDialog.dismiss();
                                     }
@@ -306,6 +318,6 @@ public class MainActivity extends Activity implements ClientInterface {
         mVideoUrl = uri;
         Toast.makeText(this, "嗅探到视频地址：" + uri, Toast.LENGTH_LONG).show();
     }
-
+ // 
 
 }
