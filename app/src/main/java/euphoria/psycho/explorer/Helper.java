@@ -19,12 +19,7 @@ public class Helper {
 //                DownloadManager downloadManager = (DownloadManager) MainActivity.this.getSystemService(DOWNLOAD_SERVICE);
 //                downloadManager.enqueue(request);
     public static DownloadListener getDownloadListener(final Context context) {
-        return new DownloadListener() {
-            @Override
-            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
-                Share.setClipboardText(context, url);
-            }
-        };
+        return (url, userAgent, contentDisposition, mimetype, contentLength) -> Share.setClipboardText(context, url);
     }
 
     public static void setWebView(WebView webView, String appCachePath) {

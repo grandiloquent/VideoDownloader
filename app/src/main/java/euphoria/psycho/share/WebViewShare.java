@@ -81,7 +81,7 @@ public class WebViewShare {
             String cookie = CookieManager.getInstance().getCookie(url);
             request.allowScanningByMediaScanner();
             request.setTitle(fileName)
-                    .setDescription("Downloading")
+                    .setDescription("正在下载")
                     .addRequestHeader("cookie", cookie)
                     .addRequestHeader("User-Agent", userAgent)
                     .setMimeType(getFileType(context, url))
@@ -90,9 +90,9 @@ public class WebViewShare {
                     .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                     .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
             downloadManager.enqueue(request);
-            Toast.makeText(context, "Download Started", Toast.LENGTH_SHORT).show();
-        } catch (Exception ignored) {
-            Toast.makeText(context, "error" + ignored, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "开始下载", Toast.LENGTH_SHORT).show();
+        } catch (Exception exception) {
+            Toast.makeText(context, "下载错误", Toast.LENGTH_SHORT).show();
 
 
         }

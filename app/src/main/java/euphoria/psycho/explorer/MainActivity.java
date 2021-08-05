@@ -219,6 +219,9 @@ public class MainActivity extends Activity implements ClientInterface {
         return arrayAdapter;
     }
 
+    private void  openDownloadDialog(){
+        
+    }
     private void openUrlDialog(View v) {
         EditText editText = new EditText(v.getContext());
         AlertDialog alertDialog = new Builder(v.getContext())
