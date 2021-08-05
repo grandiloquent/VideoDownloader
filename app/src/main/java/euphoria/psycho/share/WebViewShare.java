@@ -3,11 +3,15 @@ package euphoria.psycho.share;
 import android.app.DownloadManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.net.Uri;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.webkit.CookieManager;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceResponse;
+import android.webkit.WebView;
 import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
@@ -15,6 +19,20 @@ import java.io.ByteArrayInputStream;
 import static android.content.Context.DOWNLOAD_SERVICE;
 
 public class WebViewShare {
+    public static void supportCookie(WebView webView) {
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptThirdPartyCookies(webView, true);
+    }
+
+    public static String getWebViewVersion() {
+        PackageInfo webViewPackageInfo;
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            webViewPackageInfo = WebView.getCurrentWebViewPackage();
+            return webViewPackageInfo.versionName;
+        }
+        return null;
+    }
+
     public static WebResourceResponse tryBlockAds(String url) {
         if (url.startsWith("https://m.youtube.com/api/stats/ads")
                 || url.startsWith("https://googleads.g.doubleclick.net")
@@ -49,6 +67,7 @@ public class WebViewShare {
             );
         return null;
     }
+
     public static String getFileType(Context context, String url) {
         ContentResolver contentResolver = context.getContentResolver();
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
@@ -70,7 +89,6 @@ public class WebViewShare {
                     .setAllowedOverRoaming(true)
                     .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                     .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
-
             downloadManager.enqueue(request);
             Toast.makeText(context, "Download Started", Toast.LENGTH_SHORT).show();
         } catch (Exception ignored) {

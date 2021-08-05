@@ -8,14 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import java.util.List;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 
@@ -44,12 +41,16 @@ public class BookmarkActivity extends Activity {
             AlertDialog alertDialog = new AlertDialog.Builder(v.getContext())
                     .setView(editText)
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        String newBookmark = editText.getText().toString().trim();
-                        if (newBookmark.length() == 0) {
+                        if (editText.getText() == null) {
                             bookmarkDatabase.deleteBookmark(bookmark);
                         } else {
-                            bookmark.Name = newBookmark;
-                            bookmarkDatabase.update(bookmark);
+                            String newBookmark = editText.getText().toString().trim();
+                            if (newBookmark.length() == 0) {
+                                bookmarkDatabase.deleteBookmark(bookmark);
+                            } else {
+                                bookmark.Name = newBookmark;
+                                bookmarkDatabase.update(bookmark);
+                            }
                         }
                         mBookmarkAdapter.setBookmarks(bookmarkDatabase.getBookmarkList().toArray(new Bookmark[0]));
                         dialog.dismiss();
@@ -67,7 +68,7 @@ public class BookmarkActivity extends Activity {
     }
 
     private static class BookmarkAdapter extends ArrayAdapter<Bookmark> {
-        private LayoutInflater mLayoutInflater;
+        private final LayoutInflater mLayoutInflater;
         private Bookmark[] mBookmarks;
 
         public BookmarkAdapter(Context context, int resource, Bookmark[] bookmarks) {

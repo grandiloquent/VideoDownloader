@@ -7,12 +7,14 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -56,7 +58,14 @@ import euphoria.psycho.share.ThreadShare;
 
 public class Share {
 
-
+    public static void startYouTubeActivity(Context context, WebView webView) {
+        Intent intent = new Intent(context, SampleDownloadActivity.class);
+        intent.setAction(Intent.ACTION_SEND);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, webView.getUrl());
+        context.startActivity(intent);
+    }
     public static List<Long> collectLongs(String s) {
         if (TextUtils.isEmpty(s)) {
             return null;

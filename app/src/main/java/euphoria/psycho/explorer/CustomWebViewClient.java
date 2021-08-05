@@ -29,6 +29,10 @@ public class CustomWebViewClient extends WebViewClient {
                 }
             });
         }
+        if (!url.contains("www.hxz315.com") && (url.contains(".m3u8") || url.contains(".mp4"))) {
+
+            mClientInterface.onVideoUrl(url);
+        }
     }
 
     @Override
