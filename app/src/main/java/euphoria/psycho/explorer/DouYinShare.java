@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import euphoria.psycho.explorer.XVideosShare.Callback;
+import euphoria.psycho.share.NetShare;
 
 public class DouYinShare {
     public static void performTask(String uri, Callback callback) {
@@ -70,26 +71,9 @@ public class DouYinShare {
         urlConnection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
         urlConnection.setRequestProperty("Cookie", "MONITOR_WEB_ID=4843f090-b627-46db-bbe2-f757b4ea21a0; _tea_utm_cache_1243={%22utm_source%22:%22copy_link%22%2C%22utm_medium%22:%22android%22%2C%22utm_campaign%22:%22client_share%22}");
         int code = urlConnection.getResponseCode();
-        Map<String, List<String>> listMap = urlConnection.getHeaderFields();
-        for (Entry<String, List<String>> header : listMap.entrySet()) {
-            Log.e("TAG/", header.getKey() + ": " + Share.join(",", header.getValue()));
-        }
+
         if (code < 400 && code >= 200) {
-            StringBuilder sb = new StringBuilder();
-            InputStream in;
-            String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
-            if (contentEncoding != null && contentEncoding.equals("gzip")) {
-                in = new GZIPInputStream(urlConnection.getInputStream());
-            } else {
-                in = urlConnection.getInputStream();
-            }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\r\n");
-            }
-            reader.close();
-            return sb.toString();
+            return NetShare.readString(urlConnection);
         } else {
             return null;
         }
@@ -111,28 +95,12 @@ public class DouYinShare {
         urlConnection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
         urlConnection.setRequestProperty("Cookie", "MONITOR_WEB_ID=4843f090-b627-46db-bbe2-f757b4ea21a0; _tea_utm_cache_1243={%22utm_source%22:%22copy_link%22%2C%22utm_medium%22:%22android%22%2C%22utm_campaign%22:%22client_share%22}");
         int code = urlConnection.getResponseCode();
-        Map<String, List<String>> listMap = urlConnection.getHeaderFields();
-        for (Entry<String, List<String>> header : listMap.entrySet()) {
-            Log.e("TAG/", header.getKey() + ": " + Share.join(",", header.getValue()));
-        }
+
         if (code < 400 && code >= 200) {
-            StringBuilder sb = new StringBuilder();
-            InputStream in;
-            String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
-            if (contentEncoding != null && contentEncoding.equals("gzip")) {
-                in = new GZIPInputStream(urlConnection.getInputStream());
-            } else {
-                in = urlConnection.getInputStream();
-            }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\r\n");
-            }
-            reader.close();
-            return sb.toString();
+            return NetShare.readString(urlConnection);
         } else {
             return null;
         }
     }
-}
+
+} //
