@@ -7,15 +7,12 @@ import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
@@ -26,11 +23,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -39,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
-import euphoria.psycho.explorer.XVideosShare.Callback;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
@@ -50,14 +42,12 @@ import euphoria.psycho.share.WebViewShare;
 
 public class MainActivity extends Activity implements ClientInterface {
     public static final String LAST_ACCESSED = "lastAccessed";
-    public static final String HTTPS_LUCIDU_CN_ARTICLE_JQDKGL = "https://lucidu.cn/article/jqdkgl";
+    public static final String HELP_URL = "https://lucidu.cn/article/jqdkgl";
     private static final int REQUEST_PERMISSION = 66;
     private WebView mWebView;
     private BookmarkDatabase mBookmarkDatabase;
     private String mVideoUrl;
 
-
-    //
     public boolean parsing91Porn() {
         String uri = mWebView.getUrl();
         if (uri.contains("91porn.com/")) {
@@ -71,10 +61,8 @@ public class MainActivity extends Activity implements ClientInterface {
                             get91PornVideo(value1);
                         }
                     });
-                    progressDialog.dismiss();
-                } else {
-                    progressDialog.dismiss();
                 }
+                progressDialog.dismiss();
             }));
             return true;
         }
@@ -89,10 +77,8 @@ public class MainActivity extends Activity implements ClientInterface {
             XVideosShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
                     getVideo(value);
-                    progressDialog.dismiss();
-                } else {
-                    progressDialog.dismiss();
                 }
+                progressDialog.dismiss();
             }));
             return true;
         }
@@ -204,7 +190,7 @@ public class MainActivity extends Activity implements ClientInterface {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
             mWebView.loadUrl(PreferenceShare.getPreferences()
-                    .getString(LAST_ACCESSED, HTTPS_LUCIDU_CN_ARTICLE_JQDKGL));
+                    .getString(LAST_ACCESSED, HELP_URL));
         }
     }
 
@@ -260,11 +246,10 @@ public class MainActivity extends Activity implements ClientInterface {
                                 if (value != null) {
                                     copyUrl(value);
                                     mWebView.loadUrl(value);
-                                    progressDialog.dismiss();
                                     openDownloadDialog(value);
-                                } else {
-                                    progressDialog.dismiss();
                                 }
+                                progressDialog.dismiss();
+                                
                             });
                         });
                     } else {
@@ -295,7 +280,7 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void setHelpListener() {
-        findViewById(R.id.help_outline).setOnClickListener(v -> mWebView.loadUrl(HTTPS_LUCIDU_CN_ARTICLE_JQDKGL));
+        findViewById(R.id.help_outline).setOnClickListener(v -> mWebView.loadUrl(HELP_URL));
     }
 
     @Override

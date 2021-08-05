@@ -63,10 +63,6 @@ public class XVideosShare {
         String videoId = matcher.group();
         try {
             String jsonString = getVideoUrl("https://www.xvideos.red/video-download/" + videoId + "/", token);
-
-
-            Log.e("TAG/", "Debug: getUrl, \n" + jsonString);
-
             JSONObject object = new JSONObject(jsonString);
             if (object.has(URL_MP_4_HD))
                 return object.getString(URL_MP_4_HD);
@@ -80,4 +76,3 @@ public class XVideosShare {
     }
 }
 
-// https://www.xvideos.red/video63171345/_20_8_sp_5_pts-408_2_?sxcaf=4353LFJE75
