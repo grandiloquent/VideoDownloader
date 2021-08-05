@@ -96,10 +96,18 @@ public class MainActivity extends Activity implements ClientInterface {
     private void addBookmark() {
         String name = mWebView.getTitle();
         String url = mWebView.getUrl();
-        Bookmark bookmark = new Bookmark();
-        bookmark.Name = name;
-        bookmark.Url = url;
-        mBookmarkDatabase.insert(bookmark);
+        DialogShare.createAlertDialogBuilder(this, "询问", (dialog, which) -> {
+            Bookmark bookmark = new Bookmark();
+            bookmark.Name = name;
+            bookmark.Url = url;
+            mBookmarkDatabase.insert(bookmark);
+            dialog.dismiss();
+        }, (dialog, which) -> {
+            dialog.dismiss();
+        })
+                .setMessage(String.format("是否添\n%s\n%s\n为书签？", name, url))
+                .show();
+
     }
 
     private boolean checkPermissions() {
@@ -125,22 +133,24 @@ public class MainActivity extends Activity implements ClientInterface {
         if (matcher.find()) {
             value = matcher.group();
             getVideo(value);
-        }
+        } // 
     }
 
 
     private void getVideo(String value) {
         copyUrl(value);
         try {
-            String uri = "http://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
+            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
             DialogShare.createAlertDialogBuilder(this, "询问", (dialog, which) -> {
+                dialog.dismiss();
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(uri));
                 startActivity(Intent.createChooser(intent, "打开视频链接"));
             }, (dialog, which) -> {
                 mWebView.loadUrl(uri);
+                dialog.dismiss();
             })
-                    .setMessage("打开视频链接")
+                    .setMessage("是否使用浏览器打开视频链接")
                     .show();
         } catch (UnsupportedEncodingException ignored) {
         }
