@@ -58,7 +58,7 @@ public class MainActivity extends Activity implements ClientInterface {
         String uri = mWebView.getUrl();
         if (uri.contains("91porn.com/")) {
             ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("解析...");
+            progressDialog.setMessage("解析...");
             progressDialog.show();
             Porn91Share.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
@@ -80,7 +80,7 @@ public class MainActivity extends Activity implements ClientInterface {
         String uri = mWebView.getUrl();
         if (uri.contains(".xvideos.")) {
             ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("解析...");
+            progressDialog.setMessage("解析...");
             progressDialog.show();
             XVideosShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
@@ -133,13 +133,15 @@ public class MainActivity extends Activity implements ClientInterface {
         copyUrl(value);
         try {
             String uri = "http://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
-            DialogShare.createAlertDialogBuilder(this, "打开视频链接", (dialog, which) -> {
+            DialogShare.createAlertDialogBuilder(this, "询问", (dialog, which) -> {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(uri));
-                Intent.createChooser(intent, "打开视频链接");
+                startActivity(Intent.createChooser(intent, "打开视频链接"));
             }, (dialog, which) -> {
                 mWebView.loadUrl(uri);
-            });
+            })
+                    .setMessage("打开视频链接")
+                    .show();
         } catch (UnsupportedEncodingException ignored) {
         }
     }
@@ -253,7 +255,7 @@ public class MainActivity extends Activity implements ClientInterface {
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     if (editText.getText().toString().contains("douyin.com")) {
                         ProgressDialog progressDialog = new ProgressDialog(this);
-                        progressDialog.setTitle("解析...");
+                        progressDialog.setMessage("解析...");
                         progressDialog.show();
                         String id = matchTikTokVideoId(editText.getText().toString());
                         if (id == null) return;
