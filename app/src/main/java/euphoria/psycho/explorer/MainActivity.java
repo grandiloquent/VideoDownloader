@@ -239,10 +239,13 @@ public class MainActivity extends Activity implements ClientInterface {
         return arrayAdapter;
     }
 
-    private void openDownloadDialog(String url) {
+    // 
+    private void openDownloadDialog(String id, String url) {
         AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle("询问")
+                .setMessage("是否下载视频？")
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    WebViewShare.downloadFile(MainActivity.this, StringShare.substringAfterLast(StringShare.substringBeforeLast(url, "?"), "/"), url, NetShare.DEFAULT_USER_AGENT);
+                    WebViewShare.downloadFile(MainActivity.this, id + ".mp4", url, NetShare.DEFAULT_USER_AGENT);
                     dialog.dismiss();
                 })
                 .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
@@ -274,9 +277,8 @@ public class MainActivity extends Activity implements ClientInterface {
                         DouYinShare.performTask(id, value -> {
                             MainActivity.this.runOnUiThread(() -> {
                                 if (value != null) {
-                                    copyUrl(value);
                                     mWebView.loadUrl(value);
-                                    openDownloadDialog(value);
+                                    openDownloadDialog(id, value);
                                 }
                                 progressDialog.dismiss();
 

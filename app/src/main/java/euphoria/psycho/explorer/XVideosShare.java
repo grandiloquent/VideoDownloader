@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,6 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import euphoria.psycho.share.FileShare;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
 public class XVideosShare {
@@ -41,12 +44,9 @@ public class XVideosShare {
         URL url = new URL(uri);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         NetShare.addDefaultRequestHeaders(urlConnection);
-
         urlConnection.setRequestProperty("Cookie", "session_token=" + (token == null ? DEFAULT_SESSION_TOKEN : token));
-        urlConnection.setRequestProperty("Referer", "https://www.xvideos.com/channels/peters-1");
-
+        urlConnection.setRequestProperty("Referer", "https://www.xvideos.com/");
         int code = urlConnection.getResponseCode();
-
         if (code < 400 && code >= 200) {
             return NetShare.readString(urlConnection);
         } else {
@@ -61,17 +61,17 @@ public class XVideosShare {
             return null;
         }
         String videoId = matcher.group();
+        String jsonString = null;
         try {
-            String jsonString = getVideoUrl("https://www.xvideos.red/video-download/" + videoId + "/", token);
+            jsonString = getVideoUrl("https://www.xvideos.red/video-download/" + videoId + "/", token);
             JSONObject object = new JSONObject(jsonString);
             if (object.has(URL_MP_4_HD))
                 return object.getString(URL_MP_4_HD);
-            else if(object.has("URL"))
-                return  object.getString("URL");
+            else if (object.has("URL"))
+                return object.getString("URL");
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            Logger.d(String.format("错误: url = %s, %s", url, e.getMessage()));
         }
-
         return null;
     }
 }

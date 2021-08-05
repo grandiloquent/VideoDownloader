@@ -19,7 +19,7 @@ public class NetShare {
         urlConnection.setRequestProperty("Accept-Encoding", "gzip");
         urlConnection.setRequestProperty("Connection", "keep-alive");
         urlConnection.setRequestProperty("User-Agent", DEFAULT_USER_AGENT);
-        urlConnection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
+        //urlConnection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
         urlConnection.setRequestProperty("Cache-Control", "max-age=0");
         urlConnection.setRequestProperty("Upgrade-Insecure-Requests", "1");
         urlConnection.setRequestProperty("Sec-Fetch-Dest", "document");
