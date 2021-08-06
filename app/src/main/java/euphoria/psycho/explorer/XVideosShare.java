@@ -51,7 +51,7 @@ public class XVideosShare {
         return false;
     }
 
-    public static void performTask(String uri, Callback callback) {
+    private static void performTask(String uri, Callback callback) {
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             String url = XVideosShare.getUrl(uri, null);

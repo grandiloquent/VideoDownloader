@@ -15,7 +15,7 @@ import euphoria.psycho.share.DialogShare;
 
 public class ListenerDelegate {
     private final MainActivity mMainActivity;
-    private static final String HELP_URL = "https://lucidu.cn/article/jqdkgl";
+    public static final String HELP_URL = "https://lucidu.cn/article/jqdkgl";
 
     public ListenerDelegate(MainActivity mainActivity) {
         mMainActivity = mainActivity;

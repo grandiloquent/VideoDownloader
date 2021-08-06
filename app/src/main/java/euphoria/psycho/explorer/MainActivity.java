@@ -18,7 +18,12 @@ import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +38,7 @@ import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
 
 
@@ -43,6 +49,7 @@ public class MainActivity extends Activity implements ClientInterface {
     private BookmarkDatabase mBookmarkDatabase;
     private String mVideoUrl;
     //
+
 
     public BookmarkDatabase getBookmarkDatabase() {
         return mBookmarkDatabase;
@@ -127,13 +134,21 @@ public class MainActivity extends Activity implements ClientInterface {
     //
     private void initialize() {
 //        new Thread(() -> {
-//            byte[] buffer = new byte[1024];
-//            int result = NativeShare.get91Porn(
-//                    "https://91porn.com/view_video.php?viewkey=f7ee920d417bcbb7f072&page=&viewtype=&category=".getBytes(StandardCharsets.UTF_8),
-//                    1024,
-//                    buffer
-//            );
-//            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
+////            byte[] buffer = new byte[1024];
+////            int result = NativeShare.get91Porn(
+////                    "https://91porn.com/view_video.php?viewkey=f7ee920d417bcbb7f072&page=&viewtype=&category=".getBytes(StandardCharsets.UTF_8),
+////                    1024,
+////                    buffer
+////            );
+////            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
+//            try {
+//                String value = AcFunShare.getVideoUrl("https://www.acfun.cn/v/ac30492691");
+//
+//
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 //        }).start();
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
@@ -147,13 +162,14 @@ public class MainActivity extends Activity implements ClientInterface {
 
     }
 
+
     private void loadStartPage() {
         if (getIntent().getData() != null) {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
-            mWebView.loadUrl("https://91porn.com/index.php");
-//            mWebView.loadUrl(PreferenceShare.getPreferences()
-//                    .getString(LAST_ACCESSED, HELP_URL));
+            // mWebView.loadUrl("https://www.acfun.cn/");
+            mWebView.loadUrl(PreferenceShare.getPreferences()
+                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
     }
 
@@ -211,6 +227,7 @@ public class MainActivity extends Activity implements ClientInterface {
             if (Porn91Share.parsing91Porn(this)) return;
             if (parseYouTube()) return;
             if (parsingIqiyi()) return;
+            if (AcFunShare.parsingVideo(this)) return;
             if (mVideoUrl != null) {
                 try {
                     mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
