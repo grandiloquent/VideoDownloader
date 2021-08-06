@@ -1,7 +1,9 @@
 package euphoria.psycho.explorer;
 
+import android.app.ProgressDialog;
 import android.os.Process;
 import android.util.Log;
+import android.webkit.WebView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,11 +20,42 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import euphoria.psycho.explorer.XVideosShare.Callback;
+import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
 
 public class Porn91Share {
-    public static void performTask(String uri, Callback callback) {
+    private static void get91PornVideo(String value, MainActivity mainActivity) {
+        Pattern pattern = Pattern.compile("(?<=src=').*?(?=')");
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            value = matcher.group();
+            mainActivity.getVideo(value);
+        }
+    }
+
+    public static boolean parsing91Porn(MainActivity mainActivity) {
+        String uri = mainActivity.getWebView().getUrl();
+        if (uri.contains("91porn.com/")) {
+            ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
+            Porn91Share.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
+                if (value != null) {
+                    String script = FileShare.readAssetString(mainActivity, "encode.js");
+                    mainActivity.getWebView().evaluateJavascript(script + value, value1 -> {
+                        if (value1 != null) {
+                            get91PornVideo(value1, mainActivity);
+                        }
+                    });
+                }
+                progressDialog.dismiss();
+            }));
+            return true;
+        }
+        return false;
+    }
+
+    private static void performTask(String uri, Callback callback) {
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             String url = null;

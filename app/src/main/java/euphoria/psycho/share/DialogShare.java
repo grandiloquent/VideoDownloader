@@ -1,6 +1,7 @@
 package euphoria.psycho.share;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
@@ -11,5 +12,12 @@ public class DialogShare {
                 .setTitle(title)
                 .setPositiveButton(android.R.string.ok, p)
                 .setNegativeButton("取消", n);
+    }
+
+    public static ProgressDialog createProgressDialog(Context context) {
+        ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage("解析...");
+        progressDialog.show();
+        return progressDialog;
     }
 }

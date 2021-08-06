@@ -44,48 +44,38 @@ public class MainActivity extends Activity implements ClientInterface {
     private String mVideoUrl;
     //
 
-
-    public boolean parsing91Porn() {
-        String uri = mWebView.getUrl();
-        if (uri.contains("91porn.com/")) {
-            ProgressDialog progressDialog = createProgressDialog();
-            Porn91Share.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
-                if (value != null) {
-                    String script = FileShare.readAssetString(MainActivity.this, "encode.js");
-                    mWebView.evaluateJavascript(script + value, value1 -> {
-                        if (value1 != null) {
-                            get91PornVideo(value1);
-                        }
-                    });
-                }
-                progressDialog.dismiss();
-            }));
-            return true;
-        }
-        return false;
+    public BookmarkDatabase getBookmarkDatabase() {
+        return mBookmarkDatabase;
     }
 
-    public boolean parsingXVideos() {
-        String uri = mWebView.getUrl();
-        if (uri.contains(".xvideos.")) {
-            ProgressDialog progressDialog = createProgressDialog();
-            XVideosShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
-                if (value != null) {
-                    getVideo(value);
-                } else {
-                    Toast.makeText(this, "无法解析视频", Toast.LENGTH_LONG).show();
-                }
-                progressDialog.dismiss();
-            }));
-            return true;
+    public void getVideo(String value) {
+        copyUrl(value);
+        try {
+            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
+            DialogShare.createAlertDialogBuilder(this, "询问", (dialog, which) -> {
+                dialog.dismiss();
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(uri));
+                startActivity(Intent.createChooser(intent, "打开视频链接"));
+            }, (dialog, which) -> {
+                mWebView.loadUrl(uri);
+                dialog.dismiss();
+            })
+                    .setMessage("是否使用浏览器打开视频链接")
+                    .show();
+        } catch (UnsupportedEncodingException ignored) {
         }
-        return false;
+    }
+    // iqiyi.com
+
+    public WebView getWebView() {
+        return mWebView;
     }
 
     public boolean parsingIqiyi() {
         String uri = mWebView.getUrl();
         if (uri.contains(".iqiyi.com")) {
-            ProgressDialog progressDialog = createProgressDialog();
+            ProgressDialog progressDialog = DialogShare.createProgressDialog(MainActivity.this);
             IqiyiShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
                     getVideo(value);
@@ -98,7 +88,6 @@ public class MainActivity extends Activity implements ClientInterface {
         }
         return false;
     }
-    // iqiyi.com
 
 
     private boolean checkPermissions() {
@@ -135,45 +124,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return cacheDirectory;
     }
 
-    private ProgressDialog createProgressDialog() {
-        ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("解析...");
-        progressDialog.show();
-        return progressDialog;
-    }
-
-    private void get91PornVideo(String value) {
-        Pattern pattern = Pattern.compile("(?<=src=').*?(?=')");
-        Matcher matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            value = matcher.group();
-            getVideo(value);
-        } //
-    }
-
-    private void getVideo(String value) {
-        copyUrl(value);
-        try {
-            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
-            DialogShare.createAlertDialogBuilder(this, "询问", (dialog, which) -> {
-                dialog.dismiss();
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(uri));
-                startActivity(Intent.createChooser(intent, "打开视频链接"));
-            }, (dialog, which) -> {
-                mWebView.loadUrl(uri);
-                dialog.dismiss();
-            })
-                    .setMessage("是否使用浏览器打开视频链接")
-                    .show();
-        } catch (UnsupportedEncodingException ignored) {
-        }
-    }
-
-    public BookmarkDatabase getBookmarkDatabase() {
-        return mBookmarkDatabase;
-    }
-
     //
     private void initialize() {
 //        new Thread(() -> {
@@ -185,7 +135,6 @@ public class MainActivity extends Activity implements ClientInterface {
 //            );
 //            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
 //        }).start();
-        
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
@@ -208,7 +157,6 @@ public class MainActivity extends Activity implements ClientInterface {
         }
     }
 
-
     private void openDownloadDialog(String videoId, String videoUrl) {
         new AlertDialog.Builder(this)
                 .setTitle("询问")
@@ -227,7 +175,7 @@ public class MainActivity extends Activity implements ClientInterface {
                 .setView(editText)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     if (editText.getText().toString().contains("douyin.com")) {
-                        ProgressDialog progressDialog = createProgressDialog();
+                        ProgressDialog progressDialog = DialogShare.createProgressDialog(MainActivity.this);
                         String id = DouYinShare.matchTikTokVideoId(editText.getText().toString());
                         if (id == null) return;
                         DouYinShare.performTask(id, value -> {
@@ -257,15 +205,10 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
-    public WebView getWebView() {
-        return mWebView;
-    }
-
-
     private void setDownloadVideo() {
         findViewById(R.id.file_download).setOnClickListener(v -> {
-            if (parsingXVideos()) return;
-            if (parsing91Porn()) return;
+            if (XVideosShare.parsingXVideos(this)) return;
+            if (Porn91Share.parsing91Porn(this)) return;
             if (parseYouTube()) return;
             if (parsingIqiyi()) return;
             if (mVideoUrl != null) {

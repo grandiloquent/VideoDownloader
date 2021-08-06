@@ -1,7 +1,9 @@
 package euphoria.psycho.explorer;
 
+import android.app.ProgressDialog;
 import android.os.Process;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
@@ -29,6 +32,23 @@ public class XVideosShare {
 
     public interface Callback {
         void run(String value);
+    }
+
+    public static boolean parsingXVideos(MainActivity mainActivity) {
+        String uri = mainActivity.getWebView().getUrl();
+        if (uri.contains(".xvideos.")) {
+            ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
+            XVideosShare.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
+                if (value != null) {
+                    mainActivity.getVideo(value);
+                } else {
+                    Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+                }
+                progressDialog.dismiss();
+            }));
+            return true;
+        }
+        return false;
     }
 
     public static void performTask(String uri, Callback callback) {
