@@ -5,5 +5,6 @@ public class NativeShare {
         System.loadLibrary("native-lib");
     }
 
-    public static native String getString(String uri);
+
+    public static native boolean getString(byte[] data, int length, byte[] buffer);
 }

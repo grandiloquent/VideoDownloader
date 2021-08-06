@@ -27,6 +27,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -36,6 +37,7 @@ import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.NativeShare;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -184,6 +186,17 @@ public class MainActivity extends Activity implements ClientInterface {
 
     //
     private void initialize() {
+        /*
+        new Thread(() -> {
+            byte[] buffer = new byte[1024];
+            NativeShare.getString(
+                    "https://lucidu.cn".getBytes(StandardCharsets.UTF_8),
+                    1024,
+                    buffer
+            );
+            Logger.d(String.format("run: %s", new String(buffer, StandardCharsets.UTF_8)));
+        }).start();
+         */ 
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
