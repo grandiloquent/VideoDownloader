@@ -5,35 +5,28 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
-import euphoria.psycho.explorer.XVideosShare.Callback;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
@@ -42,7 +35,6 @@ import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 
-import static euphoria.psycho.explorer.DouYinShare.matchTikTokVideoId;
 
 public class MainActivity extends Activity implements ClientInterface {
     public static final String LAST_ACCESSED = "lastAccessed";
@@ -107,7 +99,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
     // iqiyi.com
-
 
 
     private boolean checkPermissions() {
@@ -185,17 +176,16 @@ public class MainActivity extends Activity implements ClientInterface {
 
     //
     private void initialize() {
-        /*
-        new Thread(() -> {
-            byte[] buffer = new byte[1024];
-            NativeShare.getString(
-                    "https://lucidu.cn".getBytes(StandardCharsets.UTF_8),
-                    1024,
-                    buffer
-            );
-            Logger.d(String.format("run: %s", new String(buffer, StandardCharsets.UTF_8)));
-        }).start();
-         */
+//        new Thread(() -> {
+//            byte[] buffer = new byte[1024];
+//            int result = NativeShare.get91Porn(
+//                    "https://91porn.com/view_video.php?viewkey=f7ee920d417bcbb7f072&page=&viewtype=&category=".getBytes(StandardCharsets.UTF_8),
+//                    1024,
+//                    buffer
+//            );
+//            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
+//        }).start();
+        
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
@@ -212,12 +202,11 @@ public class MainActivity extends Activity implements ClientInterface {
         if (getIntent().getData() != null) {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
-            mWebView.loadUrl("https://m.iqiyi.com/");
+            mWebView.loadUrl("https://91porn.com/index.php");
 //            mWebView.loadUrl(PreferenceShare.getPreferences()
 //                    .getString(LAST_ACCESSED, HELP_URL));
         }
     }
-
 
 
     private void openDownloadDialog(String videoId, String videoUrl) {
@@ -239,7 +228,7 @@ public class MainActivity extends Activity implements ClientInterface {
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     if (editText.getText().toString().contains("douyin.com")) {
                         ProgressDialog progressDialog = createProgressDialog();
-                        String id = matchTikTokVideoId(editText.getText().toString());
+                        String id = DouYinShare.matchTikTokVideoId(editText.getText().toString());
                         if (id == null) return;
                         DouYinShare.performTask(id, value -> {
                             MainActivity.this.runOnUiThread(() -> {

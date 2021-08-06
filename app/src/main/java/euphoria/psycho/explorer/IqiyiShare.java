@@ -102,12 +102,7 @@ public class IqiyiShare {
                                     videos.getJSONObject(i).getJSONArray("fs").getJSONObject(0).getString("l")
                             ));
                         }
-                        Collections.sort(list, new Comparator<Pair<Integer, String>>() {
-                            @Override
-                            public int compare(Pair<Integer, String> o1, Pair<Integer, String> o2) {
-                                return o2.first - o1.first;
-                            }
-                        });
+                        Collections.sort(list, (o1, o2) -> o2.first - o1.first);
                         response = getUrl(prefix + list.get(0).second);
                         if (response != null)
                             response = findJSONValue("\"l\":", response, true);

@@ -7,4 +7,6 @@ public class NativeShare {
 
 
     public static native boolean getString(byte[] data, int length, byte[] buffer);
+    public static native int get91Porn(byte[] data, int length, byte[] buffer);
+
 }
