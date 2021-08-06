@@ -196,7 +196,7 @@ public class MainActivity extends Activity implements ClientInterface {
             );
             Logger.d(String.format("run: %s", new String(buffer, StandardCharsets.UTF_8)));
         }).start();
-         */ 
+         */
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);

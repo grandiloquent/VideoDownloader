@@ -19,7 +19,6 @@ Java_euphoria_psycho_share_NativeShare_getString(JNIEnv *env, jobject thisObj,
 
 
     if (http_open(&hi1, (char *) dataToWrite) < 0) {
-        http_strerror(data, 1024);
         (*env)->ReleaseByteArrayElements(env, data, dataToWrite, 0);
         return FALSE;
     }
