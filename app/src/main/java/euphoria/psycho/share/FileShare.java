@@ -37,7 +37,6 @@ public class FileShare {
         return null;
 
     }
-
     public static void appendAllText(File file, String contents) throws IOException {
 
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);

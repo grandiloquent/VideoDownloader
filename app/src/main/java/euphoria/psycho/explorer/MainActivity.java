@@ -40,6 +40,7 @@ import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.NativeShare;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -57,9 +58,7 @@ public class MainActivity extends Activity implements ClientInterface {
     public boolean parsing91Porn() {
         String uri = mWebView.getUrl();
         if (uri.contains("91porn.com/")) {
-            ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("解析...");
-            progressDialog.show();
+            ProgressDialog progressDialog = createProgressDialog();
             Porn91Share.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
                     String script = FileShare.readAssetString(MainActivity.this, "encode.js");
@@ -79,9 +78,7 @@ public class MainActivity extends Activity implements ClientInterface {
     public boolean parsingXVideos() {
         String uri = mWebView.getUrl();
         if (uri.contains(".xvideos.")) {
-            ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("解析...");
-            progressDialog.show();
+            ProgressDialog progressDialog = createProgressDialog();
             XVideosShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
                     getVideo(value);
@@ -93,6 +90,13 @@ public class MainActivity extends Activity implements ClientInterface {
             return true;
         }
         return false;
+    }
+
+    private ProgressDialog createProgressDialog() {
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("解析...");
+        progressDialog.show();
+        return progressDialog;
     }
 
     private void addBookmark() {
@@ -158,6 +162,7 @@ public class MainActivity extends Activity implements ClientInterface {
         }
     }
 
+    //
     private void initialize() {
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
@@ -200,18 +205,25 @@ public class MainActivity extends Activity implements ClientInterface {
             WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
         });
         mBookmarkDatabase = new BookmarkDatabase(this);
-        File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
-        Logger.d(String.format("浏览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
-        if (!cacheDirectory.isDirectory()) {
-            cacheDirectory.mkdirs();
-        }
-        Helper.setWebView(mWebView, cacheDirectory.getAbsolutePath());
+        WebViewShare.setWebView(mWebView, createCacheDirectory().getAbsolutePath());
         mWebView.setWebViewClient(new CustomWebViewClient(this));
         mWebView.setWebChromeClient(new CustomWebChromeClient(this));
         mWebView.setDownloadListener(Helper.getDownloadListener(this));
         loadStartPage();
         WebViewShare.supportCookie(mWebView);
         setHelpListener();
+    }
+
+    private File createCacheDirectory() {
+        File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
+        Logger.d(String.format("createCacheDirectory: 览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
+        if (!cacheDirectory.isDirectory()) {
+            boolean result = cacheDirectory.mkdirs();
+            if (!result) {
+                Logger.d(String.format("createCacheDirectory: 创建目录 %s 失败", cacheDirectory.getAbsolutePath()));
+            }
+        }
+        return cacheDirectory;
     }
 
     private void loadStartPage() {
@@ -239,18 +251,16 @@ public class MainActivity extends Activity implements ClientInterface {
         return arrayAdapter;
     }
 
-    // 
-    private void openDownloadDialog(String id, String url) {
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
+    private void openDownloadDialog(String videoId, String videoUrl) {
+        new AlertDialog.Builder(this)
                 .setTitle("询问")
                 .setMessage("是否下载视频？")
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    WebViewShare.downloadFile(MainActivity.this, id + ".mp4", url, NetShare.DEFAULT_USER_AGENT);
+                    WebViewShare.downloadFile(MainActivity.this, videoId + ".mp4", videoUrl, NetShare.DEFAULT_USER_AGENT);
                     dialog.dismiss();
                 })
                 .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
-                .create();
-        alertDialog.show();
+                .show();
     }
 
     public static String matchTikTokVideoId(String input) {
@@ -269,9 +279,7 @@ public class MainActivity extends Activity implements ClientInterface {
                 .setView(editText)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     if (editText.getText().toString().contains("douyin.com")) {
-                        ProgressDialog progressDialog = new ProgressDialog(this);
-                        progressDialog.setMessage("解析...");
-                        progressDialog.show();
+                        ProgressDialog progressDialog = createProgressDialog();
                         String id = matchTikTokVideoId(editText.getText().toString());
                         if (id == null) return;
                         DouYinShare.performTask(id, value -> {

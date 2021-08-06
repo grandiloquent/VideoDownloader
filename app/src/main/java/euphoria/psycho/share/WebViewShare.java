@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.webkit.CookieManager;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -73,7 +74,17 @@ public class WebViewShare {
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(Uri.parse(url)));
     }
+    public static void setWebView(WebView webView, String appCachePath) {
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        settings.setAppCacheEnabled(true);
+        settings.setAppCachePath(appCachePath);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
+    }
     public static void downloadFile(Context context, String fileName, String url, String userAgent) {
         try {
             DownloadManager downloadManager = (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);

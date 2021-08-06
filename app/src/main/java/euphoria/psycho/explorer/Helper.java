@@ -22,15 +22,5 @@ public class Helper {
         return (url, userAgent, contentDisposition, mimetype, contentLength) -> Share.setClipboardText(context, url);
     }
 
-    public static void setWebView(WebView webView, String appCachePath) {
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        settings.setAppCacheEnabled(true);
-        settings.setAppCachePath(appCachePath);
-        settings.setDomStorageEnabled(true);
-        settings.setDatabaseEnabled(true);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
-    }
 }
