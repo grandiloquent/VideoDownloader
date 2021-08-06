@@ -27,39 +27,31 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
+import euphoria.psycho.explorer.XVideosShare.Callback;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.NativeShare;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 
+import static euphoria.psycho.explorer.DouYinShare.matchTikTokVideoId;
+
 public class MainActivity extends Activity implements ClientInterface {
-    public static final String HELP_URL = "https://lucidu.cn/article/jqdkgl";
     public static final String LAST_ACCESSED = "lastAccessed";
     private static final int REQUEST_PERMISSION = 66;
     private WebView mWebView;
     private BookmarkDatabase mBookmarkDatabase;
     private String mVideoUrl;
+    //
 
-    public static String matchTikTokVideoId(String input) {
-        if (input == null) return null;
-        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
-        Matcher matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return matcher.group();
-        }
-        return null;
-    }
 
     public boolean parsing91Porn() {
         String uri = mWebView.getUrl();
@@ -98,22 +90,25 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
-    private void addBookmark() {
-        String name = mWebView.getTitle();
-        String url = mWebView.getUrl();
-        DialogShare.createAlertDialogBuilder(this, "询问", (dialog, which) -> {
-            Bookmark bookmark = new Bookmark();
-            bookmark.Name = name;
-            bookmark.Url = url;
-            mBookmarkDatabase.insert(bookmark);
-            dialog.dismiss();
-        }, (dialog, which) -> {
-            dialog.dismiss();
-        })
-                .setMessage(String.format("是否添\n\n\"%s\"\n\"%s\"\n\n为书签？", name, url))
-                .show();
-
+    public boolean parsingIqiyi() {
+        String uri = mWebView.getUrl();
+        if (uri.contains(".iqiyi.com")) {
+            ProgressDialog progressDialog = createProgressDialog();
+            IqiyiShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
+                if (value != null) {
+                    getVideo(value);
+                } else {
+                    Toast.makeText(this, "无法解析视频", Toast.LENGTH_LONG).show();
+                }
+                progressDialog.dismiss();
+            }));
+            return true;
+        }
+        return false;
     }
+    // iqiyi.com
+
+
 
     private boolean checkPermissions() {
         List<String> needPermissions = new ArrayList<>();
@@ -184,7 +179,11 @@ public class MainActivity extends Activity implements ClientInterface {
         }
     }
 
-    //
+    public BookmarkDatabase getBookmarkDatabase() {
+        return mBookmarkDatabase;
+    }
+
+    // 
     private void initialize() {
         /*
         new Thread(() -> {
@@ -200,47 +199,26 @@ public class MainActivity extends Activity implements ClientInterface {
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
-        findViewById(R.id.favorite_border).setOnClickListener(v -> {
-            addBookmark();
-        });
-        setBookmark();
-        findViewById(R.id.refresh_button).setOnClickListener(v -> {
-            refreshPage();
-        });
-        findViewById(R.id.copy_button).setOnClickListener(v -> getSystemService(ClipboardManager.class)
-                .setPrimaryClip(ClipData.newPlainText(null, mWebView.getUrl())));
-        setDownloadVideo();
         mWebView = findViewById(R.id.web);
+        new ListenerDelegate(this);
+        setDownloadVideo();
         mBookmarkDatabase = new BookmarkDatabase(this);
         setWebView();
         loadStartPage();
-        setHelpListener();
+
     }
 
     private void loadStartPage() {
         if (getIntent().getData() != null) {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
-            mWebView.loadUrl(PreferenceShare.getPreferences()
-                    .getString(LAST_ACCESSED, HELP_URL));
+            mWebView.loadUrl("https://m.iqiyi.com/");
+//            mWebView.loadUrl(PreferenceShare.getPreferences()
+//                    .getString(LAST_ACCESSED, HELP_URL));
         }
     }
 
-    private ArrayAdapter<Bookmark> makeBookmarkAdapter() {
-        List<Bookmark> bookmarkList = mBookmarkDatabase.getBookmarkList();
-        final ArrayAdapter<Bookmark> arrayAdapter = new ArrayAdapter<Bookmark>(MainActivity.this, android.R.layout.simple_list_item_1) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView text = view.findViewById(android.R.id.text1);
-                text.setTextColor(Color.BLACK);
-                text.setText(bookmarkList.get(position).Name);
-                return view;
-            }
-        };
-        arrayAdapter.addAll(bookmarkList);
-        return arrayAdapter;
-    }
+
 
     private void openDownloadDialog(String videoId, String videoUrl) {
         new AlertDialog.Builder(this)
@@ -290,31 +268,17 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
-    private void refreshPage() {
-        mWebView.clearCache(true);
-        mWebView.reload();
+    public WebView getWebView() {
+        return mWebView;
     }
 
-    private void setBookmark() {
-        findViewById(R.id.bookmark2_button).setOnClickListener(v -> {
-            Builder builderSingle = new Builder(MainActivity.this).setPositiveButton(
-                    "修改",
-                    (dialog, which) -> {
-                        Intent intent = new Intent(MainActivity.this, BookmarkActivity.class);
-                        startActivity(intent);
-                    }
-            );
-            final ArrayAdapter<Bookmark> arrayAdapter = makeBookmarkAdapter();
-            builderSingle.setAdapter(arrayAdapter, (dialog, which) -> mWebView.loadUrl(arrayAdapter.getItem(which).Url));
-            builderSingle.show();
-        });
-    }
 
     private void setDownloadVideo() {
         findViewById(R.id.file_download).setOnClickListener(v -> {
             if (parsingXVideos()) return;
             if (parsing91Porn()) return;
             if (parseYouTube()) return;
+            if (parsingIqiyi()) return;
             if (mVideoUrl != null) {
                 try {
                     mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
@@ -323,10 +287,6 @@ public class MainActivity extends Activity implements ClientInterface {
                 }
             }
         });
-    }
-
-    private void setHelpListener() {
-        findViewById(R.id.help_outline).setOnClickListener(v -> mWebView.loadUrl(HELP_URL));
     }
 
     private void setWebView() {

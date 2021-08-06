@@ -1,4 +1,4 @@
-package euphoria.psycho.share;
+package euphoria.psycho.explorer;
 
 public class NativeShare {
     static {
