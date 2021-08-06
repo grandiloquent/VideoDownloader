@@ -7,9 +7,6 @@ import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -17,7 +14,6 @@ import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
@@ -40,20 +36,28 @@ import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.NativeShare;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
 
 public class MainActivity extends Activity implements ClientInterface {
-    public static final String LAST_ACCESSED = "lastAccessed";
     public static final String HELP_URL = "https://lucidu.cn/article/jqdkgl";
+    public static final String LAST_ACCESSED = "lastAccessed";
     private static final int REQUEST_PERMISSION = 66;
     private WebView mWebView;
     private BookmarkDatabase mBookmarkDatabase;
     private String mVideoUrl;
+
+    public static String matchTikTokVideoId(String input) {
+        if (input == null) return null;
+        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        return null;
+    }
 
     public boolean parsing91Porn() {
         String uri = mWebView.getUrl();
@@ -92,13 +96,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
-    private ProgressDialog createProgressDialog() {
-        ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("解析...");
-        progressDialog.show();
-        return progressDialog;
-    }
-
     private void addBookmark() {
         String name = mWebView.getTitle();
         String url = mWebView.getUrl();
@@ -133,6 +130,30 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
+    private void copyUrl(String value) {
+        Share.setClipboardText(MainActivity.this, value);
+        Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
+    }
+
+    private File createCacheDirectory() {
+        File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
+        Logger.d(String.format("createCacheDirectory: 览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
+        if (!cacheDirectory.isDirectory()) {
+            boolean result = cacheDirectory.mkdirs();
+            if (!result) {
+                Logger.d(String.format("createCacheDirectory: 创建目录 %s 失败", cacheDirectory.getAbsolutePath()));
+            }
+        }
+        return cacheDirectory;
+    }
+
+    private ProgressDialog createProgressDialog() {
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("解析...");
+        progressDialog.show();
+        return progressDialog;
+    }
+
     private void get91PornVideo(String value) {
         Pattern pattern = Pattern.compile("(?<=src=').*?(?=')");
         Matcher matcher = pattern.matcher(value);
@@ -141,7 +162,6 @@ public class MainActivity extends Activity implements ClientInterface {
             getVideo(value);
         } //
     }
-
 
     private void getVideo(String value) {
         copyUrl(value);
@@ -170,60 +190,18 @@ public class MainActivity extends Activity implements ClientInterface {
         findViewById(R.id.favorite_border).setOnClickListener(v -> {
             addBookmark();
         });
-        findViewById(R.id.bookmark2_button).setOnClickListener(v -> {
-            AlertDialog.Builder builderSingle = new AlertDialog.Builder(MainActivity.this).setPositiveButton(
-                    "修改",
-                    (dialog, which) -> {
-                        Intent intent = new Intent(MainActivity.this, BookmarkActivity.class);
-                        startActivity(intent);
-                    }
-            );
-            final ArrayAdapter<Bookmark> arrayAdapter = makeBookmarkAdapter();
-            builderSingle.setAdapter(arrayAdapter, (dialog, which) -> mWebView.loadUrl(arrayAdapter.getItem(which).Url));
-            builderSingle.show();
-        });
+        setBookmark();
         findViewById(R.id.refresh_button).setOnClickListener(v -> {
             refreshPage();
         });
         findViewById(R.id.copy_button).setOnClickListener(v -> getSystemService(ClipboardManager.class)
                 .setPrimaryClip(ClipData.newPlainText(null, mWebView.getUrl())));
-        findViewById(R.id.file_download).setOnClickListener(v -> {
-            if (parsingXVideos()) return;
-            if (parsing91Porn()) return;
-            if (parseYouTube()) return;
-            if (mVideoUrl != null) {
-                try {
-                    mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        setDownloadVideo();
         mWebView = findViewById(R.id.web);
-        mWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
-            String fileName = URLUtil.guessFileName(url, contentDisposition, WebViewShare.getFileType(MainActivity.this, url));
-            WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
-        });
         mBookmarkDatabase = new BookmarkDatabase(this);
-        WebViewShare.setWebView(mWebView, createCacheDirectory().getAbsolutePath());
-        mWebView.setWebViewClient(new CustomWebViewClient(this));
-        mWebView.setWebChromeClient(new CustomWebChromeClient(this));
-        mWebView.setDownloadListener(Helper.getDownloadListener(this));
+        setWebView();
         loadStartPage();
-        WebViewShare.supportCookie(mWebView);
         setHelpListener();
-    }
-
-    private File createCacheDirectory() {
-        File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
-        Logger.d(String.format("createCacheDirectory: 览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
-        if (!cacheDirectory.isDirectory()) {
-            boolean result = cacheDirectory.mkdirs();
-            if (!result) {
-                Logger.d(String.format("createCacheDirectory: 创建目录 %s 失败", cacheDirectory.getAbsolutePath()));
-            }
-        }
-        return cacheDirectory;
     }
 
     private void loadStartPage() {
@@ -263,16 +241,6 @@ public class MainActivity extends Activity implements ClientInterface {
                 .show();
     }
 
-    public static String matchTikTokVideoId(String input) {
-        if (input == null) return null;
-        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
-        Matcher matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return matcher.group();
-        }
-        return null;
-    }
-
     private void openUrlDialog(View v) {
         EditText editText = new EditText(v.getContext());
         AlertDialog alertDialog = new Builder(v.getContext())
@@ -301,11 +269,6 @@ public class MainActivity extends Activity implements ClientInterface {
         alertDialog.show();
     }
 
-    private void copyUrl(String value) {
-        Share.setClipboardText(MainActivity.this, value);
-        Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
-    }
-
     private boolean parseYouTube() {
         if (mWebView.getUrl().contains("youtube.com/watch")) {
             Share.startYouTubeActivity(this, mWebView);
@@ -319,8 +282,50 @@ public class MainActivity extends Activity implements ClientInterface {
         mWebView.reload();
     }
 
+    private void setBookmark() {
+        findViewById(R.id.bookmark2_button).setOnClickListener(v -> {
+            Builder builderSingle = new Builder(MainActivity.this).setPositiveButton(
+                    "修改",
+                    (dialog, which) -> {
+                        Intent intent = new Intent(MainActivity.this, BookmarkActivity.class);
+                        startActivity(intent);
+                    }
+            );
+            final ArrayAdapter<Bookmark> arrayAdapter = makeBookmarkAdapter();
+            builderSingle.setAdapter(arrayAdapter, (dialog, which) -> mWebView.loadUrl(arrayAdapter.getItem(which).Url));
+            builderSingle.show();
+        });
+    }
+
+    private void setDownloadVideo() {
+        findViewById(R.id.file_download).setOnClickListener(v -> {
+            if (parsingXVideos()) return;
+            if (parsing91Porn()) return;
+            if (parseYouTube()) return;
+            if (mVideoUrl != null) {
+                try {
+                    mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private void setHelpListener() {
         findViewById(R.id.help_outline).setOnClickListener(v -> mWebView.loadUrl(HELP_URL));
+    }
+
+    private void setWebView() {
+        mWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+            String fileName = URLUtil.guessFileName(url, contentDisposition, WebViewShare.getFileType(MainActivity.this, url));
+            WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
+        });
+        WebViewShare.setWebView(mWebView, createCacheDirectory().getAbsolutePath());
+        mWebView.setWebViewClient(new CustomWebViewClient(this));
+        mWebView.setWebChromeClient(new CustomWebChromeClient(this));
+        mWebView.setDownloadListener(Helper.getDownloadListener(this));
+        WebViewShare.supportCookie(mWebView);
     }
 
     @Override
@@ -350,7 +355,6 @@ public class MainActivity extends Activity implements ClientInterface {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         for (int i = 0; i < permissions.length; i++) {
             boolean result = grantResults[i] == PackageManager.PERMISSION_GRANTED;
-            Logger.d(String.format("请求权限回调: 权限 = %s, 允许 = %b", permissions[i], result));
             if (!result) {
                 Toast.makeText(this, "缺少必要权限，程序无法运行", Toast.LENGTH_LONG).show();
                 finish();
