@@ -183,7 +183,7 @@ public class MainActivity extends Activity implements ClientInterface {
         return mBookmarkDatabase;
     }
 
-    // 
+    //
     private void initialize() {
         /*
         new Thread(() -> {
