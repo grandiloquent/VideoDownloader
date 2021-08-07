@@ -19,7 +19,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -31,6 +30,12 @@ import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.videos.AcFunShare;
+import euphoria.psycho.videos.DouYinShare;
+import euphoria.psycho.videos.IqiyiShare;
+import euphoria.psycho.videos.Porn91Share;
+import euphoria.psycho.videos.XVideosRedShare;
+import euphoria.psycho.videos.XVideosShare;
 
 
 public class MainActivity extends Activity implements ClientInterface {

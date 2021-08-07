@@ -1,4 +1,4 @@
-package euphoria.psycho.explorer;
+package euphoria.psycho.videos;
 
 import android.os.Process;
 import android.util.Pair;
@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import euphoria.psycho.explorer.XVideosRedShare.Callback;
+import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 

@@ -1,4 +1,4 @@
-package euphoria.psycho.explorer;
+package euphoria.psycho.videos;
 
 import android.os.Process;
 
@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import euphoria.psycho.explorer.XVideosRedShare.Callback;
+import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.NetShare;
 
 public class DouYinShare {

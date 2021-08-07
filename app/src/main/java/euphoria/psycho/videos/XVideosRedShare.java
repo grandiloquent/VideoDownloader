@@ -1,4 +1,4 @@
-package euphoria.psycho.explorer;
+package euphoria.psycho.videos;
 
 import android.app.ProgressDialog;
 import android.os.Process;
@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
