@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -29,10 +30,12 @@ import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.DouYinShare;
 import euphoria.psycho.videos.IqiyiShare;
+import euphoria.psycho.videos.KuaiShouShare;
 import euphoria.psycho.videos.Porn91Share;
 import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.XVideosShare;
@@ -44,8 +47,6 @@ public class MainActivity extends Activity implements ClientInterface {
     private WebView mWebView;
     private BookmarkDatabase mBookmarkDatabase;
     private String mVideoUrl;
-    //
-
 
     public BookmarkDatabase getBookmarkDatabase() {
         return mBookmarkDatabase;
@@ -109,11 +110,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
-    private void copyUrl(String value) {
-        Share.setClipboardText(MainActivity.this, value);
-        Toast.makeText(MainActivity.this, "视频地址已成功复制到剪切板.", Toast.LENGTH_LONG).show();
-    }
-
     private File createCacheDirectory() {
         File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
         Logger.d(String.format("createCacheDirectory: 览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
@@ -126,7 +122,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return cacheDirectory;
     }
 
-    //
     private void initialize() {
         new Thread(() -> {
 //            byte[] buffer = new byte[1024];
@@ -137,7 +132,6 @@ public class MainActivity extends Activity implements ClientInterface {
 //            );
 //            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
         }).start();
-        //
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
@@ -155,8 +149,8 @@ public class MainActivity extends Activity implements ClientInterface {
         if (getIntent().getData() != null) {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
-         mWebView.loadUrl(PreferenceShare.getPreferences()
-                   .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
+            mWebView.loadUrl(PreferenceShare.getPreferences()
+                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
     }
 
@@ -192,6 +186,8 @@ public class MainActivity extends Activity implements ClientInterface {
                             });
                         });
                     } else {
+                        if (KuaiShouShare.parsingVideo(editText.getText().toString(), this))
+                            return;
                         mWebView.loadUrl(editText.getText().toString());
                     }
                 })
