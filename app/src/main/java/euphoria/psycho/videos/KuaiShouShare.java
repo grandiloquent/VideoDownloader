@@ -87,6 +87,7 @@ public class KuaiShouShare {
         } else {
             return null;
         }
+
     }
 
 }

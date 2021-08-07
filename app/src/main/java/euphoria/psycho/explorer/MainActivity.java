@@ -40,7 +40,6 @@ import euphoria.psycho.videos.Porn91Share;
 import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.XVideosShare;
 
-
 public class MainActivity extends Activity implements ClientInterface {
     public static final String LAST_ACCESSED = "lastAccessed";
     private static final int REQUEST_PERMISSION = 66;
@@ -69,8 +68,8 @@ public class MainActivity extends Activity implements ClientInterface {
         } catch (UnsupportedEncodingException ignored) {
         }
     }
-    // iqiyi.com
 
+    // iqiyi.com
     public WebView getWebView() {
         return mWebView;
     }
@@ -91,7 +90,6 @@ public class MainActivity extends Activity implements ClientInterface {
         }
         return false;
     }
-
 
     private boolean checkPermissions() {
         List<String> needPermissions = new ArrayList<>();
@@ -141,9 +139,7 @@ public class MainActivity extends Activity implements ClientInterface {
         mBookmarkDatabase = new BookmarkDatabase(this);
         setWebView();
         loadStartPage();
-
     }
-
 
     private void loadStartPage() {
         if (getIntent().getData() != null) {
@@ -182,7 +178,6 @@ public class MainActivity extends Activity implements ClientInterface {
                                     openDownloadDialog(id, value);
                                 }
                                 progressDialog.dismiss();
-
                             });
                         });
                     } else {
@@ -274,6 +269,4 @@ public class MainActivity extends Activity implements ClientInterface {
     public void onVideoUrl(String uri) {
         mVideoUrl = uri;
     }
-
-
 }
