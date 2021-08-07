@@ -18,27 +18,18 @@ import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
 
 
@@ -133,23 +124,16 @@ public class MainActivity extends Activity implements ClientInterface {
 
     //
     private void initialize() {
-//        new Thread(() -> {
-////            byte[] buffer = new byte[1024];
-////            int result = NativeShare.get91Porn(
-////                    "https://91porn.com/view_video.php?viewkey=f7ee920d417bcbb7f072&page=&viewtype=&category=".getBytes(StandardCharsets.UTF_8),
-////                    1024,
-////                    buffer
-////            );
-////            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
-//            try {
-//                String value = AcFunShare.getVideoUrl("https://www.acfun.cn/v/ac30492691");
-//
-//
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }).start();
+        new Thread(() -> {
+//            byte[] buffer = new byte[1024];
+//            int result = NativeShare.get91Porn(
+//                    "https://91porn.com/view_video.php?viewkey=f7ee920d417bcbb7f072&page=&viewtype=&category=".getBytes(StandardCharsets.UTF_8),
+//                    1024,
+//                    buffer
+//            );
+//            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
+        }).start();
+        //
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
@@ -223,7 +207,7 @@ public class MainActivity extends Activity implements ClientInterface {
 
     private void setDownloadVideo() {
         findViewById(R.id.file_download).setOnClickListener(v -> {
-            if (XVideosShare.parsingXVideos(this)) return;
+            if (XVideosRedShare.parsingXVideos(this)) return;
             if (Porn91Share.parsing91Porn(this)) return;
             if (parseYouTube()) return;
             if (parsingIqiyi()) return;

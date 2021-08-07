@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import euphoria.psycho.explorer.XVideosShare.Callback;
+import euphoria.psycho.explorer.XVideosRedShare.Callback;
 import euphoria.psycho.share.NetShare;
 
 public class DouYinShare {

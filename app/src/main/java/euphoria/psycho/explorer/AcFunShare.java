@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import euphoria.psycho.explorer.XVideosShare.Callback;
+import euphoria.psycho.explorer.XVideosRedShare.Callback;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
