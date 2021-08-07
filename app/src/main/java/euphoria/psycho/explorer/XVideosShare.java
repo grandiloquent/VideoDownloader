@@ -1,9 +1,13 @@
 package euphoria.psycho.explorer;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Process;
 import android.util.Pair;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -28,12 +32,15 @@ public class XVideosShare {
 
     public static boolean parsingVideo(MainActivity mainActivity) {
         String uri = mainActivity.getWebView().getUrl();
-        if (uri.contains(".acfun.cn")) {
+        if (uri.contains(".xvideos.com/")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             performTask(mainActivity.getWebView().getUrl(), value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
-
-                   //  mainActivity.getVideo(value);
+                    try {
+                        launchDialog(mainActivity, value);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                 }
@@ -63,6 +70,19 @@ public class XVideosShare {
             if (callback != null)
                 callback.run(null);
         }).start();
+    }
+
+    private static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
+        String[] names = new String[videoList.size()];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = videoList.get(i).first;
+        }
+        new AlertDialog.Builder(mainActivity)
+                .setItems(names, (dialog, which) -> {
+                    mainActivity.getVideo(videoList.get(which).second);
+                })
+                .show();
+
     }
 
     private static void parseHls(String hlsUri, List<Pair<String, String>> videoList) throws IOException {

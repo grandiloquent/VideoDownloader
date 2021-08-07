@@ -151,9 +151,9 @@ public class MainActivity extends Activity implements ClientInterface {
         if (getIntent().getData() != null) {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
-            // mWebView.loadUrl("https://www.acfun.cn/");
-            mWebView.loadUrl(PreferenceShare.getPreferences()
-                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
+            mWebView.loadUrl("https://www.xvideos.com/video60031851/stepdaughter_penetrated_by_bbc_while_stepmom_watches_-_shoplyfter_mylf");
+//            mWebView.loadUrl(PreferenceShare.getPreferences()
+//                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
     }
 
@@ -212,6 +212,7 @@ public class MainActivity extends Activity implements ClientInterface {
             if (parseYouTube()) return;
             if (parsingIqiyi()) return;
             if (AcFunShare.parsingVideo(this)) return;
+            if (XVideosShare.parsingVideo(this)) return;
             if (mVideoUrl != null) {
                 try {
                     mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));

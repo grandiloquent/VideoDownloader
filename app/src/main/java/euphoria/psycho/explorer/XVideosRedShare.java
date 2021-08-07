@@ -28,7 +28,7 @@ public class XVideosRedShare {
 
     public static boolean parsingXVideos(MainActivity mainActivity) {
         String uri = mainActivity.getWebView().getUrl();
-        if (uri.contains(".xvideos.")) {
+        if (uri.contains(".xvideos.red/")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             XVideosRedShare.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
