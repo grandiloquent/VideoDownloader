@@ -52,7 +52,6 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     public void getVideo(String value) {
-        copyUrl(value);
         try {
             String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
             DialogShare.createAlertDialogBuilder(this, "询问", (dialog, which) -> {
@@ -156,9 +155,8 @@ public class MainActivity extends Activity implements ClientInterface {
         if (getIntent().getData() != null) {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
-            mWebView.loadUrl("https://www.xvideos.com/video60031851/stepdaughter_penetrated_by_bbc_while_stepmom_watches_-_shoplyfter_mylf");
-//            mWebView.loadUrl(PreferenceShare.getPreferences()
-//                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
+         mWebView.loadUrl(PreferenceShare.getPreferences()
+                   .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
     }
 
@@ -278,7 +276,6 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public void onVideoUrl(String uri) {
-        Share.setClipboardText(this, uri);
         mVideoUrl = uri;
     }
 
