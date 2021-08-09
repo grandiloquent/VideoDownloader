@@ -20,7 +20,7 @@ import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.NetShare;
 
 public class DouYinShare {
-
+ 
 
     public static void performTask(String uri, Callback callback) {
         new Thread(() -> {
