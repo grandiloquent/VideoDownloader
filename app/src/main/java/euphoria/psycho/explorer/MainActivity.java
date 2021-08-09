@@ -19,7 +19,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -30,7 +29,6 @@ import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.DouYinShare;
@@ -51,24 +49,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return mBookmarkDatabase;
     }
 
-    public void getVideo(String value) {
-        try {
-            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
-            DialogShare.createAlertDialogBuilder(this, "询问", (dialog, which) -> {
-                dialog.dismiss();
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(uri));
-                startActivity(Intent.createChooser(intent, "打开视频链接"));
-            }, (dialog, which) -> {
-                mWebView.loadUrl(uri);
-                dialog.dismiss();
-            })
-                    .setMessage("是否使用浏览器打开视频链接")
-                    .show();
-        } catch (UnsupportedEncodingException ignored) {
-        }
-    }
-
     // iqiyi.com
     public WebView getWebView() {
         return mWebView;
@@ -80,7 +60,7 @@ public class MainActivity extends Activity implements ClientInterface {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(MainActivity.this);
             IqiyiShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
                 if (value != null) {
-                    getVideo(value);
+                    Helper.viewVideo(this, value);
                 } else {
                     Toast.makeText(this, "无法解析视频", Toast.LENGTH_LONG).show();
                 }
@@ -90,6 +70,7 @@ public class MainActivity extends Activity implements ClientInterface {
         }
         return false;
     }
+
 
     private boolean checkPermissions() {
         List<String> needPermissions = new ArrayList<>();
@@ -108,17 +89,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
-    private File createCacheDirectory() {
-        File cacheDirectory = new File(new File(getCacheDir(), "Explorer"), "Cache");
-        Logger.d(String.format("createCacheDirectory: 览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
-        if (!cacheDirectory.isDirectory()) {
-            boolean result = cacheDirectory.mkdirs();
-            if (!result) {
-                Logger.d(String.format("createCacheDirectory: 创建目录 %s 失败", cacheDirectory.getAbsolutePath()));
-            }
-        }
-        return cacheDirectory;
-    }
 
     private void initialize() {
         new Thread(() -> {
@@ -150,17 +120,6 @@ public class MainActivity extends Activity implements ClientInterface {
         }
     }
 
-    private void openDownloadDialog(String videoId, String videoUrl) {
-        new AlertDialog.Builder(this)
-                .setTitle("询问")
-                .setMessage("是否下载视频？")
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    WebViewShare.downloadFile(MainActivity.this, videoId + ".mp4", videoUrl, NetShare.DEFAULT_USER_AGENT);
-                    dialog.dismiss();
-                })
-                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
-                .show();
-    }
 
     private void openUrlDialog(View v) {
         EditText editText = new EditText(v.getContext());
@@ -175,7 +134,7 @@ public class MainActivity extends Activity implements ClientInterface {
                             MainActivity.this.runOnUiThread(() -> {
                                 if (value != null) {
                                     mWebView.loadUrl(value);
-                                    openDownloadDialog(id, value);
+                                    Helper.openDownloadDialog(MainActivity.this, id, value);
                                 }
                                 progressDialog.dismiss();
                             });
@@ -222,12 +181,13 @@ public class MainActivity extends Activity implements ClientInterface {
             String fileName = URLUtil.guessFileName(url, contentDisposition, WebViewShare.getFileType(MainActivity.this, url));
             WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
         });
-        WebViewShare.setWebView(mWebView, createCacheDirectory().getAbsolutePath());
+        WebViewShare.setWebView(mWebView, Helper.createCacheDirectory(this).getAbsolutePath());
         mWebView.setWebViewClient(new CustomWebViewClient(this));
         mWebView.setWebChromeClient(new CustomWebChromeClient(this));
         mWebView.setDownloadListener(Helper.getDownloadListener(this));
         WebViewShare.supportCookie(mWebView);
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

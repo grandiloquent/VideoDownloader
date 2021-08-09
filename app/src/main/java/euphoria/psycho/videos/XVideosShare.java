@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
@@ -72,7 +73,7 @@ public class XVideosShare {
         }
         new AlertDialog.Builder(mainActivity)
                 .setItems(names, (dialog, which) -> {
-                    mainActivity.getVideo(videoList.get(which).second);
+                    Helper.viewVideo(mainActivity, videoList.get(which).second);
                 })
                 .show();
 

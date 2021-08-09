@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.DialogShare;
@@ -22,7 +23,7 @@ public class Porn91Share {
         Matcher matcher = pattern.matcher(value);
         if (matcher.find()) {
             value = matcher.group();
-            mainActivity.getVideo(value);
+            Helper.viewVideo(mainActivity,value);
         }
     }
 

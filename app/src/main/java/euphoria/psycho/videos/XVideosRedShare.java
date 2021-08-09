@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
@@ -33,7 +34,7 @@ public class XVideosRedShare {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             XVideosRedShare.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
-                    mainActivity.getVideo(value);
+                    Helper.viewVideo(mainActivity,value);
                 } else {
                     Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                 }

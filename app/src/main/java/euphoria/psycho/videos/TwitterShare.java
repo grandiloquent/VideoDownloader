@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import androidx.annotation.NonNull;
+import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
@@ -145,7 +146,7 @@ public class TwitterShare {
         String uri = mainActivity.getWebView().getUrl();
         if (uri.contains(".twitter.com/")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            performTask(StringShare.substringAfterLast(mainActivity.getWebView().getUrl(),"/"), value -> mainActivity.runOnUiThread(() -> {
+            performTask(StringShare.substringAfterLast(mainActivity.getWebView().getUrl(), "/"), value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
                     try {
                         launchDialog(mainActivity, value);
@@ -169,7 +170,7 @@ public class TwitterShare {
         }
         new AlertDialog.Builder(mainActivity)
                 .setItems(names, (dialog, which) -> {
-                    mainActivity.getVideo(videoList.get(which).url);
+                    Helper.viewVideo(mainActivity, videoList.get(which).url);
                 })
                 .show();
 
