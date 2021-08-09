@@ -36,11 +36,6 @@ public class DownloadActivity extends Activity {
     private TextView mSubTitle;
 
     private Handler mHandler = new Handler();
-
-
-
-
-
     //
 
 
@@ -50,61 +45,6 @@ public class DownloadActivity extends Activity {
         setContentView(R.layout.download_activity);
         mTitle = findViewById(R.id.title);
         mSubTitle = findViewById(R.id.subtitle);
-
-
-        new Thread(() -> {
-//            byte[] buffer = new byte[1024];
-//            int result = NativeShare.get91Porn(
-//                    "https://91porn.com/view_video.php?viewkey=f7ee920d417bcbb7f072&page=&viewtype=&category=".getBytes(StandardCharsets.UTF_8),
-//                    1024,
-//                    buffer
-//            );
-//            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
-            List<String> tsList = parseM3u8File();
-            for (String ts : tsList) {
-                String tsUri = StringShare.substringBeforeLast(URI, "/")
-                        + "/"
-                        + ts;
-                final String fileName = StringShare.substringBeforeLast(ts, "?");
-//                File tsFile = new File(mDirectory, fileName);
-//                mHandler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mTitle.setText(fileName);
-//
-//                    }
-//                });
-//                if (tsFile.exists()) {
-//                } else {
-//                    try {
-//                        String tsUri = StringShare.substringBeforeLast(URI, "/")
-//                                + "/"
-//                                + ts;
-//                        HttpURLConnection connection = (HttpURLConnection) new URL(tsUri).openConnection();
-//                        int statusCode = connection.getResponseCode();
-//                        if (statusCode >= 200 && statusCode < 400) {
-//                            int size = Integer.parseInt(connection.getHeaderField("Content-Length"));
-//                            setBookmark(tsUri, fileName, tsFile.getAbsolutePath(), size);
-////                            mHandler.post(new Runnable() {
-////                                @Override
-////                                public void run() {
-////                                    mSubTitle.setText(FileShare.formatFileSize(size));
-////                                }
-////                            });
-////                            InputStream is = connection.getInputStream();
-////                            FileOutputStream out = new FileOutputStream(tsFile);
-////                            FileShare.copyTo(is, out, size);
-////                            FileShare.closeSilently(is);
-////                            FileShare.closeSilently(out);
-//                        }
-//                    } catch (Exception e) {
-//                        Logger.d(String.format("onCreate: %s", e.getMessage()));
-//
-//                    }
-            }
-        }).
-                start();
-
     }
 
     @Override
