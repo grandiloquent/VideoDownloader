@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.DialogShare.Callback;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
@@ -82,7 +85,18 @@ public class MainActivity extends Activity implements ClientInterface {
         }).start();
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
-        findViewById(R.id.add_link).setOnClickListener(this::openUrlDialog);
+        findViewById(R.id.add_link).setOnClickListener(v -> {
+            DialogShare.createEditDialog(this, "", new Callback() {
+                @Override
+                public void run(String string) {
+                    if (DouYinShare.parsingVideo(string, MainActivity.this))
+                        return;
+                    if (KuaiShouShare.parsingVideo(string, MainActivity.this))
+                        return;
+                    mWebView.loadUrl(string);
+                }
+            });
+        });
         mWebView = findViewById(R.id.web);
         new ListenerDelegate(this);
         setDownloadVideo();
@@ -98,23 +112,6 @@ public class MainActivity extends Activity implements ClientInterface {
             mWebView.loadUrl(PreferenceShare.getPreferences()
                     .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
-    }
-
-    private void openUrlDialog(View v) {
-        EditText editText = new EditText(v.getContext());
-        AlertDialog alertDialog = new Builder(v.getContext())
-                .setView(editText)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    if (DouYinShare.parsingVideo(editText.getText().toString(), this))
-                        return;
-                    if (KuaiShouShare.parsingVideo(editText.getText().toString(), this))
-                        return;
-                    mWebView.loadUrl(editText.getText().toString());
-
-                })
-                .create();
-        alertDialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        alertDialog.show();
     }
 
 

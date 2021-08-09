@@ -1,4 +1,4 @@
-package euphoria.psycho.explorer;
+package euphoria.psycho.share;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
