@@ -1,8 +1,10 @@
 package euphoria.psycho.share;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -124,5 +126,13 @@ public class FileShare {
             value = String.format("%.0f", result);
         }
         return value + suffix;
+    }
+
+    public static void closeSilently(Closeable c) {
+        if (c == null) return;
+        try {
+            c.close();
+        } catch (IOException t) {
+        }
     }
 }

@@ -2,25 +2,14 @@ package euphoria.psycho.explorer;
 
 import android.Manifest.permission;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.view.View;
-import android.view.WindowManager.LayoutParams;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
-import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -28,8 +17,6 @@ import java.util.List;
 
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.DialogShare.Callback;
-import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
@@ -73,16 +60,9 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
+
     private void initialize() {
-        new Thread(() -> {
-//            byte[] buffer = new byte[1024];
-//            int result = NativeShare.get91Porn(
-//                    "https://91porn.com/view_video.php?viewkey=f7ee920d417bcbb7f072&page=&viewtype=&category=".getBytes(StandardCharsets.UTF_8),
-//                    1024,
-//                    buffer
-//            );
-//            Logger.d(String.format("run: %s, %b", new String(buffer, 0, result, StandardCharsets.UTF_8), result));
-        }).start();
+
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(v -> {
@@ -188,4 +168,7 @@ public class MainActivity extends Activity implements ClientInterface {
     public void onVideoUrl(String uri) {
         mVideoUrl = uri;
     }
+
+    //
+
 }
