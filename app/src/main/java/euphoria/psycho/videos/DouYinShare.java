@@ -20,7 +20,26 @@ import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.NetShare;
 
 public class DouYinShare {
- 
+
+    public static boolean parsingVideo(String string, MainActivity mainActivity) {
+        if (!string.contains("douyin.com")) {
+            return false;
+        }
+        ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
+        String id = DouYinShare.matchTikTokVideoId(string);
+        if (id == null) return true;
+        DouYinShare.performTask(id, value -> {
+            mainActivity.runOnUiThread(() -> {
+                if (value != null) {
+                    mainActivity.getWebView().loadUrl(value);
+                    Helper.openDownloadDialog(mainActivity, id, value);
+                }
+                progressDialog.dismiss();
+            });
+        });
+        return true;
+
+    }
 
     public static void performTask(String uri, Callback callback) {
         new Thread(() -> {

@@ -49,7 +49,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return mBookmarkDatabase;
     }
 
-    // iqiyi.com
     public WebView getWebView() {
         return mWebView;
     }
@@ -106,43 +105,27 @@ public class MainActivity extends Activity implements ClientInterface {
         AlertDialog alertDialog = new Builder(v.getContext())
                 .setView(editText)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    if (editText.getText().toString().contains("douyin.com")) {
-                        ProgressDialog progressDialog = DialogShare.createProgressDialog(MainActivity.this);
-                        String id = DouYinShare.matchTikTokVideoId(editText.getText().toString());
-                        if (id == null) return;
-                        DouYinShare.performTask(id, value -> {
-                            MainActivity.this.runOnUiThread(() -> {
-                                if (value != null) {
-                                    mWebView.loadUrl(value);
-                                    Helper.openDownloadDialog(MainActivity.this, id, value);
-                                }
-                                progressDialog.dismiss();
-                            });
-                        });
-                    } else {
-                        if (KuaiShouShare.parsingVideo(editText.getText().toString(), this))
-                            return;
-                        mWebView.loadUrl(editText.getText().toString());
-                    }
+                    if (DouYinShare.parsingVideo(editText.getText().toString(), this))
+                        return;
+                    if (KuaiShouShare.parsingVideo(editText.getText().toString(), this))
+                        return;
+                    mWebView.loadUrl(editText.getText().toString());
+
                 })
                 .create();
         alertDialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         alertDialog.show();
     }
 
-    private boolean parseYouTube() {
-        if (mWebView.getUrl().contains("youtube.com/watch")) {
-            Share.startYouTubeActivity(this, mWebView);
-            return true;
-        }
-        return false;
-    }
 
     private void setDownloadVideo() {
         findViewById(R.id.file_download).setOnClickListener(v -> {
             if (XVideosRedShare.parsingXVideos(this)) return;
             if (Porn91Share.parsing91Porn(this)) return;
-            if (parseYouTube()) return;
+            if (mWebView.getUrl().contains("youtube.com/watch")) {
+                Share.startYouTubeActivity(this, mWebView);
+                return;
+            }
             if (IqiyiShare.parsingVideo(this)) return;
             if (AcFunShare.parsingVideo(this)) return;
             if (XVideosShare.parsingVideo(this)) return;
