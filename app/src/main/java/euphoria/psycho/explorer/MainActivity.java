@@ -54,24 +54,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return mWebView;
     }
 
-    public boolean parsingIqiyi() {
-        String uri = mWebView.getUrl();
-        if (uri.contains(".iqiyi.com")) {
-            ProgressDialog progressDialog = DialogShare.createProgressDialog(MainActivity.this);
-            IqiyiShare.performTask(uri, value -> MainActivity.this.runOnUiThread(() -> {
-                if (value != null) {
-                    Helper.viewVideo(this, value);
-                } else {
-                    Toast.makeText(this, "无法解析视频", Toast.LENGTH_LONG).show();
-                }
-                progressDialog.dismiss();
-            }));
-            return true;
-        }
-        return false;
-    }
-
-
     private boolean checkPermissions() {
         List<String> needPermissions = new ArrayList<>();
         if (!PermissionShare.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE)) {
@@ -88,7 +70,6 @@ public class MainActivity extends Activity implements ClientInterface {
         }
         return false;
     }
-
 
     private void initialize() {
         new Thread(() -> {
@@ -119,7 +100,6 @@ public class MainActivity extends Activity implements ClientInterface {
                     .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
     }
-
 
     private void openUrlDialog(View v) {
         EditText editText = new EditText(v.getContext());
@@ -163,7 +143,7 @@ public class MainActivity extends Activity implements ClientInterface {
             if (XVideosRedShare.parsingXVideos(this)) return;
             if (Porn91Share.parsing91Porn(this)) return;
             if (parseYouTube()) return;
-            if (parsingIqiyi()) return;
+            if (IqiyiShare.parsingVideo(this)) return;
             if (AcFunShare.parsingVideo(this)) return;
             if (XVideosShare.parsingVideo(this)) return;
             if (mVideoUrl != null) {
@@ -187,7 +167,6 @@ public class MainActivity extends Activity implements ClientInterface {
         mWebView.setDownloadListener(Helper.getDownloadListener(this));
         WebViewShare.supportCookie(mWebView);
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

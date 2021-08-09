@@ -1,7 +1,9 @@
 package euphoria.psycho.videos;
 
+import android.app.ProgressDialog;
 import android.os.Process;
 import android.util.Pair;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,11 +18,30 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import euphoria.psycho.explorer.Helper;
+import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
 public class IqiyiShare {
+    public static boolean parsingVideo(MainActivity mainActivity) {
+        String uri = mainActivity.getWebView().getUrl();
+        if (uri.contains(".iqiyi.com")) {
+            ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
+            IqiyiShare.performTask(uri, value ->mainActivity.runOnUiThread(() -> {
+                if (value != null) {
+                    Helper.viewVideo(mainActivity, value);
+                } else {
+                    Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+                }
+                progressDialog.dismiss();
+            }));
+            return true;
+        }
+        return false;
+    }
     public static String md5(final String s) {
         final String MD5 = "MD5";
         try {

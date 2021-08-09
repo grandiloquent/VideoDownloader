@@ -1,6 +1,8 @@
 package euphoria.psycho.videos;
 
+import android.app.ProgressDialog;
 import android.os.Process;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,10 +13,15 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import euphoria.psycho.explorer.Helper;
+import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.NetShare;
 
 public class DouYinShare {
+
+
     public static void performTask(String uri, Callback callback) {
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
