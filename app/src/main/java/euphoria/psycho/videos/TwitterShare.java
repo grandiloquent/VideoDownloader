@@ -32,6 +32,7 @@ import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.StringShare;
 
 public class TwitterShare {
 
@@ -142,9 +143,9 @@ public class TwitterShare {
 
     public static boolean parsingVideo(MainActivity mainActivity) {
         String uri = mainActivity.getWebView().getUrl();
-        if (uri.contains(".xvideos.com/")) {
+        if (uri.contains(".twitter.com/")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            performTask(mainActivity.getWebView().getUrl(), value -> mainActivity.runOnUiThread(() -> {
+            performTask(StringShare.substringAfterLast(mainActivity.getWebView().getUrl(),"/"), value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
                     try {
                         launchDialog(mainActivity, value);
