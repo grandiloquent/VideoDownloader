@@ -25,12 +25,10 @@ public class CustomWebViewClient extends WebViewClient {
             view.evaluateJavascript("[...document.querySelectorAll('.x-overlay')].forEach(x=>x.remove())", new ValueCallback<String>() {
                 @Override
                 public void onReceiveValue(String value) {
-
                 }
             });
         }
         if (!url.contains("www.hxz315.com") && (url.contains(".m3u8") || url.contains(".mp4"))) {
-
             mClientInterface.onVideoUrl(url);
         }
     }
@@ -43,13 +41,14 @@ public class CustomWebViewClient extends WebViewClient {
 
     @Override
     public void onPageFinished(WebView view, String url) {
-
     }
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         String url = request.getUrl().toString();
-        if ((url.startsWith("https://") || url.startsWith("http://"))) {
+        if (mClientInterface.shouldOverrideUrlLoading(url)) {
+            return true;
+        } else if ((url.startsWith("https://") || url.startsWith("http://"))) {
             view.loadUrl(url);
         }
         return true;
@@ -66,7 +65,6 @@ public class CustomWebViewClient extends WebViewClient {
 
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-
         return super.shouldInterceptRequest(view, request);
     }
 }

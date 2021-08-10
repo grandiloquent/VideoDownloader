@@ -4,8 +4,8 @@ package euphoria.psycho.explorer;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+
 
 import euphoria.psycho.share.FileShare;
 
@@ -46,6 +46,7 @@ public class DownloadActivity extends Activity implements DownloadNotifier {
     public void downloadCompleted(String uri, String directory) {
         mTitle.setText(directory);
         mSubTitle.setText("已完成");
+
     }
 
 
@@ -57,6 +58,7 @@ public class DownloadActivity extends Activity implements DownloadNotifier {
         mSubTitle = findViewById(R.id.subtitle);
         new DownloadThread(URI, this, this)
                 .start();
+
     }
 
     @Override

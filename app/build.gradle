@@ -36,4 +36,5 @@ dependencies {
     implementation('com.github.evgenyneu:js-evaluator-for-android:v4.0.0') {
         exclude module: 'appcompat-v7'
     }
+    implementation project(':ffmpeglib')
 }

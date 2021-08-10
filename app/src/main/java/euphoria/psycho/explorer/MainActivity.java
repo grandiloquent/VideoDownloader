@@ -62,7 +62,6 @@ public class MainActivity extends Activity implements ClientInterface {
 
 
     private void initialize() {
-
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(v -> {
@@ -169,6 +168,27 @@ public class MainActivity extends Activity implements ClientInterface {
         mVideoUrl = uri;
     }
 
+    @Override
+    public boolean shouldOverrideUrlLoading(String uri) {
+        if (XVideosRedShare.parsingXVideos(this)) return true;
+        if (Porn91Share.parsing91Porn(this)) return true;
+        if (mWebView.getUrl().contains("youtube.com/watch")) {
+            Share.startYouTubeActivity(this, mWebView);
+            return true;
+        }
+        if (IqiyiShare.parsingVideo(this)) return true;
+        if (AcFunShare.parsingVideo(this)) return true;
+        if (XVideosShare.parsingVideo(this)) return true;
+        if (mVideoUrl != null) {
+            try {
+                mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
+                return true;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
     //
 
 }
