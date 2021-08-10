@@ -37,11 +37,14 @@ public class DownloadThread extends Thread {
     private long mCurrentBytes;
     private long mSpeedSampleBytes;
     private long mSpeed;
+    private long mTotalSize;
 
     public DownloadThread(String uri, Context context, DownloadNotifier downloadNotifier) {
         mUri = uri;
         mContext = context;
         mDownloadNotifier = downloadNotifier;
+        initializeRootDirectory();
+        initializeTaskDirectory();
         try {
             mBlobCache = new BlobCache(mDirectory + "/log",
                     100, 1024 * 1024, false,
@@ -49,8 +52,7 @@ public class DownloadThread extends Thread {
         } catch (IOException e) {
             Logger.d(String.format("onCreate: %s", e.getMessage()));
         }
-        initializeRootDirectory();
-        initializeTaskDirectory();
+
     }
 
     private void downloadFile(String ts) throws IOException {
@@ -60,8 +62,10 @@ public class DownloadThread extends Thread {
         final String fileName = StringShare.substringBeforeLast(ts, "?");
         File tsFile = new File(mDirectory, fileName);
         if (tsFile.exists()) {
-            int size = getBookmark(tsUri);
+            long size = getBookmark(tsUri);
+            Logger.d(String.format("downloadFile: %d %d", tsFile.length(), size));
             if (tsFile.length() == size) {
+                Logger.d(String.format("downloadFile: %s", "cached"));
                 mDownloadNotifier.downloadProgress(tsUri, fileName, size);
                 return;
             } else {
@@ -72,7 +76,8 @@ public class DownloadThread extends Thread {
         HttpURLConnection connection = (HttpURLConnection) new URL(tsUri).openConnection();
         int statusCode = connection.getResponseCode();
         if (statusCode >= 200 && statusCode < 400) {
-            int size = Integer.parseInt(connection.getHeaderField("Content-Length"));
+            long size = Long.parseLong(connection.getHeaderField("Content-Length"));
+            mTotalSize = size;
             setBookmark(tsUri, size);
             mDownloadNotifier.downloadProgress(tsUri, fileName, size);
             InputStream is = connection.getInputStream();
@@ -83,13 +88,14 @@ public class DownloadThread extends Thread {
         }
     }
 
-    private int getBookmark(String uri) {
+    private long getBookmark(String uri) {
         try {
             byte[] data = mBlobCache.lookup(uri.hashCode());
             if (data == null) return 0;
             DataInputStream dis = new DataInputStream(
                     new ByteArrayInputStream(data));
-            return dis.readInt();
+            dis.readUTF();
+            return dis.readLong();
         } catch (Throwable t) {
             Logger.d(String.format("getBookmark: %s", t.getMessage()));
         }
@@ -134,20 +140,21 @@ public class DownloadThread extends Thread {
         return null;
     }
 
-    private void setBookmark(String uri, int size) {
+    private void setBookmark(String uri, long size) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(bos);
             dos.writeUTF(uri);
-            dos.writeInt(size);
+            dos.writeLong(size);
             dos.flush();
             mBlobCache.insert(uri.hashCode(), bos.toByteArray());
         } catch (Throwable t) {
+            Logger.d(String.format("setBookmark: %s", t.getMessage()));
         }
     }
 
     private void transferData(InputStream in, OutputStream out) {
-        final byte buffer[] = new byte[BUFFER_SIZE];
+        final byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
             if (mShutdownRequested) {
                 throw new Error("Local halt requested; job probably timed out");
@@ -170,7 +177,7 @@ public class DownloadThread extends Thread {
                 throw new Error(e);
             }
         }
-
+        mDownloadNotifier.downloadProgress(mUri, mTotalSize, mCurrentBytes, 0);
     }
 
     private void updateProgress() {
@@ -187,7 +194,7 @@ public class DownloadThread extends Thread {
             }
             // Only notify once we have a full sample window
             if (mSpeedSampleStart != 0) {
-                mDownloadNotifier.downloadProgress(mUri, mCurrentBytes, mSpeed);
+                mDownloadNotifier.downloadProgress(mUri, mTotalSize, mCurrentBytes, mSpeed);
             }
             mSpeedSampleStart = now;
             mSpeedSampleBytes = currentBytes;
@@ -214,11 +221,15 @@ public class DownloadThread extends Thread {
         }
         for (String ts : tsList) {
             try {
+                mCurrentBytes = 0;
+                mSpeedSampleStart = 0;
+                mSpeedSampleBytes = 0;
                 downloadFile(ts);
             } catch (IOException e) {
                 mDownloadNotifier.downloadFailed(mUri, e.getMessage());
             }
         }
+        mDownloadNotifier.downloadCompleted(mUri, mDirectory.getName());
     }
 
 }

@@ -9,8 +9,9 @@ public interface DownloadNotifier {
 
     void downloadFailed(String uri, String message);
 
-    void downloadProgress(String uri, String fileName, int totalSize);
+    void downloadProgress(String uri, String fileName, long totalSize);
 
-    void downloadProgress(String uri, long downloadBytes, float speed);
+    void downloadProgress(String uri, long totalSize, long downloadBytes, long speed);
 
+    void downloadCompleted(String uri, String directory);
 }

@@ -6,7 +6,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
@@ -75,11 +74,10 @@ public class M3u8Share {
         urlConnection.setRequestProperty("Sec-Fetch-User", "?1");
         urlConnection.setRequestProperty("Upgrade-Insecure-Requests", "1");
         urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36");
-        Map<String, List<String>> listMap = urlConnection.getHeaderFields();
-        for (Entry<String, List<String>> header : listMap.entrySet()) {
-            Logger.d(String.format("getHeaders: %s", String.format("%s = %s", header.getKey(), header.getValue().get(0))));
-
-        }
+        // Map<String, List<String>> listMap = urlConnection.getHeaderFields();
+//        for (Entry<String, List<String>> header : listMap.entrySet()) {
+//            Logger.d(String.format("getHeaders: %s", String.format("%s = %s", header.getKey(), header.getValue().get(0))));
+//        }
         int code = urlConnection.getResponseCode();
         if (code < 400 && code >= 200) {
             return NetShare.readString(urlConnection);

@@ -2,41 +2,51 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.util.Log;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-
-import euphoria.psycho.share.DownloadThread;
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.StringShare;
 
-public class DownloadActivity extends Activity {
+public class DownloadActivity extends Activity implements DownloadNotifier {
     private String URI = "https://ccn.killcovid2021.com//m3u8/505212/505212.m3u8?st=WMDuO07zTRAYck8PUj-pZQ&e=1628554252";
     private TextView mTitle;
     private TextView mSubTitle;
 
-    private Handler mHandler = new Handler();
-    //
+    private final Handler mHandler = new Handler();
+
+    @Override
+    public void downloadStart(String uri) {
+        mHandler.post(() -> mTitle.setText(URI));
+    }
+
+    @Override
+    public void downloadFailed(String uri, String message) {
+        mTitle.setText(message);
+    }
+
+    @Override
+    public void downloadProgress(String uri, String fileName, long totalSize) {
+        mTitle.setText(fileName);
+        mSubTitle.setText(FileShare.formatFileSize(totalSize));
+    }
+
+    @Override
+    public void downloadProgress(String uri, long totalSize, long downloadBytes, long speed) {
+        if (totalSize == downloadBytes) {
+            mSubTitle.setText("已完成");
+        } else {
+            mSubTitle.setText(String.format("%s/%s %s/s", FileShare.formatFileSize(downloadBytes), FileShare.formatFileSize(totalSize), FileShare.formatFileSize(speed)));
+        }
+
+    }
+
+    @Override
+    public void downloadCompleted(String uri, String directory) {
+        mTitle.setText(directory);
+        mSubTitle.setText("已完成");
+    }
 
 
     @Override
@@ -45,6 +55,8 @@ public class DownloadActivity extends Activity {
         setContentView(R.layout.download_activity);
         mTitle = findViewById(R.id.title);
         mSubTitle = findViewById(R.id.subtitle);
+        new DownloadThread(URI, this, this)
+                .start();
     }
 
     @Override

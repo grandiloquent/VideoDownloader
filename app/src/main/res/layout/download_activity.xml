@@ -5,40 +5,22 @@
     android:layout_margin="12dp"
     android:orientation="vertical">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    <TextView
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="#666" />
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="#666" />
-
-        <TextView
-            android:id="@+id/subtitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:gravity="right"
-            android:maxLines="1"
-            android:text="0KB/0KB 100%"
-            android:textColor="#D9D9D9" />
-    </LinearLayout>
-
-
-    <ProgressBar
-        android:id="@+id/progress"
-        style="@android:style/Widget.Material.Light.ProgressBar.Horizontal"
+    <TextView
+        android:id="@+id/subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="100"
-        android:progress="25" />
-
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="0KB/0KB 100%"
+        android:textColor="#D9D9D9" />
 
 </LinearLayout>

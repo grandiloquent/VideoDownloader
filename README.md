@@ -28,3 +28,7 @@ adb install-multiple 1.apk 2.apk 3.apk 4.apk 5.apk 6.apk 7.apk 8.apk
 ## 浏览器调试
 
 `chrome://inspect/#devices`
+
+## 引用
+
+* ffmpeglib: https://github.com/JeffMony/JeffFFmpegDemo
