@@ -48,8 +48,10 @@ public class DownloadThread extends Thread {
     private int mTotalSize;
     private int mCurrentSize;
     private final String mBaseUri;
+    private final Context mContext;
 
     public DownloadThread(String uri, Context context, DownloadNotifier downloadNotifier) {
+        mContext = context;
         mUri = uri;
         mBaseUri = StringShare.substringBeforeLast(mUri, "/")
                 + "/";
@@ -67,7 +69,7 @@ public class DownloadThread extends Thread {
     }
 
     private void downloadFile(String ts) throws IOException {
-        final String fileName = FileShare.getFileNameFromUri(ts);
+        final String fileName =StringShare.substringBefore(FileShare.getFileNameFromUri(ts),".");
         File tsFile = new File(mDirectory, fileName);
         if (tsFile.exists()) {
             long size = getBookmark(tsFile.getName());
@@ -109,7 +111,8 @@ public class DownloadThread extends Thread {
     }
 
     private void initializeRootDirectory() {
-        mDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "视频");
+        //mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        mDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getParentFile(), "视频");
         if (!mDirectory.exists()) {
             mDirectory.mkdirs();
         }
@@ -119,7 +122,9 @@ public class DownloadThread extends Thread {
         String directoryName = Long.toString(KeyShare.crc64Long(StringShare.substringBeforeLast(mUri, "?")));
         mDirectory = new File(mDirectory, directoryName);
         if (!mDirectory.exists()) {
-            mDirectory.mkdirs();
+            boolean res = mDirectory.mkdirs();
+            Logger.d(String.format("initializeTaskDirectory: %s %b", directoryName, res));
+
         }
     }
 
@@ -136,7 +141,7 @@ public class DownloadThread extends Thread {
                 if (segments[i].startsWith("#EXTINF:")) {
                     String uri = segments[i + 1];
                     tsList.add(uri);
-                    final String fileName = FileShare.getFileNameFromUri(uri);
+                    final String fileName =StringShare.substringBefore(FileShare.getFileNameFromUri(uri),".");
                     sb.append(fileName).append('\n');
                     i++;
                 }
