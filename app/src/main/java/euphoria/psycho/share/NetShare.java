@@ -43,15 +43,14 @@ public class NetShare {
         int index = ThreadLocalRandom.current().nextInt(range.length);
         int ip = range[index][0] + ThreadLocalRandom.current().nextInt(range[index][1] - range[index][0]);
         int[] b = new int[4];
-        b[0] = (int) ((ip >> 24) & 0xff);
-        b[1] = (int) ((ip >> 16) & 0xff);
-        b[2] = (int) ((ip >> 8) & 0xff);
-        b[3] = (int) (ip & 0xff);
-        return Integer.toString(b[0]) + "." + Integer.toString(b[1]) + "." + Integer.toString(b[2]) + "." + Integer.toString(b[3]);
+        b[0] = (ip >> 24) & 0xff;
+        b[1] = (ip >> 16) & 0xff;
+        b[2] = (ip >> 8) & 0xff;
+        b[3] = ip & 0xff;
+        return b[0] + "." + b[1] + "." + b[2] + "." + b[3];
     }
 
     public static String readString(HttpURLConnection connection) {
-        StringBuilder sb = new StringBuilder();
         InputStream in;
         BufferedReader reader = null;
         try {
@@ -63,9 +62,11 @@ public class NetShare {
             }
             reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             String line;
+            StringBuilder sb = new StringBuilder();
             while ((line = reader.readLine()) != null) {
                 sb.append(line).append("\r\n");
             }
+            return sb.toString();
         } catch (Exception ignored) {
         } finally {
             try {
@@ -74,7 +75,7 @@ public class NetShare {
             } catch (Exception ignored) {
             }
         }
-        return sb.toString();
+        return null;
     }
 
 }

@@ -16,8 +16,11 @@ public class DownloadActivity extends Activity implements DownloadNotifier {
     private final Handler mHandler = new Handler();
 
     @Override
-    public void downloadStart(String uri) {
-        mHandler.post(() -> mTitle.setText(uri));
+    public void downloadStart(String uri, int total) {
+        mHandler.post(() -> {
+            mTitle.setText(uri);
+            mSubTitle.setText(String.format("0/%d", total));
+        });
     }
 
     @Override
@@ -26,26 +29,24 @@ public class DownloadActivity extends Activity implements DownloadNotifier {
     }
 
     @Override
-    public void downloadProgress(String uri, String fileName, long totalSize) {
+    public void downloadProgress(String uri, String fileName) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 mTitle.setText(fileName);
-                if (totalSize > 0)
-                    mSubTitle.setText(FileShare.formatFileSize(totalSize));
             }
         });
     }
 
     @Override
-    public void downloadProgress(String uri, long totalSize, long downloadBytes, long speed) {
+    public void downloadProgress(String uri, int currentSize, int total, long downloadBytes, long speed) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (totalSize == downloadBytes) {
-                    mSubTitle.setText("已完成");
+                if (speed == 0) {
+                    mSubTitle.setText(String.format("%d/%d %s", currentSize, total, FileShare.formatFileSize(downloadBytes)));
                 } else {
-                    mSubTitle.setText(String.format("%s/%s %s/s", FileShare.formatFileSize(downloadBytes), FileShare.formatFileSize(totalSize), FileShare.formatFileSize(speed)));
+                    mSubTitle.setText(String.format("%d/%d %s %s/s", currentSize, total, FileShare.formatFileSize(downloadBytes), FileShare.formatFileSize(speed)));
                 }
             }
         });

@@ -45,7 +45,8 @@ public class DownloadThread extends Thread {
     private long mCurrentBytes;
     private long mSpeedSampleBytes;
     private long mSpeed;
-    private long mTotalSize;
+    private int mTotalSize;
+    private int mCurrentSize;
     private final String mBaseUri;
 
     public DownloadThread(String uri, Context context, DownloadNotifier downloadNotifier) {
@@ -55,7 +56,6 @@ public class DownloadThread extends Thread {
         mDownloadNotifier = downloadNotifier;
         initializeRootDirectory();
         initializeTaskDirectory();
-        Logger.d(String.format("DownloadThread: %s", mDirectory.getAbsolutePath()));
         try {
             mBlobCache = new BlobCache(mDirectory + "/log",
                     100, 1024 * 1024, false,
@@ -71,24 +71,21 @@ public class DownloadThread extends Thread {
         File tsFile = new File(mDirectory, fileName);
         if (tsFile.exists()) {
             long size = getBookmark(tsFile.getName());
-            Logger.d(String.format("downloadFile: %d %d", tsFile.length(), size));
             if (tsFile.length() == size) {
-                Logger.d(String.format("downloadFile: %s", "cached"));
-                mDownloadNotifier.downloadProgress(ts, fileName, size);
+                mDownloadNotifier.downloadProgress(ts, fileName);
                 return;
             } else {
                 tsFile.delete();
             }
         }
         String tsUri = mBaseUri + ts;
-        mDownloadNotifier.downloadProgress(tsUri, fileName, 0);
+        mDownloadNotifier.downloadProgress(tsUri, fileName);
         HttpURLConnection connection = (HttpURLConnection) new URL(tsUri).openConnection();
         int statusCode = connection.getResponseCode();
         if (statusCode >= 200 && statusCode < 400) {
             long size = Long.parseLong(connection.getHeaderField("Content-Length"));
-            mTotalSize = size;
             setBookmark(tsFile.getName(), size);
-            mDownloadNotifier.downloadProgress(tsUri, fileName, size);
+            mDownloadNotifier.downloadProgress(tsUri, fileName);
             InputStream is = connection.getInputStream();
             FileOutputStream out = new FileOutputStream(tsFile);
             transferData(is, out);
@@ -150,7 +147,6 @@ public class DownloadThread extends Thread {
             return tsList;
         } catch (IOException e) {
             Logger.d(String.format("parseM3u8File: %s", e.getMessage()));
-
         }
         return null;
     }
@@ -192,7 +188,7 @@ public class DownloadThread extends Thread {
                 throw new Error(e);
             }
         }
-        mDownloadNotifier.downloadProgress(mUri, mTotalSize, mCurrentBytes, 0);
+        mDownloadNotifier.downloadProgress(mUri, mCurrentSize, mTotalSize, mCurrentBytes, 0);
 
     }
 
@@ -210,7 +206,7 @@ public class DownloadThread extends Thread {
             }
             // Only notify once we have a full sample window
             if (mSpeedSampleStart != 0) {
-                mDownloadNotifier.downloadProgress(mUri, mTotalSize, mCurrentBytes, mSpeed);
+                mDownloadNotifier.downloadProgress(mUri, mCurrentSize, mTotalSize, mCurrentBytes, mSpeed);
             }
             mSpeedSampleStart = now;
             mSpeedSampleBytes = currentBytes;
@@ -229,19 +225,19 @@ public class DownloadThread extends Thread {
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        mDownloadNotifier.downloadStart(mUri);
         List<String> tsList = parseM3u8File();
         if (tsList == null) {
             mDownloadNotifier.downloadFailed(mUri, "解析m3u8文件失败");
             return;
         }
+        mTotalSize = tsList.size();
+        mDownloadNotifier.downloadStart(mUri, mTotalSize);
         for (String ts : tsList) {
             try {
-                mCurrentBytes = 0;
-                mSpeedSampleStart = 0;
-                mSpeedSampleBytes = 0;
                 downloadFile(ts);
+                mCurrentSize++;
             } catch (IOException e) {
+                Logger.d(String.format("run: %s", e.getMessage()));
                 mDownloadNotifier.downloadFailed(mUri, e.getMessage());
             }
         }

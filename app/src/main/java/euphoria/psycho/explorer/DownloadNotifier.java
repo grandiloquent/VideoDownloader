@@ -5,13 +5,13 @@ import android.os.Process;
 import java.io.File;
 
 public interface DownloadNotifier {
-    void downloadStart(String uri);
+    void downloadStart(String uri, int total);
 
     void downloadFailed(String uri, String message);
 
-    void downloadProgress(String uri, String fileName, long totalSize);
+    void downloadProgress(String uri, String fileName);
 
-    void downloadProgress(String uri, long totalSize, long downloadBytes, long speed);
+    void downloadProgress(String uri, int currentSize, int total, long downloadBytes, long speed);
 
     void downloadCompleted(String uri, String directory);
 

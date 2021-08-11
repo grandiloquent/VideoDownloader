@@ -1,13 +1,19 @@
 package euphoria.psycho.explorer;
 
+import android.Manifest;
 import android.Manifest.permission;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -19,6 +25,7 @@ import java.util.List;
 
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.DialogShare.Callback;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -30,6 +37,8 @@ import euphoria.psycho.videos.KuaiShouShare;
 import euphoria.psycho.videos.Porn91Share;
 import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.XVideosShare;
+
+import static android.os.Build.VERSION.SDK_INT;
 
 public class MainActivity extends Activity implements ClientInterface {
     public static final String LAST_ACCESSED = "lastAccessed";
@@ -51,11 +60,11 @@ public class MainActivity extends Activity implements ClientInterface {
         if (!PermissionShare.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE)) {
             needPermissions.add(permission.WRITE_EXTERNAL_STORAGE);
         }
-        if (!PermissionShare.checkSelfPermission(this, permission.INTERNET)) {
-            needPermissions.add(permission.INTERNET);
-        }
+//        if (!PermissionShare.checkSelfPermission(this, permission.MANAGE_EXTERNAL_STORAGE)) {
+//            needPermissions.add(permission.MANAGE_EXTERNAL_STORAGE);
+//        }
         if (needPermissions.size() > 0) {
-            if (VERSION.SDK_INT >= VERSION_CODES.M) {
+            if (SDK_INT >= VERSION_CODES.M) {
                 requestPermissions(needPermissions.toArray(new String[0]), REQUEST_PERMISSION);
                 return true;
             }
@@ -139,6 +148,18 @@ public class MainActivity extends Activity implements ClientInterface {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (checkPermissions()) return;
+        if (SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
+            try {
+                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                startActivityForResult(intent, 1);
+            } catch (Exception ex) {
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                startActivityForResult(intent, 1);
+            }
+            return;
+        }
         initialize();
     }
 
@@ -174,6 +195,16 @@ public class MainActivity extends Activity implements ClientInterface {
     @Override
     public void onVideoUrl(String uri) {
         mVideoUrl = uri;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (Environment.isExternalStorageManager()) {
+                initialize();
+            }
+        }
     }
 
     @Override
