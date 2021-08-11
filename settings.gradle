@@ -1,3 +1,2 @@
-include ':ffmpeglib'
-include ':app'
 rootProject.name='Explorer'
+include 'app','ffmpeglib'

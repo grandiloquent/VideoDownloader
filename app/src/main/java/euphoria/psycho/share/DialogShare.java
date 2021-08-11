@@ -23,6 +23,7 @@ public class DialogShare {
                 .setNegativeButton("取消", n);
     }
 
+
     public interface Callback {
         void run(String string);
     }

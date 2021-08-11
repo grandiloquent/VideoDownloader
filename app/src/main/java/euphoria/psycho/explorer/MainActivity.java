@@ -2,10 +2,12 @@ package euphoria.psycho.explorer;
 
 import android.Manifest.permission;
 import android.app.Activity;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -17,6 +19,7 @@ import java.util.List;
 
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.DialogShare.Callback;
+import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
@@ -82,6 +85,11 @@ public class MainActivity extends Activity implements ClientInterface {
         mBookmarkDatabase = new BookmarkDatabase(this);
         setWebView();
         loadStartPage();
+        if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
+                PackageShare.isAppInstalled(this, "com.android.chrome")) {
+            PreferenceShare.getEditor().putBoolean("chrome", true).apply();
+        }
+        //PackageShare.listAllInstalledPackages(this);
     }
 
     private void loadStartPage() {
@@ -175,7 +183,7 @@ public class MainActivity extends Activity implements ClientInterface {
         if (uri.contains("youtube.com/watch")) {
             Share.startYouTubeActivity(this, uri);
             return true;
-        } 
+        }
         if (IqiyiShare.parsingVideo(this, uri)) return true;
         if (AcFunShare.parsingVideo(this, uri)) return true;
         if (XVideosShare.parsingVideo(this, uri)) return true;

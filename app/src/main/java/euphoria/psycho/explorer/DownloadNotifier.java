@@ -14,4 +14,8 @@ public interface DownloadNotifier {
     void downloadProgress(String uri, long totalSize, long downloadBytes, long speed);
 
     void downloadCompleted(String uri, String directory);
+
+    void mergeVideoCompleted(String outPath);
+
+    void mergeVideoFailed(String message);
 }

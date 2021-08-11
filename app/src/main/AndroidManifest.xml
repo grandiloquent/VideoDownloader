@@ -22,17 +22,17 @@
         <meta-data
             android:name="android.webkit.WebView.MetricsOptOut"
             android:value="true" />
-        <!--        <uses-library-->
-        <!--            android:name="org.apache.http.legacy"-->
-        <!--            android:required="false" />-->
+                <uses-library
+                    android:name="org.apache.http.legacy"
+                    android:required="false" />
         <activity
             android:name=".MainActivity"
             android:theme="@android:style/Theme.Material.Light.NoActionBar"
             android:windowSoftInputMode="adjustNothing">
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
+                        <intent-filter>
+                            <category android:name="android.intent.category.LAUNCHER" />
+                            <action android:name="android.intent.action.MAIN" />
+                        </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -68,10 +68,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".DownloadActivity">
-            <!--            <intent-filter>-->
-            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-            <!--                <action android:name="android.intent.action.MAIN" />-->
-            <!--            </intent-filter>-->
+<!--            <intent-filter>-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--            </intent-filter>-->
         </activity>
     </application>
 </manifest>

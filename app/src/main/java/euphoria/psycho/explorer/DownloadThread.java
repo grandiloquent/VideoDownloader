@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.Process;
 import android.os.SystemClock;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,9 +16,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import euphoria.psycho.share.FileShare;
@@ -24,6 +30,9 @@ import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 
+import com.jeffmony.ffmpeglib.LogUtils;
+import com.jeffmony.ffmpeglib.VideoProcessor;
+import com.jeffmony.ffmpeglib.listener.OnVideoCompositeListener;
 
 public class DownloadThread extends Thread {
     public static final int BUFFER_SIZE = 8192;
@@ -59,7 +68,7 @@ public class DownloadThread extends Thread {
         String tsUri = StringShare.substringBeforeLast(mUri, "/")
                 + "/"
                 + ts;
-        final String fileName = StringShare.substringBeforeLast(ts, "?");
+        final String fileName = StringShare.substringAfterLast(StringShare.substringBeforeLast(ts, "?"), "/");
         File tsFile = new File(mDirectory, fileName);
         if (tsFile.exists()) {
             long size = getBookmark(tsUri);
@@ -125,13 +134,19 @@ public class DownloadThread extends Thread {
             }
             String[] segments = response.split("\n");
             List<String> tsList = new ArrayList<>();
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < segments.length; i++) {
                 if (segments[i].startsWith("#EXTINF:")) {
                     String uri = segments[i + 1];
                     tsList.add(uri);
+                    final String fileName = StringShare.substringAfterLast(StringShare.substringBeforeLast(uri, "?"), "/");
+                    sb.append(fileName).append('\n');
                     i++;
                 }
             }
+            OutputStream outputStream = new FileOutputStream(new File(mDirectory, "list.txt"));
+            outputStream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.close();
             return tsList;
         } catch (IOException e) {
             Logger.d(String.format("parseM3u8File: %s", e.getMessage()));
@@ -178,6 +193,7 @@ public class DownloadThread extends Thread {
             }
         }
         mDownloadNotifier.downloadProgress(mUri, mTotalSize, mCurrentBytes, 0);
+
     }
 
     private void updateProgress() {
@@ -230,6 +246,33 @@ public class DownloadThread extends Thread {
             }
         }
         mDownloadNotifier.downloadCompleted(mUri, mDirectory.getName());
+        VideoProcessor videoProcessor = new VideoProcessor();
+        List<String> inputVideos = null;
+        try {
+            String[] files = FileShare.readAllText(new File(mDirectory, "list.txt"))
+                    .split("\n");
+            inputVideos = new ArrayList<>();
+            for (String file : files) {
+                inputVideos.add(new File(mDirectory, file).getAbsolutePath());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String outputPath = new File(mDirectory, mDirectory.getName() + ".mp4")
+                .getAbsolutePath();
+        Logger.d(String.format("transferData: %s", outputPath));
+        videoProcessor.compositeVideos(outputPath, inputVideos, new OnVideoCompositeListener() {
+            @Override
+            public void onComplete() {
+                mDownloadNotifier.mergeVideoCompleted(outputPath);
+            }
+
+            @Override
+            public void onError(int errCode) {
+                mDownloadNotifier.mergeVideoFailed(Integer.toString(errCode));
+            }
+        });
     }
 
 }

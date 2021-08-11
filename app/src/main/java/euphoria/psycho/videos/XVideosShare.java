@@ -2,22 +2,30 @@ package euphoria.psycho.videos;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Process;
 import android.util.Pair;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import euphoria.psycho.explorer.DownloadActivity;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
+import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 
 public class XVideosShare {
@@ -67,6 +75,38 @@ public class XVideosShare {
         }).start();
     }
 
+    public static AlertDialog.Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
+        return new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setPositiveButton(android.R.string.ok, p)
+                .setNegativeButton("下载", n);
+    }
+
+    public static void viewVideo(MainActivity mainActivity, String value) {
+        try {
+            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
+            createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
+                dialog.dismiss();
+                if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setPackage("com.android.chrome");
+                    intent.setData(Uri.parse(uri));
+                    mainActivity.startActivity(intent);
+                } else {
+                    Helper.videoChooser(mainActivity, uri);
+                }
+            }, (dialog, which) -> {
+                dialog.dismiss();
+                Intent intent = new Intent(mainActivity, DownloadActivity.class);
+                intent.setData(Uri.parse(uri));
+                mainActivity.startActivity(intent);
+            })
+                    .setMessage("是否使用浏览器打开视频链接")
+                    .show();
+        } catch (UnsupportedEncodingException ignored) {
+        }
+    }
+
     private static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
         String[] names = new String[videoList.size()];
         for (int i = 0; i < names.length; i++) {
@@ -74,7 +114,7 @@ public class XVideosShare {
         }
         new AlertDialog.Builder(mainActivity)
                 .setItems(names, (dialog, which) -> {
-                    Helper.viewVideo(mainActivity, videoList.get(which).second);
+                    viewVideo(mainActivity, videoList.get(which).second);
                 })
                 .show();
 

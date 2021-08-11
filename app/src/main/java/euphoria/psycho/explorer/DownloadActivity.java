@@ -5,12 +5,11 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
-
+import android.widget.Toast;
 
 import euphoria.psycho.share.FileShare;
 
 public class DownloadActivity extends Activity implements DownloadNotifier {
-    private String URI = "https://ccn.killcovid2021.com//m3u8/505212/505212.m3u8?st=WMDuO07zTRAYck8PUj-pZQ&e=1628554252";
     private TextView mTitle;
     private TextView mSubTitle;
 
@@ -18,35 +17,70 @@ public class DownloadActivity extends Activity implements DownloadNotifier {
 
     @Override
     public void downloadStart(String uri) {
-        mHandler.post(() -> mTitle.setText(URI));
+        mHandler.post(() -> mTitle.setText(uri));
     }
 
     @Override
     public void downloadFailed(String uri, String message) {
-        mTitle.setText(message);
+        mHandler.post(() -> mTitle.setText(message));
     }
 
     @Override
     public void downloadProgress(String uri, String fileName, long totalSize) {
-        mTitle.setText(fileName);
-        mSubTitle.setText(FileShare.formatFileSize(totalSize));
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mTitle.setText(fileName);
+                mSubTitle.setText(FileShare.formatFileSize(totalSize));
+            }
+        });
     }
 
     @Override
     public void downloadProgress(String uri, long totalSize, long downloadBytes, long speed) {
-        if (totalSize == downloadBytes) {
-            mSubTitle.setText("已完成");
-        } else {
-            mSubTitle.setText(String.format("%s/%s %s/s", FileShare.formatFileSize(downloadBytes), FileShare.formatFileSize(totalSize), FileShare.formatFileSize(speed)));
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (totalSize == downloadBytes) {
+                    mSubTitle.setText("已完成");
+                } else {
+                    mSubTitle.setText(String.format("%s/%s %s/s", FileShare.formatFileSize(downloadBytes), FileShare.formatFileSize(totalSize), FileShare.formatFileSize(speed)));
+                }
+            }
+        });
 
     }
 
     @Override
     public void downloadCompleted(String uri, String directory) {
-        mTitle.setText(directory);
-        mSubTitle.setText("已完成");
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mTitle.setText(directory);
+                mSubTitle.setText("已完成");
+            }
+        });
 
+    }
+
+    @Override
+    public void mergeVideoCompleted(String outPath) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(DownloadActivity.this, outPath, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void mergeVideoFailed(String message) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(DownloadActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 
@@ -56,7 +90,7 @@ public class DownloadActivity extends Activity implements DownloadNotifier {
         setContentView(R.layout.download_activity);
         mTitle = findViewById(R.id.title);
         mSubTitle = findViewById(R.id.subtitle);
-        new DownloadThread(URI, this, this)
+        new DownloadThread(getIntent().getData().toString(), this, this)
                 .start();
 
     }

@@ -15,6 +15,7 @@ import java.net.URLEncoder;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
+import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 
 public class Helper {
@@ -40,12 +41,22 @@ public class Helper {
         context.startActivity(Intent.createChooser(intent, "打开视频链接"));
     }
 
+
+
     public static void viewVideo(MainActivity mainActivity, String value) {
         try {
             String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
             DialogShare.createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
                 dialog.dismiss();
-                Helper.videoChooser(mainActivity, uri);
+                if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setPackage("com.android.chrome");
+
+                    intent.setData(Uri.parse(uri));
+                    mainActivity.startActivity(intent);
+                } else {
+                    Helper.videoChooser(mainActivity, uri);
+                }
             }, (dialog, which) -> {
                 mainActivity.getWebView().loadUrl(uri);
                 dialog.dismiss();
@@ -68,7 +79,7 @@ public class Helper {
         return cacheDirectory;
     }
 
-    public static void openDownloadDialog(Context context,String videoId, String videoUrl) {
+    public static void openDownloadDialog(Context context, String videoId, String videoUrl) {
         new AlertDialog.Builder(context)
                 .setTitle("询问")
                 .setMessage("是否下载视频？")
