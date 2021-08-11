@@ -13,14 +13,13 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.NetShare;
 
 public class Porn91Share {
-    private static void get91PornVideo(String value, MainActivity mainActivity) {
+    private static void process91PornVideo(String value, MainActivity mainActivity) {
         Pattern pattern = Pattern.compile("(?<=src=').*?(?=')");
         Matcher matcher = pattern.matcher(value);
         if (matcher.find()) {
@@ -40,9 +39,9 @@ public class Porn91Share {
                     return;
                 }
                 String script = FileShare.readAssetString(mainActivity, "encode.js");
-                mainActivity.getWebView().evaluateJavascript(script + encodedHtml, value1 -> {
-                    if (value1 != null) {
-                        get91PornVideo(value1, mainActivity);
+                mainActivity.getWebView().evaluateJavascript(script + encodedHtml, videoUri -> {
+                    if (videoUri != null) {
+                        process91PornVideo(videoUri, mainActivity);
                     } else {
                         Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                     }
@@ -58,27 +57,30 @@ public class Porn91Share {
     private static void performTask(String uri, Callback callback) {
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String resposne = null;
+            String result = null;
             try {
-                resposne = getUrl(uri);
-                Pattern pattern = Pattern.compile("(?<=document\\.write\\()strencode2\\(\".*?\"\\)(?=\\);)");
-                Matcher matcher = pattern.matcher(resposne);
-                if (matcher.find()) {
-                    resposne = matcher.group();
-                } else {
-                    resposne = null;
-                }
+                result = substringKeyCode(fetchHtml(uri));
             } catch (IOException e) {
                 Log.e("TAG", "Error: performTask, " + e.getMessage() + " " + e.getCause());
-
             }
             if (callback != null)
-                callback.run(resposne);
+                callback.run(result);
         }).start();
-    }
-    // 
 
-    private static String getUrl(String uri) throws IOException {
+    }
+
+    private static String substringKeyCode(String response) {
+        if (response == null) return null;
+        Pattern pattern = Pattern.compile("(?<=document\\.write\\()strencode2\\(\".*?\"\\)(?=\\);)");
+        Matcher matcher = pattern.matcher(response);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        return null;
+    }
+    //
+
+    private static String fetchHtml(String uri) throws IOException {
         URL url = new URL(uri);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         NetShare.addDefaultRequestHeaders(urlConnection);
