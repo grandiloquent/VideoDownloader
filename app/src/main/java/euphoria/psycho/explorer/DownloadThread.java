@@ -36,7 +36,6 @@ import com.jeffmony.ffmpeglib.listener.OnVideoCompositeListener;
 
 public class DownloadThread extends Thread {
     public static final int BUFFER_SIZE = 8192;
-    private final Context mContext;
     private final DownloadNotifier mDownloadNotifier;
     private final String mUri;
     private BlobCache mBlobCache;
@@ -47,13 +46,16 @@ public class DownloadThread extends Thread {
     private long mSpeedSampleBytes;
     private long mSpeed;
     private long mTotalSize;
+    private final String mBaseUri;
 
     public DownloadThread(String uri, Context context, DownloadNotifier downloadNotifier) {
         mUri = uri;
-        mContext = context;
+        mBaseUri = StringShare.substringBeforeLast(mUri, "/")
+                + "/";
         mDownloadNotifier = downloadNotifier;
         initializeRootDirectory();
         initializeTaskDirectory();
+        Logger.d(String.format("DownloadThread: %s", mDirectory.getAbsolutePath()));
         try {
             mBlobCache = new BlobCache(mDirectory + "/log",
                     100, 1024 * 1024, false,
@@ -65,29 +67,27 @@ public class DownloadThread extends Thread {
     }
 
     private void downloadFile(String ts) throws IOException {
-        String tsUri = StringShare.substringBeforeLast(mUri, "/")
-                + "/"
-                + ts;
-        final String fileName = StringShare.substringAfterLast(StringShare.substringBeforeLast(ts, "?"), "/");
+        final String fileName = FileShare.getFileNameFromUri(ts);
         File tsFile = new File(mDirectory, fileName);
         if (tsFile.exists()) {
-            long size = getBookmark(tsUri);
+            long size = getBookmark(tsFile.getName());
             Logger.d(String.format("downloadFile: %d %d", tsFile.length(), size));
             if (tsFile.length() == size) {
                 Logger.d(String.format("downloadFile: %s", "cached"));
-                mDownloadNotifier.downloadProgress(tsUri, fileName, size);
+                mDownloadNotifier.downloadProgress(ts, fileName, size);
                 return;
             } else {
                 tsFile.delete();
             }
         }
+        String tsUri = mBaseUri + ts;
         mDownloadNotifier.downloadProgress(tsUri, fileName, 0);
         HttpURLConnection connection = (HttpURLConnection) new URL(tsUri).openConnection();
         int statusCode = connection.getResponseCode();
         if (statusCode >= 200 && statusCode < 400) {
             long size = Long.parseLong(connection.getHeaderField("Content-Length"));
             mTotalSize = size;
-            setBookmark(tsUri, size);
+            setBookmark(tsFile.getName(), size);
             mDownloadNotifier.downloadProgress(tsUri, fileName, size);
             InputStream is = connection.getInputStream();
             FileOutputStream out = new FileOutputStream(tsFile);
@@ -112,7 +112,7 @@ public class DownloadThread extends Thread {
     }
 
     private void initializeRootDirectory() {
-        mDirectory = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "视频");
+        mDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "视频");
         if (!mDirectory.exists()) {
             mDirectory.mkdirs();
         }
@@ -139,7 +139,7 @@ public class DownloadThread extends Thread {
                 if (segments[i].startsWith("#EXTINF:")) {
                     String uri = segments[i + 1];
                     tsList.add(uri);
-                    final String fileName = StringShare.substringAfterLast(StringShare.substringBeforeLast(uri, "?"), "/");
+                    final String fileName = FileShare.getFileNameFromUri(uri);
                     sb.append(fileName).append('\n');
                     i++;
                 }

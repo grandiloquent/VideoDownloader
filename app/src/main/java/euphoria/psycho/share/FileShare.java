@@ -2,11 +2,14 @@ package euphoria.psycho.share;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.Xml.Encoding;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +20,8 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileShare {
 
@@ -135,4 +140,25 @@ public class FileShare {
         } catch (IOException t) {
         }
     }
+
+    public static List<String> readAllLines(File file) throws IOException {
+        String line;
+        List<String> lines = new ArrayList<>();
+        BufferedReader sr = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        while ((line = sr.readLine()) != null)
+            lines.add(line);
+        return lines;
+    }
+
+    public static String getFileNameFromUri(String path) {
+        int end = path.indexOf('?');
+        if (end == -1) {
+            end = path.length();
+        }
+        int start = path.lastIndexOf('/', end);
+        start = start == -1 ? 0 : start + 1;
+        return path.substring(start, end);
+    }
 }
+// https://referencesource.microsoft.com/#mscorlib/system/io/file.cs
+// https://referencesource.microsoft.com/#mscorlib/system/io/path.cs

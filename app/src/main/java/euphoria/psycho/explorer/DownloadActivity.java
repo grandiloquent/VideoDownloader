@@ -31,7 +31,8 @@ public class DownloadActivity extends Activity implements DownloadNotifier {
             @Override
             public void run() {
                 mTitle.setText(fileName);
-                mSubTitle.setText(FileShare.formatFileSize(totalSize));
+                if (totalSize > 0)
+                    mSubTitle.setText(FileShare.formatFileSize(totalSize));
             }
         });
     }
