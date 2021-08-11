@@ -23,13 +23,13 @@ import euphoria.psycho.share.StringShare;
 
 public class AcFunShare {
 
-    public static boolean parsingVideo(MainActivity mainActivity) {
-        String uri = mainActivity.getWebView().getUrl();
+    public static boolean parsingVideo(MainActivity mainActivity, String url) {
+        String uri = url == null ? mainActivity.getWebView().getUrl() : url;
         if (uri.contains(".acfun.cn")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             performTask(String.format("https://www.acfun.cn/v/ac%s", Uri.parse(uri).getQueryParameter("ac")), value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
-                    Helper.viewVideo(mainActivity,value);
+                    Helper.viewVideo(mainActivity, value);
                 } else {
                     Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                 }

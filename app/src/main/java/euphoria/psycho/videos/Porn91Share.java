@@ -23,12 +23,12 @@ public class Porn91Share {
         Matcher matcher = pattern.matcher(value);
         if (matcher.find()) {
             value = matcher.group();
-            Helper.viewVideo(mainActivity,value);
+            Helper.viewVideo(mainActivity, value);
         }
     }
 
-    public static boolean parsing91Porn(MainActivity mainActivity) {
-        String uri = mainActivity.getWebView().getUrl();
+    public static boolean parsing91Porn(MainActivity mainActivity, String url) {
+        String uri = url == null ? mainActivity.getWebView().getUrl() : url;
         if (uri.contains("91porn.com/")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             Porn91Share.performTask(uri, value -> mainActivity.runOnUiThread(() -> {

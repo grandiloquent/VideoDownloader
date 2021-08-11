@@ -96,15 +96,15 @@ public class MainActivity extends Activity implements ClientInterface {
 
     private void setDownloadVideo() {
         findViewById(R.id.file_download).setOnClickListener(v -> {
-            if (XVideosRedShare.parsingXVideos(this)) return;
-            if (Porn91Share.parsing91Porn(this)) return;
+            if (XVideosRedShare.parsingXVideos(this, null)) return;
+            if (Porn91Share.parsing91Porn(this, null)) return;
             if (mWebView.getUrl().contains("youtube.com/watch")) {
-                Share.startYouTubeActivity(this, mWebView);
+                Share.startYouTubeActivity(this, mWebView.getUrl());
                 return;
             }
-            if (IqiyiShare.parsingVideo(this)) return;
-            if (AcFunShare.parsingVideo(this)) return;
-            if (XVideosShare.parsingVideo(this)) return;
+            if (IqiyiShare.parsingVideo(this, null)) return;
+            if (AcFunShare.parsingVideo(this, null)) return;
+            if (XVideosShare.parsingVideo(this, null)) return;
             if (mVideoUrl != null) {
                 try {
                     mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
@@ -170,15 +170,15 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public boolean shouldOverrideUrlLoading(String uri) {
-        if (XVideosRedShare.parsingXVideos(this)) return true;
-        if (Porn91Share.parsing91Porn(this)) return true;
-        if (mWebView.getUrl().contains("youtube.com/watch")) {
-            Share.startYouTubeActivity(this, mWebView);
+        if (XVideosRedShare.parsingXVideos(this, uri)) return true;
+        if (Porn91Share.parsing91Porn(this, uri)) return true;
+        if (uri.contains("youtube.com/watch")) {
+            Share.startYouTubeActivity(this, uri);
             return true;
-        }
-        if (IqiyiShare.parsingVideo(this)) return true;
-        if (AcFunShare.parsingVideo(this)) return true;
-        if (XVideosShare.parsingVideo(this)) return true;
+        } 
+        if (IqiyiShare.parsingVideo(this, uri)) return true;
+        if (AcFunShare.parsingVideo(this, uri)) return true;
+        if (XVideosShare.parsingVideo(this, uri)) return true;
         if (mVideoUrl != null) {
             try {
                 mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));

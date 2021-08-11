@@ -24,8 +24,8 @@ public class XVideosShare {
         void run(List<Pair<String, String>> videoList);
     }
 
-    public static boolean parsingVideo(MainActivity mainActivity) {
-        String uri = mainActivity.getWebView().getUrl();
+    public static boolean parsingVideo(MainActivity mainActivity, String url) {
+        String uri = url == null ? mainActivity.getWebView().getUrl() : url;
         if (uri.contains(".xvideos.com/")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             performTask(mainActivity.getWebView().getUrl(), value -> mainActivity.runOnUiThread(() -> {

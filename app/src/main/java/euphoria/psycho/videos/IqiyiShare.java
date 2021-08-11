@@ -26,11 +26,11 @@ import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
 public class IqiyiShare {
-    public static boolean parsingVideo(MainActivity mainActivity) {
-        String uri = mainActivity.getWebView().getUrl();
+    public static boolean parsingVideo(MainActivity mainActivity, String url) {
+        String uri = url == null ? mainActivity.getWebView().getUrl() : url;
         if (uri.contains(".iqiyi.com")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            IqiyiShare.performTask(uri, value ->mainActivity.runOnUiThread(() -> {
+            IqiyiShare.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
                     Helper.viewVideo(mainActivity, value);
                 } else {
@@ -42,6 +42,7 @@ public class IqiyiShare {
         }
         return false;
     }
+
     public static String md5(final String s) {
         final String MD5 = "MD5";
         try {

@@ -28,13 +28,13 @@ public class XVideosRedShare {
         void run(String value);
     }
 
-    public static boolean parsingXVideos(MainActivity mainActivity) {
-        String uri = mainActivity.getWebView().getUrl();
+    public static boolean parsingXVideos(MainActivity mainActivity, String url) {
+        String uri = url == null ? mainActivity.getWebView().getUrl() : url;
         if (uri.contains(".xvideos.red/")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             XVideosRedShare.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
-                    Helper.viewVideo(mainActivity,value);
+                    Helper.viewVideo(mainActivity, value);
                 } else {
                     Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                 }

@@ -58,12 +58,12 @@ import euphoria.psycho.share.ThreadShare;
 
 public class Share {
 
-    public static void startYouTubeActivity(Context context, WebView webView) {
+    public static void startYouTubeActivity(Context context,String url) {
         Intent intent = new Intent(context, SampleDownloadActivity.class);
         intent.setAction(Intent.ACTION_SEND);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, webView.getUrl());
+        intent.putExtra(Intent.EXTRA_TEXT,url);
         context.startActivity(intent);
     }
     public static List<Long> collectLongs(String s) {
