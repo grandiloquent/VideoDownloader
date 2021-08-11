@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
@@ -28,8 +29,9 @@ public class Porn91Share {
     }
 
     public static boolean parsing91Porn(MainActivity mainActivity, String url) {
+        Logger.d(String.format("parsing91Porn: %s", url));
         String uri = url == null ? mainActivity.getWebView().getUrl() : url;
-        if (uri.contains("91porn.com/")) {
+        if (uri.contains("91porn.com/view_video.php?viewkey=")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             Porn91Share.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {

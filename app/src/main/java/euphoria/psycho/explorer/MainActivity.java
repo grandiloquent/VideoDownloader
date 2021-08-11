@@ -179,14 +179,6 @@ public class MainActivity extends Activity implements ClientInterface {
         if (IqiyiShare.parsingVideo(this, uri)) return true;
         if (AcFunShare.parsingVideo(this, uri)) return true;
         if (XVideosShare.parsingVideo(this, uri)) return true;
-        if (mVideoUrl != null) {
-            try {
-                mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
-                return true;
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
         return false;
     }
     //

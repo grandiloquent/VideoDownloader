@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
@@ -26,9 +27,9 @@ public class XVideosShare {
 
     public static boolean parsingVideo(MainActivity mainActivity, String url) {
         String uri = url == null ? mainActivity.getWebView().getUrl() : url;
-        if (uri.contains(".xvideos.com/")) {
+        if (uri.contains("https://www.xvideos.com/video")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            performTask(mainActivity.getWebView().getUrl(), value -> mainActivity.runOnUiThread(() -> {
+            performTask(uri, value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
                     try {
                         launchDialog(mainActivity, value);
