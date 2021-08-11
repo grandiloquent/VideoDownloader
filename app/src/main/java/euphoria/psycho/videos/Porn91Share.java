@@ -3,6 +3,7 @@ package euphoria.psycho.videos;
 import android.app.ProgressDialog;
 import android.os.Process;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -29,20 +30,25 @@ public class Porn91Share {
     }
 
     public static boolean parsing91Porn(MainActivity mainActivity, String url) {
-        Logger.d(String.format("parsing91Porn: %s", url));
         String uri = url == null ? mainActivity.getWebView().getUrl() : url;
         if (uri.contains("91porn.com/view_video.php?viewkey=")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            Porn91Share.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
-                if (value != null) {
-                    String script = FileShare.readAssetString(mainActivity, "encode.js");
-                    mainActivity.getWebView().evaluateJavascript(script + value, value1 -> {
-                        if (value1 != null) {
-                            get91PornVideo(value1, mainActivity);
-                        }
-                    });
+            Porn91Share.performTask(uri, encodedHtml -> mainActivity.runOnUiThread(() -> {
+                if (encodedHtml == null) {
+                    Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    return;
                 }
+                String script = FileShare.readAssetString(mainActivity, "encode.js");
+                mainActivity.getWebView().evaluateJavascript(script + encodedHtml, value1 -> {
+                    if (value1 != null) {
+                        get91PornVideo(value1, mainActivity);
+                    } else {
+                        Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+                    }
+                });
                 progressDialog.dismiss();
+
             }));
             return true;
         }
@@ -52,28 +58,32 @@ public class Porn91Share {
     private static void performTask(String uri, Callback callback) {
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String url = null;
+            String resposne = null;
             try {
-                url = getUrl(uri);
+                resposne = getUrl(uri);
                 Pattern pattern = Pattern.compile("(?<=document\\.write\\()strencode2\\(\".*?\"\\)(?=\\);)");
-                Matcher matcher = pattern.matcher(url);
+                Matcher matcher = pattern.matcher(resposne);
                 if (matcher.find()) {
-                    url = matcher.group();
+                    resposne = matcher.group();
+                } else {
+                    resposne = null;
                 }
             } catch (IOException e) {
                 Log.e("TAG", "Error: performTask, " + e.getMessage() + " " + e.getCause());
 
             }
             if (callback != null)
-                callback.run(url);
+                callback.run(resposne);
         }).start();
     }
+    // 
 
     private static String getUrl(String uri) throws IOException {
         URL url = new URL(uri);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         NetShare.addDefaultRequestHeaders(urlConnection);
         urlConnection.setRequestProperty("Referer", "https://91porn.com");
+        urlConnection.setRequestProperty("X-Forwarded-For", NetShare.randomIp());
         int code = urlConnection.getResponseCode();
         if (code < 400 && code >= 200) {
             return NetShare.readString(urlConnection);
