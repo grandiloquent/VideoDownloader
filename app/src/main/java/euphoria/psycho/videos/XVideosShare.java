@@ -98,7 +98,7 @@ public class XVideosShare {
             }, (dialog, which) -> {
                 dialog.dismiss();
                 Intent intent = new Intent(mainActivity, DownloadActivity.class);
-                intent.setData(Uri.parse(uri));
+                intent.setData(Uri.parse(value));
                 mainActivity.startActivity(intent);
             })
                     .setMessage("是否使用浏览器打开视频链接")
