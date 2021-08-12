@@ -69,7 +69,7 @@ public class DownloadThread extends Thread {
     public static final String COLUMN_TOTAL_BYTES = "total_bytes";
     public static final String COLUMN_URI = "uri";
     public static final int CONTROL_PAUSED = 1;
-    public static final String DEFAULT_USER_AGENT;
+    //public static final String DEFAULT_USER_AGENT;
     public static final int DESTINATION_CACHE_PARTITION = 1;
     public static final int DESTINATION_CACHE_PARTITION_NOROAMING = 3;
     public static final int DESTINATION_CACHE_PARTITION_PURGEABLE = 2;
@@ -114,32 +114,32 @@ public class DownloadThread extends Thread {
     private static final Pattern PATTERN_ANDROID_DIRS =
             Pattern.compile("(?i)^/storage/[^/]+(?:/[0-9]+)?/Android/(?:data|obb|media)/.+");
 
-    static {
-        final StringBuilder builder = new StringBuilder();
-        final boolean validRelease = !TextUtils.isEmpty(Build.VERSION.RELEASE_OR_CODENAME);
-        final boolean validId = !TextUtils.isEmpty(Build.ID);
-        final boolean includeModel = "REL".equals(Build.VERSION.CODENAME)
-                && !TextUtils.isEmpty(Build.MODEL);
-        builder.append("AndroidDownloadManager");
-        if (validRelease) {
-            builder.append("/").append(Build.VERSION.RELEASE_OR_CODENAME);
-        }
-        builder.append(" (Linux; U; Android");
-        if (validRelease) {
-            builder.append(" ").append(Build.VERSION.RELEASE_OR_CODENAME);
-        }
-        if (includeModel || validId) {
-            builder.append(";");
-            if (includeModel) {
-                builder.append(" ").append(Build.MODEL);
-            }
-            if (validId) {
-                builder.append(" Build/").append(Build.ID);
-            }
-        }
-        builder.append(")");
-        DEFAULT_USER_AGENT = builder.toString();
-    }
+//    static {
+//        final StringBuilder builder = new StringBuilder();
+//        final boolean validRelease = !TextUtils.isEmpty(Build.VERSION.RELEASE_OR_CODENAME);
+//        final boolean validId = !TextUtils.isEmpty(Build.ID);
+//        final boolean includeModel = "REL".equals(Build.VERSION.CODENAME)
+//                && !TextUtils.isEmpty(Build.MODEL);
+//        builder.append("AndroidDownloadManager");
+//        if (validRelease) {
+//            builder.append("/").append(Build.VERSION.RELEASE_OR_CODENAME);
+//        }
+//        builder.append(" (Linux; U; Android");
+//        if (validRelease) {
+//            builder.append(" ").append(Build.VERSION.RELEASE_OR_CODENAME);
+//        }
+//        if (includeModel || validId) {
+//            builder.append(";");
+//            if (includeModel) {
+//                builder.append(" ").append(Build.MODEL);
+//            }
+//            if (validId) {
+//                builder.append(" Build/").append(Build.ID);
+//            }
+//        }
+//        builder.append(")");
+//        DEFAULT_USER_AGENT = builder.toString();
+//    }
 
     private final Context mContext;
     private final long mId;
@@ -941,7 +941,7 @@ public class DownloadThread extends Thread {
             if (mUserAgent != null) {
                 return mUserAgent;
             } else {
-                return DEFAULT_USER_AGENT;
+                return null;//DEFAULT_USER_AGENT;
             }
         }
 

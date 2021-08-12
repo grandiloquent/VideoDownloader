@@ -3,6 +3,8 @@ package euphoria.psycho.explorer;
 import android.Manifest;
 import android.Manifest.permission;
 import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -18,6 +20,11 @@ import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -59,6 +66,9 @@ public class MainActivity extends Activity implements ClientInterface {
         List<String> needPermissions = new ArrayList<>();
         if (!PermissionShare.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE)) {
             needPermissions.add(permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (!PermissionShare.checkSelfPermission(this, permission.READ_EXTERNAL_STORAGE)) {
+            needPermissions.add(permission.READ_EXTERNAL_STORAGE);
         }
 
 
@@ -144,6 +154,16 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+//            if (Environment.isExternalStorageManager()) {
+//                initialize();
+//            }
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (checkPermissions()) return;
@@ -194,16 +214,6 @@ public class MainActivity extends Activity implements ClientInterface {
     @Override
     public void onVideoUrl(String uri) {
         mVideoUrl = uri;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            if (Environment.isExternalStorageManager()) {
-                initialize();
-            }
-        }
     }
 
     @Override

@@ -4,38 +4,36 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.Process;
 import android.os.SystemClock;
-import android.util.Log;
-import android.widget.Toast;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
-
-import com.jeffmony.ffmpeglib.LogUtils;
-import com.jeffmony.ffmpeglib.VideoProcessor;
-import com.jeffmony.ffmpeglib.listener.OnVideoCompositeListener;
+//import com.jeffmony.ffmpeglib.FFmpegCmdUtils;
+//import com.jeffmony.ffmpeglib.LogUtils;
+//import com.jeffmony.ffmpeglib.VideoProcessor;
+//import com.jeffmony.ffmpeglib.listener.OnVideoCompositeListener;
 
 public class DownloadThread extends Thread {
     public static final int BUFFER_SIZE = 8192;
+    private final String mBaseUri;
+    private final Context mContext;
     private final DownloadNotifier mDownloadNotifier;
     private final String mUri;
     private BlobCache mBlobCache;
@@ -47,12 +45,11 @@ public class DownloadThread extends Thread {
     private long mSpeed;
     private int mTotalSize;
     private int mCurrentSize;
-    private final String mBaseUri;
-    private final Context mContext;
 
     public DownloadThread(String uri, Context context, DownloadNotifier downloadNotifier) {
         mContext = context;
         mUri = uri;
+        Logger.d(String.format("DownloadThread: %s", uri));
         mBaseUri = StringShare.substringBeforeLast(mUri, "/")
                 + "/";
         mDownloadNotifier = downloadNotifier;
@@ -69,7 +66,7 @@ public class DownloadThread extends Thread {
     }
 
     private void downloadFile(String ts) throws IOException {
-        final String fileName =StringShare.substringBefore(FileShare.getFileNameFromUri(ts),".");
+        final String fileName = FileShare.getFileNameFromUri(ts);
         File tsFile = new File(mDirectory, fileName);
         if (tsFile.exists()) {
             long size = getBookmark(tsFile.getName());
@@ -112,14 +109,15 @@ public class DownloadThread extends Thread {
 
     private void initializeRootDirectory() {
         //mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-        mDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getParentFile(), "视频");
+        // Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getParentFile()
+        mDirectory = mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         if (!mDirectory.exists()) {
             mDirectory.mkdirs();
         }
     }
 
     private void initializeTaskDirectory() {
-        String directoryName = Long.toString(KeyShare.crc64Long(StringShare.substringBeforeLast(mUri, "?")));
+        String directoryName = Long.toString(StringShare.substringBeforeLast(StringShare.substringBeforeLast(mUri, "?"), "?").hashCode());
         mDirectory = new File(mDirectory, directoryName);
         if (!mDirectory.exists()) {
             boolean res = mDirectory.mkdirs();
@@ -141,8 +139,8 @@ public class DownloadThread extends Thread {
                 if (segments[i].startsWith("#EXTINF:")) {
                     String uri = segments[i + 1];
                     tsList.add(uri);
-                    final String fileName =StringShare.substringBefore(FileShare.getFileNameFromUri(uri),".");
-                    sb.append(fileName).append('\n');
+                    final String fileName = FileShare.getFileNameFromUri(uri);
+                    sb.append(mDirectory).append("/").append(fileName).append("\n");
                     i++;
                 }
             }
@@ -244,36 +242,36 @@ public class DownloadThread extends Thread {
             } catch (IOException e) {
                 Logger.d(String.format("run: %s", e.getMessage()));
                 mDownloadNotifier.downloadFailed(mUri, e.getMessage());
+                return;
             }
         }
         mDownloadNotifier.downloadCompleted(mUri, mDirectory.getName());
-        VideoProcessor videoProcessor = new VideoProcessor();
-        List<String> inputVideos = null;
         try {
-            String[] files = FileShare.readAllText(new File(mDirectory, "list.txt"))
-                    .split("\n");
-            inputVideos = new ArrayList<>();
-            for (String file : files) {
-                inputVideos.add(new File(mDirectory, file).getAbsolutePath());
+            List<String> inputVideos = FileShare.readAllLines((new File(mDirectory, "list.txt")));
+            String outputPath = new File(mDirectory, mDirectory.getName() + ".mp4")
+                    .getAbsolutePath();
+            OutputStream fileOutputStream = new FileOutputStream(outputPath);
+            byte[] b = new byte[4096];
+            for (String video : inputVideos) {
+                Logger.d(String.format("run: %s", video));
+                File file = new File(video);
+                if (file.exists()) {
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    int len;
+                    while ((len = fileInputStream.read(b)) != -1) {
+                        fileOutputStream.write(b, 0, len);
+                    }
+                    fileInputStream.close();
+                    fileOutputStream.flush();
+                }
             }
+            fileOutputStream.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String outputPath = new File(mDirectory, mDirectory.getName() + ".mp4")
-                .getAbsolutePath();
-        Logger.d(String.format("transferData: %s", outputPath));
-        videoProcessor.compositeVideos(outputPath, inputVideos, new OnVideoCompositeListener() {
-            @Override
-            public void onComplete() {
-                mDownloadNotifier.mergeVideoCompleted(outputPath);
-            }
 
-            @Override
-            public void onError(int errCode) {
-                mDownloadNotifier.mergeVideoFailed(Integer.toString(errCode));
-            }
-        });
+
     }
 
 }

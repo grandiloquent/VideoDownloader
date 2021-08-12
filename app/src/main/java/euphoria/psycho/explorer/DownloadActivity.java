@@ -26,16 +26,12 @@ public class DownloadActivity extends Activity implements DownloadNotifier {
     @Override
     public void downloadFailed(String uri, String message) {
         mHandler.post(() -> mTitle.setText(message));
+
     }
 
     @Override
     public void downloadProgress(String uri, String fileName) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mTitle.setText(fileName);
-            }
-        });
+        mHandler.post(() -> mTitle.setText(fileName));
     }
 
     @Override
