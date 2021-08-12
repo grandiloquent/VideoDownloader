@@ -1,5 +1,11 @@
 package euphoria.psycho.share;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
+
 public class KeyShare {
 
     private static final long INITIALCRC = 0xFFFFFFFFFFFFFFFFL;
@@ -40,6 +46,54 @@ public class KeyShare {
         for (char ch : in.toCharArray()) {
             result[output++] = (byte) (ch & 0xFF);
             result[output++] = (byte) (ch >> 8);
+        }
+        return result;
+    }
+
+    public static byte[] md5encode(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest digest;
+        byte[] hash = null;
+        // SHA-256
+        digest = MessageDigest.getInstance("MD5");
+        hash = digest.digest(str.getBytes(StandardCharsets.UTF_8));
+        return hash;
+    }
+
+    public static String toHex(byte[] data) {
+        if (null == data) {
+            return null;
+        }
+        if (data.length <= 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < data.length; i++) {
+            String hv = Integer.toHexString(data[i]);
+            if (hv.length() < 2) {
+                sb.append("0");
+            } else if (hv.length() == 8) {
+                hv = hv.substring(6);
+            }
+            sb.append(hv);
+        }
+        return sb.toString().toLowerCase(Locale.getDefault());
+    }
+
+    public static byte[] fromHex(String hexData) {
+        if (null == hexData) {
+            return new byte[0];
+        }
+        if ((hexData.length() & 1) != 0 || hexData.replaceAll("[a-fA-F0-9]", "").length() > 0) {
+            throw new java.lang.IllegalArgumentException("'" + hexData + "' is not a hex string");
+        }
+        byte[] result = new byte[(hexData.length() + 1) / 2];
+        String hexNumber = null;
+        int offset = 0;
+        int byteIndex = 0;
+        while (offset < hexData.length()) {
+            hexNumber = hexData.substring(offset, offset + 2);
+            offset += 2;
+            result[byteIndex++] = (byte) Integer.parseInt(hexNumber, 16);
         }
         return result;
     }

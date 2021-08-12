@@ -1,9 +1,14 @@
 package euphoria.psycho.explorer;
 
 import android.content.Context;
+import android.media.MediaScannerConnection;
+import android.media.MediaScannerConnection.MediaScannerConnectionClient;
+import android.net.Uri;
+import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.os.Process;
 import android.os.SystemClock;
+import android.webkit.MimeTypeMap;
 
 
 import java.io.ByteArrayInputStream;
@@ -11,18 +16,25 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
+import androidx.annotation.RequiresApi;
 import euphoria.psycho.share.FileShare;
+import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 //import com.jeffmony.ffmpeglib.FFmpegCmdUtils;
@@ -45,6 +57,7 @@ public class DownloadThread extends Thread {
     private long mSpeed;
     private int mTotalSize;
     private int mCurrentSize;
+    private List<String> mVideos = new ArrayList<>();
 
     public DownloadThread(String uri, Context context, DownloadNotifier downloadNotifier) {
         mContext = context;
@@ -54,14 +67,6 @@ public class DownloadThread extends Thread {
                 + "/";
         mDownloadNotifier = downloadNotifier;
         initializeRootDirectory();
-        initializeTaskDirectory();
-        try {
-            mBlobCache = new BlobCache(mDirectory + "/log",
-                    100, 1024 * 1024, false,
-                    1);
-        } catch (IOException e) {
-            Logger.d(String.format("onCreate: %s", e.getMessage()));
-        }
 
     }
 
@@ -69,6 +74,7 @@ public class DownloadThread extends Thread {
         final String fileName = FileShare.getFileNameFromUri(ts);
         File tsFile = new File(mDirectory, fileName);
         if (tsFile.exists()) {
+            Logger.d(String.format("downloadFile: file exsits, %s", tsFile.getAbsolutePath()));
             long size = getBookmark(tsFile.getName());
             if (tsFile.length() == size) {
                 mDownloadNotifier.downloadProgress(ts, fileName);
@@ -116,15 +122,6 @@ public class DownloadThread extends Thread {
         }
     }
 
-    private void initializeTaskDirectory() {
-        String directoryName = Long.toString(StringShare.substringBeforeLast(StringShare.substringBeforeLast(mUri, "?"), "?").hashCode());
-        mDirectory = new File(mDirectory, directoryName);
-        if (!mDirectory.exists()) {
-            boolean res = mDirectory.mkdirs();
-            Logger.d(String.format("initializeTaskDirectory: %s %b", directoryName, res));
-
-        }
-    }
 
     private List<String> parseM3u8File() {
         try {
@@ -132,21 +129,35 @@ public class DownloadThread extends Thread {
             if (response == null) {
                 return null;
             }
+            String directoryName = null;
+            try {
+                directoryName = KeyShare.toHex(KeyShare.md5encode(response));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            mDirectory = new File(mDirectory, directoryName);
+            if (!mDirectory.exists()) {
+                boolean res = mDirectory.mkdirs();
+                Logger.d(String.format("initializeTaskDirectory: %s %b", directoryName, res));
+
+            }
+            try {
+                mBlobCache = new BlobCache(mDirectory + "/log",
+                        100, 1024 * 1024, false,
+                        1);
+            } catch (IOException e) {
+                Logger.d(String.format("onCreate: %s", e.getMessage()));
+            }
             String[] segments = response.split("\n");
             List<String> tsList = new ArrayList<>();
-            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < segments.length; i++) {
                 if (segments[i].startsWith("#EXTINF:")) {
                     String uri = segments[i + 1];
                     tsList.add(uri);
-                    final String fileName = FileShare.getFileNameFromUri(uri);
-                    sb.append(mDirectory).append("/").append(fileName).append("\n");
+                    mVideos.add(FileShare.getFileNameFromUri(uri));
                     i++;
                 }
             }
-            OutputStream outputStream = new FileOutputStream(new File(mDirectory, "list.txt"));
-            outputStream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
-            outputStream.close();
             return tsList;
         } catch (IOException e) {
             Logger.d(String.format("parseM3u8File: %s", e.getMessage()));
@@ -247,28 +258,44 @@ public class DownloadThread extends Thread {
         }
         mDownloadNotifier.downloadCompleted(mUri, mDirectory.getName());
         try {
-            List<String> inputVideos = FileShare.readAllLines((new File(mDirectory, "list.txt")));
+//            File[] inputVideos = mDirectory.listFiles(new FileFilter() {
+//
+//                @Override
+//                public boolean accept(File pathname) {
+//                  return true;
+//                }
+//            });
             String outputPath = new File(mDirectory, mDirectory.getName() + ".mp4")
                     .getAbsolutePath();
             OutputStream fileOutputStream = new FileOutputStream(outputPath);
             byte[] b = new byte[4096];
-            for (String video : inputVideos) {
-                Logger.d(String.format("run: %s", video));
-                File file = new File(video);
-                if (file.exists()) {
-                    FileInputStream fileInputStream = new FileInputStream(file);
-                    int len;
-                    while ((len = fileInputStream.read(b)) != -1) {
-                        fileOutputStream.write(b, 0, len);
-                    }
-                    fileInputStream.close();
-                    fileOutputStream.flush();
+            for (String video : mVideos) {
+                FileInputStream fileInputStream = new FileInputStream(new File(mDirectory, video));
+                int len;
+                while ((len = fileInputStream.read(b)) != -1) {
+                    fileOutputStream.write(b, 0, len);
                 }
+                fileInputStream.close();
+                fileOutputStream.flush();
             }
             fileOutputStream.close();
+            MediaScannerConnection.scanFile(mContext,
+                    new String[]{
+                            outputPath
+                    }, new String[]{
+                            "video/mp4"
+                    }, new MediaScannerConnectionClient() {
+                        @Override
+                        public void onMediaScannerConnected() {
+                        }
 
+                        @Override
+                        public void onScanCompleted(String path, Uri uri) {
+                        }
+                    });
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.d(String.format("run: %s", e));
+
         }
 
 
