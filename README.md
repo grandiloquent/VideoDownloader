@@ -4,7 +4,7 @@
 
 [示例下载](https://lucidu.cn/article/jqdkgl)
 
-![](../images/1.gif)
+![](images/1.gif)
 
 ## adb
 
