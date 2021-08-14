@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
 public class DouYinShare extends BaseVideoExtractor {
@@ -19,9 +20,9 @@ public class DouYinShare extends BaseVideoExtractor {
         super(inputUri, mainActivity);
     }
 
-    private String getRealVideoUri(String uri) {
+    private String getRealVideoUri(String videoId) {
         try {
-            URL url = new URL(uri);
+            URL url = new URL("https://v.douyin.com/" + videoId);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
             int code = urlConnection.getResponseCode();
@@ -41,11 +42,6 @@ public class DouYinShare extends BaseVideoExtractor {
         } catch (Exception ignored) {
         }
         return null;
-    }
-
-    @Override
-    protected boolean checkUri(String inputUri) {
-        return MATCH_VIDEO_ID.matcher(inputUri).find();
     }
 
     @Override

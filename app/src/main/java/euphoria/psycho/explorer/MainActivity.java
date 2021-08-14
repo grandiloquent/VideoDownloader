@@ -17,6 +17,7 @@ import java.util.List;
 
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.DialogShare.Callback;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
