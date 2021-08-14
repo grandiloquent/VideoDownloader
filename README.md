@@ -33,6 +33,4 @@ adb install-multiple 1.apk 2.apk 3.apk 4.apk 5.apk 6.apk 7.apk 8.apk
 
 ## 引用
 
-* ffmpeglib: https://github.com/JeffMony/JeffFFmpegDemo
-
-  ffmpeg -ss 0 -t 15 -i input.mp4 -vf "fps=2,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 output.gif
+* https://github.com/HaarigerHarald/android-youtubeExtractor
