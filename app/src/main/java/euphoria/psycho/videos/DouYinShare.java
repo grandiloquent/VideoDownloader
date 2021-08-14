@@ -1,130 +1,92 @@
 package euphoria.psycho.videos;
 
-import android.app.ProgressDialog;
-import android.os.Process;
-import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.NetShare;
 
-public class DouYinShare {
+public class DouYinShare extends BaseVideoExtractor {
 
-    public static boolean parsingVideo(String string, MainActivity mainActivity) {
-        if (!string.contains("douyin.com")) {
-            return false;
-        }
-        ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-        String id = DouYinShare.matchTikTokVideoId(string);
-        if (id == null) return true;
-        DouYinShare.performTask(id, value -> {
-            mainActivity.runOnUiThread(() -> {
-                if (value != null) {
-                    mainActivity.getWebView().loadUrl(value);
-                    Helper.openDownloadDialog(mainActivity, id, value);
-                }
-                progressDialog.dismiss();
-            });
-        });
-        return true;
+    public static Pattern MATCH_VIDEO_ID = Pattern.compile("(?<=douyin.com/).+(?=/)");
 
+    public DouYinShare(String inputUri, MainActivity mainActivity) {
+        super(inputUri, mainActivity);
     }
 
-    public static void performTask(String uri, Callback callback) {
-        new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String response = null;
-            try {
-                response = DouYinShare.getVideoId("https://v.douyin.com/" + uri);
+    private String getRealVideoUri(String uri) {
+        try {
+            URL url = new URL(uri);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            int code = urlConnection.getResponseCode();
+            if (code < 400 && code >= 200) {
+                String response = NetShare.readString(urlConnection);
+                if (response == null) {
+                    return null;
+                }
                 Pattern pattern = Pattern.compile("video/(\\d+)");
-                Matcher matcher = null;
-                if (response != null) {
-                    matcher = pattern.matcher(response);
+                Matcher matcher = pattern.matcher(response);
+                if (matcher.find()) {
+                    return "https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=" + matcher.group(1);
                 }
-                if (matcher != null && matcher.find()) {
-                    String requestUri = "https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=" + matcher.group(1);
-                    response = DouYinShare.getUrl(requestUri);
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray itemList = jsonObject.getJSONArray("item_list");
-                    jsonObject = itemList.getJSONObject(0).getJSONObject("video");
-                    jsonObject = jsonObject.getJSONObject("play_addr");
-                    itemList = jsonObject.getJSONArray("url_list");
-                    response = itemList.getString(0).replace("playwm", "play");
-
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+            } else {
+                return null;
             }
-            if (callback != null)
-                callback.run(response);
-        }).start();
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
-    private static String getVideoId(String uri) throws IOException {
-        URL url = new URL(uri);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Connection", "keep-alive");
-        urlConnection.setRequestProperty("sec-ch-ua", " Not A;Brand\";v=\"99\", \"Chromium\";v=\"90\", \"Microsoft Edge\";v=\"90");
-        urlConnection.setRequestProperty("Accept", "*/*");
-        urlConnection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-        urlConnection.setRequestProperty("sec-ch-ua-mobile", "?0");
-        urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36 Edg/90.0.818.66");
-        urlConnection.setRequestProperty("Sec-Fetch-Site", "same-origin");
-        urlConnection.setRequestProperty("Sec-Fetch-Mode", "cors");
-        urlConnection.setRequestProperty("Sec-Fetch-Dest", "empty");
-        urlConnection.setRequestProperty("Referer", "https://www.iesdouyin.com/share/video/6561991332561161476/?region=CN&mid=6561671254439365390&u_code=0&titleType=title&did=MS4wLjABAAAA2Cy8LTQsppRk4gci9RcF18kdcuNyaQRtZcZt0BGbylg&iid=MS4wLjABAAAAWHQavP6vURszBFMcxNrThBB0wrNEDWNzLdTKiuW5cI_cOJvn7h0u20Uz8R292pd2&with_sec_did=1&utm_source=copy_link&utm_campaign=client_share&utm_medium=android&app=aweme&scheme_type=1");
-        urlConnection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
-        urlConnection.setRequestProperty("Cookie", "MONITOR_WEB_ID=4843f090-b627-46db-bbe2-f757b4ea21a0; _tea_utm_cache_1243={%22utm_source%22:%22copy_link%22%2C%22utm_medium%22:%22android%22%2C%22utm_campaign%22:%22client_share%22}");
-        int code = urlConnection.getResponseCode();
-        if (code < 400 && code >= 200) {
-            return NetShare.readString(urlConnection);
-        } else {
+    @Override
+    protected boolean checkUri(String inputUri) {
+        return MATCH_VIDEO_ID.matcher(inputUri).find();
+    }
+
+    @Override
+    protected String fetchVideoUri(String uri) {
+        if (uri == null) {
             return null;
         }
-    }
-
-    private static String getUrl(String uri) throws IOException {
-        URL url = new URL(uri);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Connection", "keep-alive");
-        urlConnection.setRequestProperty("sec-ch-ua", " Not A;Brand\";v=\"99\", \"Chromium\";v=\"90\", \"Microsoft Edge\";v=\"90");
-        urlConnection.setRequestProperty("Accept", "*/*");
-        urlConnection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-        urlConnection.setRequestProperty("sec-ch-ua-mobile", "?0");
-        urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36 Edg/90.0.818.66");
-        urlConnection.setRequestProperty("Sec-Fetch-Site", "same-origin");
-        urlConnection.setRequestProperty("Sec-Fetch-Mode", "cors");
-        urlConnection.setRequestProperty("Sec-Fetch-Dest", "empty");
-        urlConnection.setRequestProperty("Referer", "https://www.iesdouyin.com/share/video/6561991332561161476/?region=CN&mid=6561671254439365390&u_code=0&titleType=title&did=MS4wLjABAAAA2Cy8LTQsppRk4gci9RcF18kdcuNyaQRtZcZt0BGbylg&iid=MS4wLjABAAAAWHQavP6vURszBFMcxNrThBB0wrNEDWNzLdTKiuW5cI_cOJvn7h0u20Uz8R292pd2&with_sec_did=1&utm_source=copy_link&utm_campaign=client_share&utm_medium=android&app=aweme&scheme_type=1");
-        urlConnection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
-        urlConnection.setRequestProperty("Cookie", "MONITOR_WEB_ID=4843f090-b627-46db-bbe2-f757b4ea21a0; _tea_utm_cache_1243={%22utm_source%22:%22copy_link%22%2C%22utm_medium%22:%22android%22%2C%22utm_campaign%22:%22client_share%22}");
-        int code = urlConnection.getResponseCode();
-        if (code < 400 && code >= 200) {
-            return NetShare.readString(urlConnection);
-        } else {
+        String realVideoUri = getRealVideoUri(uri);
+        if (realVideoUri == null) {
             return null;
         }
+        try {
+            URL url = new URL(uri);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            urlConnection.setRequestProperty("Referer", "https://www.iesdouyin.com/");
+            int code = urlConnection.getResponseCode();
+            if (code < 400 && code >= 200) {
+                String response = NetShare.readString(urlConnection);
+                if (response == null) {
+                    return null;
+                }
+                JSONObject jsonObject = new JSONObject(response);
+                JSONArray itemList = jsonObject.getJSONArray("item_list");
+                jsonObject = itemList.getJSONObject(0).getJSONObject("video");
+                jsonObject = jsonObject.getJSONObject("play_addr");
+                itemList = jsonObject.getJSONArray("url_list");
+                return itemList.getString(0).replace("playwm", "play");
+
+            } else {
+                return null;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
-    public static String matchTikTokVideoId(String input) {
-        if (input == null) return null;
-        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
-        Matcher matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return matcher.group();
-        }
+    @Override
+    protected String processUri(String inputUri) {
+        Matcher matcher = MATCH_VIDEO_ID.matcher(inputUri);
+        if (matcher.find()) return matcher.group();
         return null;
     }
 } //

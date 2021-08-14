@@ -1,30 +1,15 @@
 package euphoria.psycho.explorer;
 
-import android.Manifest;
 import android.Manifest.permission;
 import android.app.Activity;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.View;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -32,7 +17,6 @@ import java.util.List;
 
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.DialogShare.Callback;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -70,8 +54,6 @@ public class MainActivity extends Activity implements ClientInterface {
         if (!PermissionShare.checkSelfPermission(this, permission.READ_EXTERNAL_STORAGE)) {
             needPermissions.add(permission.READ_EXTERNAL_STORAGE);
         }
-
-
         if (needPermissions.size() > 0) {
             if (SDK_INT >= VERSION_CODES.M) {
                 requestPermissions(needPermissions.toArray(new String[0]), REQUEST_PERMISSION);
@@ -89,8 +71,10 @@ public class MainActivity extends Activity implements ClientInterface {
             DialogShare.createEditDialog(this, "", new Callback() {
                 @Override
                 public void run(String string) {
-                    if (DouYinShare.parsingVideo(string, MainActivity.this))
+                    if (DouYinShare.MATCH_VIDEO_ID.matcher(string).find()) {
+                        new DouYinShare(string, MainActivity.this).parsingVideo();
                         return;
+                    }
                     if (KuaiShouShare.parsingVideo(string, MainActivity.this))
                         return;
                     mWebView.loadUrl(string);

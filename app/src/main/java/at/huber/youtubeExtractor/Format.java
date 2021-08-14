@@ -159,6 +159,7 @@ public class Format {
         return result;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Format{" +
