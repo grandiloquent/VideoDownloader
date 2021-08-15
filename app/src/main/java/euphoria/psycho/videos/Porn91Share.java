@@ -30,7 +30,6 @@ import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.NetShare;
 
 public class Porn91Share extends BaseVideoExtractor<String> {
-    public static Pattern MATCH_91PORN = Pattern.compile("91porn.com/view_video.php\\?viewkey=[a-zA-Z0-9]+");
 
     public Porn91Share(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -38,25 +37,22 @@ public class Porn91Share extends BaseVideoExtractor<String> {
 
     @Override
     protected String fetchVideoUri(String uri) {
+        String response = getString(uri, new String[][]{
+                {"Referer", "https://91porn.com"},
+                {"X-Forwarded-For", NetShare.randomIp()}
+        });
+        if (response == null) {
+            return null;
+        }
+        String encoded = StringShare.substring(response, "document.write(strencode2(\"", "\"));");
+        String htm = null;
         try {
-            URL url = new URL(uri);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            NetShare.addDefaultRequestHeaders(urlConnection);
-            urlConnection.setRequestProperty("Referer", "https://91porn.com");
-            urlConnection.setRequestProperty("X-Forwarded-For", NetShare.randomIp());
-            int code = urlConnection.getResponseCode();
-            if (code < 400 && code >= 200) {
-                String response = NetShare.readString(urlConnection);
-                if (response == null) {
-                    return null;
-                }
-                String encoded = StringShare.substring(response, "document.write(strencode2(\"", "\"));");
-                String htm = URLDecoder.decode(encoded, "UTF-8");
-                return StringShare.substring(htm, "src='", "'");
-            } else {
-                return null;
-            }
-        } catch (Exception ignored) {
+            htm = URLDecoder.decode(encoded, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        if (htm != null) {
+            return StringShare.substring(htm, "src='", "'");
         }
         return null;
     }
@@ -101,5 +97,14 @@ public class Porn91Share extends BaseVideoExtractor<String> {
     @Override
     protected String processUri(String inputUri) {
         return inputUri;
+    }
+
+    public static boolean handle(String uri, MainActivity mainActivity) {
+        Pattern pattern = Pattern.compile("91porn.com/view_video.php\\?viewkey=[a-zA-Z0-9]+");
+        if (pattern.matcher(uri).find()) {
+            new Porn91Share(uri, mainActivity).parsingVideo();
+            return true;
+        }
+        return false;
     }
 }

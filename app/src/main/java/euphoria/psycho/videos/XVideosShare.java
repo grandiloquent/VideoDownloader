@@ -30,14 +30,13 @@ import euphoria.psycho.share.StringShare;
 
 public class XVideosShare extends BaseVideoExtractor<List<Pair<String, String>>> {
 
-    public static Pattern MATCH_XVIDEOS = Pattern.compile("xvideos\\.com/video\\d+");
 
     public XVideosShare(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }
 
     private void parseHls(String hlsUri, List<Pair<String, String>> videoList) {
-        String hls = getString(hlsUri);
+        String hls = getString(hlsUri,null);
         if (hls == null) return;
         String[] pieces = hls.split("\n");
         for (int i = 0; i < pieces.length; i++) {
@@ -54,7 +53,7 @@ public class XVideosShare extends BaseVideoExtractor<List<Pair<String, String>>>
     @Override
     protected List<Pair<String, String>> fetchVideoUri(String uri) {
         List<Pair<String, String>> videoList = new ArrayList<>();
-        String htmlCode = getString(uri);
+        String htmlCode = getString(uri,null);
         if (htmlCode == null) return null;
         String low = StringShare.substring(htmlCode, "html5player.setVideoUrlLow('", "'");
         if (low != null) {
@@ -131,7 +130,8 @@ public class XVideosShare extends BaseVideoExtractor<List<Pair<String, String>>>
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {
-        if (MATCH_XVIDEOS.matcher(uri).find()) {
+        Pattern pattern = Pattern.compile("xvideos\\.com/video\\d+");
+        if (pattern.matcher(uri).find()) {
             new XVideosShare(uri, mainActivity).parsingVideo();
             return true;
         }

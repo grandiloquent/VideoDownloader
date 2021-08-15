@@ -33,11 +33,16 @@ public abstract class BaseVideoExtractor<T> {
 
     protected abstract T fetchVideoUri(String uri);
 
-    protected String getString(String uri) {
+    protected String getString(String uri, String[][] headers) {
         try {
             URL url = new URL(uri);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            if (headers != null) {
+                for (int i = 0; i < headers.length; i++) {
+                    urlConnection.setRequestProperty(headers[i][0], headers[i][1]);
+                }
+            }
             int code = urlConnection.getResponseCode();
             if (code < 400 && code >= 200) {
                 return NetShare.readString(urlConnection);

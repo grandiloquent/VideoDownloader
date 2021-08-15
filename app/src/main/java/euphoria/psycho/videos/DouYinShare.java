@@ -16,7 +16,6 @@ import euphoria.psycho.share.NetShare;
 
 public class DouYinShare extends BaseVideoExtractor<String> {
 
-    public static Pattern MATCH_VIDEO_ID = Pattern.compile("(?<=douyin.com/).+(?=/)");
     private String mVideoId;
 
     public DouYinShare(String inputUri, MainActivity mainActivity) {
@@ -55,25 +54,16 @@ public class DouYinShare extends BaseVideoExtractor<String> {
             return null;
         }
         try {
-            URL url = new URL(realVideoUri);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
-            int code = urlConnection.getResponseCode();
-            if (code < 400 && code >= 200) {
-                String response = NetShare.readString(urlConnection);
-                if (response == null) {
-                    return null;
-                }
-                JSONObject jsonObject = new JSONObject(response);
-                JSONArray itemList = jsonObject.getJSONArray("item_list");
-                jsonObject = itemList.getJSONObject(0).getJSONObject("video");
-                jsonObject = jsonObject.getJSONObject("play_addr");
-                itemList = jsonObject.getJSONArray("url_list");
-                return itemList.getString(0).replace("playwm", "play");
-
-            } else {
+            String response = getString(realVideoUri, null);
+            if (response == null) {
                 return null;
             }
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray itemList = jsonObject.getJSONArray("item_list");
+            jsonObject = itemList.getJSONObject(0).getJSONObject("video");
+            jsonObject = jsonObject.getJSONObject("play_addr");
+            itemList = jsonObject.getJSONArray("url_list");
+            return itemList.getString(0).replace("playwm", "play");
         } catch (Exception ignored) {
         }
         return null;
@@ -87,8 +77,18 @@ public class DouYinShare extends BaseVideoExtractor<String> {
 
     @Override
     protected String processUri(String inputUri) {
-        Matcher matcher = MATCH_VIDEO_ID.matcher(inputUri);
+        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
+        Matcher matcher = pattern.matcher(inputUri);
         if (matcher.find()) return matcher.group();
         return null;
+    }
+
+    public static boolean handle(String uri, MainActivity mainActivity) {
+        Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
+        if (pattern.matcher(uri).find()) {
+            new DouYinShare(uri, mainActivity).parsingVideo();
+            return true;
+        }
+        return false;
     }
 }

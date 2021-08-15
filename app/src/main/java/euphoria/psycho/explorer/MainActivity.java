@@ -78,8 +78,7 @@ public class MainActivity extends Activity implements ClientInterface {
             DialogShare.createEditDialog(this, "", new Callback() {
                 @Override
                 public void run(String string) {
-                    if (DouYinShare.MATCH_VIDEO_ID.matcher(string).find()) {
-                        new DouYinShare(string, MainActivity.this).parsingVideo();
+                    if (DouYinShare.handle(string, MainActivity.this)) {
                         return;
                     }
                     if (KuaiShouShare.parsingVideo(string, MainActivity.this))
@@ -112,8 +111,8 @@ public class MainActivity extends Activity implements ClientInterface {
         findViewById(R.id.file_download).setOnClickListener(v -> {
             if (XVideosRedShare.parsingXVideos(this, null)) return;
             String url = mWebView.getUrl();
-            if (Porn91Share.MATCH_91PORN.matcher(url).find()) {
-                new Porn91Share(url, this).parsingVideo();
+            if (Porn91Share.handle(url, this)) {
+                return;
             }
             if (url.contains("youtube.com/watch")) {
                 Share.startYouTubeActivity(this, url);
@@ -217,8 +216,7 @@ public class MainActivity extends Activity implements ClientInterface {
     @Override
     public boolean shouldOverrideUrlLoading(String uri) {
         if (XVideosRedShare.parsingXVideos(this, uri)) return true;
-        if (Porn91Share.MATCH_91PORN.matcher(uri).find()) {
-            new Porn91Share(uri, this).parsingVideo();
+        if (Porn91Share.handle(uri, this)) {
             return true;
         }
         if (uri.contains("youtube.com/watch")) {
