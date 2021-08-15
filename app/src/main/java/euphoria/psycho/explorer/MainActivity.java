@@ -108,7 +108,9 @@ public class MainActivity extends Activity implements ClientInterface {
     private void setDownloadVideo() {
         findViewById(R.id.file_download).setOnClickListener(v -> {
             if (XVideosRedShare.parsingXVideos(this, null)) return;
-            if (Porn91Share.parsing91Porn(this, null)) return;
+            if (Porn91Share.MATCH_91PORN.matcher(mWebView.getUrl()).find()) {
+                new Porn91Share(mWebView.getUrl(), this).parsingVideo();
+            }
             if (mWebView.getUrl().contains("youtube.com/watch")) {
                 Share.startYouTubeActivity(this, mWebView.getUrl());
                 return;
@@ -204,7 +206,10 @@ public class MainActivity extends Activity implements ClientInterface {
     @Override
     public boolean shouldOverrideUrlLoading(String uri) {
         if (XVideosRedShare.parsingXVideos(this, uri)) return true;
-        if (Porn91Share.parsing91Porn(this, uri)) return true;
+        if (Porn91Share.MATCH_91PORN.matcher(uri).find()) {
+            new Porn91Share(uri, this).parsingVideo();
+            return true;
+        }
         if (uri.contains("youtube.com/watch")) {
             Share.startYouTubeActivity(this, uri);
             return true;

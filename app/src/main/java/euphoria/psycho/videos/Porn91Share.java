@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,19 +23,42 @@ import euphoria.psycho.explorer.DownloadActivity;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.NetShare;
 
-public class Porn91Share {
-    private static void process91PornVideo(String value, MainActivity mainActivity) {
-        Pattern pattern = Pattern.compile("(?<=src=').*?(?=')");
-        Matcher matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            value = matcher.group();
-            viewVideo(mainActivity, value);
+public class Porn91Share extends BaseVideoExtractor {
+    public static Pattern MATCH_91PORN = Pattern.compile("91porn.com/view_video.php\\?viewkey=[a-zA-Z0-9]+");
+
+    public Porn91Share(String inputUri, MainActivity mainActivity) {
+        super(inputUri, mainActivity);
+    }
+
+    @Override
+    protected String fetchVideoUri(String uri) {
+        try {
+            URL url = new URL(uri);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            NetShare.addDefaultRequestHeaders(urlConnection);
+            urlConnection.setRequestProperty("Referer", "https://91porn.com");
+            urlConnection.setRequestProperty("X-Forwarded-For", NetShare.randomIp());
+            int code = urlConnection.getResponseCode();
+            if (code < 400 && code >= 200) {
+                String response = NetShare.readString(urlConnection);
+                if (response == null) {
+                    return null;
+                }
+                String encoded = StringShare.substring(response, "document.write(strencode2(\"", "\"));");
+                String htm = URLDecoder.decode(encoded, "UTF-8");
+                return StringShare.substring(htm, "src='", "'");
+            } else {
+                return null;
+            }
+        } catch (Exception ignored) {
         }
+        return null;
     }
 
     public static AlertDialog.Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
@@ -69,69 +93,13 @@ public class Porn91Share {
         }
     }
 
-    public static boolean parsing91Porn(MainActivity mainActivity, String url) {
-        String uri = url == null ? mainActivity.getWebView().getUrl() : url;
-        if (uri.contains("91porn.com/view_video.php?viewkey=")) {
-            ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            Porn91Share.performTask(uri, encodedHtml -> mainActivity.runOnUiThread(() -> {
-                if (encodedHtml == null) {
-                    Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
-                    progressDialog.dismiss();
-                    return;
-                }
-                String script = FileShare.readAssetString(mainActivity, "encode.js");
-                mainActivity.getWebView().evaluateJavascript(script + encodedHtml, videoUri -> {
-                    if (videoUri != null) {
-                        process91PornVideo(videoUri, mainActivity);
-                    } else {
-                        Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
-                    }
-                });
-                progressDialog.dismiss();
-
-            }));
-            return true;
-        }
-        return false;
+    @Override
+    protected void processVideo(String videoUri) {
+        viewVideo(mMainActivity, videoUri);
     }
 
-    private static void performTask(String uri, Callback callback) {
-        new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String result = null;
-            try {
-                result = substringKeyCode(fetchHtml(uri));
-            } catch (IOException e) {
-                Log.e("TAG", "Error: performTask, " + e.getMessage() + " " + e.getCause());
-            }
-            if (callback != null)
-                callback.run(result);
-        }).start();
-
-    }
-
-    private static String substringKeyCode(String response) {
-        if (response == null) return null;
-        Pattern pattern = Pattern.compile("(?<=document\\.write\\()strencode2\\(\".*?\"\\)(?=\\);)");
-        Matcher matcher = pattern.matcher(response);
-        if (matcher.find()) {
-            return matcher.group();
-        }
-        return null;
-    }
-    //
-
-    private static String fetchHtml(String uri) throws IOException {
-        URL url = new URL(uri);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        NetShare.addDefaultRequestHeaders(urlConnection);
-        urlConnection.setRequestProperty("Referer", "https://91porn.com");
-        urlConnection.setRequestProperty("X-Forwarded-For", NetShare.randomIp());
-        int code = urlConnection.getResponseCode();
-        if (code < 400 && code >= 200) {
-            return NetShare.readString(urlConnection);
-        } else {
-            return null;
-        }
+    @Override
+    protected String processUri(String inputUri) {
+        return inputUri;
     }
 }

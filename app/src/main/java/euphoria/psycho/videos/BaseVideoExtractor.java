@@ -7,6 +7,8 @@ import android.widget.Toast;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.StringShare;
 
 public abstract class BaseVideoExtractor {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
@@ -18,12 +20,11 @@ public abstract class BaseVideoExtractor {
         mMainActivity = mainActivity;
     }
 
-    public boolean parsingVideo() {
+    public void parsingVideo() {
         ProgressDialog progressDialog = DialogShare.createProgressDialog(mMainActivity);
         progressDialog.show();
         String uri = processUri(mInputUri);
         performTask(uri, progressDialog);
-        return true;
     }
 
     private void performTask(String uri, ProgressDialog progressDialog) {
@@ -32,8 +33,7 @@ public abstract class BaseVideoExtractor {
             String videoUri = fetchVideoUri(uri);
             mMainActivity.runOnUiThread(() -> {
                 if (videoUri != null) {
-                    mMainActivity.getWebView().loadUrl(videoUri);
-                    Helper.openDownloadDialog(mMainActivity, uri, videoUri);
+                    processVideo(videoUri);
                 } else {
                     Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                 }
@@ -44,6 +44,7 @@ public abstract class BaseVideoExtractor {
 
     protected abstract String fetchVideoUri(String uri);
 
+    protected abstract void processVideo(String videoUri);
 
     protected abstract String processUri(String inputUri);
 }
