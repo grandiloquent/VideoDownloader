@@ -25,7 +25,7 @@ import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.DouYin;
 import euphoria.psycho.videos.Iqiyi;
-import euphoria.psycho.videos.KuaiShouShare;
+import euphoria.psycho.videos.KuaiShou;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.XVideos;
@@ -82,7 +82,7 @@ public class MainActivity extends Activity implements ClientInterface {
                     if (DouYin.handle(string, MainActivity.this)) {
                         return;
                     }
-                    if (KuaiShouShare.parsingVideo(string, MainActivity.this))
+                    if (KuaiShou.handle(string, MainActivity.this))
                         return;
                     mWebView.loadUrl(string);
                 }
