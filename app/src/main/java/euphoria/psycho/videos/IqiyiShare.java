@@ -39,7 +39,6 @@ import euphoria.psycho.share.NetShare;
 
 public class IqiyiShare extends BaseVideoExtractor<List<Pair<String, String>>> {
     public static Pattern MATCH_IQIYI = Pattern.compile("\\.iqiyi\\.com/v_");
-    private String mTitle;
 
     public IqiyiShare(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -116,16 +115,14 @@ public class IqiyiShare extends BaseVideoExtractor<List<Pair<String, String>>> {
             if (response == null) {
                 return null;
             }
-            mTitle = StringShare.substring(response, "<title>", "-");
+            String title = StringShare.substring(response, "<title>", "-");
             String tvid = findJSONValue("\"tvid\":", response, false);
             String vid = findJSONValue("\"vid\":", response, true);
-            Logger.d(String.format("performTask: tvid = %s, vid = %s", tvid, vid));
             String params = String.format("/vps?tvid=%s&vid=%s&v=0&qypid=%s_12&src=01012001010000000000&t=%d&k_tag=1&k_uid=%s&rs=1",
                     tvid, vid, tvid, System.currentTimeMillis(), getMagicId());
             String hash = md5(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
             String url = String.format("%s%s&vf=%s", "http://cache.video.qiyi.com", params, hash);
             response = getHtml(url);
-            Logger.d(String.format("fetchVideoUri: %s", url));
             if (response == null) {
                 return null;
             }
@@ -150,7 +147,7 @@ public class IqiyiShare extends BaseVideoExtractor<List<Pair<String, String>>> {
                         return null;
                     }
                     String realVideoUri = findJSONValue("\"l\":", videoInfo, true);
-                    videoList.add(Pair.create(mTitle + i, realVideoUri));
+                    videoList.add(Pair.create(title + i, realVideoUri));
                 }
                 return videoList;
             }

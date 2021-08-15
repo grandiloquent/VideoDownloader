@@ -28,51 +28,47 @@ import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 
-public class XVideosShare {
-    public interface Callback {
-        void run(List<Pair<String, String>> videoList);
+public class XVideosShare extends BaseVideoExtractor<List<Pair<String, String>>> {
+
+    public static Pattern MATCH_XVIDEOS = Pattern.compile("xvideos\\.com/video\\d+");
+
+    public XVideosShare(String inputUri, MainActivity mainActivity) {
+        super(inputUri, mainActivity);
     }
 
-    public static boolean parsingVideo(MainActivity mainActivity, String url) {
-        String uri = url == null ? mainActivity.getWebView().getUrl() : url;
-        if (uri.contains("https://www.xvideos.com/video")) {
-            ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            performTask(uri, value -> mainActivity.runOnUiThread(() -> {
-                if (value != null) {
-                    try {
-                        launchDialog(mainActivity, value);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
-                }
-                progressDialog.dismiss();
-            }));
-            return true;
-        }
-        return false;
-    }
-
-    private static void performTask(String uri, Callback callback) {
-        new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            try {
-                List<Pair<String, String>> videoList = new ArrayList<>();
-                String hls = parseWebpage(uri, videoList);
-                if (hls != null) {
-                    parseHls(hls, videoList);
-                    if (callback != null)
-                        callback.run(videoList);
-                    return;
-                }
-
-            } catch (Exception e) {
-                Logger.d(String.format("performTask: %s", e.getMessage()));
+    private void parseHls(String hlsUri, List<Pair<String, String>> videoList) {
+        String hls = getString(hlsUri);
+        if (hls == null) return;
+        String[] pieces = hls.split("\n");
+        for (int i = 0; i < pieces.length; i++) {
+            if (pieces[i].startsWith("#EXT-X-STREAM-INF")) {
+                String name = StringShare.substring(pieces[i], "NAME=\"", "\"");
+                String url = StringShare.substringBeforeLast(hlsUri, "/") + "/" + pieces[i + 1];
+                videoList.add(Pair.create(name, url));
+                i++;
             }
-            if (callback != null)
-                callback.run(null);
-        }).start();
+        }
+
+    }
+
+    @Override
+    protected List<Pair<String, String>> fetchVideoUri(String uri) {
+        List<Pair<String, String>> videoList = new ArrayList<>();
+        String htmlCode = getString(uri);
+        if (htmlCode == null) return null;
+        String low = StringShare.substring(htmlCode, "html5player.setVideoUrlLow('", "'");
+        if (low != null) {
+            videoList.add(Pair.create("标清", low));
+        }
+        String high = StringShare.substring(htmlCode, "html5player.setVideoUrlHigh('", "'");
+        if (high != null) {
+            videoList.add(Pair.create("高清", high));
+        }
+        String hls = StringShare.substring(htmlCode, "html5player.setVideoHLS('", "'");
+        if (hls != null) {
+            parseHls(hls, videoList);
+        }
+        return videoList;
     }
 
     public static AlertDialog.Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
@@ -120,59 +116,26 @@ public class XVideosShare {
 
     }
 
-    private static void parseHls(String hlsUri, List<Pair<String, String>> videoList) throws IOException {
-        String hls = getString(hlsUri);
-        if (hls == null) return;
-        String[] pieces = hls.split("\n");
-        for (int i = 0; i < pieces.length; i++) {
-            if (pieces[i].startsWith("#EXT-X-STREAM-INF")) {
-                String name = StringShare.substring(pieces[i], "NAME=\"", "\"");
-                String url = StringShare.substringBeforeLast(hlsUri, "/") + "/" + pieces[i + 1];
-                videoList.add(Pair.create(name, url));
-                i++;
-            }
-        }
-
-    }
-
-    private static String parseWebpage(String pageUri, List<Pair<String, String>> videoList) throws IOException {
-        String htmlCode = getString(pageUri);
-        if (htmlCode == null) return null;
-        String low = StringShare.substring(htmlCode, "html5player.setVideoUrlLow('", "'");
-        if (low != null) {
-            videoList.add(Pair.create("标清", low));
-        }
-        String high = StringShare.substring(htmlCode, "html5player.setVideoUrlHigh('", "'");
-        if (high != null) {
-            videoList.add(Pair.create("高清", high));
-        }
-        return StringShare.substring(htmlCode, "html5player.setVideoHLS('", "'");
-    }
-
-    private static String getString(String uri) throws IOException {
-        URL url = new URL(uri);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-        urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
-        urlConnection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
-        urlConnection.setRequestProperty("Cache-Control", "max-age=0");
-        urlConnection.setRequestProperty("Connection", "keep-alive");
-        urlConnection.setRequestProperty("Referer", "https://www.xvideos.cn/");
-        urlConnection.setRequestProperty("sec-ch-ua", "Chromium\";v=\"92\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"92");
-        urlConnection.setRequestProperty("sec-ch-ua-mobile", "?0");
-        urlConnection.setRequestProperty("Sec-Fetch-Dest", "document");
-        urlConnection.setRequestProperty("Sec-Fetch-Mode", "navigate");
-        urlConnection.setRequestProperty("Sec-Fetch-Site", "same-origin");
-        urlConnection.setRequestProperty("Sec-Fetch-User", "?1");
-        urlConnection.setRequestProperty("Upgrade-Insecure-Requests", "1");
-        urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36");
-        int code = urlConnection.getResponseCode();
-        if (code < 400 && code >= 200) {
-            return NetShare.readString(urlConnection);
-        } else {
-            return null;
+    @Override
+    protected void processVideo(List<Pair<String, String>> videoUriList) {
+        try {
+            launchDialog(mMainActivity, videoUriList);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
+    @Override
+    protected String processUri(String inputUri) {
+        return inputUri;
+    }
+
+    public static boolean handle(String uri, MainActivity mainActivity) {
+        if (MATCH_XVIDEOS.matcher(uri).find()) {
+            new XVideosShare(uri, mainActivity).parsingVideo();
+            return true;
+        }
+        return false;
+    }
 }
 

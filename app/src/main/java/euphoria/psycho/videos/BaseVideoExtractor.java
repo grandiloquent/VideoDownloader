@@ -4,10 +4,14 @@ import android.os.Process;
 import android.app.ProgressDialog;
 import android.widget.Toast;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
 
 public abstract class BaseVideoExtractor<T> {
@@ -27,6 +31,28 @@ public abstract class BaseVideoExtractor<T> {
         performTask(uri, progressDialog);
     }
 
+    protected abstract T fetchVideoUri(String uri);
+
+    protected String getString(String uri) {
+        try {
+            URL url = new URL(uri);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            int code = urlConnection.getResponseCode();
+            if (code < 400 && code >= 200) {
+                return NetShare.readString(urlConnection);
+            } else {
+                return null;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    protected abstract String processUri(String inputUri);
+
+    protected abstract void processVideo(T videoUri);
+
     private void performTask(String uri, ProgressDialog progressDialog) {
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -41,10 +67,4 @@ public abstract class BaseVideoExtractor<T> {
             });
         }).start();
     }
-
-    protected abstract T fetchVideoUri(String uri);
-
-    protected abstract void processVideo(T videoUri);
-
-    protected abstract String processUri(String inputUri);
 }

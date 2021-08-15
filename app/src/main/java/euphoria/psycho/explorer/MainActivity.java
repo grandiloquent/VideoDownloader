@@ -126,7 +126,9 @@ public class MainActivity extends Activity implements ClientInterface {
                 return;
             }
             if (AcFunShare.parsingVideo(this, null)) return;
-            if (XVideosShare.parsingVideo(this, null)) return;
+            if (XVideosShare.handle(url, this)) {
+                return;
+            }
             if (mVideoUrl != null) {
                 try {
                     mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
@@ -225,7 +227,9 @@ public class MainActivity extends Activity implements ClientInterface {
         }
         //if (IqiyiShare.parsingVideo(this, uri)) return true;
         if (AcFunShare.parsingVideo(this, uri)) return true;
-        if (XVideosShare.parsingVideo(this, uri)) return true;
+        if (XVideosShare.handle(uri, this)) {
+            return true;
+        }
         return false;
     }
     //
