@@ -1,12 +1,12 @@
 package euphoria.psycho.videos;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Process;
-import android.app.ProgressDialog;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
@@ -18,10 +18,8 @@ import euphoria.psycho.explorer.DownloadActivity;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.share.StringShare;
 
 public abstract class BaseVideoExtractor<T> {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
@@ -88,6 +86,7 @@ public abstract class BaseVideoExtractor<T> {
                 .setPositiveButton(android.R.string.ok, p)
                 .setNegativeButton("下载", n);
     }
+
     public static void viewVideoBetter(MainActivity mainActivity, String value) {
         try {
             String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
@@ -113,3 +112,5 @@ public abstract class BaseVideoExtractor<T> {
         }
     }
 }
+
+//

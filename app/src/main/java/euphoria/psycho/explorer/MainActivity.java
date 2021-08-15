@@ -23,6 +23,7 @@ import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.videos.AcFunShare;
+import euphoria.psycho.videos.Bilibili;
 import euphoria.psycho.videos.DouYin;
 import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShou;
@@ -96,6 +97,7 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage();
         checkChrome();
         //PackageShare.listAllInstalledPackages(this);
+        Bilibili.handle("https://www.bilibili.com/video/BV1XT4y1E7rJ/?spm_id_from=autoNext", this);
     }
 
     private void loadStartPage() {
