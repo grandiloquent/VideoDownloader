@@ -18,7 +18,7 @@ import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
 
 public class KuaiShou extends BaseVideoExtractor<String> {
-    private static Pattern MATCH_KUAISHOU = Pattern.compile("https://v.kuaishouapp.com/s/\\S+");
+    private static Pattern MATCH_KUAISHOU = Pattern.compile("https://v\\.kuaishou(app)?\\.com(/s)?/\\S+");
 
     protected KuaiShou(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -26,11 +26,13 @@ public class KuaiShou extends BaseVideoExtractor<String> {
 
     @Override
     protected String fetchVideoUri(String uri) {
-        String response = getString(uri, null);
+        String response = getString(uri, new String[][]{
+                {"Cookie", "did=web_9db94f4e2b1d480198b8b2078e5b54da; didv=1628353110000"}
+        });
         if (response == null) {
             return null;
         }
-        return StringShare.substring(response, "\"srcNoMark\":\"", "\",");
+        return StringShare.substring(response, "\"srcNoMark\":\"", "\"");
     }
 
     @Override
