@@ -18,7 +18,7 @@ import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
 
 public class KuaiShou extends BaseVideoExtractor<String> {
-    private static Pattern MATCH_KUAISHOU = Pattern.compile("https://v\\.kuaishou(app)?\\.com(/s)?/\\S+");
+    private static final Pattern MATCH_KUAISHOU = Pattern.compile("https://v\\.kuaishou(app)?\\.com(/s)?/\\S+");
 
     protected KuaiShou(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);

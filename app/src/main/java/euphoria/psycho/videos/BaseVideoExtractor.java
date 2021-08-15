@@ -1,17 +1,26 @@
 package euphoria.psycho.videos;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Process;
 import android.app.ProgressDialog;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
+import euphoria.psycho.explorer.DownloadActivity;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
+import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 
 public abstract class BaseVideoExtractor<T> {
@@ -39,8 +48,8 @@ public abstract class BaseVideoExtractor<T> {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
             if (headers != null) {
-                for (int i = 0; i < headers.length; i++) {
-                    urlConnection.setRequestProperty(headers[i][0], headers[i][1]);
+                for (String[] header : headers) {
+                    urlConnection.setRequestProperty(header[0], header[1]);
                 }
             }
             int code = urlConnection.getResponseCode();
@@ -71,5 +80,36 @@ public abstract class BaseVideoExtractor<T> {
                 progressDialog.dismiss();
             });
         }).start();
+    }
+
+    protected static AlertDialog.Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
+        return new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setPositiveButton(android.R.string.ok, p)
+                .setNegativeButton("下载", n);
+    }
+    public static void viewVideoBetter(MainActivity mainActivity, String value) {
+        try {
+            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
+            createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
+                dialog.dismiss();
+                if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setPackage("com.android.chrome");
+                    intent.setData(Uri.parse(uri));
+                    mainActivity.startActivity(intent);
+                } else {
+                    Helper.videoChooser(mainActivity, uri);
+                }
+            }, (dialog, which) -> {
+                dialog.dismiss();
+                Intent intent = new Intent(mainActivity, DownloadActivity.class);
+                intent.setData(Uri.parse(value));
+                mainActivity.startActivity(intent);
+            })
+                    .setMessage("是否使用浏览器打开视频链接")
+                    .show();
+        } catch (UnsupportedEncodingException ignored) {
+        }
     }
 }
