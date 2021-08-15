@@ -29,6 +29,7 @@ import euphoria.psycho.videos.KuaiShouShare;
 import euphoria.psycho.videos.Porn91Share;
 import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.XVideosShare;
+import euphoria.psycho.videos.YouTubeShare;
 
 import static android.os.Build.VERSION.SDK_INT;
 
@@ -114,8 +115,7 @@ public class MainActivity extends Activity implements ClientInterface {
             if (Porn91Share.handle(url, this)) {
                 return;
             }
-            if (url.contains("youtube.com/watch")) {
-                Share.startYouTubeActivity(this, url);
+            if (YouTubeShare.handle(url, this)) {
                 return;
             }
             Logger.d(String.format("setDownloadVideo: %s", url));
@@ -215,12 +215,12 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public boolean shouldOverrideUrlLoading(String uri) {
+        Logger.d(String.format("shouldOverrideUrlLoading: %s", uri));
         if (XVideosRedShare.parsingXVideos(this, uri)) return true;
         if (Porn91Share.handle(uri, this)) {
             return true;
         }
-        if (uri.contains("youtube.com/watch")) {
-            Share.startYouTubeActivity(this, uri);
+        if (YouTubeShare.handle(uri, this)) {
             return true;
         }
         //if (IqiyiShare.parsingVideo(this, uri)) return true;

@@ -9,6 +9,8 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import euphoria.psycho.share.Logger;
+
 public class CustomWebViewClient extends WebViewClient {
 
 

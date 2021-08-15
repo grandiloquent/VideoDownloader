@@ -1,33 +1,22 @@
 package euphoria.psycho.videos;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Process;
-import android.util.Log;
-import android.widget.Toast;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.DownloadActivity;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
-import euphoria.psycho.videos.XVideosRedShare.Callback;
-import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.NetShare;
 
 public class Porn91Share extends BaseVideoExtractor<String> {
 
