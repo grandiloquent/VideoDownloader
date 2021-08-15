@@ -20,14 +20,13 @@ import at.huber.youtubeExtractor.YtFile;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.Logger;
 
-public class YouTubeShare extends BaseVideoExtractor<List<Pair<String, YtFile>>> {
-    protected YouTubeShare(String inputUri, MainActivity mainActivity) {
+public class YouTube extends BaseVideoExtractor<List<Pair<String, YtFile>>> {
+    protected YouTube(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }
 
     @Override
     protected List<Pair<String, YtFile>> fetchVideoUri(String uri) {
-        Logger.d(String.format("fetchVideoUri: %s", uri));
         final FutureTask<Object> ft = new FutureTask<>(() -> {
         }, new Object());
         List<Pair<String, YtFile>> files = new ArrayList<>();
@@ -114,10 +113,9 @@ public class YouTubeShare extends BaseVideoExtractor<List<Pair<String, YtFile>>>
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {
-        Logger.d(String.format("handle: %s", uri));
         Pattern pattern = Pattern.compile("youtube\\.com/watch\\?v=");
         if (pattern.matcher(uri).find()) {
-            new YouTubeShare(uri, mainActivity).parsingVideo();
+            new YouTube(uri, mainActivity).parsingVideo();
             return true;
         }
         return false;

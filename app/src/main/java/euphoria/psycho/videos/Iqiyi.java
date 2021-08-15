@@ -37,10 +37,10 @@ import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
-public class IqiyiShare extends BaseVideoExtractor<List<Pair<String, String>>> {
+public class Iqiyi extends BaseVideoExtractor<List<Pair<String, String>>> {
     public static Pattern MATCH_IQIYI = Pattern.compile("\\.iqiyi\\.com/v_");
 
-    public IqiyiShare(String inputUri, MainActivity mainActivity) {
+    public Iqiyi(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }
 

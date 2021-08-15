@@ -11,14 +11,12 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.NetShare;
 
-public class DouYinShare extends BaseVideoExtractor<String> {
+public class DouYin extends BaseVideoExtractor<String> {
 
     private String mVideoId;
 
-    public DouYinShare(String inputUri, MainActivity mainActivity) {
+    public DouYin(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }
 
@@ -86,7 +84,7 @@ public class DouYinShare extends BaseVideoExtractor<String> {
     public static boolean handle(String uri, MainActivity mainActivity) {
         Pattern pattern = Pattern.compile("(?<=douyin.com/).+(?=/)");
         if (pattern.matcher(uri).find()) {
-            new DouYinShare(uri, mainActivity).parsingVideo();
+            new DouYin(uri, mainActivity).parsingVideo();
             return true;
         }
         return false;

@@ -23,13 +23,13 @@ import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.videos.AcFunShare;
-import euphoria.psycho.videos.DouYinShare;
-import euphoria.psycho.videos.IqiyiShare;
+import euphoria.psycho.videos.DouYin;
+import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShouShare;
-import euphoria.psycho.videos.Porn91Share;
+import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.XVideosRedShare;
-import euphoria.psycho.videos.XVideosShare;
-import euphoria.psycho.videos.YouTubeShare;
+import euphoria.psycho.videos.XVideos;
+import euphoria.psycho.videos.YouTube;
 
 import static android.os.Build.VERSION.SDK_INT;
 
@@ -79,7 +79,7 @@ public class MainActivity extends Activity implements ClientInterface {
             DialogShare.createEditDialog(this, "", new Callback() {
                 @Override
                 public void run(String string) {
-                    if (DouYinShare.handle(string, MainActivity.this)) {
+                    if (DouYin.handle(string, MainActivity.this)) {
                         return;
                     }
                     if (KuaiShouShare.parsingVideo(string, MainActivity.this))
@@ -112,20 +112,20 @@ public class MainActivity extends Activity implements ClientInterface {
         findViewById(R.id.file_download).setOnClickListener(v -> {
             if (XVideosRedShare.parsingXVideos(this, null)) return;
             String url = mWebView.getUrl();
-            if (Porn91Share.handle(url, this)) {
+            if (Porn91.handle(url, this)) {
                 return;
             }
-            if (YouTubeShare.handle(url, this)) {
+            if (YouTube.handle(url, this)) {
                 return;
             }
             Logger.d(String.format("setDownloadVideo: %s", url));
-            if (IqiyiShare.MATCH_IQIYI.matcher(url).find()) {
+            if (Iqiyi.MATCH_IQIYI.matcher(url).find()) {
                 Logger.d(String.format("setDownloadVideo: %s", ""));
-                new IqiyiShare(url, MainActivity.this).parsingVideo();
+                new Iqiyi(url, MainActivity.this).parsingVideo();
                 return;
             }
             if (AcFunShare.parsingVideo(this, null)) return;
-            if (XVideosShare.handle(url, this)) {
+            if (XVideos.handle(url, this)) {
                 return;
             }
             if (mVideoUrl != null) {
@@ -217,15 +217,15 @@ public class MainActivity extends Activity implements ClientInterface {
     public boolean shouldOverrideUrlLoading(String uri) {
         Logger.d(String.format("shouldOverrideUrlLoading: %s", uri));
         if (XVideosRedShare.parsingXVideos(this, uri)) return true;
-        if (Porn91Share.handle(uri, this)) {
+        if (Porn91.handle(uri, this)) {
             return true;
         }
-        if (YouTubeShare.handle(uri, this)) {
+        if (YouTube.handle(uri, this)) {
             return true;
         }
         //if (IqiyiShare.parsingVideo(this, uri)) return true;
         if (AcFunShare.parsingVideo(this, uri)) return true;
-        if (XVideosShare.handle(uri, this)) {
+        if (XVideos.handle(uri, this)) {
             return true;
         }
         return false;

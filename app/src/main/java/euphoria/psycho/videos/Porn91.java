@@ -18,9 +18,9 @@ import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 
-public class Porn91Share extends BaseVideoExtractor<String> {
+public class Porn91 extends BaseVideoExtractor<String> {
 
-    public Porn91Share(String inputUri, MainActivity mainActivity) {
+    public Porn91(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }
 
@@ -91,7 +91,7 @@ public class Porn91Share extends BaseVideoExtractor<String> {
     public static boolean handle(String uri, MainActivity mainActivity) {
         Pattern pattern = Pattern.compile("91porn.com/view_video.php\\?viewkey=[a-zA-Z0-9]+");
         if (pattern.matcher(uri).find()) {
-            new Porn91Share(uri, mainActivity).parsingVideo();
+            new Porn91(uri, mainActivity).parsingVideo();
             return true;
         }
         return false;
