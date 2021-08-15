@@ -10,7 +10,7 @@ import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 
-public abstract class BaseVideoExtractor {
+public abstract class BaseVideoExtractor<T> {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
     private final String mInputUri;
     protected final MainActivity mMainActivity;
@@ -30,7 +30,7 @@ public abstract class BaseVideoExtractor {
     private void performTask(String uri, ProgressDialog progressDialog) {
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String videoUri = fetchVideoUri(uri);
+            T videoUri = fetchVideoUri(uri);
             mMainActivity.runOnUiThread(() -> {
                 if (videoUri != null) {
                     processVideo(videoUri);
@@ -42,9 +42,9 @@ public abstract class BaseVideoExtractor {
         }).start();
     }
 
-    protected abstract String fetchVideoUri(String uri);
+    protected abstract T fetchVideoUri(String uri);
 
-    protected abstract void processVideo(String videoUri);
+    protected abstract void processVideo(T videoUri);
 
     protected abstract String processUri(String inputUri);
 }

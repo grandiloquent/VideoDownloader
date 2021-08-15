@@ -14,7 +14,7 @@ import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
-public class DouYinShare extends BaseVideoExtractor {
+public class DouYinShare extends BaseVideoExtractor<String> {
 
     public static Pattern MATCH_VIDEO_ID = Pattern.compile("(?<=douyin.com/).+(?=/)");
     private String mVideoId;
@@ -91,4 +91,4 @@ public class DouYinShare extends BaseVideoExtractor {
         if (matcher.find()) return matcher.group();
         return null;
     }
-} 
+}

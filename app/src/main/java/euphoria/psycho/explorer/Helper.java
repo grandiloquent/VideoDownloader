@@ -42,29 +42,24 @@ public class Helper {
     }
 
 
-
-    public static void viewVideo(MainActivity mainActivity, String value) {
-        try {
-            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
-            DialogShare.createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
-                dialog.dismiss();
-                if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setPackage("com.android.chrome");
-
-                    intent.setData(Uri.parse(uri));
-                    mainActivity.startActivity(intent);
-                } else {
-                    Helper.videoChooser(mainActivity, uri);
-                }
-            }, (dialog, which) -> {
-                mainActivity.getWebView().loadUrl(uri);
-                dialog.dismiss();
-            })
-                    .setMessage("是否使用浏览器打开视频链接")
-                    .show();
-        } catch (UnsupportedEncodingException ignored) {
-        }
+    public static void viewVideo(MainActivity mainActivity, String uri) {
+        //String uri = URLEncoder.encode(value, "UTF-8");
+        DialogShare.createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
+            dialog.dismiss();
+            if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setPackage("com.android.chrome");
+                intent.setData(Uri.parse(uri));
+                mainActivity.startActivity(intent);
+            } else {
+                Helper.videoChooser(mainActivity, uri);
+            }
+        }, (dialog, which) -> {
+            mainActivity.getWebView().loadUrl(uri);
+            dialog.dismiss();
+        })
+                .setMessage("是否使用浏览器打开视频链接")
+                .show();
     }
 
     public static File createCacheDirectory(Context context) {

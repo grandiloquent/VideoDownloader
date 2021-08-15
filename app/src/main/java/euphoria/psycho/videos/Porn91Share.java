@@ -29,7 +29,7 @@ import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.NetShare;
 
-public class Porn91Share extends BaseVideoExtractor {
+public class Porn91Share extends BaseVideoExtractor<String> {
     public static Pattern MATCH_91PORN = Pattern.compile("91porn.com/view_video.php\\?viewkey=[a-zA-Z0-9]+");
 
     public Porn91Share(String inputUri, MainActivity mainActivity) {

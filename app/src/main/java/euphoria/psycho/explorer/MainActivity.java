@@ -47,6 +47,13 @@ public class MainActivity extends Activity implements ClientInterface {
         return mWebView;
     }
 
+    private void checkChrome() {
+        if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
+                PackageShare.isAppInstalled(this, "com.android.chrome")) {
+            PreferenceShare.getEditor().putBoolean("chrome", true).apply();
+        }
+    }
+
     private boolean checkPermissions() {
         List<String> needPermissions = new ArrayList<>();
         if (!PermissionShare.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE)) {
@@ -63,7 +70,6 @@ public class MainActivity extends Activity implements ClientInterface {
         }
         return false;
     }
-
 
     private void initialize() {
         setContentView(R.layout.activity_main);
@@ -88,10 +94,7 @@ public class MainActivity extends Activity implements ClientInterface {
         mBookmarkDatabase = new BookmarkDatabase(this);
         setWebView();
         loadStartPage();
-        if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
-                PackageShare.isAppInstalled(this, "com.android.chrome")) {
-            PreferenceShare.getEditor().putBoolean("chrome", true).apply();
-        }
+        checkChrome();
         //PackageShare.listAllInstalledPackages(this);
     }
 
@@ -108,14 +111,20 @@ public class MainActivity extends Activity implements ClientInterface {
     private void setDownloadVideo() {
         findViewById(R.id.file_download).setOnClickListener(v -> {
             if (XVideosRedShare.parsingXVideos(this, null)) return;
-            if (Porn91Share.MATCH_91PORN.matcher(mWebView.getUrl()).find()) {
-                new Porn91Share(mWebView.getUrl(), this).parsingVideo();
+            String url = mWebView.getUrl();
+            if (Porn91Share.MATCH_91PORN.matcher(url).find()) {
+                new Porn91Share(url, this).parsingVideo();
             }
-            if (mWebView.getUrl().contains("youtube.com/watch")) {
-                Share.startYouTubeActivity(this, mWebView.getUrl());
+            if (url.contains("youtube.com/watch")) {
+                Share.startYouTubeActivity(this, url);
                 return;
             }
-            if (IqiyiShare.parsingVideo(this, null)) return;
+            Logger.d(String.format("setDownloadVideo: %s", url));
+            if (IqiyiShare.MATCH_IQIYI.matcher(url).find()) {
+                Logger.d(String.format("setDownloadVideo: %s", ""));
+                new IqiyiShare(url, MainActivity.this).parsingVideo();
+                return;
+            }
             if (AcFunShare.parsingVideo(this, null)) return;
             if (XVideosShare.parsingVideo(this, null)) return;
             if (mVideoUrl != null) {
@@ -214,7 +223,7 @@ public class MainActivity extends Activity implements ClientInterface {
             Share.startYouTubeActivity(this, uri);
             return true;
         }
-        if (IqiyiShare.parsingVideo(this, uri)) return true;
+        //if (IqiyiShare.parsingVideo(this, uri)) return true;
         if (AcFunShare.parsingVideo(this, uri)) return true;
         if (XVideosShare.parsingVideo(this, uri)) return true;
         return false;

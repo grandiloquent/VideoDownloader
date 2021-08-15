@@ -1,8 +1,17 @@
 package euphoria.psycho.videos;
 
+import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Process;
+import android.text.TextUtils;
 import android.util.Pair;
+import android.webkit.CookieManager;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -17,33 +26,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
-public class IqiyiShare {
-    public static boolean parsingVideo(MainActivity mainActivity, String url) {
-        String uri = url == null ? mainActivity.getWebView().getUrl() : url;
-        if (uri.contains(".iqiyi.com")) {
-            ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            IqiyiShare.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
-                if (value != null) {
-                    Helper.viewVideo(mainActivity, value);
-                } else {
-                    Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
-                }
-                progressDialog.dismiss();
-            }));
-            return true;
-        }
-        return false;
+public class IqiyiShare extends BaseVideoExtractor<List<Pair<String, String>>> {
+    public static Pattern MATCH_IQIYI = Pattern.compile("\\.iqiyi\\.com/v_");
+    private String mTitle;
+
+    public IqiyiShare(String inputUri, MainActivity mainActivity) {
+        super(inputUri, mainActivity);
     }
 
-    public static String md5(final String s) {
+    private static String md5(final String s) {
         final String MD5 = "MD5";
         try {
             // Create MD5 Hash
@@ -94,52 +96,7 @@ public class IqiyiShare {
         return null;
     }
 
-
-    public static void performTask(String uri, Callback callback) {
-        new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String response = null;
-            try {
-                response = getUrl(uri);
-                if (response != null) {
-                    String tvid = findJSONValue("\"tvid\":", response, false);
-                    String vid = findJSONValue("\"vid\":", response, true);
-                    Logger.d(String.format("performTask: tvid = %s, vid = %s", tvid, vid));
-                    String params = String.format("/vps?tvid=%s&vid=%s&v=0&qypid=%s_12&src=01012001010000000000&t=%d&k_tag=1&k_uid=%s&rs=1",
-                            tvid, vid, tvid, System.currentTimeMillis(), getMagicId());
-                    String hash = md5(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
-                    String url = String.format("%s%s&vf=%s", "http://cache.video.qiyi.com", params, hash);
-                    response = getUrl(url);
-                    JSONObject obj = new JSONObject(response);
-                    if (obj.get("code").equals("A00000")) {
-                        String prefix = obj.getJSONObject("data").getJSONObject("vp").getString("du");
-                        Logger.d(String.format("performTask: %s", prefix));
-                        JSONArray videos = obj.getJSONObject("data").getJSONObject("vp").getJSONArray("tkl").getJSONObject(0).getJSONArray("vs");
-                        List<Pair<Integer, String>> list = new ArrayList<>();
-                        for (int i = 0; i < videos.length(); i++) {
-                            list.add(Pair.create(
-                                    Integer.parseInt(videos.getJSONObject(i).getString("scrsz").split("x")[0]),
-                                    videos.getJSONObject(i).getJSONArray("fs").getJSONObject(0).getString("l")
-                            ));
-                        }
-                        Collections.sort(list, (o1, o2) -> o2.first - o1.first);
-                        response = getUrl(prefix + list.get(0).second);
-                        if (response != null)
-                            response = findJSONValue("\"l\":", response, true);
-                    }
-
-                }
-
-            } catch (Exception e) {
-                Logger.d(String.format("performTask: %s", e.getMessage()));
-
-            }
-            if (callback != null)
-                callback.run(response);
-        }).start();
-    }
-
-    private static String getUrl(String uri) throws IOException {
+    private String getHtml(String uri) throws IOException {
         URL url = new URL(uri);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         NetShare.addDefaultRequestHeaders(urlConnection);
@@ -150,5 +107,107 @@ public class IqiyiShare {
         } else {
             return null;
         }
+    }
+
+    @Override
+    protected List<Pair<String, String>> fetchVideoUri(String uri) {
+        try {
+            String response = getHtml(uri);
+            if (response == null) {
+                return null;
+            }
+            mTitle = StringShare.substring(response, "<title>", "-");
+            String tvid = findJSONValue("\"tvid\":", response, false);
+            String vid = findJSONValue("\"vid\":", response, true);
+            Logger.d(String.format("performTask: tvid = %s, vid = %s", tvid, vid));
+            String params = String.format("/vps?tvid=%s&vid=%s&v=0&qypid=%s_12&src=01012001010000000000&t=%d&k_tag=1&k_uid=%s&rs=1",
+                    tvid, vid, tvid, System.currentTimeMillis(), getMagicId());
+            String hash = md5(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
+            String url = String.format("%s%s&vf=%s", "http://cache.video.qiyi.com", params, hash);
+            response = getHtml(url);
+            Logger.d(String.format("fetchVideoUri: %s", url));
+            if (response == null) {
+                return null;
+            }
+            JSONObject obj = new JSONObject(response);
+            if (obj.get("code").equals("A00000")) {
+                String prefix = obj.getJSONObject("data").getJSONObject("vp").getString("du");
+                JSONArray videos = obj.getJSONObject("data").getJSONObject("vp").getJSONArray("tkl").getJSONObject(0).getJSONArray("vs");
+                List<Pair<Integer, JSONArray>> list = new ArrayList<>();
+                for (int i = 0; i < videos.length(); i++) {
+                    list.add(Pair.create(
+                            Integer.parseInt(videos.getJSONObject(i).getString("scrsz").split("x")[0]),
+                            videos.getJSONObject(i).getJSONArray("fs")
+                    ));
+                }
+                Collections.sort(list, (o1, o2) -> o2.first - o1.first);
+                JSONArray largestResolution = list.get(0).second;
+                List<Pair<String, String>> videoList = new ArrayList<>();
+                for (int i = 0; i < largestResolution.length(); i++) {
+                    String uriPart = largestResolution.getJSONObject(i).getString("l");
+                    String videoInfo = getHtml(prefix + uriPart);
+                    if (videoInfo == null) {
+                        return null;
+                    }
+                    String realVideoUri = findJSONValue("\"l\":", videoInfo, true);
+                    videoList.add(Pair.create(mTitle + i, realVideoUri));
+                }
+                return videoList;
+            }
+
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    @Override
+    protected String processUri(String inputUri) {
+        return inputUri;
+    }
+
+    @Override
+    protected void processVideo(List<Pair<String, String>> videoUri) {
+        AlertDialog alertDialog =
+                new AlertDialog.Builder(mMainActivity)
+                        .setTitle("询问")
+                        .setMessage("确定要下载此视频吗？")
+                        .setPositiveButton("确定", (dialog, which) -> {
+                            dialog.dismiss();
+                            executeTask(videoUri);
+                        })
+                        .setNegativeButton("取消", (dialog, which) -> {
+                            dialog.dismiss();
+                        })
+                        .create();
+        alertDialog.show();
+    }
+
+    private void executeTask(List<Pair<String, String>> videoUri) {
+        DownloadManager manager = (DownloadManager) mMainActivity.getSystemService(Context.DOWNLOAD_SERVICE);
+        for (int i = 0; i < videoUri.size(); i++) {
+            downloadFile(manager, videoUri.get(i).second, videoUri.get(i).first + ".f4v", "video/x-f4v");
+        }
+    }
+
+    private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
+        final DownloadManager.Request request;
+        Uri uri = Uri.parse(url);
+        request = new DownloadManager.Request(uri);
+        request.setMimeType(mimetype);
+        // set downloaded file destination to /sdcard/Download.
+        // or, should it be set to one of several Environment.DIRECTORY* dirs depending on mimetype?
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+        // let this downloaded file be scanned by MediaScanner - so that it can
+        // show up in Gallery app, for example.
+        request.allowScanningByMediaScanner();
+        // XXX: Have to use the old url since the cookies were stored using the
+        // old percent-encoded url.
+//        String cookies = CookieManager.getInstance().getCookie(url, privateBrowsing);
+//        request.addRequestHeader("cookie", cookies);
+//        request.addRequestHeader("User-Agent", userAgent);
+//        request.addRequestHeader("Referer", referer);
+        request.setNotificationVisibility(
+                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        manager.enqueue(request);
     }
 }
