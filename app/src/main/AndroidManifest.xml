@@ -59,17 +59,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".BookmarkActivity" />
-        <activity
-            android:name=".SampleDownloadActivity"
-            android:excludeFromRecents="true"
-            android:taskAffinity=""
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity>
         <activity android:name=".DownloadActivity">
             <!--            <intent-filter>-->
             <!--                <category android:name="android.intent.category.LAUNCHER" />-->
