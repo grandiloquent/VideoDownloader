@@ -3,6 +3,7 @@ package euphoria.psycho.videos;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.regex.Matcher;
@@ -20,24 +21,21 @@ public class DouYinShare extends BaseVideoExtractor {
         super(inputUri, mainActivity);
     }
 
+    private String getLocation(String videoId) throws IOException {
+        URL url = new URL("https://v.douyin.com/" + videoId);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+        urlConnection.setInstanceFollowRedirects(false);
+        return urlConnection.getHeaderField("Location");
+    }
+
     private String getRealVideoUri(String videoId) {
         try {
-            URL url = new URL("https://v.douyin.com/" + videoId);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
-            int code = urlConnection.getResponseCode();
-            if (code < 400 && code >= 200) {
-                String response = NetShare.readString(urlConnection);
-                if (response == null) {
-                    return null;
-                }
-                Pattern pattern = Pattern.compile("video/(\\d+)");
-                Matcher matcher = pattern.matcher(response);
-                if (matcher.find()) {
-                    return "https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=" + matcher.group(1);
-                }
-            } else {
-                return null;
+            String videoUri = getLocation(videoId);
+            Pattern pattern = Pattern.compile("video/(\\d+)");
+            Matcher matcher = pattern.matcher(videoUri);
+            if (matcher.find()) {
+                return "https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=" + matcher.group(1);
             }
         } catch (Exception ignored) {
         }
@@ -45,19 +43,18 @@ public class DouYinShare extends BaseVideoExtractor {
     }
 
     @Override
-    protected String fetchVideoUri(String uri) {
-        if (uri == null) {
+    protected String fetchVideoUri(String shareId) {
+        if (shareId == null) {
             return null;
         }
-        String realVideoUri = getRealVideoUri(uri);
+        String realVideoUri = getRealVideoUri(shareId);
         if (realVideoUri == null) {
             return null;
         }
         try {
-            URL url = new URL(uri);
+            URL url = new URL(realVideoUri);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
-            urlConnection.setRequestProperty("Referer", "https://www.iesdouyin.com/");
             int code = urlConnection.getResponseCode();
             if (code < 400 && code >= 200) {
                 String response = NetShare.readString(urlConnection);
@@ -75,6 +72,7 @@ public class DouYinShare extends BaseVideoExtractor {
                 return null;
             }
         } catch (Exception ignored) {
+
         }
         return null;
     }

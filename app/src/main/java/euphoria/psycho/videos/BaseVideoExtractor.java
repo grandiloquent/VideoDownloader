@@ -7,12 +7,11 @@ import android.widget.Toast;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.Logger;
 
 public abstract class BaseVideoExtractor {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
     private final String mInputUri;
-    private final MainActivity mMainActivity;
+    protected final MainActivity mMainActivity;
 
     protected BaseVideoExtractor(String inputUri, MainActivity mainActivity) {
         mInputUri = inputUri;
@@ -35,7 +34,7 @@ public abstract class BaseVideoExtractor {
                 if (videoUri != null) {
                     mMainActivity.getWebView().loadUrl(videoUri);
                     Helper.openDownloadDialog(mMainActivity, uri, videoUri);
-                }else {
+                } else {
                     Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                 }
                 progressDialog.dismiss();
