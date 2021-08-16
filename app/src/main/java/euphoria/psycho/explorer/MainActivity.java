@@ -233,7 +233,6 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public boolean shouldOverrideUrlLoading(String uri) {
-        Logger.d(String.format("shouldOverrideUrlLoading: %s", uri));
         if (XVideosRedShare.parsingXVideos(this, uri)) return true;
         if (Porn91.handle(uri, this)) {
             return true;
