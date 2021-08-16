@@ -85,5 +85,12 @@ int substring(const char *s, const char *first, const char *second,
     }
     return -1;
 }
-
+static inline int randomIP(int begin, int end) {
+    int gap = end - begin + 1;
+    int ret = 0;
+    //srand((unsigned) time(0));
+    ret = rand() % gap + begin;
+//in++;
+    return ret;
+}
 #endif

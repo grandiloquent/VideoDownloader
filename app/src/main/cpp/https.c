@@ -138,7 +138,8 @@ static int http_header(HTTP_INFO *hi, char *param) {
 
     if (strncasecmp(t1, "HTTP", 4) == 0) {
         hi->response.status = atoi(t2);
-    } else if (strncasecmp(t1, "set-cookie:", 11) == 0) {
+    }
+    else if (strncasecmp(t1, "set-cookie:", 11) == 0) {
         snprintf(hi->response.cookie, 512, "%s", t2);
     } else if (strncasecmp(t1, "location:", 9) == 0) {
         len = (int) strlen(t2);
@@ -146,7 +147,8 @@ static int http_header(HTTP_INFO *hi, char *param) {
         hi->response.location[len] = 0;
     } else if (strncasecmp(t1, "content-length:", 15) == 0) {
         hi->response.content_length = atoi(t2);
-    } else if (strncasecmp(t1, "transfer-encoding:", 18) == 0) {
+    }
+    else if (strncasecmp(t1, "transfer-encoding:", 18) == 0) {
         if (strncasecmp(t2, "chunked", 7) == 0) {
             hi->response.chunked = TRUE;
         }
@@ -585,16 +587,8 @@ int http_close(HTTP_INFO *hi) {
 
 
 /*---------------------------------------------------------------------*/
-static inline int randomIP(int begin, int end) {
-    int gap = end - begin + 1;
-    int ret = 0;
-    srand((unsigned) time(0));
-    ret = rand() % gap + begin;
-//in++;
-    return ret;
-}
 
-int http_get(HTTP_INFO *hi, char *url, char *response, int size) {
+int http_get(HTTP_INFO *hi, char *url, char *response, int size, char* headers) {
     char request[1024], err[100];
     char host[256], port[10], dir[1024];
     int sock_fd, https, verify;
@@ -642,15 +636,15 @@ int http_get(HTTP_INFO *hi, char *url, char *response, int size) {
     }
 
     /* Send HTTP request. */
+
     len = snprintf(request, 1024,
                    "GET %s HTTP/1.1\r\n"
                    "User-Agent: Mozilla/4.0\r\n"
                    "Host: %s:%s\r\n"
                    "Content-Type: application/json; charset=utf-8\r\n"
                    "Connection: Keep-Alive\r\n"
-                   "X-Forwarded-For: %d.%d.%d.%d\r\n"
                    "%s\r\n",
-                   dir, host, port, randomIP(1, 255),randomIP(1, 255),randomIP(1, 255),randomIP(1, 255), hi->request.cookie);
+                   dir, host, port,headers);
 
     if ((ret = https_write(hi, request, len)) != len) {
         https_close(hi);
