@@ -74,6 +74,7 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void initialize() {
+
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(v -> {
@@ -119,7 +120,6 @@ public class MainActivity extends Activity implements ClientInterface {
                 return;
             }
             if (Iqiyi.MATCH_IQIYI.matcher(url).find()) {
-                Logger.d(String.format("setDownloadVideo: %s", ""));
                 new Iqiyi(url, MainActivity.this).parsingVideo();
                 return;
             }

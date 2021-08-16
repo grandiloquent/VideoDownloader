@@ -652,7 +652,6 @@ int http_get(HTTP_INFO *hi, char *url, char *response, int size) {
                    "%s\r\n",
                    dir, host, port, randomIP(1, 255),randomIP(1, 255),randomIP(1, 255),randomIP(1, 255), hi->request.cookie);
 
-    LOGE("%s",request);
     if ((ret = https_write(hi, request, len)) != len) {
         https_close(hi);
 
