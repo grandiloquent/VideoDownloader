@@ -1,5 +1,7 @@
 package euphoria.psycho.share;
 
+
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -57,7 +59,13 @@ public class NetShare {
             String contentEncoding = connection.getHeaderField("Content-Encoding");
             if (contentEncoding != null && contentEncoding.equals("gzip")) {
                 in = new GZIPInputStream(connection.getInputStream());
-            } else {
+            }
+            /*
+            "implementation group": "org.brotli', name: 'dec', version: '0.1.1",
+            else if (contentEncoding != null && contentEncoding.equals("br")) {
+                in = new BrotliInputStream(connection.getInputStream());
+            } */
+            else {
                 in = connection.getInputStream();
             }
             reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));

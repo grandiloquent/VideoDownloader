@@ -18,6 +18,7 @@ import euphoria.psycho.explorer.DownloadActivity;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 
