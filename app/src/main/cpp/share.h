@@ -48,23 +48,26 @@ int substring(const char *s, const char *first, const char *second,
     int nomatch = 0;
     int found = 0;
     while (*s) {
-        if (*s == *first) {
+        if (!found && *s == *first) {
             nomatch = 0;
             for (int i = 1; i < lFirst; i++) {
-                if (*(s + i) == 0)return -1;
+                if (*(s + i) == 0) return -1;
                 if (*(s + i) != *(first + i)) {
                     s++;
                     nomatch = 1;
                     break;
                 }
             }
-            if (nomatch)continue;
+            if (nomatch) continue;
             s += lFirst;
             save = s;
             found = 1;
+
             continue;
         }
+
         if (found && *s == *second) {
+
             nomatch = 0;
 
             for (int i = 1; i < lSecond; i++) {
@@ -85,6 +88,7 @@ int substring(const char *s, const char *first, const char *second,
     }
     return -1;
 }
+
 static inline int randomIP(int begin, int end) {
     int gap = end - begin + 1;
     int ret = 0;
@@ -93,4 +97,5 @@ static inline int randomIP(int begin, int end) {
 //in++;
     return ret;
 }
+
 #endif

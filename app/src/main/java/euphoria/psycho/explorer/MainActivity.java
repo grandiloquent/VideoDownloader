@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,26 +75,22 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void initialize() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                byte[] buffer = new byte[128];
-                try {
-                    byte[] buf="https://91porn.com/view_video.php?viewkey=a3737ddb776250bd1a45&page=&viewtype=&category="
-                            .getBytes("UTF-8");
-                    int length= buf.length;
-                    int result = NativeShare.get91Porn(buf
-                           ,
-                            length,
-                            buffer,128
-                    );
-                    Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
-
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                byte[] buffer = new byte[128];
+//                byte[] buf="https://v.douyin.com/eoQggd5/"
+//                        .getBytes(StandardCharsets.UTF_8);
+//                int length= buf.length;
+//                int result = NativeShare.getDouYin(buf
+//                       ,
+//                        length,
+//                        buffer
+//                );
+//                Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
+//
+//            }
+//        }).start();
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(v -> {
