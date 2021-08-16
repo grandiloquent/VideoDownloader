@@ -97,7 +97,6 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage();
         checkChrome();
         //PackageShare.listAllInstalledPackages(this);
-        Bilibili.handle("https://www.bilibili.com/video/BV1XT4y1E7rJ/?spm_id_from=autoNext", this);
     }
 
     private void loadStartPage() {
@@ -109,7 +108,6 @@ public class MainActivity extends Activity implements ClientInterface {
         }
     }
 
-
     private void setDownloadVideo() {
         findViewById(R.id.file_download).setOnClickListener(v -> {
             if (XVideosRedShare.parsingXVideos(this, null)) return;
@@ -120,7 +118,6 @@ public class MainActivity extends Activity implements ClientInterface {
             if (YouTube.handle(url, this)) {
                 return;
             }
-            Logger.d(String.format("setDownloadVideo: %s", url));
             if (Iqiyi.MATCH_IQIYI.matcher(url).find()) {
                 Logger.d(String.format("setDownloadVideo: %s", ""));
                 new Iqiyi(url, MainActivity.this).parsingVideo();
@@ -128,6 +125,9 @@ public class MainActivity extends Activity implements ClientInterface {
             }
             if (AcFunShare.parsingVideo(this, null)) return;
             if (XVideos.handle(url, this)) {
+                return;
+            }
+            if (Bilibili.handle(url, this)) {
                 return;
             }
             if (mVideoUrl != null) {
