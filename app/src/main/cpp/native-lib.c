@@ -8,7 +8,6 @@ JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
         JNIEnv *env, jobject thisObj, jbyteArray urlBytes, jint length,
         jbyteArray buffer,jint bufferLength) {
     // int len = (*env)->GetArrayLength(env, urlBytes);
-    LOGE("%d",length);
     jbyte *url = (*env)->GetByteArrayElements(env, urlBytes, NULL);
     HTTP_INFO hi1;
     // 32768 = 32 KB
