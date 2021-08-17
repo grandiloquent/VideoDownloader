@@ -2,142 +2,40 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "mbedtls/net_sockets.h"
-#include "mbedtls/ssl.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include "share.h"
-#include "tls.h"
 
-const char *pers = "mini_client";
-#define GET_REQUEST "GET / HTTP/1.0\r\n\r\n\r\n"
 
 JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
         JNIEnv *env, jclass thisObj, jbyteArray urlBytes,
         jbyteArray buffer, jint bufferLength) {
-
-    int ret = 0;
-    mbedtls_net_context server_fd;
-    struct sockaddr_in addr;
-    mbedtls_x509_crt ca;
-
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
-    mbedtls_ssl_context ssl;
-    mbedtls_ssl_config conf;
-    mbedtls_ctr_drbg_init(&ctr_drbg);
-
-    /*
-    * 0. Initialize and setup stuff
-    */
-    mbedtls_net_init(&server_fd);
-    mbedtls_ssl_init(&ssl);
-    mbedtls_ssl_config_init(&conf);
-
-    mbedtls_x509_crt_init(&ca);
-
-    mbedtls_entropy_init(&entropy);
-    if (mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
-                              NULL, 0) != 0) {
-        ret = -1;
-        LOGE("%s", "mbedtls_ctr_drbg_seed");
-        goto exit;
-    }
-
-    if (mbedtls_ssl_config_defaults(&conf,
-                                    MBEDTLS_SSL_IS_CLIENT,
-                                    MBEDTLS_SSL_TRANSPORT_STREAM,
-                                    MBEDTLS_SSL_PRESET_DEFAULT) != 0) {
-        LOGE("%s", "mbedtls_ssl_config_defaults");
-        ret = -1;
-        goto exit;
-    }
-
-    mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
     crt_rsa[crt_rsa_size - 1] = 0;
-    if (mbedtls_x509_crt_parse(&ca, crt_rsa, crt_rsa_size) != 0) {
-        LOGE("%s", "mbedtls_x509_crt_parse_der");
-        ret = -1;
-        goto exit;
-    }
+    TLSConnectParams tlsConnectParams = {.ca=crt_rsa, .ca_len=(crt_rsa_size - 1)};
 
-    mbedtls_ssl_conf_ca_chain(&conf, &ca, NULL);
-    mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_REQUIRED);
-
-    if (mbedtls_ssl_setup(&ssl, &conf) != 0) {
-        LOGE("%s", "mbedtls_ssl_setup");
-        ret = -1;
-        goto exit;
-    }
-    if (mbedtls_ssl_set_hostname(&ssl, "bing.com") != 0) {
-        LOGE("%s", "mbedtls_ssl_set_hostname");
-        ret = -1;
-        goto exit;
-    }
-    /*
-        * 1. Start the connection
-        */
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-
-    ret = 1; /* for endianness detection */
-    addr.sin_port = htons(443);
-
-    struct hostent *he;
-    if ((he = gethostbyname("bing.com")) == NULL) {
-        LOGE("%s", "gethostbyname");
-        ret = -1;
-        goto exit;
-    }
-    memcpy(&addr.sin_addr, he->h_addr_list[0], he->h_length);
-    // addr.sin_addr.s_addr = "108.160.165.62";
-    ret = 0;
-
-    if ((server_fd.MBEDTLS_PRIVATE(fd) = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        LOGE("%s", "server_fd.MBEDTLS_PRIVATE(fd)");
-        ret = -1;
-        goto exit;
-    }
-
-    if (connect(server_fd.MBEDTLS_PRIVATE(fd),
-                (const struct sockaddr *) &addr, sizeof(addr)) < 0) {
-        LOGE("%s", "connect");
-        ret = -1;
-        goto exit;
-    }
-
-    mbedtls_ssl_set_bio(&ssl, &server_fd, mbedtls_net_send, mbedtls_net_recv, NULL);
-
-    if (mbedtls_ssl_handshake(&ssl) != 0) {
-        LOGE("%s", "mbedtls_ssl_handshake");
-        ret = -1;
-        goto exit;
-    }
-
-    /*
-     * 2. Write the GET request and close the connection
-     */
-    int writeLen;
-    HAL_TLS_Write(&ssl, GET_REQUEST, strlen(GET_REQUEST), 500, &writeLen);
-
-    LOGE("HAL_TLS_Write %d %d", strlen(GET_REQUEST), writeLen);
+    uintptr_t handle = HAL_TLS_Connect(&tlsConnectParams, "91porn.com", 443);
+    size_t written_len;
+    char *header =
+            "GET / HTTP/1.1\r\n"
+            "Accept: text/css,*/*;q=0.1\r\n"
+            "Accept-Encoding: gzip, deflate, br\r\n"
+            "Accept-Language: zh-CN,zh;q=0.9,en;q=0.8\r\n"
+            "Cache-Control: no-cache\r\n"
+            "Connection: keep-alive\r\n"
+            "Host: 91porn.com\r\n"
+            "Pragma: no-cache\r\n"
+            "sec-ch-ua: Chromium\";v=\"92\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"92\r\n"
+            "sec-ch-ua-mobile: ?0\r\n"
+            "Sec-Fetch-Dest: style\r\n"
+            "Sec-Fetch-Mode: cors\r\n"
+            "Sec-Fetch-Site: cross-site\r\n"
+            "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36\r\n"
+            "\r\n";
+    HAL_TLS_Write(handle, header, strlen(header), 5000,
+                  &written_len);
+    LOGE("%d", written_len);
     char buf[1024];
-    memset(buf,0,1024);
-    int readlen;
-    if (HAL_TLS_Read(&ssl, buf, 1023, 5000, &readlen) != QCLOUD_RET_SUCCESS) {
-        ret = -1;
-       // goto exit;
-    }
-    LOGE("%d %s", readlen, buf);
-    HAL_TLS_Disconnect(&ssl, &server_fd, &entropy, &ctr_drbg, &ca);
-    return 0;
-    exit:
-    HAL_TLS_Disconnect(&ssl, &server_fd, &entropy, &ctr_drbg, &ca);
+    size_t read_len;
+    HAL_TLS_Read(handle, buf, 1023, 5000, &read_len);
+    LOGE("%s", buf);
     return -1;
 /*
     // ------------------

@@ -11,6 +11,7 @@
 #include "str.h"
 #include "url.h"
 #include "timer.h"
+#include "tls.h"
 
 
 static inline int randomIP(int begin, int end) {

@@ -3,6 +3,9 @@
 // #include "tls.h"
 
 #include <errno.h>
+#include <mbedtls/net_sockets.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
 
 #define QCLOUD_RET_MQTT_ALREADY_CONNECTED 4
 #define QCLOUD_RET_MQTT_CONNACK_CONNECTION_ACCEPTED 3
@@ -100,8 +103,8 @@ typedef struct {
 } TLSDataParams;
 
 typedef struct {
-    const char *ca_crt;
-    uint16_t ca_crt_len;
+    const char *ca;
+    uint32_t ca_len;
 
 #ifdef AUTH_MODE_CERT
     /**
@@ -182,11 +185,11 @@ static int _mbedtls_client_init(TLSDataParams *pDataParams, TLSConnectParams *pC
     }
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
-    if (pConnectParams->ca_crt != NULL) {
+    if (pConnectParams->ca != NULL) {
         if ((ret = mbedtls_x509_crt_parse(&(pDataParams->ca_cert),
-                                          (const unsigned char *) pConnectParams->ca_crt,
-                                          (pConnectParams->ca_crt_len + 1)))) {
-            LOGE("parse ca crt failed returned 0x%04x", ret < 0 ? -ret : ret);
+                                          (const unsigned char *) pConnectParams->ca,
+                                          (pConnectParams->ca_len + 1)))) {
+            LOGE("parse ca failed returned 0x%04x", ret < 0 ? -ret : ret);
             return QCLOUD_ERR_SSL_CERT;
         }
     }
