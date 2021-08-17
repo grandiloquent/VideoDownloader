@@ -1,12 +1,13 @@
 #include <jni.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "https.h"
 #include "share.h"
 #include "cJSON.h"
 
 JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
-        JNIEnv *env, jobject thisObj, jbyteArray urlBytes, jint length,
+        JNIEnv *env, jclass thisObj, jbyteArray urlBytes, jint length,
         jbyteArray buffer, jint bufferLength) {
 
     // ------------------
@@ -31,7 +32,7 @@ JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
     int statusCode = http_get(&hi, (char *) url, (char *) responseBuffer, responseBufferSize,
                               headerBuffer);
     if (statusCode >= 400 || statusCode < 200) {
-        LOGE("get91Porn: %d", statusCode);
+        LOGE("get91Porn: statusCode = %d", statusCode);
         goto error;
     }
 
