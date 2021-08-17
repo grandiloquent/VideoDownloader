@@ -8,5 +8,5 @@ if (window.location.hostname === "91porn.com") {
         document.body.replaceWith(body);
     }
     element.style.margin = '0';
-    body.style.padding = '0';
+    document.body.style.padding = '0!important';
 }
