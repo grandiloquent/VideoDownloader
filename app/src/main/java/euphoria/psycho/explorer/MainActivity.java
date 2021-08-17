@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.ContactsContract.Directory;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -76,18 +78,18 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void initialize() {
+        // Logger.d(String.format("initialize: %s", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
 //                byte[] buffer = new byte[128];
-//                byte[] buf = "https://v.douyin.com/eoQggd5/"
+//                byte[] buf = "c8fe382e726ae919036f"
 //                        .getBytes(StandardCharsets.UTF_8);
-//                int length = buf.length;
 //                int result = NativeShare.get91Porn(buf,
 //                        buffer,
-//                        length
+//                        128
 //                );
-//                //Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
+//               Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
 //
 //            }
 //        }).start();

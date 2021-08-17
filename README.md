@@ -34,3 +34,5 @@ adb install-multiple 1.apk 2.apk 3.apk 4.apk 5.apk 6.apk 7.apk 8.apk
 ## 引用
 
 * https://github.com/HaarigerHarald/android-youtubeExtractor
+* https://github.com/yhirose/cpp-httplib
+* https://github.com/leenjewel/openssl_for_ios_and_android
