@@ -2,14 +2,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "https.h"
-#include "share.h"
-#include "cJSON.h"
-
 JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
         JNIEnv *env, jclass thisObj, jbyteArray urlBytes, jint length,
         jbyteArray buffer, jint bufferLength) {
 
+
+
+/*
     // ------------------
     int urlBytesSize = (*env)->GetArrayLength(env, urlBytes);
     jbyte *url = (*env)->GetByteArrayElements(env, urlBytes, NULL);
@@ -67,6 +66,8 @@ JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
     // ------------------
     error:
     (*env)->ReleaseByteArrayElements(env, urlBytes, url, 0);
+    */
+
     return 0;
 }
 
