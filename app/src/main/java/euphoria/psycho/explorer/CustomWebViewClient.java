@@ -1,23 +1,35 @@
 package euphoria.psycho.explorer;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import euphoria.psycho.share.Logger;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import euphoria.psycho.share.FileShare;
 
 public class CustomWebViewClient extends WebViewClient {
 
 
     private final ClientInterface mClientInterface;
+    private final WebResourceResponse mEmptyResponse = new WebResourceResponse(
+            "text/plain",
+            "UTF-8",
+            new ByteArrayInputStream("".getBytes())
+    );
+    private String mJavaScript;
 
     public CustomWebViewClient(ClientInterface clientInterface) {
         mClientInterface = clientInterface;
+        try {
+            mJavaScript = FileShare.readText(clientInterface.getContext().getAssets().open("youtube.js"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -40,9 +52,10 @@ public class CustomWebViewClient extends WebViewClient {
         super.onPageStarted(view, url, favicon);
 
     }
-
+// 
     @Override
     public void onPageFinished(WebView view, String url) {
+        view.evaluateJavascript(mJavaScript, null);
     }
 
     @Override
@@ -61,6 +74,9 @@ public class CustomWebViewClient extends WebViewClient {
     @Override
     @SuppressWarnings("deprecation")
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+        if (url.contains("://fans.91p20.space/")) {
+            return mEmptyResponse;
+        }
         return super.shouldInterceptRequest(view, url);
     }
 

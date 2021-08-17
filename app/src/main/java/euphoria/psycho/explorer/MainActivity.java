@@ -2,6 +2,7 @@ package euphoria.psycho.explorer;
 
 import android.Manifest.permission;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build.VERSION_CODES;
@@ -75,21 +76,21 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void initialize() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                byte[] buffer = new byte[128];
-                byte[] buf = "https://v.douyin.com/eoQggd5/"
-                        .getBytes(StandardCharsets.UTF_8);
-                int length = buf.length;
-                int result = NativeShare.get91Porn(buf,
-                        buffer,
-                        length
-                );
-                //Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
-
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                byte[] buffer = new byte[128];
+//                byte[] buf = "https://v.douyin.com/eoQggd5/"
+//                        .getBytes(StandardCharsets.UTF_8);
+//                int length = buf.length;
+//                int result = NativeShare.get91Porn(buf,
+//                        buffer,
+//                        length
+//                );
+//                //Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
+//
+//            }
+//        }).start();
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         findViewById(R.id.add_link).setOnClickListener(v -> {
@@ -245,6 +246,11 @@ public class MainActivity extends Activity implements ClientInterface {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
     }
     //
 
