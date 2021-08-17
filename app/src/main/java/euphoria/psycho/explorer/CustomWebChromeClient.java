@@ -2,6 +2,7 @@ package euphoria.psycho.explorer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
@@ -19,10 +20,6 @@ public class CustomWebChromeClient extends WebChromeClient {
     @Override
     public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
         //Log.e("TAG/", "Debug: onConsoleMessage, \n" + consoleMessage.message());
-        boolean isLog = false;
-        if (isLog) {
-            Toast.makeText(mActivity, consoleMessage.message(), Toast.LENGTH_LONG).show();
-        }
         return super.onConsoleMessage(consoleMessage);
     }
 

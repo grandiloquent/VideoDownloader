@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import euphoria.psycho.share.FileShare;
+import euphoria.psycho.share.Logger;
 
 public class CustomWebViewClient extends WebViewClient {
 
@@ -50,9 +51,9 @@ public class CustomWebViewClient extends WebViewClient {
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         super.onPageStarted(view, url, favicon);
-
     }
-// 
+
+    //
     @Override
     public void onPageFinished(WebView view, String url) {
         view.evaluateJavascript(mJavaScript, null);
@@ -74,7 +75,8 @@ public class CustomWebViewClient extends WebViewClient {
     @Override
     @SuppressWarnings("deprecation")
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        if (url.contains("://fans.91p20.space/")) {
+        if (url.contains("://fans.91p20.space/")
+                || url.contains("://ssl.google-analytics.com/")) {
             return mEmptyResponse;
         }
         return super.shouldInterceptRequest(view, url);
