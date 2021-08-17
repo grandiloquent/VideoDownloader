@@ -6,6 +6,7 @@
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
+#include "mbedtls/include/mbedtls/net_sockets.h"
 
 #define QCLOUD_RET_MQTT_ALREADY_CONNECTED 4
 #define QCLOUD_RET_MQTT_CONNACK_CONNECTION_ACCEPTED 3
@@ -96,7 +97,7 @@ typedef struct {
     mbedtls_ssl_context ssl;
     mbedtls_ssl_config ssl_conf;
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
-    mbedtls_x509_crt ca_cert;
+    mbedtls_x509_crt ca;
     mbedtls_x509_crt client_cert;
 #endif
     mbedtls_pk_context private_key;
@@ -141,7 +142,7 @@ static void _free_mebedtls(TLSDataParams *pParams) {
     mbedtls_net_free(&(pParams->socket_fd));
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
     mbedtls_x509_crt_free(&(pParams->client_cert));
-    mbedtls_x509_crt_free(&(pParams->ca_cert));
+    mbedtls_x509_crt_free(&(pParams->ca));
     mbedtls_pk_free(&(pParams->private_key));
 #endif
     mbedtls_ssl_free(&(pParams->ssl));
@@ -170,7 +171,7 @@ static int _mbedtls_client_init(TLSDataParams *pDataParams, TLSConnectParams *pC
     mbedtls_ssl_config_init(&(pDataParams->ssl_conf));
     mbedtls_ctr_drbg_init(&(pDataParams->ctr_drbg));
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
-    mbedtls_x509_crt_init(&(pDataParams->ca_cert));
+    mbedtls_x509_crt_init(&(pDataParams->ca));
     mbedtls_x509_crt_init(&(pDataParams->client_cert));
     mbedtls_pk_init(&(pDataParams->private_key));
 #endif
@@ -186,7 +187,7 @@ static int _mbedtls_client_init(TLSDataParams *pDataParams, TLSConnectParams *pC
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
     if (pConnectParams->ca != NULL) {
-        if ((ret = mbedtls_x509_crt_parse(&(pDataParams->ca_cert),
+        if ((ret = mbedtls_x509_crt_parse(&(pDataParams->ca),
                                           (const unsigned char *) pConnectParams->ca,
                                           (pConnectParams->ca_len + 1)))) {
             LOGE("parse ca failed returned 0x%04x", ret < 0 ? -ret : ret);
@@ -310,7 +311,7 @@ uintptr_t HAL_TLS_Connect(TLSConnectParams *pConnectParams, const char *host, in
                          &(pDataParams->ctr_drbg));
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
-    mbedtls_ssl_conf_ca_chain(&(pDataParams->ssl_conf), &(pDataParams->ca_cert), NULL);
+    mbedtls_ssl_conf_ca_chain(&(pDataParams->ssl_conf), &(pDataParams->ca), NULL);
     if ((ret = mbedtls_ssl_conf_own_cert(&(pDataParams->ssl_conf), &(pDataParams->client_cert),
                                          &(pDataParams->private_key))) != 0) {
         LOGE("mbedtls_ssl_conf_own_cert failed returned 0x%04x", ret < 0 ? -ret : ret);
@@ -391,7 +392,7 @@ void HAL_TLS_Disconnect(uintptr_t handle) {
     mbedtls_net_free(&(pParams->socket_fd));
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
     mbedtls_x509_crt_free(&(pParams->client_cert));
-    mbedtls_x509_crt_free(&(pParams->ca_cert));
+    mbedtls_x509_crt_free(&(pParams->ca));
     mbedtls_pk_free(&(pParams->private_key));
 #endif
     mbedtls_ssl_free(&(pParams->ssl));
