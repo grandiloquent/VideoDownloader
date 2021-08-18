@@ -17,7 +17,7 @@
 * [x] [B站](https://www.bilibili.com/)
 * [x] [Twitter](https://m.twitter.com)
 * [x] [YouTube](https://m.youtube.com)
-* [x] [91porn](https://91porn.com)
+* [x] [91porn](https://91porn.com/index.php)
 * [x] [XVideos](https://xvideos.com)
 * [x] [PornHub](https://www.pornhub.com)
 * [ ] [PornOne](https://pornone.com/)

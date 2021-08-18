@@ -42,20 +42,22 @@ public class ListenerDelegate {
     }
 
     private void onAddLink(View view) {
-        DialogShare.createEditDialog(mMainActivity, "", string -> {
-            if (DouYin.handle(string, mMainActivity)) {
+        DialogShare.createEditDialog(mMainActivity, "", uri -> {
+            if (DouYin.handle(uri, mMainActivity)) {
                 return;
             }
-            if (KuaiShou.handle(string, mMainActivity))
+            if (KuaiShou.handle(uri, mMainActivity))
                 return;
-            if (YouTube.handle(string, mMainActivity)) {
+            if (YouTube.handle(uri, mMainActivity)) {
                 return;
             }
             if (TwitterShare.parsingVideo(mMainActivity)) {
                 return;
             }
-            if (!string.startsWith("https://") && !string.startsWith("http://"))
-                mMainActivity.getWebView().loadUrl("https://" + string);
+            if (!uri.startsWith("https://") && !uri.startsWith("http://"))
+                mMainActivity.getWebView().loadUrl("https://" + uri);
+            else
+                mMainActivity.getWebView().loadUrl(uri);
         });
     }
 

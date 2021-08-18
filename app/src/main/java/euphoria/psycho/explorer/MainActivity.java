@@ -121,13 +121,13 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void loadStartPage() {
-        mWebView.loadUrl("https://i.y.qq.com/n2/m/index.html");
-//        if (getIntent().getData() != null) {
-//            mWebView.loadUrl(getIntent().getData().toString());
-//        } else {
-//            mWebView.loadUrl(PreferenceShare.getPreferences()
-//                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
-//        }
+        // mWebView.loadUrl("https://i.y.qq.com/n2/m/index.html");
+        if (getIntent().getData() != null) {
+            mWebView.loadUrl(getIntent().getData().toString());
+        } else {
+            mWebView.loadUrl(PreferenceShare.getPreferences()
+                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
+        }
     }
 
     @Override
@@ -209,7 +209,9 @@ public class MainActivity extends Activity implements ClientInterface {
         if (YouTube.handle(uri, this)) {
             return true;
         }
-        if (AcFunShare.parsingVideo(this, uri)) return true;
+        if (AcFunShare.parsingVideo(this, uri)) {
+            return true;
+        }
         if (XVideos.handle(uri, this)) {
             return true;
         }
