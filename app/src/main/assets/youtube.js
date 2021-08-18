@@ -2,13 +2,19 @@
 
 if (window.location.hostname === "91porn.com") {
     const body = document.createElement('body');
-    const element = document.querySelector('#wrapper .row');
-    if (element) {
-        body.appendChild(element);
-        document.body.replaceWith(body);
+    const row = document.querySelector('#wrapper .row');
+    if (row) {
+        row.style.margin = '0';
+        body.appendChild(row);
     }
-    element.style.margin = '0';
-    const style=document.createElement('style');
-    style.textContent="body{padding:0!important}";
+    const paging = document.getElementById('paging');
+    if (paging) {
+        body.appendChild(row);
+    }
+    document.body.replaceWith(body);
+
+
+    const style = document.createElement('style');
+    style.textContent = "body{padding:0!important}";
     document.querySelector('head').appendChild(style);
 }

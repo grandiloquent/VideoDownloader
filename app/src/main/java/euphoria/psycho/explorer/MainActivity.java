@@ -121,7 +121,7 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void loadStartPage() {
-        mWebView.loadUrl("https://i.y.qq.com");
+        mWebView.loadUrl("https://i.y.qq.com/n2/m/index.html");
 //        if (getIntent().getData() != null) {
 //            mWebView.loadUrl(getIntent().getData().toString());
 //        } else {
@@ -200,7 +200,9 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public boolean shouldOverrideUrlLoading(String uri) {
-        if (XVideosRedShare.parsingXVideos(this, uri)) return true;
+        if (XVideosRedShare.parsingXVideos(this, uri)) {
+            return true;
+        }
         if (Porn91.handle(uri, this)) {
             return true;
         }
