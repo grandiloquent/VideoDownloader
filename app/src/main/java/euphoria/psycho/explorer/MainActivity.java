@@ -63,11 +63,10 @@ public class MainActivity extends Activity implements ClientInterface {
 
     private boolean checkPermissions() {
         List<String> needPermissions = new ArrayList<>();
+        // we need the WRITE_EXTERNAL_STORAGE
+        // permission to download video
         if (!PermissionShare.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE)) {
             needPermissions.add(permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (!PermissionShare.checkSelfPermission(this, permission.READ_EXTERNAL_STORAGE)) {
-            needPermissions.add(permission.READ_EXTERNAL_STORAGE);
         }
         if (needPermissions.size() > 0) {
             if (SDK_INT >= VERSION_CODES.M) {
@@ -122,12 +121,13 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void loadStartPage() {
-        if (getIntent().getData() != null) {
-            mWebView.loadUrl(getIntent().getData().toString());
-        } else {
-            mWebView.loadUrl(PreferenceShare.getPreferences()
-                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
-        }
+        mWebView.loadUrl("https://i.y.qq.com");
+//        if (getIntent().getData() != null) {
+//            mWebView.loadUrl(getIntent().getData().toString());
+//        } else {
+//            mWebView.loadUrl(PreferenceShare.getPreferences()
+//                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
+//        }
     }
 
     @Override
@@ -207,7 +207,6 @@ public class MainActivity extends Activity implements ClientInterface {
         if (YouTube.handle(uri, this)) {
             return true;
         }
-        //if (IqiyiShare.parsingVideo(this, uri)) return true;
         if (AcFunShare.parsingVideo(this, uri)) return true;
         if (XVideos.handle(uri, this)) {
             return true;
@@ -217,6 +216,4 @@ public class MainActivity extends Activity implements ClientInterface {
         }
         return false;
     }
-    //
-
 }
