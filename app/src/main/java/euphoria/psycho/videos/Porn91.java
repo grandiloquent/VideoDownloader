@@ -47,7 +47,7 @@ public class Porn91 extends BaseVideoExtractor<String> {
         String encoded = StringShare.substring(response, "document.write(strencode2(\"", "\"));");
         String htm = null;
         try {
-            // translate the javascript code 'window.unescape'
+            // translate from the javascript code 'window.unescape'
             htm = URLDecoder.decode(encoded, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

@@ -68,4 +68,20 @@ public class StringShare {
         return s.substring(0, index);
     }
 
+    public static String substringLine(String s, String delimiter) {
+        int index = s.indexOf(delimiter);
+        if (index == -1) return null;
+        int end = index + delimiter.length();
+        while (index - 1 > -1) {
+            if (s.charAt(index - 1) == '\n') break;
+            index--;
+        }
+        while (end + 1 < s.length()) {
+            if (s.charAt(end + 1) == '\n')
+                break;
+            end++;
+        }
+        return s.substring(index, end);
+    }
+
 }

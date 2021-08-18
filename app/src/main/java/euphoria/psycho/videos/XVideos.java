@@ -27,18 +27,7 @@ public class XVideos extends BaseVideoExtractor<List<Pair<String, String>>> {
         return false;
     }
 
-    private static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
-        String[] names = new String[videoList.size()];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = videoList.get(i).first;
-        }
-        new AlertDialog.Builder(mainActivity)
-                .setItems(names, (dialog, which) -> {
-                    viewVideoBetter(mainActivity, videoList.get(which).second);
-                })
-                .show();
 
-    }
 
     private void parseHls(String hlsUri, List<Pair<String, String>> videoList) {
         String hls = getString(hlsUri, null);

@@ -28,6 +28,7 @@ import euphoria.psycho.videos.DouYin;
 import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShou;
 import euphoria.psycho.videos.Porn91;
+import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.YouTube;
@@ -112,16 +113,13 @@ public class MainActivity extends Activity implements ClientInterface {
         // for better UX
         checkChrome();
         mWebView = findViewById(R.id.web);
-
         // Bind all event handlers
         new ListenerDelegate(this);
-
         mBookmarkDatabase = new BookmarkDatabase(this);
-
         // Set the corresponding parameters of WebView
         configureWebView();
-
         loadStartPage();
+        PornHub.handle("https://www.pornhub.com/view_video.php?viewkey=ph603697d30cc5b", this);
     }
 
     private void loadStartPage() {
@@ -215,6 +213,10 @@ public class MainActivity extends Activity implements ClientInterface {
         if (XVideos.handle(uri, this)) {
             return true;
         }
+        if (PornHub.handle(uri, this)) {
+            return true;
+        }
+
         return false;
     }
     //

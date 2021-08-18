@@ -7,12 +7,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Process;
+import android.util.Pair;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import euphoria.psycho.explorer.DownloadActivity;
 import euphoria.psycho.explorer.Helper;
@@ -21,6 +26,7 @@ import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.share.StringShare;
 
 public abstract class BaseVideoExtractor<T> {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
@@ -62,6 +68,37 @@ public abstract class BaseVideoExtractor<T> {
         return null;
     }
 
+    protected String[] getResponse(String uri, String[][] headers) {
+        try {
+            URL url = new URL(uri);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            if (headers != null) {
+                for (String[] header : headers) {
+                    urlConnection.setRequestProperty(header[0], header[1]);
+                }
+            }
+            Map<String, List<String>> listMap = urlConnection.getHeaderFields();
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Entry<String, List<String>> header : listMap.entrySet()) {
+                if (header.getKey()!=null && header.getKey().equals("set-cookie")) {
+                    for(String s:header.getValue()){
+                        stringBuilder.append(StringShare.substringBefore(s,"; "))
+                                .append("; ");
+                    }
+                }
+            }
+            int code = urlConnection.getResponseCode();
+            if (code < 400 && code >= 200) {
+                return new String[]{NetShare.readString(urlConnection),stringBuilder.toString()};
+            } else {
+                return null;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
     protected abstract String processUri(String inputUri);
 
     protected abstract void processVideo(T videoUri);
@@ -87,7 +124,18 @@ public abstract class BaseVideoExtractor<T> {
                 .setPositiveButton(android.R.string.ok, p)
                 .setNegativeButton("下载", n);
     }
+    public static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
+        String[] names = new String[videoList.size()];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = videoList.get(i).first;
+        }
+        new AlertDialog.Builder(mainActivity)
+                .setItems(names, (dialog, which) -> {
+                    viewVideoBetter(mainActivity, videoList.get(which).second);
+                })
+                .show();
 
+    }
     public static void viewVideoBetter(MainActivity mainActivity, String value) {
         try {
             String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
@@ -113,5 +161,4 @@ public abstract class BaseVideoExtractor<T> {
         }
     }
 }
-
 //

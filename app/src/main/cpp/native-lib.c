@@ -72,6 +72,14 @@ JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
     return 0;
 }
 
+JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_getPornHub(
+        JNIEnv *env, jclass thisObj, jbyteArray urlBytes,
+        jbyteArray buffer, jint bufferLength) {
+    READ_URL();
+    PORNHUB_HEADER();
+
+}
+
 JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_getDouYin(
         JNIEnv *env, jobject thisObj, jbyteArray urlBytes, jint length,
         jbyteArray buffer) {
