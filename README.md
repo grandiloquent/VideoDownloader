@@ -6,33 +6,19 @@
 
 ![](images/1.gif)
 
-## adb
+## 支持的视频网站
 
-```
-# 远程调试
-adb tcpip 5000
-adb connect 192.168.0.101
-adb connect 192.168.0.109
-
-// 打印已安装程序列表
-adb shell "pm list packages"
-
-// 安装程序
-adb shell
-settings put global package_verifier_enable 0
-adb install v2rayNG_1.6.16_armeabi-v7a.apk
-
-// 安装分割程序
-adb install-multiple 1.apk 2.apk 3.apk 4.apk 5.apk 6.apk 7.apk 8.apk
-
-```
-
-## 浏览器调试
-
-`chrome://inspect/#devices`
+* 快手
+* 抖音
+* [AcFun弹幕视频网](https://www.acfun.cn/)
+* [爱奇艺](https://m.iqiyi.com/)
+* [B站](https://www.bilibili.com/)
+* [Twitter](https://m.twitter.com)
+* [YouTube](https://m.youtube.com)
+* https://91porn.com
+* https://xvideos.com
+* https://www.pornhub.com
 
 ## 引用
 
 * https://github.com/HaarigerHarald/android-youtubeExtractor
-* https://github.com/yhirose/cpp-httplib
-* https://github.com/leenjewel/openssl_for_ios_and_android
