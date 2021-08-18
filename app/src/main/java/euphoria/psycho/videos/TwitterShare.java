@@ -144,7 +144,7 @@ public class TwitterShare {
 
     public static boolean parsingVideo(MainActivity mainActivity) {
         String uri = mainActivity.getWebView().getUrl();
-        if (uri.contains(".twitter.com/")) {
+        if (uri.contains(".twitter.com/i/")) {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             performTask(StringShare.substringAfterLast(mainActivity.getWebView().getUrl(), "/"), value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {

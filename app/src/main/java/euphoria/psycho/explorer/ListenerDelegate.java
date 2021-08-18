@@ -21,6 +21,7 @@ import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShou;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
+import euphoria.psycho.videos.TwitterShare;
 import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.YouTube;
@@ -50,10 +51,13 @@ public class ListenerDelegate {
             if (YouTube.handle(string, mMainActivity)) {
                 return;
             }
+            if (TwitterShare.parsingVideo(mMainActivity)) {
+                return;
+            }
             if (!string.startsWith("https://") && !string.startsWith("http://"))
                 mMainActivity.getWebView().loadUrl("https://" + string);
         });
-    }  
+    }
 
     private void onDownloadFile(View view) {
         if (XVideosRedShare.parsingXVideos(mMainActivity, null)) return;
@@ -76,6 +80,9 @@ public class ListenerDelegate {
             return;
         }
         if (PornHub.handle(url, mMainActivity)) {
+            return;
+        }
+        if (TwitterShare.parsingVideo(mMainActivity)) {
             return;
         }
         if (mMainActivity.getVideoUrl() != null) {

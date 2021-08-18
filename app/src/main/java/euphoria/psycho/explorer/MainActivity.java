@@ -119,7 +119,6 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView();
         loadStartPage();
-        PornHub.handle("https://www.pornhub.com/view_video.php?viewkey=ph603697d30cc5b", this);
     }
 
     private void loadStartPage() {
@@ -216,7 +215,6 @@ public class MainActivity extends Activity implements ClientInterface {
         if (PornHub.handle(uri, this)) {
             return true;
         }
-
         return false;
     }
     //
