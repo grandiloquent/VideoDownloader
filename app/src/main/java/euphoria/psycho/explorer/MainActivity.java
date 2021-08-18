@@ -7,21 +7,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.ContactsContract.Directory;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.DialogShare.Callback;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -47,6 +43,10 @@ public class MainActivity extends Activity implements ClientInterface {
 
     public BookmarkDatabase getBookmarkDatabase() {
         return mBookmarkDatabase;
+    }
+
+    public String getVideoUrl() {
+        return mVideoUrl;
     }
 
     public WebView getWebView() {
@@ -77,6 +77,18 @@ public class MainActivity extends Activity implements ClientInterface {
         return false;
     }
 
+    private void configureWebView() {
+        mWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+            String fileName = URLUtil.guessFileName(url, contentDisposition, WebViewShare.getFileType(MainActivity.this, url));
+            WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
+        });
+        WebViewShare.setWebView(mWebView, Helper.createCacheDirectory(this).getAbsolutePath());
+        mWebView.setWebViewClient(new CustomWebViewClient(this));
+        mWebView.setWebChromeClient(new CustomWebChromeClient(this));
+        mWebView.setDownloadListener(Helper.getDownloadListener(this));
+        WebViewShare.supportCookie(mWebView);
+    }
+
     private void initialize() {
         // Logger.d(String.format("initialize: %s", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
 //        new Thread(new Runnable() {
@@ -95,27 +107,21 @@ public class MainActivity extends Activity implements ClientInterface {
 //        }).start();
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
-        findViewById(R.id.add_link).setOnClickListener(v -> {
-            DialogShare.createEditDialog(this, "", new Callback() {
-                @Override
-                public void run(String string) {
-                    if (DouYin.handle(string, MainActivity.this)) {
-                        return;
-                    }
-                    if (KuaiShou.handle(string, MainActivity.this))
-                        return;
-                    mWebView.loadUrl(string);
-                }
-            });
-        });
-        mWebView = findViewById(R.id.web);
-        new ListenerDelegate(this);
-        setDownloadVideo();
-        mBookmarkDatabase = new BookmarkDatabase(this);
-        setWebView();
-        loadStartPage();
+        // check whether the chrome is installed
+        // if is such we should like to use the chrome to play the video
+        // for better UX
         checkChrome();
-        //PackageShare.listAllInstalledPackages(this);
+        mWebView = findViewById(R.id.web);
+
+        // Bind all event handlers
+        new ListenerDelegate(this);
+
+        mBookmarkDatabase = new BookmarkDatabase(this);
+
+        // Set the corresponding parameters of WebView
+        configureWebView();
+
+        loadStartPage();
     }
 
     private void loadStartPage() {
@@ -125,49 +131,6 @@ public class MainActivity extends Activity implements ClientInterface {
             mWebView.loadUrl(PreferenceShare.getPreferences()
                     .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
-    }
-
-    private void setDownloadVideo() {
-        findViewById(R.id.file_download).setOnClickListener(v -> {
-            if (XVideosRedShare.parsingXVideos(this, null)) return;
-            String url = mWebView.getUrl();
-            if (Porn91.handle(url, this)) {
-                return;
-            }
-            if (YouTube.handle(url, this)) {
-                return;
-            }
-            if (Iqiyi.MATCH_IQIYI.matcher(url).find()) {
-                new Iqiyi(url, MainActivity.this).parsingVideo();
-                return;
-            }
-            if (AcFunShare.parsingVideo(this, null)) return;
-            if (XVideos.handle(url, this)) {
-                return;
-            }
-            if (Bilibili.handle(url, this)) {
-                return;
-            }
-            if (mVideoUrl != null) {
-                try {
-                    mWebView.loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mVideoUrl, "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    private void setWebView() {
-        mWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
-            String fileName = URLUtil.guessFileName(url, contentDisposition, WebViewShare.getFileType(MainActivity.this, url));
-            WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
-        });
-        WebViewShare.setWebView(mWebView, Helper.createCacheDirectory(this).getAbsolutePath());
-        mWebView.setWebViewClient(new CustomWebViewClient(this));
-        mWebView.setWebChromeClient(new CustomWebChromeClient(this));
-        mWebView.setDownloadListener(Helper.getDownloadListener(this));
-        WebViewShare.supportCookie(mWebView);
     }
 
     @Override
@@ -204,6 +167,11 @@ public class MainActivity extends Activity implements ClientInterface {
         if (mWebView != null)
             PreferenceShare.putString(LAST_ACCESSED, mWebView.getUrl());
         super.onPause();
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
     }
 
     @Override
@@ -248,11 +216,6 @@ public class MainActivity extends Activity implements ClientInterface {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public Context getContext() {
-        return this;
     }
     //
 

@@ -8,10 +8,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.videos.AcFunShare;
+import euphoria.psycho.videos.Bilibili;
+import euphoria.psycho.videos.DouYin;
+import euphoria.psycho.videos.Iqiyi;
+import euphoria.psycho.videos.KuaiShou;
+import euphoria.psycho.videos.Porn91;
+import euphoria.psycho.videos.XVideos;
+import euphoria.psycho.videos.XVideosRedShare;
+import euphoria.psycho.videos.YouTube;
 
 public class ListenerDelegate {
     private final MainActivity mMainActivity;
@@ -24,8 +35,51 @@ public class ListenerDelegate {
         mMainActivity.findViewById(R.id.favorite_border).setOnClickListener(this::onFavorite);
         mMainActivity.findViewById(R.id.bookmark2_button).setOnClickListener(this::onShowBookmark);
         mMainActivity.findViewById(R.id.help_outline).setOnClickListener(this::onHelp);
-
+        mainActivity.findViewById(R.id.file_download).setOnClickListener(this::onDownloadFile);
+        mMainActivity.findViewById(R.id.add_link).setOnClickListener(this::onAddLink);
     }
+
+    private void onAddLink(View view) {
+        DialogShare.createEditDialog(mMainActivity, "", string -> {
+            if (DouYin.handle(string, mMainActivity)) {
+                return;
+            }
+            if (KuaiShou.handle(string, mMainActivity))
+                return;
+            if (!string.startsWith("https://") && !string.startsWith("http://"))
+                mMainActivity.getWebView().loadUrl("https://" + string);
+        });
+    }
+
+    private void onDownloadFile(View view) {
+        if (XVideosRedShare.parsingXVideos(mMainActivity, null)) return;
+        String url = mMainActivity.getWebView().getUrl();
+        if (Porn91.handle(url, mMainActivity)) {
+            return;
+        }
+        if (YouTube.handle(url, mMainActivity)) {
+            return;
+        }
+        if (Iqiyi.MATCH_IQIYI.matcher(url).find()) {
+            new Iqiyi(url, mMainActivity).parsingVideo();
+            return;
+        }
+        if (AcFunShare.parsingVideo(mMainActivity, null)) return;
+        if (XVideos.handle(url, mMainActivity)) {
+            return;
+        }
+        if (Bilibili.handle(url, mMainActivity)) {
+            return;
+        }
+        if (mMainActivity.getVideoUrl() != null) {
+            try {
+                mMainActivity.getWebView().loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mMainActivity.getVideoUrl(), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     private void onHelp(View view) {
         mMainActivity.getWebView().loadUrl(HELP_URL);
