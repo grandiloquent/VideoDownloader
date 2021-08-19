@@ -1,6 +1,10 @@
 package euphoria.psycho.share;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Xml.Encoding;
 
@@ -22,6 +26,10 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import euphoria.psycho.explorer.BuildConfig;
+
+import static android.os.Build.VERSION.SDK_INT;
 
 public class FileShare {
 
@@ -158,6 +166,21 @@ public class FileShare {
         int start = path.lastIndexOf('/', end);
         start = start == -1 ? 0 : start + 1;
         return path.substring(start, end);
+    }
+
+    public static void requestManageAllFilePermission(){
+//        if (SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
+//            try {
+//                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+//                startActivityForResult(intent, 1);
+//            } catch (Exception ex) {
+//                Intent intent = new Intent();
+//                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+//                startActivityForResult(intent, 1);
+//            }
+//            return;
+//        }
     }
 }
 // https://referencesource.microsoft.com/#mscorlib/system/io/file.cs

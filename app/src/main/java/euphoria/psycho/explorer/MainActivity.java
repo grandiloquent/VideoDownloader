@@ -118,6 +118,8 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView();
         loadStartPage();
+        Intent service = new Intent(this, DownloadService.class);
+        startService(service);
     }
 
     private void loadStartPage() {
@@ -143,24 +145,15 @@ public class MainActivity extends Activity implements ClientInterface {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Check if we have obtained all
+        // the permissions required  to run the app
         if (checkPermissions()) return;
-//        if (SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
-//            try {
-//                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-//                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
-//                startActivityForResult(intent, 1);
-//            } catch (Exception ex) {
-//                Intent intent = new Intent();
-//                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-//                startActivityForResult(intent, 1);
-//            }
-//            return;
-//        }
         initialize();
     }
 
     @Override
     protected void onPause() {
+        // WebView can be null when the pause event occurs
         if (mWebView != null)
             PreferenceShare.putString(LAST_ACCESSED, mWebView.getUrl());
         super.onPause();
@@ -173,6 +166,8 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public void onBackPressed() {
+        // When the user press the back button,
+        // tries to return to the previously visited page
         if (mWebView.canGoBack()) {
             mWebView.goBack();
             return;
@@ -184,6 +179,8 @@ public class MainActivity extends Activity implements ClientInterface {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         for (int i = 0; i < permissions.length; i++) {
             boolean result = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+            // If the user does not provide a necessary permission,
+            // exit the program
             if (!result) {
                 Toast.makeText(this, "缺少必要权限，程序无法运行", Toast.LENGTH_LONG).show();
                 finish();
@@ -200,9 +197,6 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public boolean shouldOverrideUrlLoading(String uri) {
-        if (XVideosRedShare.parsingXVideos(this, uri)) {
-            return true;
-        }
         if (Porn91.handle(uri, this)) {
             return true;
         }
