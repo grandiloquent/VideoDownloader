@@ -5,15 +5,14 @@ import android.util.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 
 public class PornOne extends BaseVideoExtractor<List<Pair<String, String>>> {
-    private static Pattern MATCH_PORNONE = Pattern.compile("pornone\\.com/.+/.+/\\d+");
+    private static Pattern MATCH_PORNONE = Pattern.compile("pornone\\.com/.+/.+/\\d{5,}");
 
     protected PornOne(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -30,9 +29,11 @@ public class PornOne extends BaseVideoExtractor<List<Pair<String, String>>> {
             return null;
         }
         List<Pair<String, String>> videoUriList = new ArrayList<>();
+        Pattern pattern = Pattern.compile("\\d+_(\\d+)x\\d+_");
         for (int i = 0; i < videos.size(); i++) {
+            Matcher matcher = pattern.matcher(videos.get(i));
             videoUriList.add(Pair.create(
-                    StringShare.substring(videos.get(i), "_", "x"),
+                    matcher.find() ? matcher.group(1) : videos.get(i),
                     videos.get(i)
             ));
         }
