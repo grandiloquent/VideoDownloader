@@ -28,13 +28,14 @@ import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.utils.DownloadUtils;
+import euphoria.psycho.utils.NotificationUtils;
 
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_FATAL;
+import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_SUCCESS;
 
 public class DownloadService extends Service implements DownloadNotifier {
-    private static final String ACTION_DISMISS_DOWNLOAD = "euphoria.psycho.explorer.ACTION_DISMISS_DOWNLOAD";
     private static final String DOWNLOAD = "DOWNLOAD";
-    private static final int NOTIFICATION_ID = android.R.drawable.stat_sys_download;
+    private static final Object mLock = new Object();
     private NotificationManager mNotificationManager;
     private Executor mExecutor;
     private BroadcastReceiver mDismissReceiver = new BroadcastReceiver() {
@@ -45,58 +46,48 @@ public class DownloadService extends Service implements DownloadNotifier {
         }
     };
     private boolean mRegistered = false;
-
     private DownloadTaskDatabase mDatabase;
-
-    @RequiresApi(api = VERSION_CODES.O)
-    private static void createNotificationChannel(Context context) {
-        final NotificationChannel notificationChannel = new NotificationChannel(
-                DOWNLOAD,
-                "下载视频频道",
-                NotificationManager.IMPORTANCE_LOW);
-        NotificationManager mgr = (NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-        mgr.createNotificationChannel(notificationChannel);
-    }
 
 
     @Override
-    public void downloadCompleted(String uri, String directory) {
+    public void downloadCompleted(DownloadTaskInfo downloadTaskInfo) {
+        NotificationUtils.updateDownloadCompletedNotification(this,
+                DOWNLOAD, downloadTaskInfo, mNotificationManager);
     }
 
     @Override
     public void downloadFailed(String uri, String message) {
     }
 
-    @Override
-    public void downloadProgress(String uri, String fileName) {
-    }
 
     @Override
-    public void downloadProgress(String uri, int currentSize, int total, long downloadBytes, long speed) {
+    public void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName) {
+        NotificationUtils.updateDownloadProgressNotification(this,
+                DOWNLOAD, taskInfo, mNotificationManager,
+                currentSize / total * 100, fileName
+        );
     }
 
     @Override
     public void downloadStart(DownloadTaskInfo downloadTaskInfo) {
+        NotificationUtils.updateDownloadStartNotification(this,
+                DOWNLOAD, downloadTaskInfo, mNotificationManager);
     }
-
-    private File mDirectory;
 
     @Override
-    public void mergeVideoCompleted(String outPath) {
-    }
-
-    private void initializeRootDirectory() {
-        //mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-        // Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getParentFile()
-        mDirectory = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        if (!mDirectory.exists()) {
-            mDirectory.mkdirs();
+    public void mergeVideoCompleted(DownloadTaskInfo taskInfo, String outPath) {
+        NotificationUtils.updateMergeVideoCompletedNotification(this,
+                DOWNLOAD, taskInfo, mNotificationManager, outPath);
+        taskInfo.Status = 0;
+        synchronized (mLock) {
+            mDatabase.updateDownloadTaskInfo(taskInfo);
         }
     }
 
     @Override
-    public void mergeVideoFailed(String message) {
+    public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
+        NotificationUtils.updateMergeVideoFailedNotification(this,
+                DOWNLOAD, taskInfo, mNotificationManager);
     }
 
     @Nullable
@@ -109,16 +100,11 @@ public class DownloadService extends Service implements DownloadNotifier {
     public void onCreate() {
         super.onCreate();
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            createNotificationChannel(this);
+            NotificationUtils.createNotificationChannel(this, DOWNLOAD);
         }
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mDatabase = new DownloadTaskDatabase(this, getDatabasePath());
+        mDatabase = new DownloadTaskDatabase(this, DownloadUtils.getDatabasePath(this));
         mExecutor = Executors.newSingleThreadExecutor();
-        initializeRootDirectory();
-    }
-
-    private String getDatabasePath() {
-        return new File(getExternalCacheDir(), "tasks.db").getAbsolutePath();
     }
 
     @Override
@@ -129,9 +115,6 @@ public class DownloadService extends Service implements DownloadNotifier {
         }
         super.onDestroy();
     }
-
-    private static final Object mLock = new Object();
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -144,24 +127,38 @@ public class DownloadService extends Service implements DownloadNotifier {
             taskInfo = mDatabase.getDownloadTaskInfo(downloadUri.toString());
         }
         if (taskInfo == null) {
-            thread = new DownloadThread(this, taskInfo, this);
             taskInfo = new DownloadTaskInfo();
             taskInfo.Uri = downloadUri.toString();
             taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).toString();
+            checkTaskDirectory(taskInfo);
+            thread = new DownloadThread(this, taskInfo, this);
             synchronized (mLock) {
                 long result = mDatabase.insertDownloadTaskInfo(taskInfo);
             }
+
+        } else {
+            Logger.d(String.format("onStartCommand: %s", taskInfo));
 
         }
         if (taskInfo.Status == STATUS_FATAL) {
             Toast.makeText(this, "无法下载此视频", Toast.LENGTH_LONG).show();
             return START_NOT_STICKY;
+        } else if (taskInfo.Status == STATUS_SUCCESS) {
+            return START_NOT_STICKY;
         }
+        checkTaskDirectory(taskInfo);
         if (thread == null) {
             thread = new DownloadThread(this, taskInfo, this);
         }
         mExecutor.execute(thread);
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void checkTaskDirectory(DownloadTaskInfo taskInfo) {
+        File directory = new File(taskInfo.FileName);
+        if (!directory.isDirectory()) {
+            directory.mkdirs();
+        }
     }
 
 

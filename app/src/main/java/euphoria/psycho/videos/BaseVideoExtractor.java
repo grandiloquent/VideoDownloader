@@ -19,11 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import euphoria.psycho.explorer.DownloadActivity;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
@@ -151,9 +149,9 @@ public abstract class BaseVideoExtractor<T> {
                 }
             }, (dialog, which) -> {
                 dialog.dismiss();
-                Intent intent = new Intent(mainActivity, DownloadActivity.class);
-                intent.setData(Uri.parse(value));
-                mainActivity.startActivity(intent);
+//                Intent intent = new Intent(mainActivity, DownloadActivity.class);
+//                intent.setData(Uri.parse(value));
+//                mainActivity.startActivity(intent);
             })
                     .setMessage("是否使用浏览器打开视频链接")
                     .show();

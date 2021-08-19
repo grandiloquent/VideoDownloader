@@ -26,4 +26,7 @@ public class DownloadUtils {
         }
         return directory;
     }
+    public static String getDatabasePath(Context context) {
+        return new File(context.getExternalCacheDir(), "tasks.db").getAbsolutePath();
+    }
 }

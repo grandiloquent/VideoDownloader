@@ -44,6 +44,7 @@ public class DownloadThread extends Thread {
     private final String mBaseUri;
     private final Context mContext;
     private final DownloadNotifier mDownloadNotifier;
+    private final DownloadTaskInfo mDownloadTaskInfo;
     private final String mUri;
     private BlobCache mBlobCache;
     private volatile boolean mShutdownRequested;
@@ -54,7 +55,6 @@ public class DownloadThread extends Thread {
     private int mTotalSize;
     private int mCurrentSize;
     private List<String> mVideos = new ArrayList<>();
-    private final DownloadTaskInfo mDownloadTaskInfo;
 
     public DownloadThread(Context context, DownloadTaskInfo downloadTaskInfo, DownloadNotifier downloadNotifier) {
         mContext = context;
@@ -66,30 +66,24 @@ public class DownloadThread extends Thread {
 
     }
 
-    private void downloadFile(String ts) throws IOException {
-        final String fileName = FileShare.getFileNameFromUri(ts);
-        File tsFile = new File(mDownloadTaskInfo.FileName, fileName);
+    private void downloadFile(String ts, File tsFile) throws IOException {
         if (tsFile.exists()) {
-            Logger.d(String.format("downloadFile: file exsits, %s", tsFile.getAbsolutePath()));
             long size = getBookmark(tsFile.getName());
             if (tsFile.length() == size) {
-                mDownloadNotifier.downloadProgress(ts, fileName);
                 return;
             } else {
                 tsFile.delete();
             }
         }
         String tsUri = mBaseUri + ts;
-        mDownloadNotifier.downloadProgress(tsUri, fileName);
         HttpURLConnection connection = (HttpURLConnection) new URL(tsUri).openConnection();
         int statusCode = connection.getResponseCode();
         if (statusCode >= 200 && statusCode < 400) {
             long size = Long.parseLong(connection.getHeaderField("Content-Length"));
             setBookmark(tsFile.getName(), size);
-            mDownloadNotifier.downloadProgress(tsUri, fileName);
             InputStream is = connection.getInputStream();
             FileOutputStream out = new FileOutputStream(tsFile);
-            transferData(is, out);
+            transferData(is, out, tsFile.getName());
             FileShare.closeSilently(is);
             FileShare.closeSilently(out);
         }
@@ -121,7 +115,8 @@ public class DownloadThread extends Thread {
                         100, 1024 * 1024, false,
                         1);
             } catch (IOException e) {
-                Logger.d(String.format("onCreate: %s", e.getMessage()));
+                Logger.d(String.format("parseM3u8File: %s", e.getMessage()));
+                return null;
             }
             String[] segments = response.split("\n");
             List<String> tsList = new ArrayList<>();
@@ -153,7 +148,7 @@ public class DownloadThread extends Thread {
         }
     }
 
-    private void transferData(InputStream in, OutputStream out) {
+    private void transferData(InputStream in, OutputStream out, String fileName) {
         final byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
             if (mShutdownRequested) {
@@ -171,17 +166,17 @@ public class DownloadThread extends Thread {
             try {
                 out.write(buffer, 0, len);
                 mCurrentBytes += len;
-                updateProgress();
+                updateProgress(fileName);
 
             } catch (IOException e) {
                 throw new Error(e);
             }
         }
-        mDownloadNotifier.downloadProgress(mUri, mCurrentSize, mTotalSize, mCurrentBytes, 0);
+        mDownloadNotifier.downloadProgress(mDownloadTaskInfo, mCurrentSize, mTotalSize, mCurrentBytes, 0, fileName);
 
     }
 
-    private void updateProgress() {
+    private void updateProgress(String fileName) {
         final long now = SystemClock.elapsedRealtime();
         final long currentBytes = mCurrentBytes;
         final long sampleDelta = now - mSpeedSampleStart;
@@ -195,7 +190,7 @@ public class DownloadThread extends Thread {
             }
             // Only notify once we have a full sample window
             if (mSpeedSampleStart != 0) {
-                mDownloadNotifier.downloadProgress(mUri, mCurrentSize, mTotalSize, mCurrentBytes, mSpeed);
+                mDownloadNotifier.downloadProgress(mDownloadTaskInfo, mCurrentSize, mTotalSize, mCurrentBytes, mSpeed, fileName);
             }
             mSpeedSampleStart = now;
             mSpeedSampleBytes = currentBytes;
@@ -222,25 +217,20 @@ public class DownloadThread extends Thread {
         mTotalSize = tsList.size();
         mDownloadNotifier.downloadStart(mDownloadTaskInfo);
         for (String ts : tsList) {
+            final String fileName = FileShare.getFileNameFromUri(ts);
+            File tsFile = new File(mDownloadTaskInfo.FileName, fileName);
             try {
-                downloadFile(ts);
+                downloadFile(ts, tsFile);
                 mCurrentSize++;
             } catch (IOException e) {
-                Logger.d(String.format("run: %s", e.getMessage()));
                 mDownloadNotifier.downloadFailed(mUri, e.getMessage());
                 return;
             }
+
         }
-        mDownloadNotifier.downloadCompleted(mUri, StringShare.substringAfter(mDownloadTaskInfo.FileName, "/"));
+        mDownloadNotifier.downloadCompleted(mDownloadTaskInfo);
         try {
-//            File[] inputVideos = mDirectory.listFiles(new FileFilter() {
-//
-//                @Override
-//                public boolean accept(File pathname) {
-//                  return true;
-//                }
-//            });
-            String outputPath = new File(mDownloadTaskInfo.FileName, StringShare.substringAfter(mDownloadTaskInfo.FileName, "/") + ".mp4")
+            String outputPath = new File(mDownloadTaskInfo.FileName, StringShare.substringAfterLast(mDownloadTaskInfo.FileName, "/") + ".mp4")
                     .getAbsolutePath();
             OutputStream fileOutputStream = new FileOutputStream(outputPath);
             byte[] b = new byte[4096];
@@ -268,9 +258,10 @@ public class DownloadThread extends Thread {
                         public void onScanCompleted(String path, Uri uri) {
                         }
                     });
+            mDownloadNotifier.mergeVideoCompleted(mDownloadTaskInfo, outputPath);
         } catch (IOException e) {
-            Logger.d(String.format("run: %s", e));
-
+            mDownloadNotifier.mergeVideoFailed(mDownloadTaskInfo, e.getMessage());
+            Logger.d(String.format("run: %s", e.getMessage()));
         }
 
 

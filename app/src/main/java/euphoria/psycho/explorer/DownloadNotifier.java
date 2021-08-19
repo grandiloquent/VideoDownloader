@@ -1,9 +1,5 @@
 package euphoria.psycho.explorer;
 
-import android.os.Process;
-
-import java.io.File;
-
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
 
 public interface DownloadNotifier {
@@ -11,13 +7,11 @@ public interface DownloadNotifier {
 
     void downloadFailed(String uri, String message);
 
-    void downloadProgress(String uri, String fileName);
+    void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName);
 
-    void downloadProgress(String uri, int currentSize, int total, long downloadBytes, long speed);
+    void downloadCompleted(DownloadTaskInfo taskInfo);
 
-    void downloadCompleted(String uri, String directory);
+    void mergeVideoCompleted(DownloadTaskInfo downloadTaskInfo,String outPath);
 
-    void mergeVideoCompleted(String outPath);
-
-    void mergeVideoFailed(String message);
+    void mergeVideoFailed(DownloadTaskInfo taskInfo, String message);
 }
