@@ -112,7 +112,8 @@ public class DownloadThread extends Thread {
         try {
             String response = M3u8Share.getString(mUri);
             if (response == null) {
-                mDownloadNotifier.downloadFailed(mDownloadTaskInfo, STATUS_FATAL);
+                mDownloadTaskInfo.Status = STATUS_FATAL;
+                mDownloadNotifier.downloadFailed(mDownloadTaskInfo);
                 return null;
             }
             try {
@@ -120,7 +121,8 @@ public class DownloadThread extends Thread {
                         100, 1024 * 1024, false,
                         1);
             } catch (IOException e) {
-                mDownloadNotifier.downloadFailed(mDownloadTaskInfo, STATUS_ERROR_CREATE_CACHE_FILES);
+                mDownloadTaskInfo.Status = STATUS_ERROR_CREATE_CACHE_FILES;
+                mDownloadNotifier.downloadFailed(mDownloadTaskInfo);
                 return null;
             }
             String[] segments = response.split("\n");
@@ -138,6 +140,23 @@ public class DownloadThread extends Thread {
             Logger.d(String.format("parseM3u8File: %s", e.getMessage()));
         }
         return null;
+    }
+
+    private void scanFile(String outputPath) {
+        MediaScannerConnection.scanFile(mContext,
+                new String[]{
+                        outputPath
+                }, new String[]{
+                        "video/mp4"
+                }, new MediaScannerConnectionClient() {
+                    @Override
+                    public void onMediaScannerConnected() {
+                    }
+
+                    @Override
+                    public void onScanCompleted(String path, Uri uri) {
+                    }
+                });
     }
 
     private void setBookmark(String uri, long size) {
@@ -227,7 +246,8 @@ public class DownloadThread extends Thread {
                 downloadFile(ts, tsFile);
                 mCurrentSize++;
             } catch (IOException e) {
-                mDownloadNotifier.downloadFailed(mDownloadTaskInfo, STATUS_ERROR_DOWNLOAD_FILE);
+                mDownloadTaskInfo.Status = STATUS_ERROR_DOWNLOAD_FILE;
+                mDownloadNotifier.downloadFailed(mDownloadTaskInfo);
                 return;
             }
 
@@ -248,20 +268,7 @@ public class DownloadThread extends Thread {
                 fileOutputStream.flush();
             }
             fileOutputStream.close();
-            MediaScannerConnection.scanFile(mContext,
-                    new String[]{
-                            outputPath
-                    }, new String[]{
-                            "video/mp4"
-                    }, new MediaScannerConnectionClient() {
-                        @Override
-                        public void onMediaScannerConnected() {
-                        }
-
-                        @Override
-                        public void onScanCompleted(String path, Uri uri) {
-                        }
-                    });
+            scanFile(outputPath);
             mDownloadNotifier.mergeVideoCompleted(mDownloadTaskInfo, outputPath);
         } catch (IOException e) {
             mDownloadNotifier.mergeVideoFailed(mDownloadTaskInfo, e.getMessage());

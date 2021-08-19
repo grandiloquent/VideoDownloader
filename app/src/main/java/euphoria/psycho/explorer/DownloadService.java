@@ -29,8 +29,6 @@ import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_SUCCESS;
 public class DownloadService extends Service implements DownloadNotifier {
     private static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
     private static final Object mLock = new Object();
-    private NotificationManager mNotificationManager;
-    private Executor mExecutor;
     private final BroadcastReceiver mDismissReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -38,9 +36,29 @@ public class DownloadService extends Service implements DownloadNotifier {
             stopSelf();
         }
     };
+    private NotificationManager mNotificationManager;
+    private Executor mExecutor;
     private boolean mRegistered = false;
     private DownloadTaskDatabase mDatabase;
 
+    private void checkTaskDirectory(DownloadTaskInfo taskInfo) {
+        File directory = new File(taskInfo.FileName);
+        if (!directory.isDirectory()) {
+            directory.mkdirs();
+        }
+    }
+
+    private DownloadTaskInfo createNewTask(Uri downloadUri) {
+        DownloadTaskInfo taskInfo;
+        taskInfo = new DownloadTaskInfo();
+        taskInfo.Uri = downloadUri.toString();
+        taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).toString();
+        checkTaskDirectory(taskInfo);
+        synchronized (mLock) {
+            mDatabase.insertDownloadTaskInfo(taskInfo);
+        }
+        return taskInfo;
+    }
 
     @Override
     public void downloadCompleted(DownloadTaskInfo downloadTaskInfo) {
@@ -49,9 +67,12 @@ public class DownloadService extends Service implements DownloadNotifier {
     }
 
     @Override
-    public void downloadFailed(DownloadTaskInfo taskInfo, int status) {
+    public void downloadFailed(DownloadTaskInfo taskInfo) {
+        NotificationUtils.updateDownloadFailedNotification(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
+        synchronized (mLock) {
+            mDatabase.updateDownloadTaskInfo(taskInfo);
+        }
     }
-
 
     @Override
     public void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName) {
@@ -141,25 +162,4 @@ public class DownloadService extends Service implements DownloadNotifier {
         mExecutor.execute(thread);
         return super.onStartCommand(intent, flags, startId);
     }
-
-    private DownloadTaskInfo createNewTask(Uri downloadUri) {
-        DownloadTaskInfo taskInfo;
-        taskInfo = new DownloadTaskInfo();
-        taskInfo.Uri = downloadUri.toString();
-        taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).toString();
-        checkTaskDirectory(taskInfo);
-        synchronized (mLock) {
-            mDatabase.insertDownloadTaskInfo(taskInfo);
-        }
-        return taskInfo;
-    }
-
-    private void checkTaskDirectory(DownloadTaskInfo taskInfo) {
-        File directory = new File(taskInfo.FileName);
-        if (!directory.isDirectory()) {
-            directory.mkdirs();
-        }
-    }
-
-
 }

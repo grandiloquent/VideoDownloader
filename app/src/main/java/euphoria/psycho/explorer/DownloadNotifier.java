@@ -5,7 +5,7 @@ import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
 public interface DownloadNotifier {
     void downloadStart(DownloadTaskInfo downloadTaskInfo);
 
-    void downloadFailed(DownloadTaskInfo taskInfo,  int status);
+    void downloadFailed(DownloadTaskInfo taskInfo);
 
     void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName);
 

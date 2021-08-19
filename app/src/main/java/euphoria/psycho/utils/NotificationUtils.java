@@ -31,6 +31,13 @@ public class NotificationUtils {
                 .setProgress(100, percent, false);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
+    public static void updateDownloadFailedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
+        Builder builder = getBuilder(context, notificationChannel);
+        builder.setContentTitle("下载失败")
+                .setContentText(downloadTaskInfo.Uri)
+               ;
+        manager.notify(downloadTaskInfo.FileName, 0, builder.build());
+    }
     public static void updateMergeVideoCompletedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, String fileName) {
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("合并完成")
