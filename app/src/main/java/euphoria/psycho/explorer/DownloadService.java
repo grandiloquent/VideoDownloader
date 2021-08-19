@@ -1,12 +1,9 @@
 package euphoria.psycho.explorer;
 
 import android.app.Notification;
-import android.app.Notification.Action;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,12 +11,19 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.os.Environment;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.RemoteViews;
+
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
+import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
 
 public class DownloadService extends Service implements DownloadNotifier {
@@ -27,6 +31,7 @@ public class DownloadService extends Service implements DownloadNotifier {
     private static final String DOWNLOAD = "DOWNLOAD";
     private static final int NOTIFICATION_ID = android.R.drawable.stat_sys_download;
     private NotificationManager mNotificationManager;
+    private Executor mExecutor;
     private BroadcastReceiver mDismissReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -35,6 +40,8 @@ public class DownloadService extends Service implements DownloadNotifier {
         }
     };
     private boolean mRegistered = false;
+
+    private DownloadTaskDatabase mDatabase;
 
     @RequiresApi(api = VERSION_CODES.O)
     private static void createNotificationChannel(Context context) {
@@ -114,6 +121,8 @@ public class DownloadService extends Service implements DownloadNotifier {
             createNotificationChannel(this);
         }
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mDatabase = new DownloadTaskDatabase(this, new File(getExternalCacheDir(), "tasks.db").getAbsolutePath());
+        mExecutor = Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -130,6 +139,19 @@ public class DownloadService extends Service implements DownloadNotifier {
         Uri downloadUri = intent.getData();
         if (downloadUri == null)
             return START_NOT_STICKY;
+        DownloadTaskInfo taskInfo = mDatabase.getDownloadTaskInfo(downloadUri.toString());
+        if (taskInfo == null) {
+            DownloadThread thread = new DownloadThread(downloadUri.toString(), this, this);
+            taskInfo = new DownloadTaskInfo();
+            taskInfo.Uri = downloadUri.toString();
+            taskInfo.FileName = thread.getDirectory().getAbsolutePath();
+            long result = mDatabase.insertDownloadTaskInfo(taskInfo);
+            Logger.d(String.format("onStartCommand: %s", result));
+            //mExecutor.execute(thread);
+        } else {
+            Logger.d(String.format("onStartCommand: %s", taskInfo));
+        }
         return super.onStartCommand(intent, flags, startId);
     }
+
 }

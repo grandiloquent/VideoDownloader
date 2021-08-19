@@ -232,6 +232,10 @@ public class DownloadThread extends Thread {
 //        }
     }
 
+    public File getDirectory() {
+        return mDirectory;
+    }
+
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
