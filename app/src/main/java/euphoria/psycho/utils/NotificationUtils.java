@@ -5,7 +5,10 @@ import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 
 import androidx.annotation.RequiresApi;
@@ -31,20 +34,27 @@ public class NotificationUtils {
                 .setProgress(100, percent, false);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
+
     public static void updateDownloadFailedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("下载失败")
                 .setContentText(downloadTaskInfo.Uri)
-               ;
+        ;
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
-    public static void updateMergeVideoCompletedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, String fileName) {
+
+    public static void mergeVideoCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, String fileName) {
         Builder builder = getBuilder(context, notificationChannel);
+        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+        viewIntent.setData(Uri.parse(fileName));
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,0,viewIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentTitle("合并完成")
                 .setContentText(fileName)
+                .setContentIntent(pendingIntent)
                 .setOngoing(false);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
+
     public static void updateMergeVideoFailedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Logger.d(String.format("updateMergeVideoFailedNotification: %s", downloadTaskInfo.FileName));
         Builder builder = getBuilder(context, notificationChannel);

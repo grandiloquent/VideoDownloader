@@ -52,7 +52,7 @@ public class DownloadService extends Service implements DownloadNotifier {
         DownloadTaskInfo taskInfo;
         taskInfo = new DownloadTaskInfo();
         taskInfo.Uri = downloadUri.toString();
-        taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).toString();
+        taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).getAbsolutePath();
         checkTaskDirectory(taskInfo);
         synchronized (mLock) {
             mDatabase.insertDownloadTaskInfo(taskInfo);
@@ -90,7 +90,7 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void mergeVideoCompleted(DownloadTaskInfo taskInfo, String outPath) {
-        NotificationUtils.updateMergeVideoCompletedNotification(this,
+        NotificationUtils.mergeVideoCompleted(this,
                 DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
         taskInfo.Status = 0;
         synchronized (mLock) {
@@ -132,34 +132,58 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Check if the network is available,
+        // but some websites may be blocked and must be accessed via VPN,
+        // in the future we must also check if there is an available VPN
         if (!NetShare.isNetworkAvailable(this)) {
             Toast.makeText(this, "网络不可用", Toast.LENGTH_LONG).show();
             return START_NOT_STICKY;
         }
+        // the download uri should be passed by `intent.setData`
+        // otherwise we should stop immediately
         Uri downloadUri = intent.getData();
         if (downloadUri == null)
             return START_NOT_STICKY;
         DownloadTaskInfo taskInfo;
         DownloadThread thread = null;
+        // in the further we should use
+        // multiple threads to download videos,
+        // so use a lock to ensure thread safety
         synchronized (mLock) {
             taskInfo = mDatabase.getDownloadTaskInfo(downloadUri.toString());
         }
+        // If the download task does not exist in the database,
+        // we will create a new task,
+        // but if the video task has been executed before,
+        // only the data in the database is deleted,
+        // we will also check the cache file to reuse the downloaded data
+        // under the premise of ensuring data consistency
         if (taskInfo == null) {
             taskInfo = createNewTask(downloadUri);
             thread = new DownloadThread(this, taskInfo, this);
-
         }
+        // If the video cannot be downloaded due to unrecoverable conditions,
+        // such as a wrong download uri or lack of permission to access the video,
+        // we will terminate the task immediately
         if (taskInfo.Status == STATUS_FATAL) {
             Toast.makeText(this, "无法下载此视频", Toast.LENGTH_LONG).show();
             return START_NOT_STICKY;
+
         } else if (taskInfo.Status == STATUS_SUCCESS) {
+            Toast.makeText(this, "视频已成功下载", Toast.LENGTH_LONG).show();
             return START_NOT_STICKY;
         }
+        // Check whether the directory generated based on
+        // the hash value of the download uri exists,
+        // and create the directory if it does not exist
         checkTaskDirectory(taskInfo);
         if (thread == null) {
             thread = new DownloadThread(this, taskInfo, this);
         }
+        // Submit the download task to the thread pool
         mExecutor.execute(thread);
         return super.onStartCommand(intent, flags, startId);
+
+       
     }
 }

@@ -28,10 +28,14 @@ public class PornOne extends BaseVideoExtractor<List<Pair<String, String>>> {
         if (videos == null) {
             return null;
         }
+        return createVideoList(videos);
+    }
+
+    private List<Pair<String, String>> createVideoList(List<String> videos) {
         List<Pair<String, String>> videoUriList = new ArrayList<>();
-        Pattern pattern = Pattern.compile("\\d+_(\\d+)x\\d+_");
+        final Pattern pattern = Pattern.compile("\\d+_(\\d+)x\\d+_");
         for (int i = 0; i < videos.size(); i++) {
-            Matcher matcher = pattern.matcher(videos.get(i));
+            final Matcher matcher = pattern.matcher(videos.get(i));
             videoUriList.add(Pair.create(
                     matcher.find() ? matcher.group(1) : videos.get(i),
                     videos.get(i)

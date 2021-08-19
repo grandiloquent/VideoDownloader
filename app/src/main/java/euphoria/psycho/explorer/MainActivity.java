@@ -5,34 +5,23 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import java.io.UnsupportedEncodingException;
-import java.net.NetworkInterface;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.DialogShare.Callback;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.videos.AcFunShare;
-import euphoria.psycho.videos.Bilibili;
-import euphoria.psycho.videos.DouYin;
-import euphoria.psycho.videos.Iqiyi;
-import euphoria.psycho.videos.KuaiShou;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
-import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.YouTube;
 
