@@ -4,11 +4,8 @@ import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
-import android.os.Build.VERSION_CODES;
-import android.os.Environment;
 import android.os.Process;
 import android.os.SystemClock;
-import android.webkit.MimeTypeMap;
 
 
 import java.io.ByteArrayInputStream;
@@ -16,28 +13,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
-import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
+import euphoria.psycho.utils.BlobCache;
+import euphoria.psycho.utils.M3u8Utils;
 
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_CREATE_CACHE_FILES;
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_DOWNLOAD_FILE;
@@ -110,7 +101,7 @@ public class DownloadThread extends Thread {
 
     private List<String> parseM3u8File() {
         try {
-            String response = M3u8Share.getString(mUri);
+            String response = M3u8Utils.getString(mUri);
             if (response == null) {
                 mDownloadTaskInfo.Status = STATUS_FATAL;
                 mDownloadNotifier.downloadFailed(mDownloadTaskInfo);

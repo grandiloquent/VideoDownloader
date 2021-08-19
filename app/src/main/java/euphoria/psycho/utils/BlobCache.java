@@ -63,7 +63,7 @@
 // public void syncAll();
 // public static void deleteFiles(String path);
 //
-package euphoria.psycho.explorer;
+package euphoria.psycho.utils;
 
 import android.util.Log;
 
