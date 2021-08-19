@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,9 +24,11 @@ import euphoria.psycho.explorer.DownloadService;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
+import euphoria.psycho.share.WebViewShare;
 
 public abstract class BaseVideoExtractor<T> {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
@@ -80,16 +83,16 @@ public abstract class BaseVideoExtractor<T> {
             Map<String, List<String>> listMap = urlConnection.getHeaderFields();
             StringBuilder stringBuilder = new StringBuilder();
             for (Entry<String, List<String>> header : listMap.entrySet()) {
-                if (header.getKey()!=null && header.getKey().equals("set-cookie")) {
-                    for(String s:header.getValue()){
-                        stringBuilder.append(StringShare.substringBefore(s,"; "))
+                if (header.getKey() != null && header.getKey().equals("set-cookie")) {
+                    for (String s : header.getValue()) {
+                        stringBuilder.append(StringShare.substringBefore(s, "; "))
                                 .append("; ");
                     }
                 }
             }
             int code = urlConnection.getResponseCode();
             if (code < 400 && code >= 200) {
-                return new String[]{NetShare.readString(urlConnection),stringBuilder.toString()};
+                return new String[]{NetShare.readString(urlConnection), stringBuilder.toString()};
             } else {
                 return null;
             }
@@ -123,6 +126,7 @@ public abstract class BaseVideoExtractor<T> {
                 .setPositiveButton(android.R.string.ok, p)
                 .setNegativeButton("下载", n);
     }
+
     public static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
         String[] names = new String[videoList.size()];
         for (int i = 0; i < names.length; i++) {
@@ -133,11 +137,12 @@ public abstract class BaseVideoExtractor<T> {
                     viewVideoBetter(mainActivity, videoList.get(which).second);
                 })
                 .show();
-
+ // 
     }
-    public static void viewVideoBetter(MainActivity mainActivity, String value) {
+
+    public static void viewVideoBetter(MainActivity mainActivity, String videoUri) {
         try {
-            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(value, "UTF-8");
+            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(videoUri, "UTF-8");
             createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
                 dialog.dismiss();
                 if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
@@ -150,9 +155,13 @@ public abstract class BaseVideoExtractor<T> {
                 }
             }, (dialog, which) -> {
                 dialog.dismiss();
-                Intent intent = new Intent(mainActivity, DownloadService.class);
-                intent.setData(Uri.parse(value));
-                mainActivity.startService(intent);
+                if (videoUri.contains("m3u8")) {
+                    Intent intent = new Intent(mainActivity, DownloadService.class);
+                    intent.setData(Uri.parse(videoUri));
+                    mainActivity.startService(intent);
+                } else {
+                    WebViewShare.downloadFile(mainActivity, KeyShare.toHex(videoUri.getBytes(StandardCharsets.UTF_8)), videoUri, BaseVideoExtractor.USER_AGENT);
+                }
             })
                     .setMessage("是否使用浏览器打开视频链接")
                     .show();
