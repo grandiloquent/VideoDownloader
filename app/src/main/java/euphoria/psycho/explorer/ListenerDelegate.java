@@ -92,7 +92,7 @@ public class ListenerDelegate {
         if (TwitterShare.parsingVideo(mMainActivity)) {
             return;
         }
-    
+
         if (mMainActivity.getVideoUrl() != null) {
             try {
                 mMainActivity.getWebView().loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mMainActivity.getVideoUrl(), "UTF-8"));
