@@ -1,31 +1,23 @@
 package euphoria.psycho.explorer;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.os.Environment;
 import android.os.IBinder;
 import android.widget.Toast;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
-import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.utils.DownloadUtils;
 import euphoria.psycho.utils.NotificationUtils;
@@ -34,11 +26,11 @@ import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_FATAL;
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_SUCCESS;
 
 public class DownloadService extends Service implements DownloadNotifier {
-    private static final String DOWNLOAD = "DOWNLOAD";
+    private static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
     private static final Object mLock = new Object();
     private NotificationManager mNotificationManager;
     private Executor mExecutor;
-    private BroadcastReceiver mDismissReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mDismissReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Logger.d(String.format("onReceive: %s", ""));
@@ -52,18 +44,18 @@ public class DownloadService extends Service implements DownloadNotifier {
     @Override
     public void downloadCompleted(DownloadTaskInfo downloadTaskInfo) {
         NotificationUtils.updateDownloadCompletedNotification(this,
-                DOWNLOAD, downloadTaskInfo, mNotificationManager);
+                DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
     }
 
     @Override
-    public void downloadFailed(String uri, String message) {
+    public void downloadFailed(DownloadTaskInfo taskInfo, int status) {
     }
 
 
     @Override
     public void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName) {
         NotificationUtils.updateDownloadProgressNotification(this,
-                DOWNLOAD, taskInfo, mNotificationManager,
+                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager,
                 currentSize / total * 100, fileName
         );
     }
@@ -71,13 +63,13 @@ public class DownloadService extends Service implements DownloadNotifier {
     @Override
     public void downloadStart(DownloadTaskInfo downloadTaskInfo) {
         NotificationUtils.updateDownloadStartNotification(this,
-                DOWNLOAD, downloadTaskInfo, mNotificationManager);
+                DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
     }
 
     @Override
     public void mergeVideoCompleted(DownloadTaskInfo taskInfo, String outPath) {
         NotificationUtils.updateMergeVideoCompletedNotification(this,
-                DOWNLOAD, taskInfo, mNotificationManager, outPath);
+                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
         taskInfo.Status = 0;
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
@@ -87,7 +79,7 @@ public class DownloadService extends Service implements DownloadNotifier {
     @Override
     public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
         NotificationUtils.updateMergeVideoFailedNotification(this,
-                DOWNLOAD, taskInfo, mNotificationManager);
+                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
     }
 
     @Nullable
@@ -100,7 +92,7 @@ public class DownloadService extends Service implements DownloadNotifier {
     public void onCreate() {
         super.onCreate();
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            NotificationUtils.createNotificationChannel(this, DOWNLOAD);
+            NotificationUtils.createNotificationChannel(this, DOWNLOAD_CHANNEL);
         }
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mDatabase = new DownloadTaskDatabase(this, DownloadUtils.getDatabasePath(this));
@@ -127,17 +119,8 @@ public class DownloadService extends Service implements DownloadNotifier {
             taskInfo = mDatabase.getDownloadTaskInfo(downloadUri.toString());
         }
         if (taskInfo == null) {
-            taskInfo = new DownloadTaskInfo();
-            taskInfo.Uri = downloadUri.toString();
-            taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).toString();
-            checkTaskDirectory(taskInfo);
+            taskInfo = createNewTask(downloadUri);
             thread = new DownloadThread(this, taskInfo, this);
-            synchronized (mLock) {
-                long result = mDatabase.insertDownloadTaskInfo(taskInfo);
-            }
-
-        } else {
-            Logger.d(String.format("onStartCommand: %s", taskInfo));
 
         }
         if (taskInfo.Status == STATUS_FATAL) {
@@ -152,6 +135,18 @@ public class DownloadService extends Service implements DownloadNotifier {
         }
         mExecutor.execute(thread);
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private DownloadTaskInfo createNewTask(Uri downloadUri) {
+        DownloadTaskInfo taskInfo;
+        taskInfo = new DownloadTaskInfo();
+        taskInfo.Uri = downloadUri.toString();
+        taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).toString();
+        checkTaskDirectory(taskInfo);
+        synchronized (mLock) {
+            mDatabase.insertDownloadTaskInfo(taskInfo);
+        }
+        return taskInfo;
     }
 
     private void checkTaskDirectory(DownloadTaskInfo taskInfo) {

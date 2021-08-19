@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 public class DownloadTaskDatabase extends SQLiteOpenHelper {
     public static final int STATUS_FATAL = -1;
     public static final int STATUS_SUCCESS = 0;
+    public static final int STATUS_ERROR_CREATE_CACHE_FILES = 1;
+    public static final int STATUS_ERROR_DOWNLOAD_FILE = 2;
 
 
     public DownloadTaskDatabase(@Nullable Context context, @Nullable String name) {

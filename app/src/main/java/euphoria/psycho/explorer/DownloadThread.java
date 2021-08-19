@@ -39,6 +39,10 @@ import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 
+import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_CREATE_CACHE_FILES;
+import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_DOWNLOAD_FILE;
+import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_FATAL;
+
 public class DownloadThread extends Thread {
     public static final int BUFFER_SIZE = 8192;
     private final String mBaseUri;
@@ -108,6 +112,7 @@ public class DownloadThread extends Thread {
         try {
             String response = M3u8Share.getString(mUri);
             if (response == null) {
+                mDownloadNotifier.downloadFailed(mDownloadTaskInfo, STATUS_FATAL);
                 return null;
             }
             try {
@@ -115,7 +120,7 @@ public class DownloadThread extends Thread {
                         100, 1024 * 1024, false,
                         1);
             } catch (IOException e) {
-                Logger.d(String.format("parseM3u8File: %s", e.getMessage()));
+                mDownloadNotifier.downloadFailed(mDownloadTaskInfo, STATUS_ERROR_CREATE_CACHE_FILES);
                 return null;
             }
             String[] segments = response.split("\n");
@@ -211,7 +216,6 @@ public class DownloadThread extends Thread {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         List<String> tsList = parseM3u8File();
         if (tsList == null) {
-            mDownloadNotifier.downloadFailed(mUri, "解析m3u8文件失败");
             return;
         }
         mTotalSize = tsList.size();
@@ -223,7 +227,7 @@ public class DownloadThread extends Thread {
                 downloadFile(ts, tsFile);
                 mCurrentSize++;
             } catch (IOException e) {
-                mDownloadNotifier.downloadFailed(mUri, e.getMessage());
+                mDownloadNotifier.downloadFailed(mDownloadTaskInfo, STATUS_ERROR_DOWNLOAD_FILE);
                 return;
             }
 

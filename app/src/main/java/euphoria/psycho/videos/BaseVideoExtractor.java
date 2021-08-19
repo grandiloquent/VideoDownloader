@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import euphoria.psycho.explorer.DownloadService;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
@@ -149,9 +150,9 @@ public abstract class BaseVideoExtractor<T> {
                 }
             }, (dialog, which) -> {
                 dialog.dismiss();
-//                Intent intent = new Intent(mainActivity, DownloadActivity.class);
-//                intent.setData(Uri.parse(value));
-//                mainActivity.startActivity(intent);
+                Intent intent = new Intent(mainActivity, DownloadService.class);
+                intent.setData(Uri.parse(value));
+                mainActivity.startService(intent);
             })
                     .setMessage("是否使用浏览器打开视频链接")
                     .show();
