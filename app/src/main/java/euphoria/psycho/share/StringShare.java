@@ -1,5 +1,8 @@
 package euphoria.psycho.share;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StringShare {
 
     public static String substring(String string, String first, String second) {
@@ -84,4 +87,19 @@ public class StringShare {
         return s.substring(index, end);
     }
 
+    public static List<String> substringCodes(String string, String pattern, int max) {
+        int index = string.indexOf(pattern);
+        if (index == -1) return null;
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < max; i++) {
+            int start = string.lastIndexOf("\"", index);
+            if (start == -1) break;
+            int end = string.indexOf("\"", index + pattern.length());
+            if (end == -1) break;
+            list.add(string.substring(start + 1, end));
+            index = string.indexOf(pattern,end+1);
+            if (index == -1) break;
+        }
+        return list;
+    }
 }

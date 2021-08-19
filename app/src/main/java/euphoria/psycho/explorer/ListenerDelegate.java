@@ -21,6 +21,7 @@ import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShou;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
+import euphoria.psycho.videos.PornOne;
 import euphoria.psycho.videos.TwitterShare;
 import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.XVideosRedShare;
@@ -54,6 +55,7 @@ public class ListenerDelegate {
             if (TwitterShare.parsingVideo(mMainActivity)) {
                 return;
             }
+
             if (!uri.startsWith("https://") && !uri.startsWith("http://"))
                 mMainActivity.getWebView().loadUrl("https://" + uri);
             else
@@ -84,9 +86,13 @@ public class ListenerDelegate {
         if (PornHub.handle(url, mMainActivity)) {
             return;
         }
+        if (PornOne.handle(url, mMainActivity)) {
+            return;
+        }
         if (TwitterShare.parsingVideo(mMainActivity)) {
             return;
         }
+    
         if (mMainActivity.getVideoUrl() != null) {
             try {
                 mMainActivity.getWebView().loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mMainActivity.getVideoUrl(), "UTF-8"));

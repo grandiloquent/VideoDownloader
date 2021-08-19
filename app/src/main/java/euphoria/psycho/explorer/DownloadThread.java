@@ -37,10 +37,6 @@ import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
-//import com.jeffmony.ffmpeglib.FFmpegCmdUtils;
-//import com.jeffmony.ffmpeglib.LogUtils;
-//import com.jeffmony.ffmpeglib.VideoProcessor;
-//import com.jeffmony.ffmpeglib.listener.OnVideoCompositeListener;
 
 public class DownloadThread extends Thread {
     public static final int BUFFER_SIZE = 8192;

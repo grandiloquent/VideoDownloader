@@ -29,6 +29,7 @@ import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShou;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
+import euphoria.psycho.videos.PornOne;
 import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.YouTube;
@@ -118,8 +119,9 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView();
         loadStartPage();
-        Intent service = new Intent(this, DownloadService.class);
-        startService(service);
+//        Intent service = new Intent(this, DownloadService.class);
+//        startService(service);
+        PornOne.handle("https://pornone.com/chubby/sexy-lore/277275817/", this);
     }
 
     private void loadStartPage() {
@@ -210,6 +212,9 @@ public class MainActivity extends Activity implements ClientInterface {
             return true;
         }
         if (PornHub.handle(uri, this)) {
+            return true;
+        }
+        if (PornOne.handle(uri, this)) {
             return true;
         }
         return false;
