@@ -1,6 +1,8 @@
 package euphoria.psycho.share;
 
 
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 
 import java.io.BufferedReader;
@@ -8,8 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -96,5 +100,19 @@ public class NetShare {
         return connection.getHeaderFields();
     }
 
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+    }
+
+    public static boolean isInternetAvailable() {
+        try {
+            InetAddress address = InetAddress.getByName("www.google.com");
+            return address.toString().length() != 0;
+        } catch (UnknownHostException e) {
+            // Log error
+        }
+        return false;
+    }
 }
 

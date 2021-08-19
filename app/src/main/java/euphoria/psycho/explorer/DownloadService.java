@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.NetShare;
 import euphoria.psycho.utils.DownloadUtils;
 import euphoria.psycho.utils.NotificationUtils;
 
@@ -110,6 +111,10 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (!NetShare.isNetworkAvailable(this)) {
+            Toast.makeText(this, "网络不可用", Toast.LENGTH_LONG).show();
+            return START_NOT_STICKY;
+        }
         Uri downloadUri = intent.getData();
         if (downloadUri == null)
             return START_NOT_STICKY;

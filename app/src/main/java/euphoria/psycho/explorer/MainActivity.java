@@ -13,6 +13,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
+import java.net.NetworkInterface;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +124,7 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Intent service = new Intent(this, DownloadService.class);
 //        service.setData(Uri.parse("https://ccn.killcovid2021.com//m3u8/509537/509537.m3u8?st=fn0MNMJXISpLi0f-fGK-5g&e=1629364436"));
 //        startService(service);
- 
+
     }
 
     private void loadStartPage() {
