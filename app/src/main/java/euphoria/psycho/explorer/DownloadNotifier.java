@@ -4,8 +4,10 @@ import android.os.Process;
 
 import java.io.File;
 
+import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
+
 public interface DownloadNotifier {
-    void downloadStart(String uri, int total);
+    void downloadStart(DownloadTaskInfo downloadTaskInfo);
 
     void downloadFailed(String uri, String message);
 

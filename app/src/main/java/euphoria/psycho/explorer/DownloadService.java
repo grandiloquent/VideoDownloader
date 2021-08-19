@@ -13,6 +13,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.os.IBinder;
+import android.widget.Toast;
 
 
 import java.io.File;
@@ -24,7 +25,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
 import euphoria.psycho.share.FileShare;
+import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.utils.DownloadUtils;
+
+import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_FATAL;
 
 public class DownloadService extends Service implements DownloadNotifier {
     private static final String ACTION_DISMISS_DOWNLOAD = "euphoria.psycho.explorer.ACTION_DISMISS_DOWNLOAD";
@@ -54,31 +59,6 @@ public class DownloadService extends Service implements DownloadNotifier {
         mgr.createNotificationChannel(notificationChannel);
     }
 
-    private void updateNotification() {
-        Notification.Builder builder;
-        if (android.os.Build.VERSION.SDK_INT >= VERSION_CODES.O) {
-            builder = new Notification.Builder(this,
-                    DOWNLOAD);
-
-        } else {
-            builder = new Notification.Builder(this);
-        }
-        builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                .setLocalOnly(true);
-        builder.setContentTitle("下载视频")
-                .setContentText("")
-                //.setContentIntent(pairIntent)
-                .setDefaults(Notification.DEFAULT_SOUND)
-                .setColor(getColor(android.R.color.primary_text_dark))
-                .setOngoing(true);
-        //.addAction(pairAction)
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_DISMISS_DOWNLOAD);
-        registerReceiver(mDismissReceiver, filter);
-        mRegistered = true;
-        builder.setProgress(100, 20, false);
-        mNotificationManager.notify("1", 0, builder.build());
-    }
 
     @Override
     public void downloadCompleted(String uri, String directory) {
@@ -97,11 +77,22 @@ public class DownloadService extends Service implements DownloadNotifier {
     }
 
     @Override
-    public void downloadStart(String uri, int total) {
+    public void downloadStart(DownloadTaskInfo downloadTaskInfo) {
     }
+
+    private File mDirectory;
 
     @Override
     public void mergeVideoCompleted(String outPath) {
+    }
+
+    private void initializeRootDirectory() {
+        //mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        // Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getParentFile()
+        mDirectory = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (!mDirectory.exists()) {
+            mDirectory.mkdirs();
+        }
     }
 
     @Override
@@ -121,8 +112,13 @@ public class DownloadService extends Service implements DownloadNotifier {
             createNotificationChannel(this);
         }
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mDatabase = new DownloadTaskDatabase(this, new File(getExternalCacheDir(), "tasks.db").getAbsolutePath());
+        mDatabase = new DownloadTaskDatabase(this, getDatabasePath());
         mExecutor = Executors.newSingleThreadExecutor();
+        initializeRootDirectory();
+    }
+
+    private String getDatabasePath() {
+        return new File(getExternalCacheDir(), "tasks.db").getAbsolutePath();
     }
 
     @Override
@@ -134,24 +130,39 @@ public class DownloadService extends Service implements DownloadNotifier {
         super.onDestroy();
     }
 
+    private static final Object mLock = new Object();
+
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Uri downloadUri = intent.getData();
         if (downloadUri == null)
             return START_NOT_STICKY;
-        DownloadTaskInfo taskInfo = mDatabase.getDownloadTaskInfo(downloadUri.toString());
+        DownloadTaskInfo taskInfo;
+        DownloadThread thread = null;
+        synchronized (mLock) {
+            taskInfo = mDatabase.getDownloadTaskInfo(downloadUri.toString());
+        }
         if (taskInfo == null) {
-            DownloadThread thread = new DownloadThread(downloadUri.toString(), this, this);
+            thread = new DownloadThread(this, taskInfo, this);
             taskInfo = new DownloadTaskInfo();
             taskInfo.Uri = downloadUri.toString();
-            taskInfo.FileName = thread.getDirectory().getAbsolutePath();
-            long result = mDatabase.insertDownloadTaskInfo(taskInfo);
-            Logger.d(String.format("onStartCommand: %s", result));
-            //mExecutor.execute(thread);
-        } else {
-            Logger.d(String.format("onStartCommand: %s", taskInfo));
+            taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).toString();
+            synchronized (mLock) {
+                long result = mDatabase.insertDownloadTaskInfo(taskInfo);
+            }
+
         }
+        if (taskInfo.Status == STATUS_FATAL) {
+            Toast.makeText(this, "无法下载此视频", Toast.LENGTH_LONG).show();
+            return START_NOT_STICKY;
+        }
+        if (thread == null) {
+            thread = new DownloadThread(this, taskInfo, this);
+        }
+        mExecutor.execute(thread);
         return super.onStartCommand(intent, flags, startId);
     }
+
 
 }

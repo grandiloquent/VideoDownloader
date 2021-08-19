@@ -33,6 +33,7 @@ import java.util.Base64;
 import java.util.List;
 
 import androidx.annotation.RequiresApi;
+import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
@@ -45,7 +46,6 @@ public class DownloadThread extends Thread {
     private final DownloadNotifier mDownloadNotifier;
     private final String mUri;
     private BlobCache mBlobCache;
-    private File mDirectory;
     private volatile boolean mShutdownRequested;
     private long mSpeedSampleStart;
     private long mCurrentBytes;
@@ -54,21 +54,21 @@ public class DownloadThread extends Thread {
     private int mTotalSize;
     private int mCurrentSize;
     private List<String> mVideos = new ArrayList<>();
+    private final DownloadTaskInfo mDownloadTaskInfo;
 
-    public DownloadThread(String uri, Context context, DownloadNotifier downloadNotifier) {
+    public DownloadThread(Context context, DownloadTaskInfo downloadTaskInfo, DownloadNotifier downloadNotifier) {
         mContext = context;
-        mUri = uri;
-        Logger.d(String.format("DownloadThread: %s", uri));
+        mDownloadTaskInfo = downloadTaskInfo;
+        mUri = mDownloadTaskInfo.Uri;
         mBaseUri = StringShare.substringBeforeLast(mUri, "/")
                 + "/";
         mDownloadNotifier = downloadNotifier;
-        initializeRootDirectory();
 
     }
 
     private void downloadFile(String ts) throws IOException {
         final String fileName = FileShare.getFileNameFromUri(ts);
-        File tsFile = new File(mDirectory, fileName);
+        File tsFile = new File(mDownloadTaskInfo.FileName, fileName);
         if (tsFile.exists()) {
             Logger.d(String.format("downloadFile: file exsits, %s", tsFile.getAbsolutePath()));
             long size = getBookmark(tsFile.getName());
@@ -109,15 +109,6 @@ public class DownloadThread extends Thread {
         return 0;
     }
 
-    private void initializeRootDirectory() {
-        //mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-        // Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getParentFile()
-        mDirectory = mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        if (!mDirectory.exists()) {
-            mDirectory.mkdirs();
-        }
-    }
-
 
     private List<String> parseM3u8File() {
         try {
@@ -125,20 +116,8 @@ public class DownloadThread extends Thread {
             if (response == null) {
                 return null;
             }
-            String directoryName = null;
             try {
-                directoryName = KeyShare.toHex(KeyShare.md5encode(response));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            mDirectory = new File(mDirectory, directoryName);
-            if (!mDirectory.exists()) {
-                boolean res = mDirectory.mkdirs();
-                Logger.d(String.format("initializeTaskDirectory: %s %b", directoryName, res));
-
-            }
-            try {
-                mBlobCache = new BlobCache(mDirectory + "/log",
+                mBlobCache = new BlobCache(mDownloadTaskInfo.FileName + "/log",
                         100, 1024 * 1024, false,
                         1);
             } catch (IOException e) {
@@ -232,10 +211,6 @@ public class DownloadThread extends Thread {
 //        }
     }
 
-    public File getDirectory() {
-        return mDirectory;
-    }
-
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -245,7 +220,7 @@ public class DownloadThread extends Thread {
             return;
         }
         mTotalSize = tsList.size();
-        mDownloadNotifier.downloadStart(mUri, mTotalSize);
+        mDownloadNotifier.downloadStart(mDownloadTaskInfo);
         for (String ts : tsList) {
             try {
                 downloadFile(ts);
@@ -256,7 +231,7 @@ public class DownloadThread extends Thread {
                 return;
             }
         }
-        mDownloadNotifier.downloadCompleted(mUri, mDirectory.getName());
+        mDownloadNotifier.downloadCompleted(mUri, StringShare.substringAfter(mDownloadTaskInfo.FileName, "/"));
         try {
 //            File[] inputVideos = mDirectory.listFiles(new FileFilter() {
 //
@@ -265,12 +240,12 @@ public class DownloadThread extends Thread {
 //                  return true;
 //                }
 //            });
-            String outputPath = new File(mDirectory, mDirectory.getName() + ".mp4")
+            String outputPath = new File(mDownloadTaskInfo.FileName, StringShare.substringAfter(mDownloadTaskInfo.FileName, "/") + ".mp4")
                     .getAbsolutePath();
             OutputStream fileOutputStream = new FileOutputStream(outputPath);
             byte[] b = new byte[4096];
             for (String video : mVideos) {
-                FileInputStream fileInputStream = new FileInputStream(new File(mDirectory, video));
+                FileInputStream fileInputStream = new FileInputStream(new File(mDownloadTaskInfo.FileName, video));
                 int len;
                 while ((len = fileInputStream.read(b)) != -1) {
                     fileOutputStream.write(b, 0, len);

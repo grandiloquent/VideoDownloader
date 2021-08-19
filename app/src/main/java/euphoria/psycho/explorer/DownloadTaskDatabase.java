@@ -12,6 +12,7 @@ import java.util.List;
 import androidx.annotation.Nullable;
 
 public class DownloadTaskDatabase extends SQLiteOpenHelper {
+    public static final int STATUS_FATAL = -1;
 
     public DownloadTaskDatabase(@Nullable Context context, @Nullable String name) {
         super(context, name, null, 1);
@@ -35,6 +36,7 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
             downloadTaskInfo.Status = cursor.getInt(2);
             downloadTaskInfo.CreateAt = cursor.getLong(3);
             downloadTaskInfo.UpdateAt = cursor.getLong(4);
+            downloadTaskInfo.Uri = uri;
         }
         cursor.close();
         return downloadTaskInfo;
