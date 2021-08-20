@@ -14,4 +14,6 @@ public interface DownloadNotifier {
     void mergeVideoCompleted(DownloadTaskInfo downloadTaskInfo, String outPath);
 
     void mergeVideoFailed(DownloadTaskInfo taskInfo, String message);
+
+    void updateDatabase(DownloadTaskInfo taskInfo);
 }

@@ -27,7 +27,7 @@ public class NotificationUtils {
         mgr.createNotificationChannel(notificationChannel);
     }
 
-    public static void updateDownloadProgressNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, int percent, String fileName) {
+    public static void downloadProgress(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, int percent, String fileName) {
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("正在下载")
                 .setContentText(fileName)
@@ -46,14 +46,17 @@ public class NotificationUtils {
     public static void mergeVideoCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, String fileName) {
         Builder builder = getBuilder(context, notificationChannel);
         Intent viewIntent = new Intent(Intent.ACTION_VIEW);
-        viewIntent.setData(Uri.parse(fileName));
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,0,viewIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        viewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        viewIntent.setDataAndType(Uri.parse(fileName),"video/mp4");
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), viewIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentTitle("合并完成")
                 .setContentText(fileName)
                 .setContentIntent(pendingIntent)
                 .setOngoing(false);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
+ 
 
     public static void updateMergeVideoFailedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Logger.d(String.format("updateMergeVideoFailedNotification: %s", downloadTaskInfo.FileName));

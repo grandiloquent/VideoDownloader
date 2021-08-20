@@ -87,7 +87,7 @@ public class KeyShare {
             throw new java.lang.IllegalArgumentException("'" + hexData + "' is not a hex string");
         }
         byte[] result = new byte[(hexData.length() + 1) / 2];
-        String hexNumber = null;
+        String hexNumber;
         int offset = 0;
         int byteIndex = 0;
         while (offset < hexData.length()) {

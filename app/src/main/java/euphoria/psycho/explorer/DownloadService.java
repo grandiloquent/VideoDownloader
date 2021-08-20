@@ -52,8 +52,8 @@ public class DownloadService extends Service implements DownloadNotifier {
         DownloadTaskInfo taskInfo;
         taskInfo = new DownloadTaskInfo();
         taskInfo.Uri = downloadUri.toString();
-        taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).getAbsolutePath();
-        checkTaskDirectory(taskInfo);
+        //taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).getAbsolutePath();
+        // checkTaskDirectory(taskInfo);
         synchronized (mLock) {
             mDatabase.insertDownloadTaskInfo(taskInfo);
         }
@@ -76,9 +76,9 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName) {
-        NotificationUtils.updateDownloadProgressNotification(this,
+        NotificationUtils.downloadProgress(this,
                 DOWNLOAD_CHANNEL, taskInfo, mNotificationManager,
-                currentSize / total * 100, fileName
+                (int) ((currentSize / (float) total) * 100), fileName
         );
     }
 
@@ -92,7 +92,7 @@ public class DownloadService extends Service implements DownloadNotifier {
     public void mergeVideoCompleted(DownloadTaskInfo taskInfo, String outPath) {
         NotificationUtils.mergeVideoCompleted(this,
                 DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
-        taskInfo.Status = 0;
+        taskInfo.Status = STATUS_SUCCESS;
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
@@ -102,6 +102,13 @@ public class DownloadService extends Service implements DownloadNotifier {
     public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
         NotificationUtils.updateMergeVideoFailedNotification(this,
                 DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
+    }
+
+    @Override
+    public void updateDatabase(DownloadTaskInfo taskInfo) {
+        synchronized (mLock) {
+            mDatabase.updateDownloadTaskInfo(taskInfo);
+        }
     }
 
     @Nullable
@@ -144,6 +151,7 @@ public class DownloadService extends Service implements DownloadNotifier {
         Uri downloadUri = intent.getData();
         if (downloadUri == null)
             return START_NOT_STICKY;
+        Logger.d(String.format("onStartCommand: %s", downloadUri));
         DownloadTaskInfo taskInfo;
         DownloadThread thread = null;
         // in the further we should use
@@ -176,7 +184,7 @@ public class DownloadService extends Service implements DownloadNotifier {
         // Check whether the directory generated based on
         // the hash value of the download uri exists,
         // and create the directory if it does not exist
-        checkTaskDirectory(taskInfo);
+        //  checkTaskDirectory(taskInfo);
         if (thread == null) {
             thread = new DownloadThread(this, taskInfo, this);
         }
@@ -184,6 +192,6 @@ public class DownloadService extends Service implements DownloadNotifier {
         mExecutor.execute(thread);
         return super.onStartCommand(intent, flags, startId);
 
-       
+
     }
 }

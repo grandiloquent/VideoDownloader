@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Process;
 import android.os.SystemClock;
 
@@ -20,11 +21,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
 import euphoria.psycho.share.FileShare;
+import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.utils.BlobCache;
@@ -106,6 +110,14 @@ public class DownloadThread extends Thread {
                 mDownloadTaskInfo.Status = STATUS_FATAL;
                 mDownloadNotifier.downloadFailed(mDownloadTaskInfo);
                 return null;
+            } else {
+                File directory = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), KeyShare.toHex(KeyShare.md5encode(response)));
+                mDownloadTaskInfo.FileName = directory.getAbsolutePath();
+                Logger.d(String.format("parseM3u8File: %s", mDownloadTaskInfo.FileName));
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+                mDownloadNotifier.updateDatabase(mDownloadTaskInfo);
             }
             try {
                 mBlobCache = new BlobCache(mDownloadTaskInfo.FileName + "/log",
@@ -127,7 +139,7 @@ public class DownloadThread extends Thread {
                 }
             }
             return tsList;
-        } catch (IOException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             Logger.d(String.format("parseM3u8File: %s", e.getMessage()));
         }
         return null;
