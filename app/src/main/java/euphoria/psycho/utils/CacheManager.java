@@ -30,7 +30,7 @@ import java.util.HashMap;
 public class CacheManager {
     private static final String TAG = "CacheManager";
     private static final String KEY_CACHE_UP_TO_DATE = "cache-up-to-date";
-    private static HashMap<String, BlobCache> sCacheMap =
+    private static final HashMap<String, BlobCache> sCacheMap =
             new HashMap<String, BlobCache>();
     private static boolean sOldCheckDone = false;
 
@@ -71,13 +71,11 @@ public class CacheManager {
             // ignore.
         }
         if (n != 0) return;
-        pref.edit().putInt(KEY_CACHE_UP_TO_DATE, 1).commit();
+        pref.edit().putInt(KEY_CACHE_UP_TO_DATE, 1).apply();
 
         File cacheDir = context.getExternalCacheDir();
         String prefix = cacheDir.getAbsolutePath() + "/";
 
-        BlobCache.deleteFiles(prefix + "imgcache");
-        BlobCache.deleteFiles(prefix + "rev_geocoding");
         BlobCache.deleteFiles(prefix + "bookmark");
     }
 }
