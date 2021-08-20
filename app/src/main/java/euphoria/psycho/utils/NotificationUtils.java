@@ -1,6 +1,5 @@
 package euphoria.psycho.utils;
 
-
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
@@ -13,6 +12,8 @@ import android.os.Build.VERSION_CODES;
 
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
+import euphoria.psycho.explorer.MovieActivity;
+import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.Logger;
 
 public class NotificationUtils {
@@ -45,10 +46,10 @@ public class NotificationUtils {
 
     public static void mergeVideoCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, String fileName) {
         Builder builder = getBuilder(context, notificationChannel);
-        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+        //
+        Intent viewIntent = new Intent(context, MovieActivity.class);
         viewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        viewIntent.setDataAndType(Uri.parse(fileName),"video/mp4");
-
+        viewIntent.setDataAndType(Uri.parse(fileName), "video/mp4");
         PendingIntent pendingIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), viewIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentTitle("合并完成")
                 .setContentText(fileName)
@@ -56,7 +57,6 @@ public class NotificationUtils {
                 .setOngoing(false);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
- 
 
     public static void updateMergeVideoFailedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Logger.d(String.format("updateMergeVideoFailedNotification: %s", downloadTaskInfo.FileName));
@@ -102,3 +102,4 @@ public class NotificationUtils {
 //        mRegistered = true;
 //        builder.setProgress(100, 20, false);
 }
+// 添加系统程序 Gallery2 的

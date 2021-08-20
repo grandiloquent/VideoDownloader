@@ -195,7 +195,7 @@ public class Share {
         return sb.toString();
     }
 
-    public static void launchDialog(Context context, String title, String message, View view, DialogInterface.OnClickListener positiveCallback) {
+    public static void launchDialog(Context context, String title, String message, View view, OnClickListener positiveCallback) {
         new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
@@ -209,7 +209,7 @@ public class Share {
                 }).show();
     }
 
-    public static void launchAskDialog(Context context, String message, DialogInterface.OnClickListener positiveCallback) {
+    public static void launchAskDialog(Context context, String message, OnClickListener positiveCallback) {
         new AlertDialog.Builder(context)
                 .setTitle("询问")
                 .setMessage(message)
