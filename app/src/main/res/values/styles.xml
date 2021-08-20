@@ -7,4 +7,47 @@
         <item name="android:layout_weight">1</item>
     </style>
 
+    <dimen name="list_item_min_height">128dp</dimen>
+    <dimen name="list_item_default_margin">128dp</dimen>
+
+    <style name="ListItemContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/list_item_min_height</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_marginStart">@dimen/list_item_default_margin</item>
+    </style>
+
+    <dimen name="list_item_start_icon_width">128dp</dimen>
+    <dimen name="list_item_start_icon_right_margin">20dp</dimen>
+
+    <style name="ListItemStartIcon">
+        <item name="android:layout_width">226dp</item>
+        <item name="android:layout_height">@dimen/list_item_start_icon_width</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginEnd">@dimen/list_item_start_icon_right_margin</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
+
+    <dimen name="text_size_large">16sp</dimen>
+
+    <style name="TextAppearance" parent="android:TextAppearance" />
+
+    <style name="TextAppearance.TextLarge">
+        <item name="android:textSize">@dimen/text_size_large</item>
+    </style>
+
+    <style name="TextAppearance.TextLarge.Primary">
+        <item name="android:textColor">@color/default_text_color_list</item>
+    </style>
+
+    <item name="default_disabled_alpha" format="float" type="dimen">0.38</item>
+
+
+    <color name="default_text_color">@color/default_text_color_dark</color>
+    <color name="default_text_color_dark">@color/modern_grey_900</color>
+    <color name="modern_grey_900">#ff202124</color>
+
 </resources>

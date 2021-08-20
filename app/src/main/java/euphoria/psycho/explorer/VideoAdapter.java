@@ -28,7 +28,7 @@ public class VideoAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public File getItem(int position) {
         return mVideos.get(position);
     }
 
@@ -45,6 +45,7 @@ public class VideoAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.title = convertView.findViewById(R.id.title);
             viewHolder.thumbnail = convertView.findViewById(R.id.thumbnail);
+            convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }

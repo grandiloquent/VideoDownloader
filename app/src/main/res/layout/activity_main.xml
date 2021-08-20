@@ -42,6 +42,11 @@
             android:src="@drawable/ic_action_file_download" />
 
         <ImageButton
+            android:id="@+id/playlist_play"
+            style="@style/ImageButton"
+            android:src="@drawable/ic_action_playlist_play" />
+
+        <ImageButton
             android:id="@+id/help_outline"
             style="@style/ImageButton"
             android:src="@drawable/ic_action_help_outline" />

@@ -6,12 +6,18 @@
 
     <ImageView
         android:id="@+id/thumbnail"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="8dp" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:background="#f2f2f2" />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.TextLarge.Primary" />
+
+
 </LinearLayout>

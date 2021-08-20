@@ -3,6 +3,17 @@ package euphoria.psycho.share;
 
 public class MathShare {
 
+    private static final double EARTH_RADIUS_METERS = 6367000.0;
+
+    public static double accurateDistanceMeters(double lat1, double lng1,
+                                                double lat2, double lng2) {
+        double dlat = Math.sin(0.5 * (lat2 - lat1));
+        double dlng = Math.sin(0.5 * (lng2 - lng1));
+        double x = dlat * dlat + dlng * dlng * Math.cos(lat1) * Math.cos(lat2);
+        return (2 * Math.atan2(Math.sqrt(x), Math.sqrt(Math.max(0.0,
+                1.0 - x)))) * EARTH_RADIUS_METERS;
+    }
+
     public static int ceilLog2(float value) {
         int i;
         for (i = 0; i < 31; i++) {
@@ -77,4 +88,7 @@ public class MathShare {
         return Integer.highestOneBit(n);
     }
 
+    public static double toMile(double meter) {
+        return meter / 1609;
+    }
 }

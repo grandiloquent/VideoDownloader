@@ -40,7 +40,15 @@ public class ListenerDelegate {
         mMainActivity.findViewById(R.id.help_outline).setOnClickListener(this::onHelp);
         mainActivity.findViewById(R.id.file_download).setOnClickListener(this::onDownloadFile);
         mMainActivity.findViewById(R.id.add_link).setOnClickListener(this::onAddLink);
+        mainActivity.findViewById(R.id.playlist_play).setOnClickListener(this::onPlaylist);
     }
+
+    private void onPlaylist(View view) {
+        Intent intent=new Intent(mMainActivity,VideoListActivity.class);
+       mMainActivity.startActivity(intent);
+    }
+
+ 
 
     private void onAddLink(View view) {
         DialogShare.createEditDialog(mMainActivity, "", uri -> {

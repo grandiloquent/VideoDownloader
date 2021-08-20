@@ -7,6 +7,16 @@ import java.util.List;
 
 public class StringShare {
 
+    public static byte[] getBytes(String in) {
+        byte[] result = new byte[in.length() * 2];
+        int output = 0;
+        for (char ch : in.toCharArray()) {
+            result[output++] = (byte) (ch & 0xFF);
+            result[output++] = (byte) (ch >> 8);
+        }
+        return result;
+    }
+
     //
     public static boolean isNullOrEmpty(String exifMake) {
         return TextUtils.isEmpty(exifMake);
