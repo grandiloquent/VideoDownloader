@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2009 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package euphoria.psycho.explorer;
 
 import android.annotation.TargetApi;
@@ -78,7 +62,6 @@ public class MoviePlayer implements
 
     private Context mContext;
     private final VideoView mVideoView;
-    private final View mRootView;
     private final Bookmarker mBookmarker;
     private final Uri mUri;
     private final Handler mHandler = new Handler();
@@ -120,8 +103,7 @@ public class MoviePlayer implements
     public MoviePlayer(View rootView, final MovieActivity movieActivity,
                        Uri videoUri, Bundle savedInstance, boolean canReplay) {
         mContext = movieActivity.getApplicationContext();
-        mRootView = rootView;
-        mVideoView = (VideoView) rootView.findViewById(R.id.surface_view);
+        mVideoView = rootView.findViewById(R.id.surface_view);
         mBookmarker = new Bookmarker(movieActivity);
         mUri = videoUri;
         mController = new MovieControllerOverlay(mContext);
@@ -149,16 +131,13 @@ public class MoviePlayer implements
                 return true;
             }
         });
-        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer player) {
-                if (!mVideoView.canSeekForward() || !mVideoView.canSeekBackward()) {
-                    mController.setSeekable(false);
-                } else {
-                    mController.setSeekable(true);
-                }
-                setProgress();
+        mVideoView.setOnPreparedListener(player -> {
+            if (!mVideoView.canSeekForward() || !mVideoView.canSeekBackward()) {
+                mController.setSeekable(false);
+            } else {
+                mController.setSeekable(true);
             }
+            setProgress();
         });
         // The SurfaceView is transparent before drawing the first frame.
         // This makes the UI flashing when open a video. (black -> old screen

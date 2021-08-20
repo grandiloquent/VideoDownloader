@@ -28,8 +28,8 @@ import android.view.WindowManager;
 import android.widget.ShareActionProvider;
 
 
+import euphoria.psycho.share.FileShare;
 import euphoria.psycho.utils.ApiHelper;
-import euphoria.psycho.utils.Utils;
 
 /**
  * This activity plays a video from a specified URI.
@@ -144,7 +144,7 @@ public class MovieActivity extends Activity {
                                     displayName);
                         }
                     } finally {
-                        Utils.closeSilently(cursor);
+                        FileShare.closeSilently(cursor);
                     }
                 }
             };

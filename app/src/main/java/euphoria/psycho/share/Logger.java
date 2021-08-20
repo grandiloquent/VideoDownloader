@@ -22,3 +22,4 @@ public class Logger {
         Log.e("TAG", stringBuilder.toString());
     }
 }
+//
