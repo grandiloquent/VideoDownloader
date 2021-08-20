@@ -46,7 +46,6 @@ public class NotificationUtils {
 
     public static void mergeVideoCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, String fileName) {
         Builder builder = getBuilder(context, notificationChannel);
-        //
         Intent viewIntent = new Intent(context, MovieActivity.class);
         viewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         viewIntent.setDataAndType(Uri.parse(fileName), "video/mp4");
@@ -54,7 +53,9 @@ public class NotificationUtils {
         builder.setContentTitle("合并完成")
                 .setContentText(fileName)
                 .setContentIntent(pendingIntent)
-                .setOngoing(false);
+                .setOngoing(false)
+                .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                .setAutoCancel(true);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
 
@@ -77,7 +78,8 @@ public class NotificationUtils {
     public static void updateDownloadCompletedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("已完成下载")
-                .setContentText(downloadTaskInfo.Uri);
+                .setContentText(downloadTaskInfo.Uri)
+                .setSmallIcon(android.R.drawable.stat_sys_download_done);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
 
