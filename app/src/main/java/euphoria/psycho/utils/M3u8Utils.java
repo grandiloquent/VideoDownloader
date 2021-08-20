@@ -15,7 +15,7 @@ public class M3u8Utils {
     private static String URI = "https://hls-hw.xvideos-cdn.com/videos/hls/29/2f/cd/292fcd03310b0126b55dbd3ee0e47cce/hls-720p-e4013.m3u8?e=1628509853&l=0&h=2dfabad566e13a1e6b8c3c58a4959baa";
     private static String TS_MIMETYPE = "video/mp2t";
     private static String M3U8_MIME_TYPE = "application/x-mpegURL";
-// 
+//
     public static void parseM3u8File() {
         try {
             String response = getString(URI);

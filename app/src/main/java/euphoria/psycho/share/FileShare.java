@@ -2,8 +2,10 @@ package euphoria.psycho.share;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Xml.Encoding;
@@ -33,28 +35,32 @@ import static android.os.Build.VERSION.SDK_INT;
 
 public class FileShare {
 
-    public static String readAssetString(Context context, String fileName) {
-        InputStream in = null;
-        try {
-            in = context.getAssets().open(fileName);
-            return readText(in);
-        } catch (IOException ignored) {
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException ignored) {
-                }
-            }
-        }
-        return null;
-
-    }
-
     public static void appendAllText(File file, String contents) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
         writer.write(contents);
         writer.close();
+    }
+
+    public static void closeSilently(Closeable c) {
+        if (c == null) return;
+        try {
+            c.close();
+        } catch (IOException t) {
+        }
+    }
+
+    public static void closeSilently(ParcelFileDescriptor fd) {
+        try {
+            if (fd != null) fd.close();
+        } catch (Throwable t) {
+        }
+    }
+
+    public static void closeSilently(Cursor cursor) {
+        try {
+            if (cursor != null) cursor.close();
+        } catch (Throwable t) {
+        }
     }
 
     public static long copyTo(Reader in, Writer out, int bufferSize) throws IOException {
@@ -80,29 +86,6 @@ public class FileShare {
             bytes = in.read(buffer);
         }
         return bytesCopied;
-    }
-
-    public static byte[] readBytes(InputStream in, int estimatedSize) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(Math.max(estimatedSize, in.available()));
-        copyTo(in, buffer, 8 * 1024);
-        return buffer.toByteArray();
-    }
-
-    public static String readText(Reader in) throws IOException {
-        StringWriter buffer = new StringWriter();
-        copyTo(in, buffer, 8 * 1024);
-        return buffer.toString();
-    }
-
-    public static String readText(InputStream in) throws IOException {
-        return readText(new InputStreamReader(in, StandardCharsets.UTF_8));
-    }
-
-    public static String readAllText(File filename) throws IOException {
-        InputStreamReader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8");
-        String s = readText(reader);
-        reader.close();
-        return s;
     }
 
     public static String formatFileSize(long number) {
@@ -141,12 +124,14 @@ public class FileShare {
         return value + suffix;
     }
 
-    public static void closeSilently(Closeable c) {
-        if (c == null) return;
-        try {
-            c.close();
-        } catch (IOException t) {
+    public static String getFileNameFromUri(String path) {
+        int end = path.indexOf('?');
+        if (end == -1) {
+            end = path.length();
         }
+        int start = path.lastIndexOf('/', end);
+        start = start == -1 ? 0 : start + 1;
+        return path.substring(start, end);
     }
 
     public static List<String> readAllLines(File file) throws IOException {
@@ -158,17 +143,48 @@ public class FileShare {
         return lines;
     }
 
-    public static String getFileNameFromUri(String path) {
-        int end = path.indexOf('?');
-        if (end == -1) {
-            end = path.length();
-        }
-        int start = path.lastIndexOf('/', end);
-        start = start == -1 ? 0 : start + 1;
-        return path.substring(start, end);
+    public static String readAllText(File filename) throws IOException {
+        InputStreamReader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8");
+        String s = readText(reader);
+        reader.close();
+        return s;
     }
 
-    public static void requestManageAllFilePermission(){
+    public static String readAssetString(Context context, String fileName) {
+        InputStream in = null;
+        try {
+            in = context.getAssets().open(fileName);
+            return readText(in);
+        } catch (IOException ignored) {
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+        return null;
+
+    }
+
+    public static byte[] readBytes(InputStream in, int estimatedSize) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream(Math.max(estimatedSize, in.available()));
+        copyTo(in, buffer, 8 * 1024);
+        return buffer.toByteArray();
+    }
+
+    public static String readText(Reader in) throws IOException {
+        StringWriter buffer = new StringWriter();
+        copyTo(in, buffer, 8 * 1024);
+        return buffer.toString();
+    }
+
+    public static String readText(InputStream in) throws IOException {
+        return readText(new InputStreamReader(in, StandardCharsets.UTF_8));
+    }
+
+    public static void requestManageAllFilePermission() {
 //        if (SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
 //            try {
 //                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
@@ -182,6 +198,8 @@ public class FileShare {
 //            return;
 //        }
     }
+
+
 }
 // https://referencesource.microsoft.com/#mscorlib/system/io/file.cs
 // https://referencesource.microsoft.com/#mscorlib/system/io/path.cs

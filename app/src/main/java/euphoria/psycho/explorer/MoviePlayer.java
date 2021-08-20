@@ -46,6 +46,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+import euphoria.psycho.share.DateTimeShare;
 import euphoria.psycho.utils.ApiHelper;
 import euphoria.psycho.utils.BlobCache;
 import euphoria.psycho.utils.CacheManager;
@@ -234,26 +235,13 @@ public class MoviePlayer implements
         outState.putLong(KEY_RESUMEABLE_TIME, mResumeableTime);
     }
 
-    // Returns a (localized) string for the given duration (in seconds).
-    public static String formatDuration(final Context context, int duration) {
-        int h = duration / 3600;
-        int m = (duration - h * 3600) / 60;
-        int s = duration - (h * 3600 + m * 60);
-        String durationValue;
-        if (h == 0) {
-            durationValue = String.format(context.getString(R.string.details_ms), m, s);
-        } else {
-            durationValue = String.format(context.getString(R.string.details_hms), h, m, s);
-        }
-        return durationValue;
-    }
 
     private void showResumeDialog(Context context, final int bookmark) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(R.string.resume_playing_title);
         builder.setMessage(String.format(
                 context.getString(R.string.resume_playing_message),
-                formatDuration(context, bookmark / 1000)));
+                DateTimeShare.formatDuration(context, bookmark / 1000)));
         builder.setOnCancelListener(new OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {

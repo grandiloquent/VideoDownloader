@@ -1,9 +1,34 @@
 package euphoria.psycho.share;
 
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class StringShare {
+
+    //
+    public static boolean isNullOrEmpty(String exifMake) {
+        return TextUtils.isEmpty(exifMake);
+    }
+
+    public static float parseFloatSafely(String content, float defaultValue) {
+        if (content == null) return defaultValue;
+        try {
+            return Float.parseFloat(content);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    public static int parseIntSafely(String content, int defaultValue) {
+        if (content == null) return defaultValue;
+        try {
+            return Integer.parseInt(content);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
 
     public static String substring(String string, String first, String second) {
         int start = string.indexOf(first);
@@ -71,6 +96,22 @@ public class StringShare {
         return s.substring(0, index);
     }
 
+    public static List<String> substringCodes(String string, String pattern, int max) {
+        int index = string.indexOf(pattern);
+        if (index == -1) return null;
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < max; i++) {
+            int start = string.lastIndexOf("\"", index);
+            if (start == -1) break;
+            int end = string.indexOf("\"", index + pattern.length());
+            if (end == -1) break;
+            list.add(string.substring(start + 1, end));
+            index = string.indexOf(pattern, end + 1);
+            if (index == -1) break;
+        }
+        return list;
+    }
+
     public static String substringLine(String s, String delimiter) {
         int index = s.indexOf(delimiter);
         if (index == -1) return null;
@@ -87,19 +128,4 @@ public class StringShare {
         return s.substring(index, end);
     }
 
-    public static List<String> substringCodes(String string, String pattern, int max) {
-        int index = string.indexOf(pattern);
-        if (index == -1) return null;
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < max; i++) {
-            int start = string.lastIndexOf("\"", index);
-            if (start == -1) break;
-            int end = string.indexOf("\"", index + pattern.length());
-            if (end == -1) break;
-            list.add(string.substring(start + 1, end));
-            index = string.indexOf(pattern,end+1);
-            if (index == -1) break;
-        }
-        return list;
-    }
 }
