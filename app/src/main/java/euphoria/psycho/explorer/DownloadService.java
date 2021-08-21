@@ -101,9 +101,9 @@ public class DownloadService extends Service implements DownloadNotifier {
                 DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
         taskInfo.Status = STATUS_SUCCESS;
         synchronized (mLock) {
-            Logger.d(String.format("mergeVideoCompleted: %s", taskInfo.toString()));
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
+        Toast.makeText(this, "视频合并成功: " + outPath, Toast.LENGTH_LONG).show();
     }
 
     @Override
