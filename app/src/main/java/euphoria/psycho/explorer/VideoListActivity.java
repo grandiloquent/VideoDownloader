@@ -15,6 +15,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,28 +29,61 @@ public class VideoListActivity extends Activity {
     private VideoAdapter mVideoAdapter;
     private GridView mGridView;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        initialize();
+    // Delete the entire directory where the video file is
+    private void actionDelete(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+                .getMenuInfo();
+        File directory = mVideoAdapter.getItem(info.position).getParentFile();
+        FileShare.recursivelyDeleteFile(directory, input -> true);
+        List<File> videos = getVideos();
+        mVideoAdapter.update(videos);
     }
 
+    // Share the video
+    private void actionShare(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+                .getMenuInfo();
+        File videoFile = mVideoAdapter.getItem(info.position);
+        startActivity(createShareIntent(Uri.fromFile(videoFile)));
+    }
+
+    private Intent createShareIntent(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("video/*");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        return intent;
+    }
+
+    public static List<File> recursivelyListFiles(File directory) {
+        ArrayList<File> results = new ArrayList<>();
+        File[] files = directory.listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith(".mp4"));
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    results.addAll(recursivelyListFiles(file));
+                } else {
+                    results.add(file);
+                }
+            }
+        }
+        return results;
+    }
+
+    private List<File> getVideos() {
+        return recursivelyListFiles(
+                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        );
+    }
 
     private void initialize() {
         setContentView(R.layout.activity_video_list);
         mGridView = findViewById(R.id.grid_view);
         mGridView.setNumColumns(2);
+        registerForContextMenu(mGridView);
         mVideoAdapter = new VideoAdapter(this);
         mGridView.setAdapter(mVideoAdapter);
-        List<File> videos = new ArrayList<>();
-        List<File> files = FileShare.recursivelyListFiles(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS));
-        for (File f : files) {
-            if (FileShare.getExtension(f.getName()).equals("mp4")) {
-                videos.add(f);
-            }
-        }
+        List<File> videos = getVideos();
         mVideoAdapter.update(videos);
-        registerForContextMenu(mGridView);
         ContextShare.initialize(this);
         mGridView.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -62,51 +96,24 @@ public class VideoListActivity extends Activity {
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        getMenuInflater().inflate(R.menu.videos, menu);
-        super.onCreateContextMenu(menu, v, menuInfo);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initialize();
     }
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-                .getMenuInfo();
-        switch (item.getItemId()) {
-            case R.id.action_share:
-                startActivity(createShareIntent(Uri.fromFile(mVideoAdapter.getItem(info.position))));
-                break;
-            case R.id.action_delete:
-                actionDelete(mVideoAdapter.getItem(info.position).getParentFile());
-                break;
-
+        if (item.getItemId() == R.id.action_share) {
+            actionShare(item);
+        } else if (item.getItemId() == R.id.action_delete) {
+            actionDelete(item);
         }
         return super.onContextItemSelected(item);
-
     }
 
-    private void actionDelete(File directory) {
-        FileShare.recursivelyDeleteFile(directory, new Function<String, Boolean>() {
-            @Override
-            public Boolean apply(String input) {
-                return true;
-            }
-        });
-
-        List<File> files = FileShare.recursivelyListFiles(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS));
-        List<File> videos = new ArrayList<>();
-
-        for (File f : files) {
-            if (FileShare.getExtension(f.getName()).equals("mp4")) {
-                videos.add(f);
-            }
-        }
-        mVideoAdapter.update(videos);
-    }
-
-    private Intent createShareIntent(Uri uri) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("video/*");
-        intent.putExtra(Intent.EXTRA_STREAM, uri);
-        return intent;
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        getMenuInflater().inflate(R.menu.videos, menu);
+        super.onCreateContextMenu(menu, v, menuInfo);
     }
 }
