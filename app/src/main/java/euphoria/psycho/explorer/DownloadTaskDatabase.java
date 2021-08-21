@@ -16,6 +16,7 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
     public static final int STATUS_SUCCESS = 1;
     public static final int STATUS_ERROR_CREATE_CACHE_FILES = 2;
     public static final int STATUS_ERROR_DOWNLOAD_FILE = 3;
+    public static final int STATUS_ERROR_MERGE_FILE = 4;
 
 
     public DownloadTaskDatabase(@Nullable Context context, @Nullable String name) {
@@ -46,11 +47,8 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
         return downloadTaskInfo;
     }
 
-    public List<DownloadTaskInfo> getDownloadTaskInfos(int status) {
-//        Cursor cursor = getReadableDatabase().rawQuery("select uri,filename from tasks where status != ?", new String[]{
-//                Integer.toString(status)
-//        });
-        Cursor cursor = getReadableDatabase().rawQuery("select * from tasks",null);
+    public List<DownloadTaskInfo> getDownloadTaskInfos() {
+        Cursor cursor = getReadableDatabase().rawQuery("select * from tasks", null);
         List<DownloadTaskInfo> taskInfos = new ArrayList<>();
         while (cursor.moveToNext()) {
             DownloadTaskInfo taskInfo = new DownloadTaskInfo();

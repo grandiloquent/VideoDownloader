@@ -23,6 +23,8 @@ import euphoria.psycho.share.NetShare;
 import euphoria.psycho.utils.DownloadUtils;
 import euphoria.psycho.utils.NotificationUtils;
 
+import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_DOWNLOAD_FILE;
+import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_MERGE_FILE;
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_FATAL;
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_SUCCESS;
 
@@ -32,7 +34,6 @@ public class DownloadService extends Service implements DownloadNotifier {
     private final BroadcastReceiver mDismissReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Logger.d(String.format("onReceive: %s", ""));
             stopSelf();
         }
     };
@@ -42,8 +43,7 @@ public class DownloadService extends Service implements DownloadNotifier {
     private DownloadTaskDatabase mDatabase;
 
     private void checkTasks() {
-        Logger.d(String.format("checkTasks: %s", ""));
-        List<DownloadTaskInfo> taskInfos = mDatabase.getDownloadTaskInfos(20);
+        List<DownloadTaskInfo> taskInfos = mDatabase.getDownloadTaskInfos();
         boolean founded = false;
         for (DownloadTaskInfo taskInfo : taskInfos) {
             if (taskInfo.Status == 1) {
@@ -103,13 +103,17 @@ public class DownloadService extends Service implements DownloadNotifier {
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
-        Toast.makeText(this, "视频合并成功: " + outPath, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "视频合并成功：" + outPath, Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
         NotificationUtils.updateMergeVideoFailedNotification(this,
                 DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
+        taskInfo.Status = STATUS_ERROR_MERGE_FILE;
+        synchronized (mLock) {
+            mDatabase.updateDownloadTaskInfo(taskInfo);
+        }
     }
 
     @Nullable
