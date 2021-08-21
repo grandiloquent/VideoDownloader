@@ -32,6 +32,7 @@ import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.Logger;
@@ -44,29 +45,6 @@ public class Iqiyi extends BaseVideoExtractor<List<Pair<String, String>>> {
         super(inputUri, mainActivity);
     }
 
-    private static String md5(final String s) {
-        final String MD5 = "MD5";
-        try {
-            // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest
-                    .getInstance(MD5);
-            digest.update(s.getBytes());
-            byte[] messageDigest = digest.digest();
-            // Create Hex String
-            StringBuilder hexString = new StringBuilder();
-            for (byte aMessageDigest : messageDigest) {
-                String h = Integer.toHexString(0xFF & aMessageDigest);
-                if (h.length() < 2)
-                    hexString.append("0");
-                hexString.append(h);
-            }
-            return hexString.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
 
     private static String getMagicId() {
         Random random = new Random();
@@ -120,7 +98,7 @@ public class Iqiyi extends BaseVideoExtractor<List<Pair<String, String>>> {
             String vid = findJSONValue("\"vid\":", response, true);
             String params = String.format("/vps?tvid=%s&vid=%s&v=0&qypid=%s_12&src=01012001010000000000&t=%d&k_tag=1&k_uid=%s&rs=1",
                     tvid, vid, tvid, System.currentTimeMillis(), getMagicId());
-            String hash = md5(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
+            String hash = KeyShare.md5(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
             String url = String.format("%s%s&vf=%s", "http://cache.video.qiyi.com", params, hash);
             response = getHtml(url);
             if (response == null) {

@@ -11,6 +11,7 @@ import android.util.Pair;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -41,6 +42,32 @@ public abstract class BaseVideoExtractor<T> {
         mMainActivity = mainActivity;
     }
 
+    public String getLocation(String uri, String[][] headers) throws IOException {
+        URL url = new URL(uri);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        if (headers != null) {
+            for (String[] header : headers) {
+                urlConnection.setRequestProperty(header[0], header[1]);
+            }
+        }
+        urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+        urlConnection.setInstanceFollowRedirects(false);
+        return urlConnection.getHeaderField("Location");
+    }
+
+    public static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
+        String[] names = new String[videoList.size()];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = videoList.get(i).first;
+        }
+        new AlertDialog.Builder(mainActivity)
+                .setItems(names, (dialog, which) -> {
+                    viewVideoBetter(mainActivity, videoList.get(which).second);
+                })
+                .show();
+        //
+    }
+
     public void parsingVideo() {
         ProgressDialog progressDialog = DialogShare.createProgressDialog(mMainActivity);
         progressDialog.show();
@@ -48,31 +75,43 @@ public abstract class BaseVideoExtractor<T> {
         performTask(uri, progressDialog);
     }
 
-    protected abstract T fetchVideoUri(String uri);
-
-    protected String getString(String uri, String[][] headers) {
+    public static void viewVideoBetter(MainActivity mainActivity, String videoUri) {
         try {
-            URL url = new URL(uri);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
-            if (headers != null) {
-                for (String[] header : headers) {
-                    urlConnection.setRequestProperty(header[0], header[1]);
+            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(videoUri, "UTF-8");
+            createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
+                dialog.dismiss();
+                if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setPackage("com.android.chrome");
+                    intent.setData(Uri.parse(uri));
+                    mainActivity.startActivity(intent);
+                } else {
+                    Helper.videoChooser(mainActivity, uri);
                 }
-            }
-            int code = urlConnection.getResponseCode();
-            Logger.d(String.format("getString: %d", code));
-            if (code < 400 && code >= 200) {
-                return NetShare.readString(urlConnection);
-            } else {
-                return null;
-            }
-        } catch (Exception ignored) {
-            Logger.d(String.format("getString: %s", ignored.getMessage()));
-
+            }, (dialog, which) -> {
+                dialog.dismiss();
+                if (videoUri.contains("m3u8")) {
+                    Intent intent = new Intent(mainActivity, DownloadService.class);
+                    intent.setData(Uri.parse(videoUri));
+                    mainActivity.startService(intent);
+                } else {
+                    WebViewShare.downloadFile(mainActivity, KeyShare.toHex(videoUri.getBytes(StandardCharsets.UTF_8)), videoUri, BaseVideoExtractor.USER_AGENT);
+                }
+            })
+                    .setMessage("是否使用浏览器打开视频链接")
+                    .show();
+        } catch (UnsupportedEncodingException ignored) {
         }
-        return null;
     }
+
+    protected static AlertDialog.Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
+        return new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setPositiveButton(android.R.string.ok, p)
+                .setNegativeButton("下载", n);
+    }
+
+    protected abstract T fetchVideoUri(String uri);
 
     protected String[] getResponse(String uri, String[][] headers) {
         try {
@@ -105,6 +144,67 @@ public abstract class BaseVideoExtractor<T> {
         return null;
     }
 
+    protected String getString(String uri, String[][] headers) {
+        try {
+            URL url = new URL(uri);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            if (headers != null) {
+                for (String[] header : headers) {
+                    urlConnection.setRequestProperty(header[0], header[1]);
+                }
+            }
+            int code = urlConnection.getResponseCode();
+            Logger.d(String.format("getString: %d", code));
+            if (code < 400 && code >= 200) {
+                return NetShare.readString(urlConnection);
+            } else {
+                return null;
+            }
+        } catch (Exception ignored) {
+            Logger.d(String.format("getString: %s", ignored.getMessage()));
+
+        }
+        return null;
+    }
+
+    protected String postFormUrlencoded(String uri, String[][] headers, String[][] values) {
+        try {
+            URL url = new URL(uri);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            if (headers != null) {
+                for (String[] header : headers) {
+                    urlConnection.setRequestProperty(header[0], header[1]);
+                }
+            }
+            if (values != null) {
+                OutputStream outputStream = urlConnection.getOutputStream();
+                for (int i = 0, j = values.length; i < j; i++) {
+                    outputStream.write(values[i][0].getBytes(StandardCharsets.UTF_8));
+                    outputStream.write(61);
+                    outputStream.write(URLEncoder.encode(values[i][1], "UTF-8").getBytes(StandardCharsets.UTF_8));
+                    if (i + 1 < j)
+                        outputStream.write(38);
+                }
+                outputStream.close();
+            }
+            int code = urlConnection.getResponseCode();
+            Logger.d(String.format("getString: %d", code));
+            if (code < 400 && code >= 200) {
+                return NetShare.readString(urlConnection);
+            } else {
+                return null;
+            }
+        } catch (Exception ignored) {
+            Logger.d(String.format("getString: %s", ignored.getMessage()));
+
+        }
+        return null;
+    }
+
     protected abstract String processUri(String inputUri);
 
     protected abstract void processVideo(T videoUri);
@@ -122,55 +222,6 @@ public abstract class BaseVideoExtractor<T> {
                 progressDialog.dismiss();
             });
         }).start();
-    }
-
-    protected static AlertDialog.Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
-        return new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setPositiveButton(android.R.string.ok, p)
-                .setNegativeButton("下载", n);
-    }
-
-    public static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
-        String[] names = new String[videoList.size()];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = videoList.get(i).first;
-        }
-        new AlertDialog.Builder(mainActivity)
-                .setItems(names, (dialog, which) -> {
-                    viewVideoBetter(mainActivity, videoList.get(which).second);
-                })
-                .show();
- // 
-    }
-
-    public static void viewVideoBetter(MainActivity mainActivity, String videoUri) {
-        try {
-            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(videoUri, "UTF-8");
-            createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
-                dialog.dismiss();
-                if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setPackage("com.android.chrome");
-                    intent.setData(Uri.parse(uri));
-                    mainActivity.startActivity(intent);
-                } else {
-                    Helper.videoChooser(mainActivity, uri);
-                }
-            }, (dialog, which) -> {
-                dialog.dismiss();
-                if (videoUri.contains("m3u8")) {
-                    Intent intent = new Intent(mainActivity, DownloadService.class);
-                    intent.setData(Uri.parse(videoUri));
-                    mainActivity.startService(intent);
-                } else {
-                    WebViewShare.downloadFile(mainActivity, KeyShare.toHex(videoUri.getBytes(StandardCharsets.UTF_8)), videoUri, BaseVideoExtractor.USER_AGENT);
-                }
-            })
-                    .setMessage("是否使用浏览器打开视频链接")
-                    .show();
-        } catch (UnsupportedEncodingException ignored) {
-        }
     }
 }
 //

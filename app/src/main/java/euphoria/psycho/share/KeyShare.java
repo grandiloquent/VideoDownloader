@@ -40,6 +40,25 @@ public class KeyShare {
         return crc64Long(getBytes(in));
     }
 
+    public static byte[] fromHex(String hexData) {
+        if (null == hexData) {
+            return new byte[0];
+        }
+        if ((hexData.length() & 1) != 0 || hexData.replaceAll("[a-fA-F0-9]", "").length() > 0) {
+            throw new java.lang.IllegalArgumentException("'" + hexData + "' is not a hex string");
+        }
+        byte[] result = new byte[(hexData.length() + 1) / 2];
+        String hexNumber;
+        int offset = 0;
+        int byteIndex = 0;
+        while (offset < hexData.length()) {
+            hexNumber = hexData.substring(offset, offset + 2);
+            offset += 2;
+            result[byteIndex++] = (byte) Integer.parseInt(hexNumber, 16);
+        }
+        return result;
+    }
+
     public static byte[] getBytes(String in) {
         byte[] result = new byte[in.length() * 2];
         int output = 0;
@@ -48,6 +67,30 @@ public class KeyShare {
             result[output++] = (byte) (ch >> 8);
         }
         return result;
+    }
+
+    public static String md5(final String s) {
+        final String MD5 = "MD5";
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest
+                    .getInstance(MD5);
+            digest.update(s.getBytes());
+            byte[] messageDigest = digest.digest();
+            // Create Hex String
+            StringBuilder hexString = new StringBuilder();
+            for (byte aMessageDigest : messageDigest) {
+                String h = Integer.toHexString(0xFF & aMessageDigest);
+                if (h.length() < 2)
+                    hexString.append("0");
+                hexString.append(h);
+            }
+            return hexString.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     public static byte[] md5encode(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -78,24 +121,4 @@ public class KeyShare {
         }
         return sb.toString().toLowerCase(Locale.getDefault());
     }
-
-    public static byte[] fromHex(String hexData) {
-        if (null == hexData) {
-            return new byte[0];
-        }
-        if ((hexData.length() & 1) != 0 || hexData.replaceAll("[a-fA-F0-9]", "").length() > 0) {
-            throw new java.lang.IllegalArgumentException("'" + hexData + "' is not a hex string");
-        }
-        byte[] result = new byte[(hexData.length() + 1) / 2];
-        String hexNumber;
-        int offset = 0;
-        int byteIndex = 0;
-        while (offset < hexData.length()) {
-            hexNumber = hexData.substring(offset, offset + 2);
-            offset += 2;
-            result[byteIndex++] = (byte) Integer.parseInt(hexNumber, 16);
-        }
-        return result;
-    }
-
 }

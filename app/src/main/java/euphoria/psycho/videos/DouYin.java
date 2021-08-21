@@ -20,18 +20,13 @@ public class DouYin extends BaseVideoExtractor<String> {
         super(inputUri, mainActivity);
     }
 
-    private String getLocation(String videoId) throws IOException {
-        URL url = new URL("https://v.douyin.com/" + videoId);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
-        urlConnection.setInstanceFollowRedirects(false);
-        return urlConnection.getHeaderField("Location");
-    }
+
+
 
     private String getRealVideoUri(String videoId) {
         mVideoId = videoId;
         try {
-            String videoUri = getLocation(videoId);
+            String videoUri = getLocation("https://v.douyin.com/" + videoId,null);
             Pattern pattern = Pattern.compile("video/(\\d+)");
             Matcher matcher = pattern.matcher(videoUri);
             if (matcher.find()) {
