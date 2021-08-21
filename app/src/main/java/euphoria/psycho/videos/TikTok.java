@@ -32,6 +32,9 @@ public class TikTok extends BaseVideoExtractor<String> {
     protected String fetchVideoUri(String uri) {
         try {
             String location = getLocation(uri);
+            if (location == null) {
+                return null;
+            }
             String[] response = getResponse("https://dltik.com/?hl=en", null);
             Pattern pattern = Pattern.compile("(?<=<input name=\"__RequestVerificationToken\" type=\"hidden\" value=\")[^\"]+(?=\")");
             Matcher matcher = pattern.matcher(response[0]);
@@ -54,13 +57,18 @@ public class TikTok extends BaseVideoExtractor<String> {
                 return null;
             }
         } catch (Exception exception) {
+            Logger.d(String.format("fetchVideoUri: %s", exception));
+
         }
         return null;
     }
 
     private String getLocation(String uri) throws IOException {
-        String location = getLocation(uri, null);
-        location = getLocation(location, null);
+        String[] response = getLocationAddCookie(uri, null);
+        String location = getLocation(response[0], new String[][]{
+                {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"},
+                {"Cookie", response[1]}
+        });
         return location;
     }
 

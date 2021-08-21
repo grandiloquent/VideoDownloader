@@ -52,9 +52,32 @@ public abstract class BaseVideoExtractor<T> {
         }
         urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
         urlConnection.setInstanceFollowRedirects(false);
+        Logger.d(String.format("getLocation: %d", urlConnection.getResponseCode()));
         return urlConnection.getHeaderField("Location");
     }
+    public String[] getLocationAddCookie(String uri, String[][] headers) throws IOException {
+        URL url = new URL(uri);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        if (headers != null) {
+            for (String[] header : headers) {
+                urlConnection.setRequestProperty(header[0], header[1]);
+            }
+        }
 
+        urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+        urlConnection.setInstanceFollowRedirects(false);
+        Map<String, List<String>> listMap = urlConnection.getHeaderFields();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Entry<String, List<String>> header : listMap.entrySet()) {
+            if (header.getKey() != null && header.getKey().equals("set-cookie")) {
+                for (String s : header.getValue()) {
+                    stringBuilder.append(StringShare.substringBefore(s, "; "))
+                            .append("; ");
+                }
+            }
+        }
+        return new String[]{urlConnection.getHeaderField("Location"),stringBuilder.toString()};
+    }
     public static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
         String[] names = new String[videoList.size()];
         for (int i = 0; i < names.length; i++) {
@@ -155,7 +178,6 @@ public abstract class BaseVideoExtractor<T> {
                 }
             }
             int code = urlConnection.getResponseCode();
-            Logger.d(String.format("getString: %d", code));
             if (code < 400 && code >= 200) {
                 return NetShare.readString(urlConnection);
             } else {
@@ -192,7 +214,6 @@ public abstract class BaseVideoExtractor<T> {
                 outputStream.close();
             }
             int code = urlConnection.getResponseCode();
-            Logger.d(String.format("getString: %d", code));
             if (code < 400 && code >= 200) {
                 return NetShare.readString(urlConnection);
             } else {
@@ -204,7 +225,7 @@ public abstract class BaseVideoExtractor<T> {
         }
         return null;
     }
-
+ 
     protected abstract String processUri(String inputUri);
 
     protected abstract void processVideo(T videoUri);
