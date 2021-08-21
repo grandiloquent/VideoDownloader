@@ -31,8 +31,8 @@
 
 1. Copy the video shared link or page address from the tiktok application or website, some like:
 
-    https://vm.tiktok.com/ZSJkHUCwK/
-    https://www.tiktok.com/@travelscenerykj/video/6990367736601922822
+        https://vm.tiktok.com/ZSJkHUCwK/
+        https://www.tiktok.com/@travelscenerykj/video/6990367736601922822
 
 2. Click the add link button in the upper left corner
 
