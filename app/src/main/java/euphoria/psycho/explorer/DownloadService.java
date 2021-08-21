@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -57,6 +58,8 @@ public class DownloadService extends Service implements DownloadNotifier {
             stopSelf();
     }
 
+    private static Handler mHandler = new Handler();
+
     private DownloadTaskInfo createNewTask(Uri downloadUri) {
         DownloadTaskInfo taskInfo;
         taskInfo = new DownloadTaskInfo();
@@ -64,6 +67,7 @@ public class DownloadService extends Service implements DownloadNotifier {
         synchronized (mLock) {
             taskInfo.Id = mDatabase.insertDownloadTaskInfo(taskInfo);
         }
+        Toast.makeText(this, "成功创建下载任务：" + downloadUri, Toast.LENGTH_LONG).show();
         return taskInfo;
     }
 
@@ -103,7 +107,12 @@ public class DownloadService extends Service implements DownloadNotifier {
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
-        Toast.makeText(this, "视频合并成功：" + outPath, Toast.LENGTH_LONG).show();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(DownloadService.this, "成功合并文件：" + outPath, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -130,7 +139,7 @@ public class DownloadService extends Service implements DownloadNotifier {
         }
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mDatabase = new DownloadTaskDatabase(this, DownloadUtils.getDatabasePath(this));
-        mExecutor = Executors.newSingleThreadExecutor();
+        mExecutor = Executors.newFixedThreadPool(3);
     }
 
     @Override

@@ -117,10 +117,9 @@ public class MainActivity extends Activity implements ClientInterface {
         configureWebView();
         loadStartPage();
         //new File(getExternalCacheDir(), "tasks.db").delete();
-
-//        Intent service = new Intent(this, DownloadService.class);
+        Intent service = new Intent(this, DownloadService.class);
 //        service.setData(Uri.parse("https://cdn.91p07.com//m3u8/505694/505694.m3u8?st=L4N4OdIeD2TqZBQRo4logA&e=1629536998"));
-//        startService(service);
+        startService(service);
 
     }
 
