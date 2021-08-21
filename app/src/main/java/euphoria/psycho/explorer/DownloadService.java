@@ -31,6 +31,7 @@ import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_SUCCESS;
 
 public class DownloadService extends Service implements DownloadNotifier {
     private static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
+    private static Handler mHandler = new Handler();
     private static final Object mLock = new Object();
     private final BroadcastReceiver mDismissReceiver = new BroadcastReceiver() {
         @Override
@@ -58,8 +59,6 @@ public class DownloadService extends Service implements DownloadNotifier {
             stopSelf();
     }
 
-    private static Handler mHandler = new Handler();
-
     private DownloadTaskInfo createNewTask(Uri downloadUri) {
         DownloadTaskInfo taskInfo;
         taskInfo = new DownloadTaskInfo();
@@ -73,56 +72,63 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void downloadCompleted(DownloadTaskInfo downloadTaskInfo) {
-        NotificationUtils.updateDownloadCompletedNotification(this,
-                DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
+        mHandler.post(() -> {
+            NotificationUtils.updateDownloadCompletedNotification(this,
+                    DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
+        });
     }
 
     @Override
     public void downloadFailed(DownloadTaskInfo taskInfo) {
-        NotificationUtils.downloadFailed(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
+        mHandler.post(() -> {
+            NotificationUtils.downloadFailed(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
+        });
     }
 
     @Override
     public void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName) {
-        NotificationUtils.downloadProgress(this,
-                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager,
-                (int) ((currentSize / (float) total) * 100), fileName
-        );
+        mHandler.post(() -> {
+            NotificationUtils.downloadProgress(this,
+                    DOWNLOAD_CHANNEL, taskInfo, mNotificationManager,
+                    (int) ((currentSize / (float) total) * 100), fileName
+            );
+        });
     }
 
     @Override
     public void downloadStart(DownloadTaskInfo downloadTaskInfo) {
-        NotificationUtils.updateDownloadStartNotification(this,
-                DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
+        mHandler.post(() -> {
+            NotificationUtils.updateDownloadStartNotification(this,
+                    DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
+        });
     }
 
     @Override
     public void mergeVideoCompleted(DownloadTaskInfo taskInfo, String outPath) {
-        NotificationUtils.mergeVideoCompleted(this,
-                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
         taskInfo.Status = STATUS_SUCCESS;
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(DownloadService.this, "成功合并文件：" + outPath, Toast.LENGTH_LONG).show();
-            }
+        mHandler.post(() -> {
+            NotificationUtils.mergeVideoCompleted(this,
+                    DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
+            Toast.makeText(DownloadService.this, "成功合并文件：" + outPath, Toast.LENGTH_LONG).show();
         });
     }
 
     @Override
     public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
-        NotificationUtils.updateMergeVideoFailedNotification(this,
-                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
         taskInfo.Status = STATUS_ERROR_MERGE_FILE;
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
+        mHandler.post(() -> {
+            NotificationUtils.updateMergeVideoFailedNotification(this,
+                    DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
+        });
     }
 
     @Nullable
