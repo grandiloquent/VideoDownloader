@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.arch.core.util.Function;
 import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
@@ -75,7 +76,7 @@ public class VideoListActivity extends Activity {
                 startActivity(createShareIntent(Uri.fromFile(mVideoAdapter.getItem(info.position))));
                 break;
             case R.id.action_delete:
-                actionDelete();
+                actionDelete(mVideoAdapter.getItem(info.position).getParentFile());
                 break;
 
         }
@@ -83,7 +84,23 @@ public class VideoListActivity extends Activity {
 
     }
 
-    private void actionDelete() {
+    private void actionDelete(File directory) {
+        FileShare.recursivelyDeleteFile(directory, new Function<String, Boolean>() {
+            @Override
+            public Boolean apply(String input) {
+                return true;
+            }
+        });
+
+        List<File> files = FileShare.recursivelyListFiles(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS));
+        List<File> videos = new ArrayList<>();
+
+        for (File f : files) {
+            if (FileShare.getExtension(f.getName()).equals("mp4")) {
+                videos.add(f);
+            }
+        }
+        mVideoAdapter.update(videos);
     }
 
     private Intent createShareIntent(Uri uri) {
