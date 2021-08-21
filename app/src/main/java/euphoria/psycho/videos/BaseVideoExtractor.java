@@ -55,6 +55,7 @@ public abstract class BaseVideoExtractor<T> {
         Logger.d(String.format("getLocation: %d", urlConnection.getResponseCode()));
         return urlConnection.getHeaderField("Location");
     }
+
     public String[] getLocationAddCookie(String uri, String[][] headers) throws IOException {
         URL url = new URL(uri);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -63,7 +64,6 @@ public abstract class BaseVideoExtractor<T> {
                 urlConnection.setRequestProperty(header[0], header[1]);
             }
         }
-
         urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
         urlConnection.setInstanceFollowRedirects(false);
         Map<String, List<String>> listMap = urlConnection.getHeaderFields();
@@ -76,8 +76,9 @@ public abstract class BaseVideoExtractor<T> {
                 }
             }
         }
-        return new String[]{urlConnection.getHeaderField("Location"),stringBuilder.toString()};
+        return new String[]{urlConnection.getHeaderField("Location"), stringBuilder.toString()};
     }
+
     public static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
         String[] names = new String[videoList.size()];
         for (int i = 0; i < names.length; i++) {
