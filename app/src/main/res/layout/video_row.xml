@@ -4,12 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ImageView
+    <euphoria.psycho.explorer.SquareImageView
         android:id="@+id/thumbnail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="fitCenter"
-        android:background="#f2f2f2" />
+        android:layout_height="match_parent"
+        android:background="#000000" />
 
     <TextView
         android:id="@+id/title"

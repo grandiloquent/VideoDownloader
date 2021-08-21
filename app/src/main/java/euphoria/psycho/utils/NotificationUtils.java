@@ -36,10 +36,12 @@ public class NotificationUtils {
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
 
-    public static void updateDownloadFailedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
+    public static void downloadFailed(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("下载失败")
                 .setContentText(downloadTaskInfo.Uri)
+                .setOngoing(false)
+                .setAutoCancel(true);
         ;
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
@@ -53,8 +55,8 @@ public class NotificationUtils {
         builder.setContentTitle("合并完成")
                 .setContentText(fileName)
                 .setContentIntent(pendingIntent)
-                .setOngoing(false)
                 .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                .setOngoing(false)
                 .setAutoCancel(true);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }

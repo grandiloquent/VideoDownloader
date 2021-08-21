@@ -12,7 +12,7 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 
-import java.io.File;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -41,21 +41,28 @@ public class DownloadService extends Service implements DownloadNotifier {
     private boolean mRegistered = false;
     private DownloadTaskDatabase mDatabase;
 
-    private void checkTaskDirectory(DownloadTaskInfo taskInfo) {
-        File directory = new File(taskInfo.FileName);
-        if (!directory.isDirectory()) {
-            directory.mkdirs();
+    private void checkTasks() {
+        Logger.d(String.format("checkTasks: %s", ""));
+        List<DownloadTaskInfo> taskInfos = mDatabase.getDownloadTaskInfos(20);
+        boolean founded = false;
+        for (DownloadTaskInfo taskInfo : taskInfos) {
+            if (taskInfo.Status == 1) {
+                continue;
+            }
+            DownloadThread thread = new DownloadThread(this, taskInfo, this);
+            mExecutor.execute(thread);
+            founded = true;
         }
+        if (!founded)
+            stopSelf();
     }
 
     private DownloadTaskInfo createNewTask(Uri downloadUri) {
         DownloadTaskInfo taskInfo;
         taskInfo = new DownloadTaskInfo();
         taskInfo.Uri = downloadUri.toString();
-        //taskInfo.FileName = DownloadUtils.getDownloadFileName(this, taskInfo.Uri).getAbsolutePath();
-        // checkTaskDirectory(taskInfo);
         synchronized (mLock) {
-            mDatabase.insertDownloadTaskInfo(taskInfo);
+            taskInfo.Id = mDatabase.insertDownloadTaskInfo(taskInfo);
         }
         return taskInfo;
     }
@@ -68,7 +75,7 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void downloadFailed(DownloadTaskInfo taskInfo) {
-        NotificationUtils.updateDownloadFailedNotification(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
+        NotificationUtils.downloadFailed(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
@@ -94,6 +101,7 @@ public class DownloadService extends Service implements DownloadNotifier {
                 DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
         taskInfo.Status = STATUS_SUCCESS;
         synchronized (mLock) {
+            Logger.d(String.format("mergeVideoCompleted: %s", taskInfo.toString()));
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
     }
@@ -102,13 +110,6 @@ public class DownloadService extends Service implements DownloadNotifier {
     public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
         NotificationUtils.updateMergeVideoFailedNotification(this,
                 DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
-    }
-
-    @Override
-    public void updateDatabase(DownloadTaskInfo taskInfo) {
-        synchronized (mLock) {
-            mDatabase.updateDownloadTaskInfo(taskInfo);
-        }
     }
 
     @Nullable
@@ -149,9 +150,10 @@ public class DownloadService extends Service implements DownloadNotifier {
         // the download uri should be passed by `intent.setData`
         // otherwise we should stop immediately
         Uri downloadUri = intent.getData();
-        if (downloadUri == null)
+        if (downloadUri == null) {
+            checkTasks();
             return START_NOT_STICKY;
-        Logger.d(String.format("onStartCommand: %s", downloadUri));
+        }
         DownloadTaskInfo taskInfo;
         DownloadThread thread = null;
         // in the further we should use
@@ -193,5 +195,12 @@ public class DownloadService extends Service implements DownloadNotifier {
         return super.onStartCommand(intent, flags, startId);
 
 
+    }
+
+    @Override
+    public void updateDatabase(DownloadTaskInfo taskInfo) {
+        synchronized (mLock) {
+            mDatabase.updateDownloadTaskInfo(taskInfo);
+        }
     }
 }

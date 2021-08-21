@@ -33,6 +33,7 @@ public class VideoListActivity extends Activity {
         initialize();
     }
 
+
     private void initialize() {
         setContentView(R.layout.activity_video_list);
         mGridView = findViewById(R.id.grid_view);
@@ -73,10 +74,16 @@ public class VideoListActivity extends Activity {
             case R.id.action_share:
                 startActivity(createShareIntent(Uri.fromFile(mVideoAdapter.getItem(info.position))));
                 break;
+            case R.id.action_delete:
+                actionDelete();
+                break;
 
         }
         return super.onContextItemSelected(item);
 
+    }
+
+    private void actionDelete() {
     }
 
     private Intent createShareIntent(Uri uri) {

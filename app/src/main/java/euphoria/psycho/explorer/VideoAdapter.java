@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +19,11 @@ import euphoria.psycho.share.VideoShare;
 public class VideoAdapter extends BaseAdapter {
     private List<File> mVideos = new ArrayList<>();
     private final LayoutInflater mInflater;
+    private final Context mContext;
 
     public VideoAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
+        mContext = context;
     }
 
     @Override
@@ -50,7 +54,12 @@ public class VideoAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         viewHolder.title.setText(mVideos.get(position).getName());
-        viewHolder.thumbnail.setImageBitmap(VideoShare.createVideoThumbnail(mVideos.get(position).getAbsolutePath()));
+        Glide
+                .with(mContext)
+                .load(mVideos.get(position))
+                .fitCenter()
+                //.placeholder(R.drawable.loading_spinner)
+                .into(viewHolder.thumbnail);
         return convertView;
     }
 

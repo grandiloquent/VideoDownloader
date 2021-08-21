@@ -5,19 +5,24 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.utils.DownloadUtils;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -111,9 +116,12 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView();
         loadStartPage();
+        //new File(getExternalCacheDir(), "tasks.db").delete();
+
 //        Intent service = new Intent(this, DownloadService.class);
-//        service.setData(Uri.parse("https://ccn.killcovid2021.com//m3u8/509537/509537.m3u8?st=fn0MNMJXISpLi0f-fGK-5g&e=1629364436"));
+//        service.setData(Uri.parse("https://cdn.91p07.com//m3u8/505694/505694.m3u8?st=L4N4OdIeD2TqZBQRo4logA&e=1629536998"));
 //        startService(service);
+
     }
 
     private void loadStartPage() {

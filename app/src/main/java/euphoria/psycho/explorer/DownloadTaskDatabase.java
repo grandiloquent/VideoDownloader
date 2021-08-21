@@ -46,16 +46,20 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
         return downloadTaskInfo;
     }
 
-    public List<DownloadTaskInfo> getDownloadTaskInfos(int minStatus, int maxStatus) {
-        Cursor cursor = getReadableDatabase().rawQuery("select uri,filename from tasks where status >= ? or status <= ? ", new String[]{
-                Integer.toString(minStatus),
-                Integer.toString(maxStatus)
-        });
+    public List<DownloadTaskInfo> getDownloadTaskInfos(int status) {
+//        Cursor cursor = getReadableDatabase().rawQuery("select uri,filename from tasks where status != ?", new String[]{
+//                Integer.toString(status)
+//        });
+        Cursor cursor = getReadableDatabase().rawQuery("select * from tasks",null);
         List<DownloadTaskInfo> taskInfos = new ArrayList<>();
         while (cursor.moveToNext()) {
             DownloadTaskInfo taskInfo = new DownloadTaskInfo();
-            taskInfo.Uri = cursor.getString(0);
-            taskInfo.FileName = cursor.getString(1);
+            taskInfo.Id = cursor.getLong(0);
+            taskInfo.Uri = cursor.getString(1);
+            taskInfo.FileName = cursor.getString(2);
+            taskInfo.Status = cursor.getInt(3);
+            taskInfo.CreateAt = cursor.getLong(4);
+            taskInfo.UpdateAt = cursor.getLong(5);
             taskInfos.add(taskInfo);
         }
         cursor.close();
@@ -95,12 +99,13 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
     }
 
     public static class DownloadTaskInfo {
+        // (?<=public) ([a-zA-Z]+) ([a-zA-Z]+)(?=;)
         public long Id;
         public String Uri;
         public String FileName;
+        public int Status;
         public long CreateAt;
         public long UpdateAt;
-        public int Status;
 
         @Override
         public String toString() {
