@@ -16,4 +16,7 @@
     <string name="details_hms" msgid="3215779248094151255">"%1$d:%2$02d:%3$02d"</string>
     <string name="movie_view_label" msgid="3526526872644898229">"视频播放器"</string>
     <string name="delete">删除</string>
+    <string name="video_list_name">浏览视频</string>
+    <string name="ask">询问</string>
+
 </resources>

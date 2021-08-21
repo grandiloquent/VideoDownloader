@@ -1,6 +1,7 @@
 package euphoria.psycho.explorer;
 
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.IntentShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -20,6 +22,18 @@ import euphoria.psycho.share.WebViewShare;
 
 public class Helper {
 
+
+    public static File createCacheDirectory(Context context) {
+        File cacheDirectory = new File(new File(context.getCacheDir(), "Explorer"), "Cache");
+        Logger.d(String.format("createCacheDirectory: 览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
+        if (!cacheDirectory.isDirectory()) {
+            boolean result = cacheDirectory.mkdirs();
+            if (!result) {
+                Logger.d(String.format("createCacheDirectory: 创建目录 %s 失败", cacheDirectory.getAbsolutePath()));
+            }
+        }
+        return cacheDirectory;
+    }
 
     //                Request request = new Request(Uri.parse(url));
 //
@@ -35,22 +49,30 @@ public class Helper {
         return (url, userAgent, contentDisposition, mimetype, contentLength) -> Share.setClipboardText(context, url);
     }
 
+    public static void openDownloadDialog(Context context, String videoId, String videoUrl) {
+        new Builder(context)
+                .setTitle(R.string.ask)
+                .setMessage("是否下载视频？")
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    WebViewShare.downloadFile(context, videoId + ".mp4", videoUrl, NetShare.DEFAULT_USER_AGENT);
+                    dialog.dismiss();
+                })
+                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
     public static void videoChooser(Context context, String uri) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(uri));
         context.startActivity(Intent.createChooser(intent, "打开视频链接"));
     }
 
-
     public static void viewVideo(MainActivity mainActivity, String uri) {
         //String uri = URLEncoder.encode(value, "UTF-8");
         DialogShare.createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
             dialog.dismiss();
             if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setPackage("com.android.chrome");
-                intent.setData(Uri.parse(uri));
-                mainActivity.startActivity(intent);
+                IntentShare.launchChrome(mainActivity, uri);
             } else {
                 Helper.videoChooser(mainActivity, uri);
             }
@@ -59,30 +81,6 @@ public class Helper {
             dialog.dismiss();
         })
                 .setMessage("是否使用浏览器打开视频链接")
-                .show();
-    }
-
-    public static File createCacheDirectory(Context context) {
-        File cacheDirectory = new File(new File(context.getCacheDir(), "Explorer"), "Cache");
-        Logger.d(String.format("createCacheDirectory: 览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
-        if (!cacheDirectory.isDirectory()) {
-            boolean result = cacheDirectory.mkdirs();
-            if (!result) {
-                Logger.d(String.format("createCacheDirectory: 创建目录 %s 失败", cacheDirectory.getAbsolutePath()));
-            }
-        }
-        return cacheDirectory;
-    }
-
-    public static void openDownloadDialog(Context context, String videoId, String videoUrl) {
-        new AlertDialog.Builder(context)
-                .setTitle("询问")
-                .setMessage("是否下载视频？")
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    WebViewShare.downloadFile(context, videoId + ".mp4", videoUrl, NetShare.DEFAULT_USER_AGENT);
-                    dialog.dismiss();
-                })
-                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
                 .show();
     }
 }//

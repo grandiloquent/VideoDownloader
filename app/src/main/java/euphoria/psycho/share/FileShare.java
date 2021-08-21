@@ -51,21 +51,34 @@ public class FileShare {
         if (c == null) return;
         try {
             c.close();
-        } catch (IOException t) {
+        } catch (IOException ignored) {
         }
     }
-
+    public static List<File> recursivelyListFiles(File directory,String extension) {
+        ArrayList<File> results = new ArrayList<>();
+        File[] files = directory.listFiles(file -> file.isDirectory() || (file.isFile() && file.getName().endsWith(extension)));
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    results.addAll(recursivelyListFiles(file,extension));
+                } else {
+                    results.add(file);
+                }
+            }
+        }
+        return results;
+    }
     public static void closeSilently(ParcelFileDescriptor fd) {
         try {
             if (fd != null) fd.close();
-        } catch (Throwable t) {
+        } catch (Throwable ignored) {
         }
     }
 
     public static void closeSilently(Cursor cursor) {
         try {
             if (cursor != null) cursor.close();
-        } catch (Throwable t) {
+        } catch (Throwable ignored) {
         }
     }
 

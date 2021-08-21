@@ -17,7 +17,7 @@ import java.util.List;
 import euphoria.psycho.share.VideoShare;
 
 public class VideoAdapter extends BaseAdapter {
-    private List<File> mVideos = new ArrayList<>();
+    private final List<File> mVideos = new ArrayList<>();
     private final LayoutInflater mInflater;
     private final Context mContext;
 
@@ -69,7 +69,7 @@ public class VideoAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public class ViewHolder {
+    public static class ViewHolder {
         public TextView title;
         public ImageView thumbnail;
     }

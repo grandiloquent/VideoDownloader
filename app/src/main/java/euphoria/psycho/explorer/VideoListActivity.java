@@ -1,7 +1,6 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -9,21 +8,16 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.arch.core.util.Function;
 import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.IntentShare;
 
 public class VideoListActivity extends Activity {
     private VideoAdapter mVideoAdapter;
@@ -44,34 +38,15 @@ public class VideoListActivity extends Activity {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
                 .getMenuInfo();
         File videoFile = mVideoAdapter.getItem(info.position);
-        startActivity(createShareIntent(Uri.fromFile(videoFile)));
+        startActivity(IntentShare.createShareVideoIntent(Uri.fromFile(videoFile)));
     }
+    //
 
-    private Intent createShareIntent(Uri uri) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("video/*");
-        intent.putExtra(Intent.EXTRA_STREAM, uri);
-        return intent;
-    }
-
-    public static List<File> recursivelyListFiles(File directory) {
-        ArrayList<File> results = new ArrayList<>();
-        File[] files = directory.listFiles(file -> file.isDirectory() || (file.isFile() && file.getName().endsWith(".mp4")));
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    results.addAll(recursivelyListFiles(file));
-                } else {
-                    results.add(file);
-                }
-            }
-        }
-        return results;
-    }
 
     private List<File> getVideos() {
-        return recursivelyListFiles(
-                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        return FileShare.recursivelyListFiles(
+                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                ".mp4"
         );
     }
 
@@ -86,9 +61,10 @@ public class VideoListActivity extends Activity {
         mVideoAdapter.update(videos);
         ContextShare.initialize(this);
         mGridView.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(parent.getContext(), MovieActivity.class);
-            intent.setData(Uri.fromFile(mVideoAdapter.getItem(position)));
-            startActivity(intent);
+            IntentShare.launchActivity(VideoListActivity.this,
+                    MovieActivity.class,
+                    Uri.fromFile(mVideoAdapter.getItem(position)));
+
         });
     }
 
