@@ -48,8 +48,6 @@ public class ListenerDelegate {
        mMainActivity.startActivity(intent);
     }
 
- 
-
     private void onAddLink(View view) {
         DialogShare.createEditDialog(mMainActivity, "", uri -> {
             if (DouYin.handle(uri, mMainActivity)) {

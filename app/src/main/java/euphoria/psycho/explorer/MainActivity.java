@@ -22,6 +22,7 @@ import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
+import euphoria.psycho.videos.TikTok;
 import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.YouTube;
 
@@ -113,6 +114,7 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Intent service = new Intent(this, DownloadService.class);
 //        service.setData(Uri.parse("https://ccn.killcovid2021.com//m3u8/509537/509537.m3u8?st=fn0MNMJXISpLi0f-fGK-5g&e=1629364436"));
 //        startService(service);
+        TikTok.handle("https://vm.tiktok.com/ZMRFYYsr2/", this);
     }
 
     private void loadStartPage() {

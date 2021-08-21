@@ -61,12 +61,15 @@ public abstract class BaseVideoExtractor<T> {
                 }
             }
             int code = urlConnection.getResponseCode();
+            Logger.d(String.format("getString: %d", code));
             if (code < 400 && code >= 200) {
                 return NetShare.readString(urlConnection);
             } else {
                 return null;
             }
         } catch (Exception ignored) {
+            Logger.d(String.format("getString: %s", ignored.getMessage()));
+
         }
         return null;
     }
