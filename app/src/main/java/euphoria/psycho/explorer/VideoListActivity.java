@@ -56,7 +56,7 @@ public class VideoListActivity extends Activity {
 
     public static List<File> recursivelyListFiles(File directory) {
         ArrayList<File> results = new ArrayList<>();
-        File[] files = directory.listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith(".mp4"));
+        File[] files = directory.listFiles(file -> file.isDirectory() || (file.isFile() && file.getName().endsWith(".mp4")));
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
@@ -85,13 +85,10 @@ public class VideoListActivity extends Activity {
         List<File> videos = getVideos();
         mVideoAdapter.update(videos);
         ContextShare.initialize(this);
-        mGridView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(parent.getContext(), MovieActivity.class);
-                intent.setData(Uri.fromFile(mVideoAdapter.getItem(position)));
-                startActivity(intent);
-            }
+        mGridView.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(parent.getContext(), MovieActivity.class);
+            intent.setData(Uri.fromFile(mVideoAdapter.getItem(position)));
+            startActivity(intent);
         });
     }
 
