@@ -225,7 +225,7 @@ public abstract class BaseVideoExtractor<T> {
         }
         return null;
     }
- 
+
     protected abstract String processUri(String inputUri);
 
     protected abstract void processVideo(T videoUri);
