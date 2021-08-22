@@ -13,6 +13,7 @@ import euphoria.psycho.share.StringShare;
 
 public class QQ extends BaseVideoExtractor<String> {
     private static Pattern MATCH_QQ = Pattern.compile("qq\\.com");
+    public static final String PLAYER_VERSION = "3.2.19.333";
 
     protected QQ(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -250,7 +251,7 @@ public class QQ extends BaseVideoExtractor<String> {
             }
             for (int i = 0; i < fc; i++) {
                 JSONObject keyObject = getObject(String.format("http://vv.video.qq.com/getkey?otype=json&platform=11&appver=%s&filename=%s&format=%s&vid=%s",
-                        "3.2.19.333", fn, name[1], vid));
+                        PLAYER_VERSION, fn, name[1], vid));
                 String key = parseKey(keyObject);
                 if (key == null) {
                     key = fvKey;
