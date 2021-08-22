@@ -61,6 +61,7 @@ public class StringShare {
         }
         return string.substring(start, end);
     }
+
     public static String substringMax(String string, String first, String second) {
         int start = string.indexOf(first);
         if (start == -1) return null;
@@ -157,6 +158,14 @@ public class StringShare {
             end++;
         }
         return s.substring(index, end);
+    }
+
+    public static int count(String s, char c) {
+        int i = 0;
+        for (int j = 0; j < s.length(); j++) {
+            if (s.charAt(j) == c) i++;
+        }
+        return i;
     }
 
 }
