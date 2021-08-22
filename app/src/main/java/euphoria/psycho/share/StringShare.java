@@ -61,7 +61,14 @@ public class StringShare {
         }
         return string.substring(start, end);
     }
-
+    public static String substringMax(String string, String first, String second) {
+        int start = string.indexOf(first);
+        if (start == -1) return null;
+        start += first.length();
+        int end = string.lastIndexOf(second);
+        if (end == -1) return null;
+        return string.substring(start, end);
+    }
 
     public static String substring(String string, String first, String second, boolean afterLast) {
         int start = afterLast ? string.lastIndexOf(first) : string.indexOf(first);

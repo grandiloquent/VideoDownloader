@@ -1,5 +1,9 @@
 package euphoria.psycho.videos;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +18,47 @@ public class QQ extends BaseVideoExtractor<String> {
         super(inputUri, mainActivity);
     }
 
+    // data.vl.vi[0].ul.ui[0].url
+    private String parseCDN(JSONObject obj) {
+        try {
+            JSONObject vl;
+            if (obj.has("vl")) {
+                vl = obj.getJSONObject("vl");
+            } else {
+                return null;
+            }
+            JSONArray vi;
+            if (vl.has("vi")) {
+                vi = vl.getJSONArray("vi");
+            } else {
+                return null;
+            }
+            JSONObject ul;
+            if (vi.getJSONObject(0).has("ul")) {
+                ul = vi.getJSONObject(0).getJSONObject("ul");
+            } else {
+                return null;
+            }
+            JSONArray ui;
+            if (ul.has("ui")) {
+                ui = ul.getJSONArray("ui");
+            } else {
+                return null;
+            }
+            String url;
+            if (ui.getJSONObject(0).has("url")) {
+                url = ui.getJSONObject(0).getString("url");
+                return url;
+            } else {
+                return null;
+            }
+
+        } catch (Exception ignored) {
+            Logger.d(String.format("parseJSON: %s", ignored));
+        }
+        return null;
+    }
+
     @Override
     protected String fetchVideoUri(String uri) {
         String vid = getVid(uri);
@@ -25,12 +70,23 @@ public class QQ extends BaseVideoExtractor<String> {
             Logger.d(String.format("'%s' is null.", "response"));
             return null;
         }
-        String jsonBody = StringShare.substring(response, "QZOutputJson=", ";");
+        String jsonBody = StringShare.substringMax(response, "QZOutputJson=", ";");
         if (jsonBody == null) {
             Logger.d(String.format("'%s' is null.", "jsonBody"));
             return null;
         }
-        Logger.d(String.format("fetchVideoUri: %s", jsonBody));
+        JSONObject obj;
+        try {
+            obj = new JSONObject(jsonBody);
+        } catch (JSONException e) {
+            return null;
+        }
+        String cdn = parseCDN(obj);
+        if (cdn == null) {
+            Logger.d(String.format("'%s' is null.", "cdn"));
+            return null;
+        }
+        Logger.d(String.format("fetchVideoUri: %s", cdn));
         return null;
     }
 
