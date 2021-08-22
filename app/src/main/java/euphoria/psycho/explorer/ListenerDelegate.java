@@ -19,6 +19,7 @@ import euphoria.psycho.videos.Bilibili;
 import euphoria.psycho.videos.DouYin;
 import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShou;
+import euphoria.psycho.videos.MgTv;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
@@ -90,6 +91,9 @@ public class ListenerDelegate {
             return;
         }
         if (Bilibili.handle(url, mMainActivity)) {
+            return;
+        }
+        if (MgTv.handle(url, mMainActivity)) {
             return;
         }
         if (PornHub.handle(url, mMainActivity)) {

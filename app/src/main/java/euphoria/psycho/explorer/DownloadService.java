@@ -222,4 +222,6 @@ public class DownloadService extends Service implements DownloadNotifier {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
     }
+
+    //
 }

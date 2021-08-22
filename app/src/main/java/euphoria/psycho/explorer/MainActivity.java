@@ -24,6 +24,7 @@ import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.utils.DownloadUtils;
 import euphoria.psycho.videos.AcFunShare;
+import euphoria.psycho.videos.MgTv;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
@@ -117,10 +118,9 @@ public class MainActivity extends Activity implements ClientInterface {
         configureWebView();
         loadStartPage();
         //new File(getExternalCacheDir(), "tasks.db").delete();
-        Intent service = new Intent(this, DownloadService.class);
+        //  Intent service = new Intent(this, DownloadService.class);
 //        service.setData(Uri.parse("https://cdn.91p07.com//m3u8/505694/505694.m3u8?st=L4N4OdIeD2TqZBQRo4logA&e=1629536998"));
-        startService(service);
-
+        // startService(service);
     }
 
     private void loadStartPage() {
