@@ -18,7 +18,6 @@ public class QQ extends BaseVideoExtractor<String> {
         super(inputUri, mainActivity);
     }
 
-    // data.vl.vi[0].ul.ui[0].url
     private String parseCDN(JSONObject obj) {
         try {
             JSONObject vl;
@@ -59,13 +58,34 @@ public class QQ extends BaseVideoExtractor<String> {
         return null;
     }
 
-    @Override
-    protected String fetchVideoUri(String uri) {
-        String vid = getVid(uri);
-        if (vid == null) return null;
-        uri = String.format("http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=%s&vid=%s",
-                "3.2.19.333", "shd", vid);
-        String response = getString(uri, null);
+    private String[] parseResolutions(JSONObject obj) {
+        try {
+            JSONObject fl;
+            if (obj.has("fl")) {
+                fl = obj.getJSONObject("fl");
+            } else {
+                return null;
+            }
+            JSONArray fi;
+            if (fl.has("fi")) {
+                fi = fl.getJSONArray("fi");
+            } else {
+                return null;
+            }
+            String[] names = new String[fi.length()];
+            for (int i = 0; i < fi.length(); i++) {
+                names[i] = fi.getJSONObject(i).getString("name");
+            }
+            return names;
+        } catch (Exception ignored) {
+            Logger.d(String.format("parseJSON: %s", ignored));
+        }
+        return null;
+    }
+
+    private JSONObject getInfo(String resolution, String vid) {
+        String response = getString(String.format("http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=%s&vid=%s",
+                "3.2.19.333", resolution, vid), null);
         if (response == null) {
             Logger.d(String.format("'%s' is null.", "response"));
             return null;
@@ -79,20 +99,104 @@ public class QQ extends BaseVideoExtractor<String> {
         try {
             obj = new JSONObject(jsonBody);
         } catch (JSONException e) {
+            Logger.d(String.format("getInfo: %s", e.getMessage()));
             return null;
         }
+        return obj;
+    }
+
+    @Override
+    protected String fetchVideoUri(String uri) {
+        // 1.
+        String vid = getVid(uri);
+        if (vid == null) return null;
+        JSONObject obj = getInfo("shd", vid);
         String cdn = parseCDN(obj);
         if (cdn == null) {
             Logger.d(String.format("'%s' is null.", "cdn"));
             return null;
         }
-        Logger.d(String.format("fetchVideoUri: %s", cdn));
+        String[] names = parseResolutions(obj);
+        if (names == null) {
+            Logger.d(String.format("'%s' is null.", "names"));
+            return null;
+        }
+        // 4.
+        for (String name : names) {
+            JSONObject objTmp = getInfo(name, vid);
+            String fn = parseFN(objTmp);
+            int fc = parseFC(objTmp);
+            Logger.d(String.format("fetchVideoUri: %d %s", fc, fn));
+            //
+        }
+        return null;
+    }
+
+    private int parseFC(JSONObject obj) {
+        try {
+            JSONObject vl;
+            if (obj.has("vl")) {
+                vl = obj.getJSONObject("vl");
+            } else {
+                return 0;
+            }
+            JSONArray vi;
+            if (vl.has("vi")) {
+                vi = vl.getJSONArray("vi");
+            } else {
+                return 0;
+            }
+            JSONObject cl;
+            if (vi.getJSONObject(0).has("cl")) {
+                cl = vi.getJSONObject(0).getJSONObject("cl");
+            } else {
+                return 0;
+            }
+            int fc;
+            if (cl.has("fc")) {
+                fc = cl.getInt("fc");
+                return fc;
+            } else {
+                return 0;
+            }
+
+        } catch (Exception ignored) {
+            Logger.d(String.format("parseJSON: %s", ignored));
+        }
+        return 0;
+    }
+
+    private String parseFN(JSONObject obj) {
+        try {
+            JSONObject vl;
+            if (obj.has("vl")) {
+                vl = obj.getJSONObject("vl");
+            } else {
+                return null;
+            }
+            JSONArray vi;
+            if (vl.has("vi")) {
+                vi = vl.getJSONArray("vi");
+            } else {
+                return null;
+            }
+            String fn;
+            if (vi.getJSONObject(0).has("fn")) {
+                fn = vi.getJSONObject(0).getString("fn");
+                return fn;
+            } else {
+                return null;
+            }
+
+        } catch (Exception ignored) {
+            Logger.d(String.format("parseJSON: %s", ignored));
+        }
         return null;
     }
 
     private String getVid(String uri) {
         String vid = StringShare.substringLeast(uri, "/", ".html");
-        if (vid.length() == 11) {
+        if (vid != null && vid.length() == 11) {
             return vid;
         }
         String response = getString(uri, null);
