@@ -16,6 +16,7 @@
 * [x] [AcFun弹幕视频网](https://www.acfun.cn/)
 * [x] [爱奇艺](https://m.iqiyi.com/)
 * [x] [B站](https://www.bilibili.com/)
+* [x] [芒果TV](https://mgtv.com/)
 * [x] [Twitter](https://m.twitter.com)
 * [x] [YouTube](https://m.youtube.com)
 * [x] [91porn](https://91porn.com/index.php)
