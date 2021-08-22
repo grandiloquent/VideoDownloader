@@ -10,14 +10,12 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.StringShare;
 
 public class MgTv extends BaseVideoExtractor<List<Pair<String, String>>> {
     private static Pattern MATCH_MGTV = Pattern.compile("mgtv\\.com/[a-z]/\\d+/(\\d+)\\.html");
@@ -27,18 +25,18 @@ public class MgTv extends BaseVideoExtractor<List<Pair<String, String>>> {
     }
 
     @Override
-    protected List<Pair<String, String>> fetchVideoUri(String uri) {
+    protected List<Pair<String, String>> fetchVideoUri(String videoId) {
         String clit = String.format("clit=%d", System.currentTimeMillis() / 1000);
-        String pm2 = getPm2(uri, clit);
+        String pm2 = getPm2(videoId, clit);
         if (pm2 == null) {
             return null;
         }
-        String source = getSource(uri, clit, pm2);
+        String source = getSource(videoId, clit, pm2);
         if (source == null) {
             return null;
         }
         JSONArray[] jsonArrays = new JSONArray[2];
-        if (extractQueryVideos(source, jsonArrays)) return null;
+        if (extractStream(source, jsonArrays)) return null;
         try {
             List<Pair<String, String>> videoList = new ArrayList<>();
             for (int i = 0; i < jsonArrays[1].length(); i++) {
@@ -61,7 +59,7 @@ public class MgTv extends BaseVideoExtractor<List<Pair<String, String>>> {
         return null;
     }
 
-    private boolean extractQueryVideos(String source, JSONArray[] jsonArrays) {
+    private boolean extractStream(String source, JSONArray[] jsonArrays) {
         try {
             JSONObject obj = new JSONObject(source);
             JSONObject data;
@@ -86,16 +84,17 @@ public class MgTv extends BaseVideoExtractor<List<Pair<String, String>>> {
         return false;
     }
 
-    private String getSource(String uri, String clit, String pm2) {
+    private String getSource(String videoId, String clit, String pm2) {
         return getString(String.format("https://pcweb.api.mgtv.com/player/getSource?video_id=%s&tk2=%s&pm2=%s",
-                uri, encodeTk(clit), pm2), new String[][]{
+                videoId, encodeTk(clit), pm2), new String[][]{
                 {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"},
                 {"Cookie", "PM_CHKID=1"}
         });
     }
 
-    private String getPm2(String uri, String clit) {
-        String jsonBody = getString(getApiUrl(uri, clit),
+    private String getPm2(String videoId, String clit) {
+        String jsonBody = getString(String.format("https://pcweb.api.mgtv.com/player/video?video_id=%s&tk2=%s",
+                videoId, getTk2(clit)),
                 new String[][]{
                         {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"},
                         {"Cookie", "PM_CHKID=1"}
@@ -127,11 +126,6 @@ public class MgTv extends BaseVideoExtractor<List<Pair<String, String>>> {
         } catch (Exception ignored) {
         }
         return null;
-    }
-
-    private String getApiUrl(String uri, String clit) {
-        return String.format("https://pcweb.api.mgtv.com/player/video?video_id=%s&tk2=%s",
-                uri, getTk2(clit));
     }
 
     private String getTk2(String clit) {

@@ -185,8 +185,6 @@ public abstract class BaseVideoExtractor<T> {
                 return null;
             }
         } catch (Exception ignored) {
-            Logger.d(String.format("getString: %s", ignored.getMessage()));
-
         }
         return null;
     }

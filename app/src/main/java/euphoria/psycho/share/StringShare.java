@@ -49,6 +49,20 @@ public class StringShare {
         return string.substring(start, end);
     }
 
+    public static String substringLeast(String string, String first, String second) {
+        int start = string.indexOf(first);
+        if (start == -1) return null;
+        start += first.length();
+        int end = string.indexOf(second, start);
+        if (end == -1) return null;
+        int tmp = string.lastIndexOf(first, end);
+        if (tmp != -1) {
+            start = tmp;
+        }
+        return string.substring(start, end);
+    }
+
+
     public static String substring(String string, String first, String second, boolean afterLast) {
         int start = afterLast ? string.lastIndexOf(first) : string.indexOf(first);
         if (start == -1) return null;

@@ -96,10 +96,3 @@ public class TikTok extends BaseVideoExtractor<String> {
         return false;
     }
 }
-/*
-
-
-
-
-<input name="__RequestVerificationToken" type="hidden" value="CfDJ8AsAY-udqeNCkc5nV3bkKO2J0OPaUkfzZAyIaJglrlnv9FpkL9ik4Lr_cKPaPMacHwj4-635XuV8ASwbVk4WWYodqkKiqcjsYy02OrECUiiS2xa6Isug4kHQ_J7wkBa9GTWYt-MtA2xTF8U_GpzaQog">
- */
