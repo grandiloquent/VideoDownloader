@@ -2,58 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "share.h"
+#include "log.h"
 #include "def.h"
-#include "HAL_TCP_linux.h"
+#include "porn91.h"
 
 JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
         JNIEnv *env, jclass thisObj, jbyteArray urlBytes,
         jbyteArray buffer, jint bufferLength) {
 
     READ_URL();
-    PORN_HEADER();
 
-    uintptr_t handle = HAL_TCP_Connect("91porn.com", 80);
-    size_t written_len;
-    int ret = HAL_TCP_Write(handle, headerBuffer, strlen(headerBuffer), 3000,
-                            &written_len);
-
-    if (ret != 0) {
-        (*env)->ReleaseByteArrayElements(env, urlBytes, url, 0);
-        HAL_TCP_Disconnect(handle);
-        return 0;
-    }
-    // 32768 = 32 KB
-    int responseBufferSize = 32768;
-    size_t read_len;
-    unsigned char responseBuffer[responseBufferSize];
-
-    ret = HAL_TCP_Read(handle, responseBuffer, responseBufferSize, 10000, &read_len);
-    HAL_TCP_Disconnect(handle);
-
-    LOGE("%d\n", ret);
-
-    char *body = strstr(responseBuffer, "\r\n\r\n");
-    if (body != NULL) {
-        body += 4;
-    }
-    int value = 0;
-    while (1) {
-        char c = *body;
-        if ((c >= '0') && (c <= '9')) value = (value << 4) + (c - '0');
-        else if ((c >= 'a') && (c <= 'f')) value = (value << 4) + (c - 'a' + 10);
-        else if ((c >= 'A') && (c <= 'F')) value = (value << 4) + (c - 'A' + 10);
-        else
-            switch (c) {
-                case '\r':
-                    LOGE("===========%d", value);
-                    return 0;
-            }
-//        INC_BUFFER_POS(parser);
-//        len++;
-        body++;
-//        if (len >= MAX_CHUNKED_ENCODING_CHUNK_SIZE_LENGTH) goto bad_request;
-    }
 
 //    if (read_len == 0) {
 //        goto error;
@@ -91,8 +49,10 @@ JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
 //    HAL_TCP_Disconnect(handle);
 //    return encodeSize;
 //    error:
-//    (*env)->ReleaseByteArrayElements(env, urlBytes, url, 0);
 //    HAL_TCP_Disconnect(handle);
+    PORN_HEADER();
+    get91PornVideo(headerBuffer, 288);
+    (*env)->ReleaseByteArrayElements(env, urlBytes, url, 0);
     return 0;
 }
 
@@ -100,7 +60,6 @@ JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_getPornHub(
         JNIEnv *env, jclass thisObj, jbyteArray urlBytes,
         jbyteArray buffer, jint bufferLength) {
     READ_URL();
-    PORNHUB_HEADER();
 
 }
 

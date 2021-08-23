@@ -20,3 +20,10 @@ if (window.location.hostname === "91porn.com") {
         document.querySelector('head').appendChild(style);
     }
 }
+if (window.location.hostname === "m.iqiyi.com") {
+    const mIqyGuideLayer = document.querySelector(".m-iqyGuide-layer");
+    if (mIqyGuideLayer) {
+        mIqyGuideLayer.style.display = 'none';
+    }
+}
+

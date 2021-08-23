@@ -27,8 +27,13 @@ public class VideoListActivity extends Activity {
     private void actionDelete(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
                 .getMenuInfo();
-        File directory = mVideoAdapter.getItem(info.position).getParentFile();
-        FileShare.recursivelyDeleteFile(directory, input -> true);
+        File videoFile = mVideoAdapter.getItem(info.position);
+        File directory = videoFile.getParentFile();
+        if (videoFile.getName().substring(0, directory.getName().length()).endsWith(directory.getName())) {
+            FileShare.recursivelyDeleteFile(directory, input -> true);
+        } else {
+            videoFile.delete();
+        }
         List<File> videos = getVideos();
         mVideoAdapter.update(videos);
     }

@@ -14,16 +14,6 @@
 #include "tls.h"
 
 
-static inline int randomIP(int begin, int end) {
-    int gap = end - begin + 1;
-    int ret = 0;
-    //srand((unsigned) time(0));
-    ret = rand() % gap + begin;
-//in++;
-    return ret;
-}
-
-
 #define crt_rsa_size 70369
 
 char crt_rsa[70369] = {

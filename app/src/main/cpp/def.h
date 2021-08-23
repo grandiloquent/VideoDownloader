@@ -2,6 +2,15 @@
 #define DEF_H
 // #include "def.h"
 
+static inline int randomIP(int begin, int end) {
+    int gap = end - begin + 1;
+    int ret = 0;
+    //srand((unsigned) time(0));
+    ret = rand() % gap + begin;
+//in++;
+    return ret;
+}
+
 #define READ_URL()                                                \
   int urlBytesSize = (*env)->GetArrayLength(env, urlBytes);       \
   jbyte *url = (*env)->GetByteArrayElements(env, urlBytes, NULL); \
