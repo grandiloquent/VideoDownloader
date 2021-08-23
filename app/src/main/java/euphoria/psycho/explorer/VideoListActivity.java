@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.IntentShare;
+import euphoria.psycho.share.Logger;
 
 public class VideoListActivity extends Activity {
     private VideoAdapter mVideoAdapter;
@@ -29,6 +30,9 @@ public class VideoListActivity extends Activity {
                 .getMenuInfo();
         File videoFile = mVideoAdapter.getItem(info.position);
         File directory = videoFile.getParentFile();
+        if (directory == null) {
+            return;
+        }
         if (videoFile.getName().substring(0, directory.getName().length()).endsWith(directory.getName())) {
             FileShare.recursivelyDeleteFile(directory, input -> true);
         } else {
@@ -45,8 +49,6 @@ public class VideoListActivity extends Activity {
         File videoFile = mVideoAdapter.getItem(info.position);
         startActivity(IntentShare.createShareVideoIntent(Uri.fromFile(videoFile)));
     }
-    //
-
 
     private List<File> getVideos() {
         return FileShare.recursivelyListFiles(
