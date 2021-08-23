@@ -28,7 +28,7 @@ JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
     size_t read_len;
     unsigned char responseBuffer[responseBufferSize];
 
-    ret = HAL_TCP_Read(handle, responseBuffer, 32768, 10000, &read_len);
+    ret = HAL_TCP_Read(handle, responseBuffer, responseBufferSize, 10000, &read_len);
     HAL_TCP_Disconnect(handle);
 
     LOGE("%d\n", ret);
@@ -48,11 +48,6 @@ JNIEXPORT jint JNICALL Java_euphoria_psycho_explorer_NativeShare_get91Porn(
                 case '\r':
                     LOGE("===========%d", value);
                     return 0;
-//                case '\n':
-//                    INC_BUFFER_POS_NO_FILL(parser);
-//                    goto done;
-//                default:
-//                    goto bad_request;
             }
 //        INC_BUFFER_POS(parser);
 //        len++;

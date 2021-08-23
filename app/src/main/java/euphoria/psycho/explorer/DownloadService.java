@@ -10,7 +10,6 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.List;
@@ -24,7 +23,6 @@ import euphoria.psycho.share.NetShare;
 import euphoria.psycho.utils.DownloadUtils;
 import euphoria.psycho.utils.NotificationUtils;
 
-import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_DOWNLOAD_FILE;
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_MERGE_FILE;
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_FATAL;
 import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_SUCCESS;
@@ -137,7 +135,6 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void onCreate() {
-        Logger.e(String.format("[onCreate] %s", ""));
         super.onCreate();
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             NotificationUtils.createNotificationChannel(this, DOWNLOAD_CHANNEL);

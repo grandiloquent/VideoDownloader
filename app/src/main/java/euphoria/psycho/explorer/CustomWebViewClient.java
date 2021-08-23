@@ -1,6 +1,7 @@
 package euphoria.psycho.explorer;
 
 import android.graphics.Bitmap;
+import android.os.Message;
 import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -87,4 +88,5 @@ public class CustomWebViewClient extends WebViewClient {
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         return super.shouldInterceptRequest(view, request);
     }
+
 }

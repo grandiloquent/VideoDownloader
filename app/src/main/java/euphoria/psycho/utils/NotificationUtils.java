@@ -28,7 +28,7 @@ public class NotificationUtils {
         mgr.createNotificationChannel(notificationChannel);
     }
 
- 
+
     public static void downloadProgress(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, int percent, String fileName) {
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("正在下载")
