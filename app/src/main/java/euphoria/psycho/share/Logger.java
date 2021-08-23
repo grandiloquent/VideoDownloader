@@ -11,7 +11,10 @@ public class Logger {
         if (!sDebug) return;
         Log.e("TAG", message);
     }
-
+    public static void e(String message) {
+        if (!sDebug) return;
+        Log.e("apzDJY", message);
+    }
     public static <T> void d(List<T> list) {
         if (!sDebug) return;
         StringBuilder stringBuilder = new StringBuilder();

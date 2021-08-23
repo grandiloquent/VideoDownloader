@@ -176,6 +176,7 @@ public class DownloadThread extends Thread {
     }
 
     private void transferData(InputStream in, OutputStream out, String fileName) {
+        mDownloadNotifier.downloadProgress(mDownloadTaskInfo, mCurrentSize, mTotalSize, mCurrentBytes, 0, fileName);
         final byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
             if (mShutdownRequested) {
@@ -193,13 +194,12 @@ public class DownloadThread extends Thread {
             try {
                 out.write(buffer, 0, len);
                 mCurrentBytes += len;
-                updateProgress(fileName);
+                //updateProgress(fileName);
 
             } catch (IOException e) {
                 throw new Error(e);
             }
         }
-        mDownloadNotifier.downloadProgress(mDownloadTaskInfo, mCurrentSize, mTotalSize, mCurrentBytes, 0, fileName);
 
     }
 

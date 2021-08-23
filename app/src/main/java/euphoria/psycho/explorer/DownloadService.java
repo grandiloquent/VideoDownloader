@@ -10,8 +10,8 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
-
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -31,7 +31,7 @@ import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_SUCCESS;
 
 public class DownloadService extends Service implements DownloadNotifier {
     private static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
-    private static Handler mHandler = new Handler();
+    private static final Handler mHandler = new Handler();
     private static final Object mLock = new Object();
     private final BroadcastReceiver mDismissReceiver = new BroadcastReceiver() {
         @Override
@@ -45,6 +45,7 @@ public class DownloadService extends Service implements DownloadNotifier {
     private DownloadTaskDatabase mDatabase;
 
     private void checkTasks() {
+        Logger.e(String.format("[checkTasks] %s", ""));
         List<DownloadTaskInfo> taskInfos = mDatabase.getDownloadTaskInfos();
         boolean founded = false;
         for (DownloadTaskInfo taskInfo : taskInfos) {
@@ -60,6 +61,7 @@ public class DownloadService extends Service implements DownloadNotifier {
     }
 
     private DownloadTaskInfo createNewTask(Uri downloadUri) {
+        Logger.e(String.format("[createNewTask] %s", ""));
         DownloadTaskInfo taskInfo;
         taskInfo = new DownloadTaskInfo();
         taskInfo.Uri = downloadUri.toString();
@@ -72,73 +74,70 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void downloadCompleted(DownloadTaskInfo downloadTaskInfo) {
-        mHandler.post(() -> {
-            NotificationUtils.updateDownloadCompletedNotification(this,
-                    DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
-        });
+        Logger.e(String.format("[downloadCompleted] %s", downloadTaskInfo.toString()));
+        NotificationUtils.updateDownloadCompletedNotification(this,
+                DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
     }
 
     @Override
     public void downloadFailed(DownloadTaskInfo taskInfo) {
+        Logger.e(String.format("[downloadFailed] %s", ""));
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
-        mHandler.post(() -> {
-            NotificationUtils.downloadFailed(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
-        });
+        NotificationUtils.downloadFailed(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
     }
 
     @Override
     public void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName) {
-        mHandler.post(() -> {
-            NotificationUtils.downloadProgress(this,
-                    DOWNLOAD_CHANNEL, taskInfo, mNotificationManager,
-                    (int) ((currentSize / (float) total) * 100), fileName
-            );
-        });
+        NotificationUtils.downloadProgress(this,
+                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager,
+                (int) ((currentSize / (float) total) * 100), fileName
+        );
     }
 
     @Override
     public void downloadStart(DownloadTaskInfo downloadTaskInfo) {
-        mHandler.post(() -> {
-            NotificationUtils.updateDownloadStartNotification(this,
-                    DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
-        });
+        Logger.e(String.format("[downloadStart] %s", downloadTaskInfo.toString()));
+        NotificationUtils.updateDownloadStartNotification(this,
+                DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
     }
 
     @Override
     public void mergeVideoCompleted(DownloadTaskInfo taskInfo, String outPath) {
+        Logger.e(String.format("[mergeVideoCompleted] %s", taskInfo.toString()));
         taskInfo.Status = STATUS_SUCCESS;
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
+        NotificationUtils.mergeVideoCompleted(this,
+                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
         mHandler.post(() -> {
-            NotificationUtils.mergeVideoCompleted(this,
-                    DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
             Toast.makeText(DownloadService.this, "成功合并文件：" + outPath, Toast.LENGTH_LONG).show();
         });
     }
 
     @Override
     public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
+        Logger.e(String.format("[mergeVideoFailed] %s", ""));
         taskInfo.Status = STATUS_ERROR_MERGE_FILE;
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
-        mHandler.post(() -> {
-            NotificationUtils.updateMergeVideoFailedNotification(this,
-                    DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
-        });
+        NotificationUtils.updateMergeVideoFailedNotification(this,
+                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Logger.e(String.format("[onBind] %s", ""));
         return null;
     }
 
     @Override
     public void onCreate() {
+        Logger.e(String.format("[onCreate] %s", ""));
         super.onCreate();
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             NotificationUtils.createNotificationChannel(this, DOWNLOAD_CHANNEL);
@@ -150,6 +149,7 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void onDestroy() {
+        Logger.e(String.format("[onDestroy] %s", ""));
         if (mRegistered) {
             unregisterReceiver(mDismissReceiver);
             mRegistered = false;
@@ -159,6 +159,7 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Logger.e(String.format("[onStartCommand] %s", ""));
         // Check if the network is available,
         // but some websites may be blocked and must be accessed via VPN,
         // in the future we must also check if there is an available VPN
@@ -197,9 +198,9 @@ public class DownloadService extends Service implements DownloadNotifier {
         if (taskInfo.Status == STATUS_FATAL) {
             Toast.makeText(this, "无法下载此视频", Toast.LENGTH_LONG).show();
             return START_NOT_STICKY;
-
         } else if (taskInfo.Status == STATUS_SUCCESS) {
             Toast.makeText(this, "视频已成功下载", Toast.LENGTH_LONG).show();
+            Logger.d(String.format("onStartCommand: %s", "---------------->"));
             return START_NOT_STICKY;
         }
         // Check whether the directory generated based on
@@ -212,16 +213,16 @@ public class DownloadService extends Service implements DownloadNotifier {
         // Submit the download task to the thread pool
         mExecutor.execute(thread);
         return super.onStartCommand(intent, flags, startId);
-
-
     }
 
     @Override
     public void updateDatabase(DownloadTaskInfo taskInfo) {
+        Logger.e(String.format("[updateDatabase] %s", taskInfo.toString()));
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
     }
-
-    //
 }
+// ^(?:[\t ]*(?:\r?\n|\r))+
+// Logger.e\([^;]+\);
+// // $0
