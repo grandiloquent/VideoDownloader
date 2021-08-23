@@ -43,7 +43,6 @@ public class DownloadService extends Service implements DownloadNotifier {
     private DownloadTaskDatabase mDatabase;
 
     private void checkTasks() {
-        Logger.e(String.format("[checkTasks] %s", ""));
         List<DownloadTaskInfo> taskInfos = mDatabase.getDownloadTaskInfos();
         boolean founded = false;
         for (DownloadTaskInfo taskInfo : taskInfos) {
@@ -59,7 +58,6 @@ public class DownloadService extends Service implements DownloadNotifier {
     }
 
     private DownloadTaskInfo createNewTask(Uri downloadUri) {
-        Logger.e(String.format("[createNewTask] %s", ""));
         DownloadTaskInfo taskInfo;
         taskInfo = new DownloadTaskInfo();
         taskInfo.Uri = downloadUri.toString();
@@ -72,14 +70,12 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void downloadCompleted(DownloadTaskInfo downloadTaskInfo) {
-        Logger.e(String.format("[downloadCompleted] %s", downloadTaskInfo.toString()));
-        NotificationUtils.updateDownloadCompletedNotification(this,
+        NotificationUtils.downloadCompleted(this,
                 DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
     }
 
     @Override
     public void downloadFailed(DownloadTaskInfo taskInfo) {
-        Logger.e(String.format("[downloadFailed] %s", ""));
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }
@@ -96,14 +92,12 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void downloadStart(DownloadTaskInfo downloadTaskInfo) {
-        Logger.e(String.format("[downloadStart] %s", downloadTaskInfo.toString()));
-        NotificationUtils.updateDownloadStartNotification(this,
+        NotificationUtils.downloadStart(this,
                 DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
     }
 
     @Override
     public void mergeVideoCompleted(DownloadTaskInfo taskInfo, String outPath) {
-        Logger.e(String.format("[mergeVideoCompleted] %s", taskInfo.toString()));
         taskInfo.Status = STATUS_SUCCESS;
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
@@ -117,7 +111,6 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
-        Logger.e(String.format("[mergeVideoFailed] %s", ""));
         taskInfo.Status = STATUS_ERROR_MERGE_FILE;
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
@@ -129,7 +122,6 @@ public class DownloadService extends Service implements DownloadNotifier {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Logger.e(String.format("[onBind] %s", ""));
         return null;
     }
 
@@ -146,7 +138,6 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void onDestroy() {
-        Logger.e(String.format("[onDestroy] %s", ""));
         if (mRegistered) {
             unregisterReceiver(mDismissReceiver);
             mRegistered = false;
@@ -156,7 +147,6 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Logger.e(String.format("[onStartCommand] %s", ""));
         // Check if the network is available,
         // but some websites may be blocked and must be accessed via VPN,
         // in the future we must also check if there is an available VPN
@@ -214,7 +204,6 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void updateDatabase(DownloadTaskInfo taskInfo) {
-        Logger.e(String.format("[updateDatabase] %s", taskInfo.toString()));
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
         }

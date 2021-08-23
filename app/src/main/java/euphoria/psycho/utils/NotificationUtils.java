@@ -71,14 +71,14 @@ public class NotificationUtils {
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
 
-    public static void updateDownloadStartNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
+    public static void downloadStart(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("开始下载")
                 .setContentText(downloadTaskInfo.Uri);
         manager.notify(downloadTaskInfo.FileName, 0, builder.build());
     }
 
-    public static void updateDownloadCompletedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
+    public static void downloadCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("已完成下载")
                 .setContentText(downloadTaskInfo.Uri)
