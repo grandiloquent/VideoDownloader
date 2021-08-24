@@ -12,12 +12,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
+import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.utils.DownloadUtils;
@@ -70,53 +72,67 @@ public class DownloadService extends Service implements DownloadNotifier {
 
     @Override
     public void downloadCompleted(DownloadTaskInfo downloadTaskInfo) {
-        NotificationUtils.downloadCompleted(this,
-                DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
+        synchronized (mLock) {
+            NotificationUtils.downloadCompleted(this,
+                    DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
+        }
     }
 
     @Override
     public void downloadFailed(DownloadTaskInfo taskInfo) {
         synchronized (mLock) {
             mDatabase.updateDownloadTaskInfo(taskInfo);
+            NotificationUtils.downloadFailed(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
         }
-        NotificationUtils.downloadFailed(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
     }
 
     @Override
     public void downloadProgress(DownloadTaskInfo taskInfo, int currentSize, int total, long downloadBytes, long speed, String fileName) {
-        NotificationUtils.downloadProgress(this,
-                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager,
-                (int) ((currentSize / (float) total) * 100), fileName
-        );
+        synchronized (mLock) {
+            NotificationUtils.downloadProgress(this,
+                    DOWNLOAD_CHANNEL, taskInfo, mNotificationManager,
+                    (int) ((currentSize / (float) total) * 100), fileName
+            );
+        }
     }
 
     @Override
     public void downloadStart(DownloadTaskInfo downloadTaskInfo) {
-        NotificationUtils.downloadStart(this,
-                DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
+        synchronized (mLock) {
+            NotificationUtils.downloadStart(this,
+                    DOWNLOAD_CHANNEL, downloadTaskInfo, mNotificationManager);
+        }
     }
 
     @Override
     public void mergeVideoCompleted(DownloadTaskInfo taskInfo, String outPath) {
-        taskInfo.Status = STATUS_SUCCESS;
         synchronized (mLock) {
+            taskInfo.Status = STATUS_SUCCESS;
             mDatabase.updateDownloadTaskInfo(taskInfo);
+            File videoFile = new File(outPath);
+            File dstFile = getFinalVideoFile(videoFile);
+            videoFile.renameTo(dstFile);
+            FileShare.recursivelyDeleteFile(videoFile.getParentFile(), h -> true);
+            NotificationUtils.mergeVideoCompleted(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, dstFile.getAbsolutePath());
         }
-        NotificationUtils.mergeVideoCompleted(this,
-                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, outPath);
         mHandler.post(() -> {
             Toast.makeText(DownloadService.this, "成功合并文件：" + outPath, Toast.LENGTH_LONG).show();
         });
     }
 
+    public static File getFinalVideoFile(File videoFile) {
+        File dstFile = new File(videoFile.getParentFile().getParentFile(), videoFile.getName());
+        return dstFile;
+    }
+
     @Override
     public void mergeVideoFailed(DownloadTaskInfo taskInfo, String message) {
-        taskInfo.Status = STATUS_ERROR_MERGE_FILE;
         synchronized (mLock) {
+            taskInfo.Status = STATUS_ERROR_MERGE_FILE;
             mDatabase.updateDownloadTaskInfo(taskInfo);
+            NotificationUtils.mergeVideoFailed(this,
+                    DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
         }
-        NotificationUtils.updateMergeVideoFailedNotification(this,
-                DOWNLOAD_CHANNEL, taskInfo, mNotificationManager);
     }
 
     @Nullable

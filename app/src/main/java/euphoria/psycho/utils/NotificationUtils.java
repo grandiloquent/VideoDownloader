@@ -28,13 +28,12 @@ public class NotificationUtils {
         mgr.createNotificationChannel(notificationChannel);
     }
 
-
-    public static void downloadProgress(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, int percent, String fileName) {
+    public static void downloadCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Builder builder = getBuilder(context, notificationChannel);
-        builder.setContentTitle("正在下载")
-                .setContentText(fileName)
-                .setProgress(100, percent, false);
-        manager.notify(downloadTaskInfo.FileName, 0, builder.build());
+        builder.setContentTitle("已完成下载")
+                .setContentText(downloadTaskInfo.Uri)
+                .setSmallIcon(android.R.drawable.stat_sys_download_done);
+        manager.notify(Long.toString(downloadTaskInfo.Id), (int) downloadTaskInfo.Id, builder.build());
     }
 
     public static void downloadFailed(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
@@ -44,7 +43,22 @@ public class NotificationUtils {
                 .setOngoing(false)
                 .setAutoCancel(true);
         ;
-        manager.notify(downloadTaskInfo.FileName, 0, builder.build());
+        manager.notify(Long.toString(downloadTaskInfo.Id), (int) downloadTaskInfo.Id, builder.build());
+    }
+
+    public static void downloadProgress(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, int percent, String fileName) {
+        Builder builder = getBuilder(context, notificationChannel);
+        builder.setContentTitle("正在下载")
+                .setContentText(fileName)
+                .setProgress(100, percent, false);
+        manager.notify(Long.toString(downloadTaskInfo.Id), (int) downloadTaskInfo.Id, builder.build());
+    }
+
+    public static void downloadStart(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
+        Builder builder = getBuilder(context, notificationChannel);
+        builder.setContentTitle("开始下载")
+                .setContentText(downloadTaskInfo.Uri);
+        manager.notify(Long.toString(downloadTaskInfo.Id), (int) downloadTaskInfo.Id, builder.build());
     }
 
     public static void mergeVideoCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager, String fileName) {
@@ -59,31 +73,16 @@ public class NotificationUtils {
                 .setSmallIcon(android.R.drawable.stat_sys_download_done)
                 .setOngoing(false)
                 .setAutoCancel(true);
-        manager.notify(downloadTaskInfo.FileName, 0, builder.build());
+        manager.notify(Long.toString(downloadTaskInfo.Id), (int) downloadTaskInfo.Id, builder.build());
     }
 
-    public static void updateMergeVideoFailedNotification(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
+    public static void mergeVideoFailed(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Logger.d(String.format("updateMergeVideoFailedNotification: %s", downloadTaskInfo.FileName));
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("合并视频错误")
                 .setContentText(downloadTaskInfo.Uri)
                 .setSmallIcon(android.R.drawable.stat_sys_download_done);
-        manager.notify(downloadTaskInfo.FileName, 0, builder.build());
-    }
-
-    public static void downloadStart(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
-        Builder builder = getBuilder(context, notificationChannel);
-        builder.setContentTitle("开始下载")
-                .setContentText(downloadTaskInfo.Uri);
-        manager.notify(downloadTaskInfo.FileName, 0, builder.build());
-    }
-
-    public static void downloadCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
-        Builder builder = getBuilder(context, notificationChannel);
-        builder.setContentTitle("已完成下载")
-                .setContentText(downloadTaskInfo.Uri)
-                .setSmallIcon(android.R.drawable.stat_sys_download_done);
-        manager.notify(downloadTaskInfo.FileName, 0, builder.build());
+        manager.notify(Long.toString(downloadTaskInfo.Id), (int) downloadTaskInfo.Id, builder.build());
     }
 
     private static Notification.Builder getBuilder(Context context, String notificationChannel) {

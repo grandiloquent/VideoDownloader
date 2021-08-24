@@ -19,6 +19,7 @@ import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.IntentShare;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.StringShare;
 
 public class VideoListActivity extends Activity {
     private VideoAdapter mVideoAdapter;
@@ -33,7 +34,8 @@ public class VideoListActivity extends Activity {
         if (directory == null) {
             return;
         }
-        if (videoFile.getName().substring(0, directory.getName().length()).endsWith(directory.getName())) {
+        String videoFileName = StringShare.substringBeforeLast(videoFile.getName(), ".");
+        if (videoFileName.equals(directory.getName())) {
             FileShare.recursivelyDeleteFile(directory, input -> true);
         } else {
             videoFile.delete();
