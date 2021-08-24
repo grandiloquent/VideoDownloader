@@ -75,9 +75,7 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
         if (videoTask.Uri != null) {
             contentValues.put("uri", videoTask.Uri);
         }
-        if (videoTask.Status != 0) {
-            contentValues.put("status", videoTask.Status);
-        }
+        contentValues.put("status", videoTask.Status);
         if (videoTask.Directory != null) {
             contentValues.put("directory", videoTask.Directory);
         }

@@ -53,8 +53,7 @@ public class Request implements Comparable<Request> {
                     100, 1024 * 1024, false,
                     1);
         } catch (IOException e) {
-            mVideoTask.Status = TaskStatus.ERROR_CREATE_LOG_FILE;
-            emitSynchronizeTask();
+            emitSynchronizeTask(TaskStatus.ERROR_CREATE_LOG_FILE);
             return false;
         }
         return true;
@@ -66,17 +65,15 @@ public class Request implements Comparable<Request> {
             directory = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
                     KeyShare.toHex(KeyShare.md5encode(m3u8String)));
         } catch (Exception e) {
-            mVideoTask.Status = TaskStatus.ERROR_CREATE_DIRECTORY;
-            emitSynchronizeTask();
+            emitSynchronizeTask(TaskStatus.ERROR_CREATE_DIRECTORY);
             return null;
         }
         mVideoTask.Directory = directory.getAbsolutePath();
-        emitSynchronizeTask();
+        emitSynchronizeTask(TaskStatus.CREATE_VIDEO_DIRECTORY);
         if (!directory.exists()) {
             boolean result = directory.mkdirs();
             if (!result) {
-                mVideoTask.Status = TaskStatus.ERROR_CREATE_DIRECTORY;
-                emitSynchronizeTask();
+                emitSynchronizeTask(TaskStatus.ERROR_CREATE_DIRECTORY);
                 return null;
             }
         }
@@ -101,14 +98,7 @@ public class Request implements Comparable<Request> {
     public void setRequestQueue(RequestQueue requestQueue) {
     }
 
-    public void start() {
-        emitTaskStart();
-        String m3u8String = getM3u8File();
-        if (m3u8String == null) return;
-        File directory = createVideoDirectory(m3u8String);
-        if (directory == null) return;
-        if (!createLogFile(directory)) return;
-        parseVideos(m3u8String);
+    private boolean downloadVideos() {
         for (String video : mVideos) {
             final String fileName = FileShare.getFileNameFromUri(video);
             File videoFile = new File(mVideoTask.Directory, fileName);
@@ -117,9 +107,22 @@ public class Request implements Comparable<Request> {
             try {
                 downloadFile(video, videoFile);
             } catch (IOException e) {
-                return;
+                emitSynchronizeTask(TaskStatus.ERROR_DOWNLOAD_FILE);
+                return false;
             }
         }
+        return true;
+    }
+
+    public void start() {
+        emitTaskStart();
+        String m3u8String = getM3u8String();
+        if (m3u8String == null) return;
+        File directory = createVideoDirectory(m3u8String);
+        if (directory == null) return;
+        if (!createLogFile(directory)) return;
+        parseVideos(m3u8String);
+        if (!downloadVideos()) return;
     }
 
     private void downloadFile(String videoUri, File videoFile) throws IOException {
@@ -145,7 +148,8 @@ public class Request implements Comparable<Request> {
         }
     }
 
-    private void emitSynchronizeTask() {
+    private void emitSynchronizeTask(int status) {
+        mVideoTask.Status = status;
         mHandler.post(() -> {
             mListener.synchronizeTask(mVideoTask);
         });
@@ -177,15 +181,14 @@ public class Request implements Comparable<Request> {
         return 0;
     }
 
-    private String getM3u8File() {
+    private String getM3u8String() {
         String m3u8String = null;
         try {
             m3u8String = M3u8Utils.getString(mVideoTask.Uri);
         } catch (IOException ignored) {
         }
         if (m3u8String == null) {
-            mVideoTask.Status = TaskStatus.ERROR_READ_M3U8;
-            emitSynchronizeTask();
+            emitSynchronizeTask(TaskStatus.ERROR_READ_M3U8);
             return null;
         }
         return m3u8String;
@@ -202,7 +205,7 @@ public class Request implements Comparable<Request> {
             }
         }
         mVideoTask.TotalFiles = mVideos.size();
-        emitSynchronizeTask();
+        emitSynchronizeTask(TaskStatus.PARSE_VIDEOS);
     }
 
     private void setBookmark(String uri, long size) {
