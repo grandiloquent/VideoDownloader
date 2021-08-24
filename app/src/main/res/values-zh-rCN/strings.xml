@@ -18,5 +18,7 @@
     <string name="delete">删除</string>
     <string name="video_list_name">浏览视频</string>
     <string name="ask">询问</string>
-
+    <string name="channel_download_videos">下载视频</string>
+    <string name="download_done">已完成下载</string>
+    <string name="download_failed">下载失败</string>
 </resources>

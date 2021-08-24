@@ -16,4 +16,8 @@
     <string name="delete">Delete</string>
     <string name="video_list_name">Browse videos</string>
     <string name="ask">Ask</string>
+    <string name="channel_download_videos">Download Videos</string>
+    <string name="download_done">Download Done</string>
+    <string name="download_failed">Download Failed</string>
+
 </resources>

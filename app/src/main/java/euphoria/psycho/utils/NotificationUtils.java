@@ -8,29 +8,30 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
 import euphoria.psycho.explorer.MovieActivity;
+import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.Logger;
 
 public class NotificationUtils {
     @RequiresApi(api = VERSION_CODES.O)
-    public static void createNotificationChannel(Context context, String notificationChannelName) {
+    public static void createNotificationChannel(Context context, String channelName) {
         final NotificationChannel notificationChannel = new NotificationChannel(
-                notificationChannelName,
-                "下载视频频道",
+                channelName,
+                context.getString(R.string.channel_download_videos),
                 NotificationManager.IMPORTANCE_LOW);
-        NotificationManager mgr = (NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-        mgr.createNotificationChannel(notificationChannel);
+        ((NotificationManager) context
+                .getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(notificationChannel);
     }
 
     public static void downloadCompleted(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Builder builder = getBuilder(context, notificationChannel);
-        builder.setContentTitle("已完成下载")
+        builder.setContentTitle(context.getString(R.string.download_done))
                 .setContentText(downloadTaskInfo.Uri)
                 .setSmallIcon(android.R.drawable.stat_sys_download_done);
         manager.notify(Long.toString(downloadTaskInfo.Id), (int) downloadTaskInfo.Id, builder.build());
@@ -38,7 +39,7 @@ public class NotificationUtils {
 
     public static void downloadFailed(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
         Builder builder = getBuilder(context, notificationChannel);
-        builder.setContentTitle("下载失败")
+        builder.setContentTitle(context.getString(R.string.download_failed))
                 .setContentText(downloadTaskInfo.Uri)
                 .setOngoing(false)
                 .setAutoCancel(true);
@@ -87,7 +88,7 @@ public class NotificationUtils {
 
     private static Notification.Builder getBuilder(Context context, String notificationChannel) {
         Builder builder;
-        if (android.os.Build.VERSION.SDK_INT >= VERSION_CODES.O) {
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
             builder = new Builder(context,
                     notificationChannel);
         } else {
@@ -99,11 +100,4 @@ public class NotificationUtils {
                 .setOngoing(true);
         return builder;
     }
-    //.addAction(pairAction)
-//        IntentFilter filter = new IntentFilter();
-//        filter.addAction(ACTION_DISMISS_DOWNLOAD);
-//        registerReceiver(mDismissReceiver, filter);
-//        mRegistered = true;
-//        builder.setProgress(100, 20, false);
 }
-// 添加系统程序 Gallery2 的
