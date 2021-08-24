@@ -108,20 +108,19 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        StringBuilder sb = new StringBuilder(128);
-        sb.append("CREATE TABLE IF NOT EXISTS tasks(");
-        sb.append(URI).append(" TEXT NOT NULL UNIQUE,");
-        sb.append(STATUS).append(" INTEGER,");
-        sb.append(DIRECTORY).append(" TEXT NOT NULL UNIQUE,");
-        sb.append(TOTAL_FILES).append(" INTEGER,");
-        sb.append(ID).append(" INTEGER PRIMARY KEY,");
-        sb.append(CREATE_AT).append(" INTEGER,");
-        sb.append(UPDATE_AT).append(" INTEGER,");
-        sb.append(DOWNLOADED_FILES).append(" INTEGER,");
-        sb.append(TOTAL_SIZE).append(" INTEGER,");
-        sb.append(DOWNLOADED_SIZE).append(" INTEGER");
-        sb.append(")");
-        db.execSQL(sb.toString());
+        String sb = "CREATE TABLE IF NOT EXISTS tasks(" +
+                URI + " TEXT NOT NULL UNIQUE," +
+                STATUS + " INTEGER," +
+                DIRECTORY + " TEXT UNIQUE," +
+                TOTAL_FILES + " INTEGER," +
+                ID + " INTEGER PRIMARY KEY," +
+                CREATE_AT + " INTEGER," +
+                UPDATE_AT + " INTEGER," +
+                DOWNLOADED_FILES + " INTEGER," +
+                TOTAL_SIZE + " INTEGER," +
+                DOWNLOADED_SIZE + " INTEGER" +
+                ")";
+        db.execSQL(sb);
     }
 
     @Override

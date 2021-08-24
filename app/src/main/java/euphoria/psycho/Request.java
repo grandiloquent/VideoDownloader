@@ -1,14 +1,20 @@
 package euphoria.psycho;
 
-
 import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,24 +22,29 @@ import euphoria.psycho.VideoTask.TaskStatus;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.utils.BlobCache;
 import euphoria.psycho.utils.M3u8Utils;
 
-import static euphoria.psycho.explorer.DownloadTaskDatabase.STATUS_ERROR_DOWNLOAD_FILE;
+public class Request implements Comparable<Request> {
 
-public class Request {
-
+    public static final int BUFFER_SIZE = 8192;
+    private final String mBaseUri;
+    private final Context mContext;
     private final Handler mHandler;
     private final VideoTaskListener mListener;
     private final VideoTask mVideoTask;
-    private Context mContext;
     private BlobCache mBlobCache;
     private List<String> mVideos;
+    private Integer mSequence;
 
-    public Request(VideoTask videoTask, VideoTaskListener listener, Handler handler) {
+    public Request(Context context, VideoTask videoTask, VideoTaskListener listener, Handler handler) {
         mVideoTask = videoTask;
         mListener = listener;
         mHandler = handler;
+        mContext = context;
+        mBaseUri = StringShare.substringBeforeLast(videoTask.Uri, "/")
+                + "/";
     }
 
     public boolean createLogFile(File directory) {
@@ -72,6 +83,18 @@ public class Request {
         return directory;
     }
 
+    public final int getSequence() {
+        if (mSequence == null) {
+            throw new IllegalStateException("getSequence called before setSequence");
+        }
+        return mSequence;
+    }
+
+    public final Request setSequence(int sequence) {
+        mSequence = sequence;
+        return this;
+    }
+
     public void sendEvent(int requestNetworkDispatchStarted) {
     }
 
@@ -79,7 +102,7 @@ public class Request {
     }
 
     public void start() {
-        emitTaskStarted();
+        emitTaskStart();
         String m3u8String = getM3u8File();
         if (m3u8String == null) return;
         File directory = createVideoDirectory(m3u8String);
@@ -89,25 +112,69 @@ public class Request {
         for (String video : mVideos) {
             final String fileName = FileShare.getFileNameFromUri(video);
             File videoFile = new File(mVideoTask.Directory, fileName);
-//            try {
-//            } catch (IOException e) {
-//                return;
-//            }
-
+            mVideoTask.DownloadedFiles++;
+            emitTaskProgress();
+            try {
+                downloadFile(video, videoFile);
+            } catch (IOException e) {
+                return;
+            }
         }
     }
 
-    //
+    private void downloadFile(String videoUri, File videoFile) throws IOException {
+        if (videoFile.exists()) {
+            long size = getBookmark(videoFile.getName());
+            if (videoFile.length() == size) {
+                return;
+            } else {
+                videoFile.delete();
+            }
+        }
+        String tsUri = mBaseUri + videoUri;
+        HttpURLConnection connection = (HttpURLConnection) new URL(tsUri).openConnection();
+        int statusCode = connection.getResponseCode();
+        if (statusCode >= 200 && statusCode < 400) {
+            long size = Long.parseLong(connection.getHeaderField("Content-Length"));
+            setBookmark(videoFile.getName(), size);
+            InputStream is = connection.getInputStream();
+            FileOutputStream out = new FileOutputStream(videoFile);
+            transferData(is, out);
+            FileShare.closeSilently(is);
+            FileShare.closeSilently(out);
+        }
+    }
+
     private void emitSynchronizeTask() {
         mHandler.post(() -> {
             mListener.synchronizeTask(mVideoTask);
         });
     }
 
-    private void emitTaskStarted() {
+    private void emitTaskProgress() {
         mHandler.post(() -> {
-            mListener.taskStarted(mVideoTask);
+            mListener.taskProgress(mVideoTask);
         });
+    }
+
+    private void emitTaskStart() {
+        mHandler.post(() -> {
+            mListener.taskStart(mVideoTask);
+        });
+    }
+
+    private long getBookmark(String uri) {
+        try {
+            byte[] data = mBlobCache.lookup(uri.hashCode());
+            if (data == null) return 0;
+            DataInputStream dis = new DataInputStream(
+                    new ByteArrayInputStream(data));
+            dis.readUTF();
+            return dis.readLong();
+        } catch (Throwable t) {
+            Logger.d(String.format("getBookmark: %s", t.getMessage()));
+        }
+        return 0;
     }
 
     private String getM3u8File() {
@@ -136,6 +203,47 @@ public class Request {
         }
         mVideoTask.TotalFiles = mVideos.size();
         emitSynchronizeTask();
+    }
+
+    private void setBookmark(String uri, long size) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(bos);
+            dos.writeUTF(uri);
+            dos.writeLong(size);
+            dos.flush();
+            mBlobCache.insert(uri.hashCode(), bos.toByteArray());
+        } catch (Throwable t) {
+            Logger.d(String.format("setBookmark: %s", t.getMessage()));
+        }
+    }
+
+    private void transferData(InputStream in, OutputStream out) {
+        final byte[] buffer = new byte[BUFFER_SIZE];
+        while (true) {
+            int len = -1;
+            try {
+                len = in.read(buffer);
+            } catch (IOException e) {
+                throw new Error("Failed reading response: " + e, e);
+            }
+            if (len == -1) {
+                break;
+            }
+            try {
+                out.write(buffer, 0, len);
+                mVideoTask.DownloadedSize += len;
+                //updateProgress(fileName);
+            } catch (IOException e) {
+                throw new Error(e);
+            }
+        }
+
+    }
+
+    @Override
+    public int compareTo(Request other) {
+        return this.mSequence - other.mSequence;
     }
 
 }

@@ -7,6 +7,7 @@ import android.os.Looper;
 import java.lang.ref.WeakReference;
 
 import euphoria.psycho.explorer.App;
+import euphoria.psycho.share.Logger;
 
 public class VideoManager implements VideoTaskListener {
 
@@ -36,7 +37,7 @@ public class VideoManager implements VideoTaskListener {
     }
 
     public static VideoManager newInstance(Context context) {
-        if (sVideoManager.get() == null) {
+        if (sVideoManager == null || sVideoManager.get() == null) {
             sVideoManager = new WeakReference<>(new VideoManager(context));
         }
         return sVideoManager.get();
@@ -44,10 +45,17 @@ public class VideoManager implements VideoTaskListener {
 
     @Override
     public void synchronizeTask(VideoTask videoTask) {
+        Logger.d(String.format("synchronizeTask: %s, %s", videoTask.Id, videoTask.Status));
         mDatabase.updateVideoTask(videoTask);
     }
 
     @Override
-    public void taskStarted(VideoTask videoTask) {
+    public void taskProgress(VideoTask videoTask) {
+        Logger.d(String.format("taskProgress: %s, %s", videoTask.Id, videoTask.Status));
+    }
+
+    @Override
+    public void taskStart(VideoTask videoTask) {
+        Logger.d(String.format("taskStart: %s, %s", videoTask.Id, videoTask.Status));
     }
 }

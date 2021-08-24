@@ -26,8 +26,10 @@ public class RequestQueue {
         synchronized (mCurrentRequests) {
             mCurrentRequests.add(request);
         }
+        request.setSequence(getSequenceNumber());
         // Process requests in the order they are added.
         sendRequestEvent(request, RequestEvent.REQUEST_QUEUED);
+        mNetworkQueue.add(request);
     }
 
     public void addRequestEventListener(RequestEventListener listener) {

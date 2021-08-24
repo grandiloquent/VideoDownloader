@@ -113,5 +113,6 @@
 
 
         <service android:name=".DownloadService" />
+        <service android:name="euphoria.psycho.VideoService" />
     </application>
 </manifest>
