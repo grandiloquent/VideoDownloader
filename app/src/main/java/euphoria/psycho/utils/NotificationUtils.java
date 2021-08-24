@@ -78,7 +78,6 @@ public class NotificationUtils {
     }
 
     public static void mergeVideoFailed(Context context, String notificationChannel, DownloadTaskInfo downloadTaskInfo, NotificationManager manager) {
-        Logger.d(String.format("updateMergeVideoFailedNotification: %s", downloadTaskInfo.FileName));
         Builder builder = getBuilder(context, notificationChannel);
         builder.setContentTitle("合并视频错误")
                 .setContentText(downloadTaskInfo.Uri)

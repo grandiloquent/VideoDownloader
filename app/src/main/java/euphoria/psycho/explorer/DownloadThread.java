@@ -145,22 +145,7 @@ public class DownloadThread extends Thread {
         return null;
     }
 
-    private void scanFile(String outputPath) {
-        MediaScannerConnection.scanFile(mContext,
-                new String[]{
-                        outputPath
-                }, new String[]{
-                        "video/mp4"
-                }, new MediaScannerConnectionClient() {
-                    @Override
-                    public void onMediaScannerConnected() {
-                    }
 
-                    @Override
-                    public void onScanCompleted(String path, Uri uri) {
-                    }
-                });
-    }
 
     private void setBookmark(String uri, long size) {
         try {
@@ -271,7 +256,6 @@ public class DownloadThread extends Thread {
                 fileOutputStream.flush();
             }
             fileOutputStream.close();
-            scanFile(outputPath);
             mDownloadNotifier.mergeVideoCompleted(mDownloadTaskInfo, outputPath);
         } catch (IOException e) {
             mDownloadNotifier.mergeVideoFailed(mDownloadTaskInfo, e.getMessage());

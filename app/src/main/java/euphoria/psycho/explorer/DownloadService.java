@@ -5,6 +5,8 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
+import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -44,6 +46,11 @@ public class DownloadService extends Service implements DownloadNotifier {
     private boolean mRegistered = false;
     private DownloadTaskDatabase mDatabase;
 
+    public static File getFinalVideoFile(File videoFile) {
+        File dstFile = new File(videoFile.getParentFile().getParentFile(), videoFile.getName());
+        return dstFile;
+    }
+
     private void checkTasks() {
         List<DownloadTaskInfo> taskInfos = mDatabase.getDownloadTaskInfos();
         boolean founded = false;
@@ -68,6 +75,23 @@ public class DownloadService extends Service implements DownloadNotifier {
         }
         Toast.makeText(this, "成功创建下载任务：" + downloadUri, Toast.LENGTH_LONG).show();
         return taskInfo;
+    }
+
+    private void scanFile(String outputPath) {
+        MediaScannerConnection.scanFile(this,
+                new String[]{
+                        outputPath
+                }, new String[]{
+                        "video/mp4"
+                }, new MediaScannerConnectionClient() {
+                    @Override
+                    public void onMediaScannerConnected() {
+                    }
+
+                    @Override
+                    public void onScanCompleted(String path, Uri uri) {
+                    }
+                });
     }
 
     @Override
@@ -109,20 +133,29 @@ public class DownloadService extends Service implements DownloadNotifier {
         synchronized (mLock) {
             taskInfo.Status = STATUS_SUCCESS;
             mDatabase.updateDownloadTaskInfo(taskInfo);
+
+            // Move the merged video to the upper level directory
             File videoFile = new File(outPath);
-            File dstFile = getFinalVideoFile(videoFile);
-            videoFile.renameTo(dstFile);
+            File destinationFile = getFinalVideoFile(videoFile);
+            boolean result = videoFile.renameTo(destinationFile);
+            if (!result) {
+                return;
+            }
+            // Delete the directory contains the cache files of the video
+            if (videoFile.getParentFile() == null) {
+                Logger.d(String.format("'%s' is null.", "videoFile.getParentFile()"));
+                return;
+            }
             FileShare.recursivelyDeleteFile(videoFile.getParentFile(), h -> true);
-            NotificationUtils.mergeVideoCompleted(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, dstFile.getAbsolutePath());
+            // Request the system to scan the video
+            // so that it can be shared by other programs
+            scanFile(destinationFile.getAbsolutePath());
+
+            NotificationUtils.mergeVideoCompleted(this, DOWNLOAD_CHANNEL, taskInfo, mNotificationManager, destinationFile.getAbsolutePath());
         }
         mHandler.post(() -> {
             Toast.makeText(DownloadService.this, "成功合并文件：" + outPath, Toast.LENGTH_LONG).show();
         });
-    }
-
-    public static File getFinalVideoFile(File videoFile) {
-        File dstFile = new File(videoFile.getParentFile().getParentFile(), videoFile.getName());
-        return dstFile;
     }
 
     @Override
