@@ -19,5 +19,6 @@
     <string name="channel_download_videos">Download Videos</string>
     <string name="download_done">Download Done</string>
     <string name="download_failed">Download Failed</string>
+    <string name="insert_task_failed" />
 
 </resources>

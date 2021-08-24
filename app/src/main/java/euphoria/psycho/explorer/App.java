@@ -1,6 +1,7 @@
 package euphoria.psycho.explorer;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.StrictMode;
 
 import java.util.concurrent.Executor;
@@ -12,6 +13,12 @@ import euphoria.psycho.utils.ImageLoader;
 public class App extends Application {
     private Executor mExecutor;
     private ImageLoader mImageLoader;
+
+    private static Context sContext;
+
+    public static Context getContext() {
+        return sContext;
+    }
 
     private @NonNull
     Executor getExecutor() {
@@ -34,6 +41,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        sContext = this;
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
     }

@@ -62,22 +62,57 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
         contentValues.put("status", videoTask.Status);
         contentValues.put("directory", videoTask.Directory);
         contentValues.put("total_files", videoTask.TotalFiles);
-        contentValues.put("id", videoTask.Id);
-        contentValues.put("create_at", videoTask.CreateAt);
-        contentValues.put("update_at", videoTask.UpdateAt);
+        contentValues.put("create_at", System.currentTimeMillis());
+        contentValues.put("update_at", System.currentTimeMillis());
         contentValues.put("downloaded_files", videoTask.DownloadedFiles);
         contentValues.put("total_size", videoTask.TotalSize);
         contentValues.put("downloaded_size", videoTask.DownloadedSize);
         return getWritableDatabase().insert("tasks", null, contentValues);
     }
 
+    public int updateVideoTask(VideoTask videoTask) {
+        ContentValues contentValues = new ContentValues();
+        if (videoTask.Uri != null) {
+            contentValues.put("uri", videoTask.Uri);
+        }
+        if (videoTask.Status != 0) {
+            contentValues.put("status", videoTask.Status);
+        }
+        if (videoTask.Directory != null) {
+            contentValues.put("directory", videoTask.Directory);
+        }
+        if (videoTask.TotalFiles != 0) {
+            contentValues.put("total_files", videoTask.TotalFiles);
+        }
+        if (videoTask.CreateAt != 0) {
+            contentValues.put("create_at", videoTask.CreateAt);
+        }
+        if (videoTask.UpdateAt != 0) {
+            contentValues.put("update_at", videoTask.UpdateAt);
+        } else {
+            contentValues.put("update_at", System.currentTimeMillis());
+        }
+        if (videoTask.DownloadedFiles != 0) {
+            contentValues.put("downloaded_files", videoTask.DownloadedFiles);
+        }
+        if (videoTask.TotalSize != 0) {
+            contentValues.put("total_size", videoTask.TotalSize);
+        }
+        if (videoTask.DownloadedSize != 0) {
+            contentValues.put("downloaded_size", videoTask.DownloadedSize);
+        }
+        return getWritableDatabase().update("tasks", contentValues, "id=?", new String[]{
+                Long.toString(videoTask.Id)
+        });
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(128);
         sb.append("CREATE TABLE IF NOT EXISTS tasks(");
-        sb.append(URI).append(" TEXT,");
+        sb.append(URI).append(" TEXT NOT NULL UNIQUE,");
         sb.append(STATUS).append(" INTEGER,");
-        sb.append(DIRECTORY).append(" TEXT,");
+        sb.append(DIRECTORY).append(" TEXT NOT NULL UNIQUE,");
         sb.append(TOTAL_FILES).append(" INTEGER,");
         sb.append(ID).append(" INTEGER PRIMARY KEY,");
         sb.append(CREATE_AT).append(" INTEGER,");

@@ -13,9 +13,9 @@ public class VideoTask {
     public long DownloadedSize;
 
     public interface TaskStatus {
-        public final int ERROR_CREATE_DIRECTORY = -2;
-        public static final int ERROR_CREATE_LOG_FILE = -3;
-        public final int ERROR_READ_M3U8 = -1;
+        int ERROR_CREATE_DIRECTORY = -2;
+        int ERROR_CREATE_LOG_FILE = -3;
+        int ERROR_READ_M3U8 = -1;
     }
 }
 
