@@ -12,7 +12,7 @@ public class VideoTask {
     public int DownloadedFiles;
     public long TotalSize;
     public long DownloadedSize;
-
+    public Request Request;
 }
 
 

@@ -1,14 +1,24 @@
 package euphoria.psycho.tasks;
 
+import android.content.Intent;
+import android.graphics.Movie;
+import android.net.Uri;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.io.File;
+
+import euphoria.psycho.explorer.MovieActivity;
 
 public class ViewHolder implements VideoTaskListener, LifeCycle {
     public TextView title;
     public TextView subtitle;
     public ProgressBar progressBar;
-    private VideoTask mVideoTask;
+    private final VideoTask mVideoTask;
     private final VideoActivity mVideoActivity;
+    public View layout;
 
     public ViewHolder(VideoActivity videoActivity, VideoTask videoTask) {
         mVideoTask = videoTask;
@@ -30,6 +40,13 @@ public class ViewHolder implements VideoTaskListener, LifeCycle {
         } else if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
             title.setText(mVideoTask.FileName);
             subtitle.setText("合并完成");
+            layout.setOnClickListener(v -> {
+                Intent intent = new Intent(v.getContext(), MovieActivity.class);
+                intent.setData(Uri.fromFile(new File(
+                        videoTask.Directory + ".mp4"
+                )));
+                v.getContext().startActivity(intent);
+            });
         }
     }
 

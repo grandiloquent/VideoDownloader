@@ -77,7 +77,6 @@ public class VideoManager implements VideoTaskListener {
     }
 
     public void removeListener(Listener listener) {
-        Logger.d(String.format("removeListener: %s", "listener"));
         mListeners.remove(listener);
     }
 
@@ -94,6 +93,9 @@ public class VideoManager implements VideoTaskListener {
         mDatabase.updateVideoTask(videoTask);
         for (VideoTaskListener listener : mVideoTaskListeners) {
             listener.synchronizeTask(videoTask);
+        }
+        if (videoTask.Status < 0 || videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
+            videoTask.Request.finish();
         }
     }
 

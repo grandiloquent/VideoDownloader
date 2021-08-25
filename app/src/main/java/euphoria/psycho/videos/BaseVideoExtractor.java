@@ -31,6 +31,8 @@ import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.tasks.VideoActivity;
+import euphoria.psycho.tasks.VideoService;
 
 public abstract class BaseVideoExtractor<T> {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
@@ -115,9 +117,9 @@ public abstract class BaseVideoExtractor<T> {
             }, (dialog, which) -> {
                 dialog.dismiss();
                 if (videoUri.contains("m3u8")) {
-                    Intent intent = new Intent(mainActivity, DownloadService.class);
+                    Intent intent = new Intent(mainActivity, VideoActivity.class);
                     intent.setData(Uri.parse(videoUri));
-                    mainActivity.startService(intent);
+                    mainActivity.startActivity(intent);
                 } else {
                     WebViewShare.downloadFile(mainActivity, KeyShare.toHex(videoUri.getBytes(StandardCharsets.UTF_8)), videoUri, BaseVideoExtractor.USER_AGENT);
                 }

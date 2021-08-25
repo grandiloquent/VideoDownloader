@@ -47,6 +47,7 @@ public class VideoAdapter extends BaseAdapter {
                     .inflate(R.layout.video_item, parent, false);
             viewHolder = new ViewHolder(mVideoActivity, getItem(position));
             mVideoActivity.addLifeCycle(viewHolder);
+            viewHolder.layout = convertView;
             viewHolder.title = convertView.findViewById(R.id.title);
             viewHolder.subtitle = convertView.findViewById(R.id.subtitle);
             viewHolder.progressBar = convertView.findViewById(R.id.progress_bar);

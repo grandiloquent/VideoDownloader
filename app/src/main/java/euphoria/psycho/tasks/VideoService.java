@@ -13,7 +13,6 @@ public class VideoService extends Service {
 
     private RequestQueue mQueue;
 
-
     private VideoTask createTask(String uri) {
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
@@ -29,6 +28,31 @@ public class VideoService extends Service {
         return videoTask;
     }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        VideoManager.newInstance(this);
+        mQueue = new RequestQueue();
+        VideoManager.getInstance().setQueue(mQueue);
+        mQueue.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mQueue != null) {
+            mQueue.stop();
+            mQueue = null;
+        }
+        super.onDestroy();
+
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
@@ -41,38 +65,19 @@ public class VideoService extends Service {
         VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(uri.toString());
         if (videoTask == null) {
             videoTask = createTask(uri.toString());
+        } else {
+            if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
+                Toast.makeText(this, "视频已下载", Toast.LENGTH_LONG).show();
+                return START_NOT_STICKY;
+            }
         }
         if (videoTask == null) {
             return START_NOT_STICKY;
         }
         VideoManager.getInstance().addTask(videoTask);
-        mQueue.add(new Request(this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler()));
+        Request request = new Request(this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+        request.setRequestQueue(mQueue);
+        mQueue.add(request);
         return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        VideoManager.newInstance(this);
-        mQueue = new RequestQueue();
-        mQueue.start();
-
-
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
-    public void onDestroy() {
-        if (mQueue != null) {
-            mQueue.stop();
-            mQueue = null;
-        }
-        super.onDestroy();
-
     }
 }

@@ -17,7 +17,7 @@ import euphoria.psycho.explorer.R;
 public class VideoActivity extends Activity implements VideoManager.Listener {
     private ListView mListView;
     private VideoAdapter mVideoAdapter;
-    private List<LifeCycle> mLifeCycles = new ArrayList<>();
+    private final List<LifeCycle> mLifeCycles = new ArrayList<>();
 
     public void addLifeCycle(LifeCycle lifeCycle) {
         mLifeCycles.add(lifeCycle);
@@ -31,22 +31,19 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
-        File database = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "" +
-                "tasks.db");
-        database.delete();
         VideoManager.newInstance(this).addListener(this);
-        Intent service = new Intent(this, VideoService.class);
-        service.setData(Uri.parse("https://ccn.killcovid2021.com//m3u8/512710/512710.m3u8?st=Picb3J-P_ThmI2FT_26shQ&e=1629876663"));
-        startService(service);
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new VideoAdapter(this);
         mListView.setAdapter(mVideoAdapter);
+        Intent service = new Intent(this, VideoService.class);
+        service.setData(getIntent().getData());
+        startService(service);
     }
 
     @Override
     protected void onDestroy() {
-        for (LifeCycle lifeCycle : mLifeCycles) {
-            lifeCycle.onDestroy();
+        for (int i = 0; i < mLifeCycles.size(); i++) {
+            mLifeCycles.get(i).onDestroy();
         }
         VideoManager.getInstance().removeListener(this);
         super.onDestroy();

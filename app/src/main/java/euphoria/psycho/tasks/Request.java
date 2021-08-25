@@ -33,11 +33,12 @@ public class Request implements Comparable<Request> {
     private final Context mContext;
     private final Handler mHandler;
     private final VideoTaskListener mListener;
+    private final List<File> mVideoFiles = new ArrayList<>();
     private final VideoTask mVideoTask;
     private BlobCache mBlobCache;
     private List<String> mVideos;
     private Integer mSequence;
-    private final List<File> mVideoFiles = new ArrayList<>();
+    private RequestQueue mRequestQueue;
 
     public Request(Context context, VideoTask videoTask, VideoTaskListener listener, Handler handler) {
         mVideoTask = videoTask;
@@ -46,6 +47,7 @@ public class Request implements Comparable<Request> {
         mContext = context;
         mBaseUri = StringShare.substringBeforeLast(videoTask.Uri, "/")
                 + "/";
+        mVideoTask.Request = this;
     }
 
     public boolean createLogFile(File directory) {
@@ -95,55 +97,14 @@ public class Request implements Comparable<Request> {
         return this;
     }
 
-    public void sendEvent(int requestNetworkDispatchStarted) {
+    public void sendEvent(int event) {
+        if (mRequestQueue != null) {
+            mRequestQueue.sendRequestEvent(this, event);
+        }
     }
 
     public void setRequestQueue(RequestQueue requestQueue) {
-    }
-
-    private boolean downloadVideos() {
-        for (String video : mVideos) {
-            final String fileName = FileShare.getFileNameFromUri(video);
-            File videoFile = new File(mVideoTask.Directory, fileName);
-            mVideoFiles.add(videoFile);
-            mVideoTask.DownloadedFiles++;
-            emitTaskProgress();
-            emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEOS);
-            try {
-                downloadFile(video, videoFile);
-                emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
-            } catch (IOException e) {
-                emitSynchronizeTask(TaskStatus.ERROR_DOWNLOAD_FILE);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean mergeVideo() {
-        emitSynchronizeTask(TaskStatus.MERGE_VIDEO);
-        try {
-            String outputPath = new File(mVideoTask.Directory,
-                    StringShare.substringAfterLast(mVideoTask.Directory, "/") + ".mp4")
-                    .getAbsolutePath();
-            OutputStream fileOutputStream = new FileOutputStream(outputPath);
-            byte[] b = new byte[4096];
-            for (File video : mVideoFiles) {
-                FileInputStream fileInputStream = new FileInputStream(video);
-                int len;
-                while ((len = fileInputStream.read(b)) != -1) {
-                    fileOutputStream.write(b, 0, len);
-                }
-                fileInputStream.close();
-                fileOutputStream.flush();
-            }
-            fileOutputStream.close();
-            emitSynchronizeTask(TaskStatus.MERGE_VIDEO_FINISHED);
-            return true;
-        } catch (IOException e) {
-            emitSynchronizeTask(TaskStatus.ERROR_MERGE_VIDEO_FAILED);
-            return false;
-        }
+        mRequestQueue = requestQueue;
     }
 
     public void start() {
@@ -194,6 +155,25 @@ public class Request implements Comparable<Request> {
         }
     }
 
+    private boolean downloadVideos() {
+        for (String video : mVideos) {
+            final String fileName = FileShare.getFileNameFromUri(video);
+            File videoFile = new File(mVideoTask.Directory, fileName);
+            mVideoFiles.add(videoFile);
+            mVideoTask.DownloadedFiles++;
+            emitTaskProgress();
+            emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEOS);
+            try {
+                downloadFile(video, videoFile);
+                emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
+            } catch (IOException e) {
+                emitSynchronizeTask(TaskStatus.ERROR_DOWNLOAD_FILE);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void emitSynchronizeTask(int status) {
         mVideoTask.Status = status;
         mHandler.post(() -> {
@@ -238,6 +218,32 @@ public class Request implements Comparable<Request> {
             return null;
         }
         return m3u8String;
+    }
+
+    private boolean mergeVideo() {
+        emitSynchronizeTask(TaskStatus.MERGE_VIDEO);
+        try {
+            String outputPath = new File(mVideoTask.Directory,
+                    StringShare.substringAfterLast(mVideoTask.Directory, "/") + ".mp4")
+                    .getAbsolutePath();
+            OutputStream fileOutputStream = new FileOutputStream(outputPath);
+            byte[] b = new byte[4096];
+            for (File video : mVideoFiles) {
+                FileInputStream fileInputStream = new FileInputStream(video);
+                int len;
+                while ((len = fileInputStream.read(b)) != -1) {
+                    fileOutputStream.write(b, 0, len);
+                }
+                fileInputStream.close();
+                fileOutputStream.flush();
+            }
+            fileOutputStream.close();
+            emitSynchronizeTask(TaskStatus.MERGE_VIDEO_FINISHED);
+            return true;
+        } catch (IOException e) {
+            emitSynchronizeTask(TaskStatus.ERROR_MERGE_VIDEO_FAILED);
+            return false;
+        }
     }
 
     private void parseVideos(String m3u8String) {
@@ -293,6 +299,12 @@ public class Request implements Comparable<Request> {
     @Override
     public int compareTo(Request other) {
         return this.mSequence - other.mSequence;
+    }
+
+    void finish() {
+        if (mRequestQueue != null) {
+            mRequestQueue.finish(this);
+        }
     }
 
 }
