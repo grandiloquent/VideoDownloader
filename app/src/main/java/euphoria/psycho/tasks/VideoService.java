@@ -36,6 +36,30 @@ public class VideoService extends Service {
         return videoTask;
     }
 
+    private void submitTask(VideoTask videoTask) {
+        VideoManager.getInstance().getHandler()
+                .post(() -> {
+                    VideoManager.getInstance().addTask(videoTask);
+                    Request request = new Request(VideoService.this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+                    request.setRequestQueue(mQueue);
+                    mQueue.add(request);
+                });
+    }
+
+    private void toastTaskFailed() {
+        VideoManager.getInstance().getHandler()
+                .post(() -> {
+                    Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void toastTaskFinished() {
+        VideoManager.getInstance().getHandler()
+                .post(() -> {
+                    Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_LONG).show();
+                });
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -71,35 +95,37 @@ public class VideoService extends Service {
             return START_NOT_STICKY;
         }
         new Thread(() -> {
+            String m3u8String = null;
+            String fileName = null;
             try {
-                String m3u8String = M3u8Utils.getString(uri.toString());
+                m3u8String = M3u8Utils.getString(uri.toString());
                 if (m3u8String == null) {
+                    toastTaskFailed();
                     return;
                 }
-                String fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
-                VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(fileName);
-                if (videoTask == null) {
-                    videoTask = createTask(uri.toString(), fileName, m3u8String);
-                } else {
-                    if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
-                        //Toast.makeText(this, "视频已下载", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                }
-                if (videoTask == null) {
-                    return;
-                }
-                VideoTask finalVideoTask = videoTask;
-                VideoManager.getInstance().getHandler()
-                        .post(() -> {
-                            VideoManager.getInstance().addTask(finalVideoTask);
-                            Request request = new Request(VideoService.this, finalVideoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
-                            request.setRequestQueue(mQueue);
-                            mQueue.add(request);
-                        });
-
+                fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
             } catch (Exception ignored) {
+                toastTaskFailed();
+                return;
             }
+            if (fileName == null) {
+                toastTaskFailed();
+                return;
+            }
+            VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(fileName);
+            if (videoTask == null) {
+                videoTask = createTask(uri.toString(), fileName, m3u8String);
+            } else {
+                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
+                    toastTaskFinished();
+                    return;
+                }
+            }
+            if (videoTask == null) {
+                return;
+            }
+            submitTask(videoTask);
+
         }).start();
         return super.onStartCommand(intent, flags, startId);
     }
