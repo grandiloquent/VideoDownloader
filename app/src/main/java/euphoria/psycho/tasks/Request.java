@@ -65,7 +65,6 @@ public class Request implements Comparable<Request> {
     public File createVideoDirectory(String m3u8String) {
         File directory;
         try {
-            mVideoTask.FileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
             directory = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
                     mVideoTask.FileName);
         } catch (Exception e) {
@@ -108,7 +107,7 @@ public class Request implements Comparable<Request> {
 
     public void start() {
         emitTaskStart();
-        String m3u8String = getM3u8String();
+        String m3u8String = mVideoTask.Content;
         if (m3u8String == null) return;
         File directory = createVideoDirectory(m3u8String);
         if (directory == null) return;
@@ -135,7 +134,11 @@ public class Request implements Comparable<Request> {
             if (videoFile.length() == size) {
                 return;
             } else {
-                videoFile.delete();
+                boolean result = videoFile.delete();
+                if (!result) {
+                    emitSynchronizeTask(TaskStatus.ERROR_DELETE_FILE_FAILED);
+                    return;
+                }
             }
         }
         String tsUri = mBaseUri + videoUri;
@@ -204,19 +207,6 @@ public class Request implements Comparable<Request> {
             Logger.d(String.format("getBookmark: %s", t.getMessage()));
         }
         return 0;
-    }
-
-    private String getM3u8String() {
-        String m3u8String = null;
-        try {
-            m3u8String = M3u8Utils.getString(mVideoTask.Uri);
-        } catch (IOException ignored) {
-        }
-        if (m3u8String == null) {
-            emitSynchronizeTask(TaskStatus.ERROR_READ_M3U8);
-            return null;
-        }
-        return m3u8String;
     }
 
     private boolean mergeVideo() {
@@ -304,7 +294,7 @@ public class Request implements Comparable<Request> {
         if (mRequestQueue != null) {
             mRequestQueue.finish(this);
         }
-        VideoManager.getInstance().removeTask(mVideoTask);
+        // VideoManager.getInstance().removeTask(mVideoTask);
     }
 
 }

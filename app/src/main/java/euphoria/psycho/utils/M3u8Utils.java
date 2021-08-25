@@ -65,7 +65,6 @@ public class M3u8Utils {
         urlConnection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
         urlConnection.setRequestProperty("Cache-Control", "max-age=0");
         urlConnection.setRequestProperty("Connection", "keep-alive");
-        urlConnection.setRequestProperty("Referer", "https://www.xvideos.cn/");
         urlConnection.setRequestProperty("sec-ch-ua", "Chromium\";v=\"92\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"92");
         urlConnection.setRequestProperty("sec-ch-ua-mobile", "?0");
         urlConnection.setRequestProperty("Sec-Fetch-Dest", "document");
@@ -74,10 +73,6 @@ public class M3u8Utils {
         urlConnection.setRequestProperty("Sec-Fetch-User", "?1");
         urlConnection.setRequestProperty("Upgrade-Insecure-Requests", "1");
         urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36");
-        // Map<String, List<String>> listMap = urlConnection.getHeaderFields();
-//        for (Entry<String, List<String>> header : listMap.entrySet()) {
-//            Logger.d(String.format("getHeaders: %s", String.format("%s = %s", header.getKey(), header.getValue().get(0))));
-//        }
         int code = urlConnection.getResponseCode();
         if (code < 400 && code >= 200) {
             return NetShare.readString(urlConnection);

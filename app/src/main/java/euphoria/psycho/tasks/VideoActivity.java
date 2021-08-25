@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.View;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,11 +15,14 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.share.FileShare;
+import euphoria.psycho.share.Logger;
 
 public class VideoActivity extends Activity implements VideoManager.Listener {
     private ListView mListView;
     private VideoAdapter mVideoAdapter;
     private final List<LifeCycle> mLifeCycles = new ArrayList<>();
+    private View mProgressBar;
 
     public void addLifeCycle(LifeCycle lifeCycle) {
         mLifeCycles.add(lifeCycle);
@@ -27,18 +32,24 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
         mLifeCycles.remove(lifeCycle);
     }
 
+    private void startService() {
+        Intent service = new Intent(this, VideoService.class);
+        service.setData(getIntent().getData());
+        startService(service);
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
         VideoManager.newInstance(this).addListener(this);
+        mProgressBar = findViewById(R.id.progress_bar);
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new VideoAdapter(this);
         mListView.setAdapter(mVideoAdapter);
-        Intent service = new Intent(this, VideoService.class);
-        service.setData(getIntent().getData());
-        startService(service);
+        startService();
     }
+
 
     @Override
     protected void onDestroy() {
@@ -51,6 +62,8 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
 
     @Override
     public void addTask() {
+        mProgressBar.setVisibility(View.GONE);
+        mListView.setVisibility(View.VISIBLE);
         mVideoAdapter.update(VideoManager.getInstance().getVideoTasks());
     }
 
