@@ -20,6 +20,7 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
     private static final String DOWNLOADED_SIZE = "downloaded_size";
     private static final String ID = "id";
     private static final String STATUS = "status";
+    public static final String TABLE = "tasks";
     private static final String TOTAL_FILES = "total_files";
     private static final String TOTAL_SIZE = "total_size";
     private static final String UPDATE_AT = "update_at";
@@ -36,7 +37,7 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
     }
 
     public VideoTask getVideoTask(String uri) {
-        Cursor cursor = getReadableDatabase().rawQuery("select * from tasks where uri = ? limit 1",
+        Cursor cursor = getReadableDatabase().rawQuery("select * from " + TABLE + " where uri = ? limit 1",
                 new String[]{uri});
         VideoTask videoTask = null;
         if (cursor.moveToNext()) {
@@ -67,7 +68,7 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
         contentValues.put("downloaded_files", videoTask.DownloadedFiles);
         contentValues.put("total_size", videoTask.TotalSize);
         contentValues.put("downloaded_size", videoTask.DownloadedSize);
-        return getWritableDatabase().insert("tasks", null, contentValues);
+        return getWritableDatabase().insert(TABLE, null, contentValues);
     }
 
     public int updateVideoTask(VideoTask videoTask) {
@@ -99,14 +100,14 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
         if (videoTask.DownloadedSize != 0) {
             contentValues.put("downloaded_size", videoTask.DownloadedSize);
         }
-        return getWritableDatabase().update("tasks", contentValues, "id=?", new String[]{
+        return getWritableDatabase().update(TABLE, contentValues, "id=?", new String[]{
                 Long.toString(videoTask.Id)
         });
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sb = "CREATE TABLE IF NOT EXISTS tasks(" +
+        String sb = "CREATE TABLE IF NOT EXISTS " + TABLE + "(" +
                 URI + " TEXT NOT NULL UNIQUE," +
                 STATUS + " INTEGER," +
                 DIRECTORY + " TEXT UNIQUE," +

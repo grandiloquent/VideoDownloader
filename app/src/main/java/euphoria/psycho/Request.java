@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +19,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import euphoria.psycho.VideoTask.TaskStatus;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
@@ -37,6 +37,7 @@ public class Request implements Comparable<Request> {
     private BlobCache mBlobCache;
     private List<String> mVideos;
     private Integer mSequence;
+    private List<File> mVideoFiles = new ArrayList<>();
 
     public Request(Context context, VideoTask videoTask, VideoTaskListener listener, Handler handler) {
         mVideoTask = videoTask;
@@ -102,16 +103,45 @@ public class Request implements Comparable<Request> {
         for (String video : mVideos) {
             final String fileName = FileShare.getFileNameFromUri(video);
             File videoFile = new File(mVideoTask.Directory, fileName);
+            mVideoFiles.add(videoFile);
             mVideoTask.DownloadedFiles++;
             emitTaskProgress();
+            emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEOS);
             try {
                 downloadFile(video, videoFile);
+                emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
             } catch (IOException e) {
                 emitSynchronizeTask(TaskStatus.ERROR_DOWNLOAD_FILE);
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean mergeVideo() {
+        emitSynchronizeTask(TaskStatus.MERGE_VIDEO);
+        try {
+            String outputPath = new File(mVideoTask.Directory,
+                    StringShare.substringAfterLast(mVideoTask.Directory, "/") + ".mp4")
+                    .getAbsolutePath();
+            OutputStream fileOutputStream = new FileOutputStream(outputPath);
+            byte[] b = new byte[4096];
+            for (File video : mVideoFiles) {
+                FileInputStream fileInputStream = new FileInputStream(video);
+                int len;
+                while ((len = fileInputStream.read(b)) != -1) {
+                    fileOutputStream.write(b, 0, len);
+                }
+                fileInputStream.close();
+                fileOutputStream.flush();
+            }
+            fileOutputStream.close();
+            emitSynchronizeTask(TaskStatus.MERGE_VIDEO_FINISHED);
+            return true;
+        } catch (IOException e) {
+            emitSynchronizeTask(TaskStatus.ERROR_MERGE_VIDEO_FAILED);
+            return false;
+        }
     }
 
     public void start() {
@@ -123,6 +153,8 @@ public class Request implements Comparable<Request> {
         if (!createLogFile(directory)) return;
         parseVideos(m3u8String);
         if (!downloadVideos()) return;
+        if (!mergeVideo()) return;
+
     }
 
     private void downloadFile(String videoUri, File videoFile) throws IOException {
@@ -139,6 +171,8 @@ public class Request implements Comparable<Request> {
         int statusCode = connection.getResponseCode();
         if (statusCode >= 200 && statusCode < 400) {
             long size = Long.parseLong(connection.getHeaderField("Content-Length"));
+            mVideoTask.TotalSize += size;
+            emitSynchronizeTask(TaskStatus.PARSE_CONTENT_LENGTH);
             setBookmark(videoFile.getName(), size);
             InputStream is = connection.getInputStream();
             FileOutputStream out = new FileOutputStream(videoFile);
