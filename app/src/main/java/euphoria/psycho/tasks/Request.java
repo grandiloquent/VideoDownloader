@@ -75,7 +75,6 @@ public class Request implements Comparable<Request> {
         mVideoTask.Directory = directory.getAbsolutePath();
         emitSynchronizeTask(TaskStatus.CREATE_VIDEO_DIRECTORY);
         if (!directory.exists()) {
-            Logger.d(String.format("createVideoDirectory: %s", directory));
             boolean result = directory.mkdirs();
             if (!result) {
                 emitSynchronizeTask(TaskStatus.ERROR_CREATE_DIRECTORY);

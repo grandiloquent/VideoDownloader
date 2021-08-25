@@ -11,7 +11,7 @@ import java.util.List;
 import euphoria.psycho.explorer.R;
 
 public class VideoAdapter extends BaseAdapter {
-    private List<VideoTask> mVideoTasks = new ArrayList<>();
+    private final List<VideoTask> mVideoTasks = new ArrayList<>();
     private final VideoActivity mVideoActivity;
 
     public VideoAdapter(VideoActivity videoActivity) {
@@ -58,6 +58,7 @@ public class VideoAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
+        viewHolder.title.setText(getItem(position).Uri);
         return convertView;
     }
 }

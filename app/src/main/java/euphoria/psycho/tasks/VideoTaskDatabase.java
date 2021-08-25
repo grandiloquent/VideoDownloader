@@ -110,7 +110,7 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
         String sb = "CREATE TABLE IF NOT EXISTS " + TABLE + "(" +
                 URI + " TEXT NOT NULL UNIQUE," +
                 STATUS + " INTEGER," +
-                DIRECTORY + " TEXT UNIQUE," +
+                DIRECTORY + " TEXT," +
                 TOTAL_FILES + " INTEGER," +
                 ID + " INTEGER PRIMARY KEY," +
                 CREATE_AT + " INTEGER," +
