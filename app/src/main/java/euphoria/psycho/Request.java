@@ -37,7 +37,7 @@ public class Request implements Comparable<Request> {
     private BlobCache mBlobCache;
     private List<String> mVideos;
     private Integer mSequence;
-    private List<File> mVideoFiles = new ArrayList<>();
+    private final List<File> mVideoFiles = new ArrayList<>();
 
     public Request(Context context, VideoTask videoTask, VideoTaskListener listener, Handler handler) {
         mVideoTask = videoTask;
@@ -63,8 +63,9 @@ public class Request implements Comparable<Request> {
     public File createVideoDirectory(String m3u8String) {
         File directory;
         try {
+            mVideoTask.FileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
             directory = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-                    KeyShare.toHex(KeyShare.md5encode(m3u8String)));
+                    mVideoTask.FileName);
         } catch (Exception e) {
             emitSynchronizeTask(TaskStatus.ERROR_CREATE_DIRECTORY);
             return null;

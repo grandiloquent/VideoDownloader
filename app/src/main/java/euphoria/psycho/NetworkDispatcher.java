@@ -10,7 +10,7 @@ public class NetworkDispatcher extends Thread {
 
     public NetworkDispatcher(BlockingQueue<Request> queue) {
         mQueue = queue;
-    }
+    }//
 
     public void quit() {
         mQuit = true;

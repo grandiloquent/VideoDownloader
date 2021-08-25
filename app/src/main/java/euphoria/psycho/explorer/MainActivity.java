@@ -125,12 +125,7 @@ public class MainActivity extends Activity implements ClientInterface {
         // startService(service);
         // QQ.handle("https://v.qq.com/x/cover/k16928rkrk217zb/z00401l30ys.html", this);
 
-        File database = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "" +
-                "tasks.db");
-        database.delete();
-        Intent service = new Intent(this, VideoService.class);
-        service.setData(Uri.parse("https://cdn.91p07.com//m3u8/505694/505694.m3u8?st=L4N4OdIeD2TqZBQRo4logA&e=1629536998"));
-        startService(service);
+
     }
 
     private void loadStartPage() {

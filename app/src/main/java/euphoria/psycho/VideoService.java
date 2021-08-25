@@ -8,7 +8,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
 
 public class VideoService extends Service {
 
@@ -46,6 +45,7 @@ public class VideoService extends Service {
         if (videoTask == null) {
             return START_NOT_STICKY;
         }
+        VideoManager.getInstance().addTask(videoTask);
         mQueue.add(new Request(this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler()));
         return super.onStartCommand(intent, flags, startId);
     }

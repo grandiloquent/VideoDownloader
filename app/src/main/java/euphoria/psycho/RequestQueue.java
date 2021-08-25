@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RequestQueue {
 
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
+
+
     private final Set<Request> mCurrentRequests = new HashSet<>();
     private final NetworkDispatcher[] mDispatchers;
     private final List<RequestEventListener> mEventListeners = new ArrayList<>();
