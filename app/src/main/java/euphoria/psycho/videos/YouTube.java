@@ -25,7 +25,6 @@ public class YouTube extends BaseVideoExtractor<List<Pair<String, YtFile>>> {
         super(inputUri, mainActivity);
     }
 
-
     @Override
     protected List<Pair<String, YtFile>> fetchVideoUri(String uri) {
         final FutureTask<Object> ft = new FutureTask<>(() -> {

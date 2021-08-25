@@ -305,6 +305,7 @@ public class Request implements Comparable<Request> {
         if (mRequestQueue != null) {
             mRequestQueue.finish(this);
         }
+        VideoManager.getInstance().removeTask(mVideoTask);
     }
 
 }

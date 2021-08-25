@@ -3,6 +3,7 @@ package euphoria.psycho.videos;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.Process;
+import android.util.Pair;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import androidx.annotation.NonNull;
@@ -34,14 +37,14 @@ import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
+import euphoria.psycho.videos.Twitter.TwitterVideo;
 
-public class TwitterShare {
+public class Twitter extends BaseVideoExtractor<List<TwitterVideo>> {
+    private static final Pattern MATCH_TWITTER = Pattern.compile("twitter\\.com/.+/status/(\\d+)");
 
-
-    public interface Callback {
-        void run(List<TwitterVideo> videoList);
+    protected Twitter(String inputUri, MainActivity mainActivity) {
+        super(inputUri, mainActivity);
     }
-
 
     public static List<TwitterVideo> extractTwitterVideo(String id) throws IOException, JSONException {
         URL url = new URL("https://twittervideodownloaderpro.com/twittervideodownloadv2/index.php");
@@ -99,6 +102,14 @@ public class TwitterShare {
         return null;
     }
 
+    public static boolean handle(String uri, MainActivity mainActivity) {
+        if (MATCH_TWITTER.matcher(uri).find()) {
+            new Twitter(uri, mainActivity).parsingVideo();
+            return true;
+        }
+        return false;
+    }
+
     private static String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
         StringBuilder result = new StringBuilder();
         boolean first = true;
@@ -114,6 +125,39 @@ public class TwitterShare {
         return result.toString();
     }
 
+    @Override
+    protected List<TwitterVideo> fetchVideoUri(String uri) {
+        try {
+            Matcher matcher = MATCH_TWITTER.matcher(uri);
+            if (matcher.find()) {
+                List<TwitterVideo> videoList = extractTwitterVideo(matcher.group(1));
+                return videoList;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    protected String processUri(String inputUri) {
+        return inputUri;
+    }
+
+    @Override
+    protected void processVideo(List<TwitterVideo> videoList) {
+        String[] names = new String[videoList.size()];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = FileShare.formatFileSize(videoList.get(i).size);
+        }
+        new AlertDialog.Builder(mMainActivity)
+                .setItems(names, (dialog, which) -> {
+                    Helper.viewVideo(mMainActivity, videoList.get(which).url);
+                })
+                .show();
+    }
 
     public static class TwitterVideo {
         public long duration;
@@ -127,53 +171,4 @@ public class TwitterShare {
         }
     }
 
-    private static void performTask(String uri, Callback callback) {
-        new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            try {
-                List<TwitterVideo> videoList = extractTwitterVideo(uri);
-                if (callback != null)
-                    callback.run(videoList);
-            } catch (Exception e) {
-                Logger.d(String.format("performTask: %s", e.getMessage()));
-            }
-            if (callback != null)
-                callback.run(null);
-        }).start();
-    }
-
-    public static boolean parsingVideo(MainActivity mainActivity) {
-        String uri = mainActivity.getWebView().getUrl();
-        if (uri.contains(".twitter.com/i/")) {
-            ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
-            performTask(StringShare.substringAfterLast(mainActivity.getWebView().getUrl(), "/"), value -> mainActivity.runOnUiThread(() -> {
-                if (value != null) {
-                    try {
-                        launchDialog(mainActivity, value);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
-                }
-                progressDialog.dismiss();
-            }));
-            return true;
-        }
-        return false;
-    }
-
-    private static void launchDialog(MainActivity mainActivity, List<TwitterVideo> videoList) throws IOException {
-        String[] names = new String[videoList.size()];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = FileShare.formatFileSize(videoList.get(i).size);
-        }
-        new AlertDialog.Builder(mainActivity)
-                .setItems(names, (dialog, which) -> {
-                    Helper.viewVideo(mainActivity, videoList.get(which).url);
-                })
-                .show();
-
-    }
-    //
 }
