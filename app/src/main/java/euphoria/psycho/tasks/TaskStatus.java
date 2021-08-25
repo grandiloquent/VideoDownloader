@@ -1,4 +1,4 @@
-package euphoria.psycho;
+package euphoria.psycho.tasks;
 
 public interface TaskStatus {
     //  emitSynchronizeTask(TaskStatus.PARSE_VIDEOS);

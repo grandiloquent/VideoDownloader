@@ -1,4 +1,4 @@
-package euphoria.psycho;
+package euphoria.psycho.tasks;
 
 import android.content.Context;
 import android.os.Environment;
@@ -73,6 +73,7 @@ public class Request implements Comparable<Request> {
         mVideoTask.Directory = directory.getAbsolutePath();
         emitSynchronizeTask(TaskStatus.CREATE_VIDEO_DIRECTORY);
         if (!directory.exists()) {
+            Logger.d(String.format("createVideoDirectory: %s", directory));
             boolean result = directory.mkdirs();
             if (!result) {
                 emitSynchronizeTask(TaskStatus.ERROR_CREATE_DIRECTORY);
@@ -155,7 +156,17 @@ public class Request implements Comparable<Request> {
         parseVideos(m3u8String);
         if (!downloadVideos()) return;
         if (!mergeVideo()) return;
+        deleteCacheFiles(directory);
+    }
 
+    private void deleteCacheFiles(File directory) {
+        File videoFile = new File(directory, directory.getName() + ".mp4");
+        File destinationFile = new File(directory.getParentFile(), directory.getName() + ".mp4");
+        boolean result = videoFile.renameTo(destinationFile);
+        if (!result) {
+            return;
+        }
+        FileShare.recursivelyDeleteFile(directory, f -> true);
     }
 
     private void downloadFile(String videoUri, File videoFile) throws IOException {
@@ -172,7 +183,7 @@ public class Request implements Comparable<Request> {
         int statusCode = connection.getResponseCode();
         if (statusCode >= 200 && statusCode < 400) {
             long size = Long.parseLong(connection.getHeaderField("Content-Length"));
-            mVideoTask.TotalSize += size;
+            //mVideoTask.TotalSize += size;
             emitSynchronizeTask(TaskStatus.PARSE_CONTENT_LENGTH);
             setBookmark(videoFile.getName(), size);
             InputStream is = connection.getInputStream();
@@ -259,7 +270,7 @@ public class Request implements Comparable<Request> {
     private void transferData(InputStream in, OutputStream out) {
         final byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
-            int len = -1;
+            int len;
             try {
                 len = in.read(buffer);
             } catch (IOException e) {
@@ -270,7 +281,7 @@ public class Request implements Comparable<Request> {
             }
             try {
                 out.write(buffer, 0, len);
-                mVideoTask.DownloadedSize += len;
+                //mVideoTask.DownloadedSize += len;
                 //updateProgress(fileName);
             } catch (IOException e) {
                 throw new Error(e);

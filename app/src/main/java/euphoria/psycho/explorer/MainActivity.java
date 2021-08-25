@@ -5,36 +5,23 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.Environment;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import euphoria.psycho.VideoService;
-import euphoria.psycho.VideoTask;
-import euphoria.psycho.VideoTaskDatabase;
-import euphoria.psycho.explorer.DownloadTaskDatabase.DownloadTaskInfo;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.utils.DownloadUtils;
 import euphoria.psycho.videos.AcFunShare;
-import euphoria.psycho.videos.MgTv;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
-import euphoria.psycho.videos.QQ;
-import euphoria.psycho.videos.TikTok;
 import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.YouTube;
 

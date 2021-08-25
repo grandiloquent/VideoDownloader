@@ -1,4 +1,4 @@
-package euphoria.psycho;
+package euphoria.psycho.tasks;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,6 +51,7 @@ public class VideoAdapter extends BaseAdapter {
             viewHolder.subtitle = convertView.findViewById(R.id.subtitle);
             viewHolder.progressBar = convertView.findViewById(R.id.progress_bar);
             VideoManager.getInstance().addVideoTaskListener(viewHolder);
+            viewHolder.subtitle.setText("");
             convertView.setTag(viewHolder);
 
         } else {

@@ -1,4 +1,4 @@
-package euphoria.psycho;
+package euphoria.psycho.tasks;
 
 import java.util.ArrayList;
 import java.util.HashSet;

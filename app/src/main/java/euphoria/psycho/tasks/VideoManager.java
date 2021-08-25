@@ -1,4 +1,4 @@
-package euphoria.psycho;
+package euphoria.psycho.tasks;
 
 import android.content.Context;
 import android.os.Handler;
@@ -91,8 +91,10 @@ public class VideoManager implements VideoTaskListener {
 
     @Override
     public void synchronizeTask(VideoTask videoTask) {
-        Logger.d(String.format("synchronizeTask: %s, %s", videoTask.Id, videoTask.Status));
         mDatabase.updateVideoTask(videoTask);
+        for (VideoTaskListener listener : mVideoTaskListeners) {
+            listener.synchronizeTask(videoTask);
+        }
     }
 
     @Override
@@ -100,12 +102,13 @@ public class VideoManager implements VideoTaskListener {
         for (VideoTaskListener listener : mVideoTaskListeners) {
             listener.taskProgress(videoTask);
         }
-        Logger.d(String.format("taskProgress: %s, %s", videoTask.Id, videoTask.Status));
     }
 
     @Override
     public void taskStart(VideoTask videoTask) {
-        Logger.d(String.format("taskStart: %s, %s", videoTask.Id, videoTask.Status));
+        for (VideoTaskListener listener : mVideoTaskListeners) {
+            listener.taskStart(videoTask);
+        }
     }
 
     public interface Listener {

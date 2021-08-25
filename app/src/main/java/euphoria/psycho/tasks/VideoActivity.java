@@ -1,4 +1,4 @@
-package euphoria.psycho;
+package euphoria.psycho.tasks;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -36,7 +36,7 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
         database.delete();
         VideoManager.newInstance(this).addListener(this);
         Intent service = new Intent(this, VideoService.class);
-        service.setData(Uri.parse("https://cdn.91p07.com//m3u8/505694/505694.m3u8?st=L4N4OdIeD2TqZBQRo4logA&e=1629536998"));
+        service.setData(Uri.parse("https://ccn.killcovid2021.com//m3u8/512710/512710.m3u8?st=Picb3J-P_ThmI2FT_26shQ&e=1629876663"));
         startService(service);
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new VideoAdapter(this);
