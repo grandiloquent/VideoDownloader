@@ -103,7 +103,6 @@ public class VideoService extends Service implements RequestEventListener {
             }
             stopSelf();
             sendBroadcast(new Intent("euphoria.psycho.tasks.FINISH"));
-            toastTaskFinished();
         }
     }
 
@@ -151,19 +150,21 @@ public class VideoService extends Service implements RequestEventListener {
         }
         if (event == RequestEvent.REQUEST_FINISHED && mQueue.getCurrentRequests().size() == 0) {
             tryStop();
+            toastTaskFinished();
         }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) {
-            return START_NOT_STICKY;
-        }
-        Uri uri = intent.getData();
-        if (uri == null) {
+        // Get the video download address from the intent
+        Uri uri;
+        if (intent == null || ((uri = intent.getData()) == null)) {
             return START_NOT_STICKY;
         }
         new Thread(() -> {
+            // Calculate the hash value of the m3u8 content
+            // as the file name and unique Id,
+            // try to avoid downloading the video repeatedly
             String m3u8String;
             String fileName;
             try {
@@ -173,26 +174,27 @@ public class VideoService extends Service implements RequestEventListener {
                     return;
                 }
                 fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
+                if (fileName == null) {
+                    toastTaskFailed();
+                    return;
+                }
             } catch (Exception ignored) {
                 toastTaskFailed();
                 return;
             }
-            if (fileName == null) {
-                toastTaskFailed();
-                return;
-            }
+            // Query task from the database
             VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(fileName);
             if (videoTask == null) {
                 videoTask = createTask(uri.toString(), fileName, m3u8String);
+                if (videoTask == null) {
+                    toastTaskFailed();
+                    return;
+                }
             } else {
                 if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
                     toastTaskFinished();
                     return;
                 }
-            }
-            if (videoTask == null) {
-                toastTaskFailed();
-                return;
             }
             submitTask(videoTask);
 

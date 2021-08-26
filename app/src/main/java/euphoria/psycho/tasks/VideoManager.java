@@ -64,7 +64,6 @@ public class VideoManager implements VideoTaskListener, RequestEventListener {
 
     @Override
     public void onRequestEvent(Request Request, int event) {
-        Logger.d(String.format("onRequestEvent: %s", event));
 
     }
 
