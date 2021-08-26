@@ -75,15 +75,6 @@ public class RequestQueue {
 
     public @interface RequestEvent {
         /**
-         * Cache lookup finished for the request and cached response is delivered or request is
-         * queued for network dispatching.
-         */
-        public static final int REQUEST_CACHE_LOOKUP_FINISHED = 2;
-        /**
-         * Cache lookup started for the request.
-         */
-        public static final int REQUEST_CACHE_LOOKUP_STARTED = 1;
-        /**
          * All the work associated with the request is finished and request is removed from all the
          * queues.
          */

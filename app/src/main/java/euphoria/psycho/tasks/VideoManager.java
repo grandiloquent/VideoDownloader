@@ -69,6 +69,7 @@ public class VideoManager implements VideoTaskListener, RequestEventListener {
     }
 
     public void setQueue(RequestQueue queue) {
+        queue.addRequestEventListener(this);
         mQueue = queue;
     }
 
@@ -122,6 +123,7 @@ public class VideoManager implements VideoTaskListener, RequestEventListener {
 
     public interface Listener {
         void addTask();
+
         void finished();
     }
 }

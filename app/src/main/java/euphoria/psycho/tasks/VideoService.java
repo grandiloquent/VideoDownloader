@@ -7,38 +7,25 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.share.Logger;
+import euphoria.psycho.tasks.RequestQueue.RequestEvent;
+import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 import euphoria.psycho.utils.M3u8Utils;
-import euphoria.psycho.utils.NotificationUtils;
 
-public class VideoService extends Service {
+public class VideoService extends Service implements RequestEventListener {
 
     private static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
     private RequestQueue mQueue;
-
-    @RequiresApi(api = VERSION_CODES.O)
-    public static void createNotificationChannel(Context context, String channelName) {
-        final NotificationChannel notificationChannel = new NotificationChannel(
-                channelName,
-                context.getString(R.string.channel_download_videos),
-                NotificationManager.IMPORTANCE_LOW);
-        ((NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(notificationChannel);
-    }
+    private NotificationManager mNotificationManager;
 
     private static Notification.Builder getBuilder(Context context, String notificationChannel) {
         Builder builder;
@@ -53,6 +40,15 @@ public class VideoService extends Service {
                 .setColor(context.getColor(android.R.color.primary_text_dark))
                 .setOngoing(true);
         return builder;
+    }
+
+    @RequiresApi(api = VERSION_CODES.O)
+    private void createNotificationChannel(Context context, String channelName) {
+        final NotificationChannel notificationChannel = new NotificationChannel(
+                channelName,
+                context.getString(R.string.channel_download_videos),
+                NotificationManager.IMPORTANCE_LOW);
+        mNotificationManager.createNotificationChannel(notificationChannel);
     }
 
     private VideoTask createTask(String uri, String fileName, String content) {
@@ -107,6 +103,7 @@ public class VideoService extends Service {
             }
             stopSelf();
             sendBroadcast(new Intent("euphoria.psycho.tasks.FINISH"));
+            toastTaskFinished();
         }
     }
 
@@ -119,12 +116,14 @@ public class VideoService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mNotificationManager = ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE));
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             createNotificationChannel(this, DOWNLOAD_CHANNEL);
         }
         VideoManager.newInstance(this);
         mQueue = new RequestQueue();
         VideoManager.getInstance().setQueue(mQueue);
+        mQueue.addRequestEventListener(this);
         mQueue.start();
         startForeground(android.R.drawable.stat_sys_download, getBuilder(this,
                 DOWNLOAD_CHANNEL).build());
@@ -139,6 +138,20 @@ public class VideoService extends Service {
         }
         super.onDestroy();
 
+    }
+
+    @Override
+    public void onRequestEvent(Request Request, int event) {
+        if (
+                event == RequestEvent.REQUEST_FINISHED
+                        || event == RequestEvent.REQUEST_QUEUED) {
+            Notification.Builder builder = getBuilder(this, DOWNLOAD_CHANNEL);
+            builder.setContentText(String.format("正在下载 %s 视频", mQueue.getCurrentRequests().size()));
+            mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
+        }
+        if (event == RequestEvent.REQUEST_FINISHED && mQueue.getCurrentRequests().size() == 0) {
+            tryStop();
+        }
     }
 
     @Override
