@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -50,12 +49,9 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     static Intent getStoragePermissionIntent(Context context) {
-        Intent intent = null;
-        if (Build.VERSION.SDK_INT >= 11) {
-            intent = new Intent("android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION");//Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
-            intent.setData(Uri.parse("package:" + context.getPackageName()));
-        }
-        if (intent == null || context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
+        Intent intent = new Intent("android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION");//Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+        intent.setData(Uri.parse("package:" + context.getPackageName()));
+        if (context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
             intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             intent.setData(Uri.parse("package:" + context.getPackageName()));
         }
