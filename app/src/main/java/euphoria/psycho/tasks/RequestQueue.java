@@ -118,4 +118,7 @@ public class RequestQueue {
         sendRequestEvent(request, RequestEvent.REQUEST_FINISHED);
     }
 
+    public Set<Request> getCurrentRequests() {
+        return mCurrentRequests;
+    }
 }

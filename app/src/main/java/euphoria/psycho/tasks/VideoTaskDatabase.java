@@ -63,7 +63,6 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
 
     public long insertVideoTask(VideoTask videoTask) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put("id", videoTask.Id);
         contentValues.put("uri", videoTask.Uri);
         contentValues.put("directory", videoTask.Directory);
         contentValues.put("file_name", videoTask.FileName);

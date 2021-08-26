@@ -1,7 +1,10 @@
 package euphoria.psycho.tasks;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -48,8 +51,17 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
         mVideoAdapter = new VideoAdapter(this);
         mListView.setAdapter(mVideoAdapter);
         startService();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("euphoria.psycho.tasks.FINISH");
+        registerReceiver(mBroadcastReceiver, filter);
     }
 
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+        }
+    };
 
     @Override
     protected void onDestroy() {
@@ -57,6 +69,7 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
             mLifeCycles.get(i).onDestroy();
         }
         VideoManager.getInstance().removeListener(this);
+        unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
     }
 
@@ -65,6 +78,11 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
         mProgressBar.setVisibility(View.GONE);
         mListView.setVisibility(View.VISIBLE);
         mVideoAdapter.update(VideoManager.getInstance().getVideoTasks());
+    }
+
+    @Override
+    public void finished() {
+        finish();
     }
 
 }

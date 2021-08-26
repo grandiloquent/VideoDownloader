@@ -183,6 +183,8 @@ public class DownloadService extends Service implements DownloadNotifier {
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mDatabase = new DownloadTaskDatabase(this, DownloadUtils.getDatabasePath(this));
         mExecutor = Executors.newFixedThreadPool(3);
+
+
     }
 
     @Override
