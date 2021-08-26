@@ -5,8 +5,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -44,6 +47,19 @@ public class MainActivity extends Activity implements ClientInterface {
 
     public WebView getWebView() {
         return mWebView;
+    }
+
+    static Intent getStoragePermissionIntent(Context context) {
+        Intent intent = null;
+        if (Build.VERSION.SDK_INT >= 11) {
+            intent = new Intent("android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION");//Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+            intent.setData(Uri.parse("package:" + context.getPackageName()));
+        }
+        if (intent == null || context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
+            intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + context.getPackageName()));
+        }
+        return intent;
     }
 
     private void checkChrome() {
@@ -111,8 +127,9 @@ public class MainActivity extends Activity implements ClientInterface {
 //        service.setData(Uri.parse("https://cdn.91p07.com//m3u8/505694/505694.m3u8?st=L4N4OdIeD2TqZBQRo4logA&e=1629536998"));
         // startService(service);
         // QQ.handle("https://v.qq.com/x/cover/k16928rkrk217zb/z00401l30ys.html", this);
-
-
+//        Logger.d(String.format("initialize: %b", checkSelfPermission(permission.MANAGE_EXTERNAL_STORAGE)));
+//        if (SDK_INT >= VERSION_CODES.R && FileShare.isHasSD() && !Environment.isExternalStorageManager())
+//            startActivity(getStoragePermissionIntent(this));
     }
 
     private void loadStartPage() {
@@ -171,7 +188,7 @@ public class MainActivity extends Activity implements ClientInterface {
             // If the user does not provide a necessary permission,
             // exit the program
             if (!result) {
-                Toast.makeText(this, "缺少必要权限，程序无法运行", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.need_permissions, Toast.LENGTH_LONG).show();
                 finish();
                 return;
             }

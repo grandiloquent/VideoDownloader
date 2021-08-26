@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.explorer.App;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
 public class VideoManager implements VideoTaskListener, RequestEventListener {

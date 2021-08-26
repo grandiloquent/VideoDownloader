@@ -20,7 +20,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
-import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
@@ -131,8 +130,8 @@ public class VideoService extends Service implements RequestEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        FileShare.initialize(this);
-        mDirectory = FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
+        mDirectory =
+                //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
                 getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         if (!mDirectory.exists()) {
             mDirectory.mkdirs();

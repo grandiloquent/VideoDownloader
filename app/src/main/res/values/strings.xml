@@ -21,5 +21,6 @@
     <string name="download_failed">Download Failed</string>
     <string name="insert_task_failed">Failed to add task</string>
     <string name="download_ready">Ready to download the video</string>
+    <string name="need_permissions">The application cannot run without the necessary permissions</string>
 
 </resources>

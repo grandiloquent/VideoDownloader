@@ -44,5 +44,6 @@ public class App extends Application {
         sContext = this;
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
+        //FileShare.initialize(this);
     }
 }
