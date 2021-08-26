@@ -3,7 +3,6 @@ package euphoria.psycho.share;
 
 import android.content.Context;
 
-import euphoria.psycho.explorer.R;
 
 public class DateTimeShare {
     // Returns a (localized) string for the given duration (in seconds).
@@ -13,9 +12,9 @@ public class DateTimeShare {
         int s = duration - (h * 3600 + m * 60);
         String durationValue;
         if (h == 0) {
-            durationValue = String.format(context.getString(R.string.details_ms), m, s);
+            durationValue = String.format("%02d:%02d", m, s);
         } else {
-            durationValue = String.format(context.getString(R.string.details_hms), h, m, s);
+            durationValue = String.format("%d:%02d:%02d", h, m, s);
         }
         return durationValue;
     }

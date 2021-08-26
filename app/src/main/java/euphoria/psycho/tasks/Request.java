@@ -1,7 +1,6 @@
 package euphoria.psycho.tasks;
 
 import android.content.Context;
-import android.os.Environment;
 import android.os.Handler;
 
 import java.io.ByteArrayInputStream;
@@ -20,11 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.utils.BlobCache;
-import euphoria.psycho.utils.M3u8Utils;
 
 public class Request implements Comparable<Request> {
 
@@ -65,13 +62,11 @@ public class Request implements Comparable<Request> {
     public File createVideoDirectory(String m3u8String) {
         File directory;
         try {
-            directory = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-                    mVideoTask.FileName);
+            directory = new File(mVideoTask.Directory);
         } catch (Exception e) {
             emitSynchronizeTask(TaskStatus.ERROR_CREATE_DIRECTORY);
             return null;
         }
-        mVideoTask.Directory = directory.getAbsolutePath();
         emitSynchronizeTask(TaskStatus.CREATE_VIDEO_DIRECTORY);
         if (!directory.exists()) {
             boolean result = directory.mkdirs();

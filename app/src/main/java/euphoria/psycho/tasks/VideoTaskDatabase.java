@@ -10,6 +10,7 @@ import android.os.Environment;
 import java.io.File;
 
 import androidx.annotation.Nullable;
+import euphoria.psycho.share.FileShare;
 
 public class VideoTaskDatabase extends SQLiteOpenHelper {
 
@@ -33,7 +34,12 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
     }
 
     public static VideoTaskDatabase getInstance(Context context) {
-        File database = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "" +
+        File dir =
+                FileShare.isHasSD() ?
+                        new File(FileShare.getExternalStoragePath(context), "Videos")
+                        :
+                        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File database = new File(dir,
                 "tasks.db");
         return new VideoTaskDatabase(context, database.getAbsolutePath());
     }

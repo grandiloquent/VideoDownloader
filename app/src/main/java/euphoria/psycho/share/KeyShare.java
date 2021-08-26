@@ -45,7 +45,7 @@ public class KeyShare {
             return new byte[0];
         }
         if ((hexData.length() & 1) != 0 || hexData.replaceAll("[a-fA-F0-9]", "").length() > 0) {
-            throw new java.lang.IllegalArgumentException("'" + hexData + "' is not a hex string");
+            throw new IllegalArgumentException("'" + hexData + "' is not a hex string");
         }
         byte[] result = new byte[(hexData.length() + 1) / 2];
         String hexNumber;
@@ -73,7 +73,7 @@ public class KeyShare {
         final String MD5 = "MD5";
         try {
             // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest
+            MessageDigest digest = MessageDigest
                     .getInstance(MD5);
             digest.update(s.getBytes());
             byte[] messageDigest = digest.digest();

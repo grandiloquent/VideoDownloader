@@ -1,22 +1,15 @@
 package euphoria.psycho.share;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.Environment;
-import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
-import android.provider.Settings;
-import android.util.Log;
-import android.util.Xml.Encoding;
+import android.os.storage.StorageManager;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,20 +19,27 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
-import euphoria.psycho.explorer.BuildConfig;
+import androidx.documentfile.provider.DocumentFile;
 
-import static android.os.Build.VERSION.SDK_INT;
 
 public class FileShare {
+    public static final String KEY_TREE_URI = "tree_uri";
+    public static String sSDPath;
+    private static boolean sIsHasSD;
+
+    public static boolean isHasSD() {
+        return sIsHasSD;
+    }
 
     public static void appendAllText(File file, String contents) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
@@ -54,20 +54,7 @@ public class FileShare {
         } catch (IOException ignored) {
         }
     }
-    public static List<File> recursivelyListFiles(File directory,String extension) {
-        ArrayList<File> results = new ArrayList<>();
-        File[] files = directory.listFiles(file -> file.isDirectory() || (file.isFile() && file.getName().endsWith(extension)));
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    results.addAll(recursivelyListFiles(file,extension));
-                } else {
-                    results.add(file);
-                }
-            }
-        }
-        return results;
-    }
+
     public static void closeSilently(ParcelFileDescriptor fd) {
         try {
             if (fd != null) fd.close();
@@ -136,6 +123,60 @@ public class FileShare {
         return bytesCopied;
     }
 
+    public static byte[] createChecksum(InputStream fis) throws Exception {
+        byte[] buffer = new byte[1024];
+        MessageDigest complete = MessageDigest.getInstance("MD5");
+        int numRead;
+        do {
+            numRead = fis.read(buffer);
+            if (numRead > 0) {
+                complete.update(buffer, 0, numRead);
+            }
+        } while (numRead != -1);
+        fis.close();
+        return complete.digest();
+    }
+
+    public static void createDirectoryIfNotExists(String dirPath) {
+        createDirectoryIfNotExists(new File(dirPath));
+    }
+
+    public static void createDirectoryIfNotExists(File dir) {
+         /*
+         Tests whether the file denoted by this abstract pathname is a
+         directory.
+         Where it is required to distinguish an I/O exception from the case
+         that the file is not a directory, or where several attributes of the
+         same file are required at the same time, then the java.nio.file.Files#readAttributes(Path,Class,LinkOption[])
+         Files.readAttributes method may be used.
+         @return true if and only if the file denoted by this
+         abstract pathname exists and is a directory;
+         false otherwise
+         @throws  SecurityException
+         If a security manager exists and its java.lang.SecurityManager#checkRead(java.lang.String)
+         method denies read access to the file
+         */
+        if (!dir.isDirectory()) {
+         /*
+         Creates the directory named by this abstract pathname, including any
+         necessary but nonexistent parent directories.  Note that if this
+         operation fails it may have succeeded in creating some of the necessary
+         parent directories.
+         @return  true if and only if the directory was created,
+         along with all necessary parent directories; false
+         otherwise
+         @throws  SecurityException
+         If a security manager exists and its java.lang.SecurityManager#checkRead(java.lang.String)
+         method does not permit verification of the existence of the
+         named directory and all necessary parent directories; or if
+         the java.lang.SecurityManager#checkWrite(java.lang.String)
+         method does not permit the named directory and all necessary
+         parent directories to be created
+         */
+            dir.mkdirs();
+        }
+    }
+
     /**
      * Extracts an asset from the app's APK to a file.
      *
@@ -189,11 +230,43 @@ public class FileShare {
         return value + suffix;
     }
 
+    /**
+     * Returns the file extension, or an empty string if none.
+     *
+     * @param file Name of the file, with or without the full path.
+     * @return empty string if no extension, extension otherwise.
+     */
     public static String getExtension(String file) {
-        int lastSep = file.lastIndexOf('/');
-        int lastDot = file.lastIndexOf('.');
-        if (lastSep >= lastDot) return ""; // Subsumes |lastDot == -1|.
-        return file.substring(lastDot + 1).toLowerCase(Locale.US);
+        int index = file.lastIndexOf('.');
+        if (index == -1) return "";
+        return file.substring(index + 1).toLowerCase(Locale.US);
+    }
+
+    public static String getExternalStoragePath(Context context) {
+        StorageManager mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+        Class<?> storageVolumeClazz = null;
+        try {
+            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
+            Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
+            Method getPath = storageVolumeClazz.getMethod("getPath");
+            Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
+            Object result = getVolumeList.invoke(mStorageManager);
+            if (result == null) return null;
+            final int length = Array.getLength(result);
+            for (int i = 0; i < length; i++) {
+                Object storageVolumeElement = Array.get(result, i);
+                String path = (String) getPath.invoke(storageVolumeElement);
+                Object removableObject = isRemovable.invoke(storageVolumeElement);
+                if (removableObject == null) return null;
+                boolean removable = (Boolean) removableObject;
+                if (removable) {
+                    return path;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String getFileNameFromUri(String path) {
@@ -228,6 +301,67 @@ public class FileShare {
             return file.length();
         }
     }
+
+    public static String getMD5Checksum(InputStream fis) throws Exception {
+        byte[] b = createChecksum(fis);
+        StringBuilder result = new StringBuilder();
+        for (byte value : b) {
+            result.append(Integer.toString((value & 0xff) + 0x100, 16).substring(1));
+        }
+        return result.toString();
+    }
+
+    public static String getMD5Checksum(String filename) throws Exception {
+        return getMD5Checksum(new FileInputStream(filename));
+    }
+
+    //    public static boolean extractAsset(Context context, String assetName, File dest) {
+//        InputStream inputStream = null;
+//        OutputStream outputStream = null;
+//        try {
+//            inputStream = context.getAssets().open(assetName);
+//            outputStream = new BufferedOutputStream(new FileOutputStream(dest));
+//            byte[] buffer = new byte[8192];
+//            int c;
+//            while ((c = inputStream.read(buffer)) != -1) {
+//                outputStream.write(buffer, 0, c);
+//            }
+//            inputStream.close();
+//            outputStream.close();
+//            return true;
+//        } catch (IOException e) {
+//            if (inputStream != null) {
+//                try {
+//                    inputStream.close();
+//                } catch (IOException ex) {
+//                }
+//            }
+//            if (outputStream != null) {
+//                try {
+//                    outputStream.close();
+//                } catch (IOException ex) {
+//                }
+//            }
+//        }
+//        return false;
+//    }
+    public static String getSDPath() {
+        return sSDPath;
+    }
+
+    public static void initialize(Context context) {
+        sIsHasSD = (sSDPath = FileShare.getExternalStoragePath(context)) != null;
+    }
+
+    public static boolean isFile(String path) {
+        return new File(path).isFile();
+    }
+//    public static String getExtension(String file) {
+//        int lastSep = file.lastIndexOf('/');
+//        int lastDot = file.lastIndexOf('.');
+//        if (lastSep >= lastDot) return ""; // Subsumes |lastDot == -1|.
+//        return file.substring(lastDot + 1).toLowerCase(Locale.US);
+//    }
 
     public static List<String> readAllLines(File file) throws IOException {
         String line;
@@ -291,6 +425,21 @@ public class FileShare {
 
     /**
      * Delete the given File and (if it's a directory) everything within it.
+     */
+    public static void recursivelyDeleteFile(File currentFile) {
+        if (currentFile.isDirectory()) {
+            File[] files = currentFile.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    recursivelyDeleteFile(file);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Delete the given File and (if it's a directory) everything within it.
      *
      * @param currentFile The file or directory to delete. Does not need to exist.
      * @param canDelete   the {@link Function} function used to check if the file can be deleted.
@@ -324,19 +473,19 @@ public class FileShare {
         return ret;
     }
 
-    public static void requestManageAllFilePermission() {
-//        if (SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
-//            try {
-//                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-//                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
-//                startActivityForResult(intent, 1);
-//            } catch (Exception ex) {
-//                Intent intent = new Intent();
-//                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-//                startActivityForResult(intent, 1);
-//            }
-//            return;
-//        }
+    public static List<File> recursivelyListFiles(File directory, String extension) {
+        ArrayList<File> results = new ArrayList<>();
+        File[] files = directory.listFiles(file -> file.isDirectory() || (file.isFile() && file.getName().endsWith(extension)));
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    results.addAll(recursivelyListFiles(file, extension));
+                } else {
+                    results.add(file);
+                }
+            }
+        }
+        return results;
     }
 
     public static List<File> recursivelyListFiles(File directory) {
@@ -354,6 +503,33 @@ public class FileShare {
         return results;
     }
 
+    public static boolean rename(String src) {
+        if (sIsHasSD && src.startsWith(sSDPath)) {
+            Logger.d(String.format("rename: %s", DocumentFile.fromFile(new File(src)).getUri()));
+        }
+        return true;
+    }
+
+    public static void requestManageAllFilePermission() {
+//        if (SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
+//            try {
+//                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+//                startActivityForResult(intent, 1);
+//            } catch (Exception ex) {
+//                Intent intent = new Intent();
+//                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+//                startActivityForResult(intent, 1);
+//            }
+//            return;
+//        }
+    }
+
+    public static void writeAllBytes(String path, byte[] bytes) throws IOException {
+        FileOutputStream fs = new FileOutputStream(path);
+        fs.write(bytes, 0, bytes.length);
+        fs.close();
+    }
 
 }
 // https://referencesource.microsoft.com/#mscorlib/system/io/file.cs

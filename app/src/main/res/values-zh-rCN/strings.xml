@@ -21,4 +21,6 @@
     <string name="channel_download_videos">下载视频</string>
     <string name="download_done">已完成下载</string>
     <string name="download_failed">下载失败</string>
+    <string name="download_ready">准备下载视频</string>
+    <string name="insert_task_failed">添加任务失败</string>
 </resources>

@@ -10,12 +10,17 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.os.Environment;
 import android.os.IBinder;
 import android.widget.Toast;
+
+import java.io.File;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.explorer.VideoListActivity;
+import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
@@ -26,12 +31,13 @@ public class VideoService extends Service implements RequestEventListener {
     private static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
     private RequestQueue mQueue;
     private NotificationManager mNotificationManager;
+    private File mDirectory;
 
-    private static Notification.Builder getBuilder(Context context, String notificationChannel) {
+    private static Notification.Builder getBuilder(Context context) {
         Builder builder;
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             builder = new Builder(context,
-                    notificationChannel);
+                    VideoService.DOWNLOAD_CHANNEL);
         } else {
             builder = new Builder(context);
         }
@@ -43,9 +49,9 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     @RequiresApi(api = VERSION_CODES.O)
-    private void createNotificationChannel(Context context, String channelName) {
+    private void createNotificationChannel(Context context) {
         final NotificationChannel notificationChannel = new NotificationChannel(
-                channelName,
+                VideoService.DOWNLOAD_CHANNEL,
                 context.getString(R.string.channel_download_videos),
                 NotificationManager.IMPORTANCE_LOW);
         mNotificationManager.createNotificationChannel(notificationChannel);
@@ -55,6 +61,7 @@ public class VideoService extends Service implements RequestEventListener {
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
         videoTask.FileName = fileName;
+        videoTask.Directory = new File(mDirectory, fileName).getAbsolutePath();
         videoTask.Content = content;
         long result = VideoManager
                 .getInstance()
@@ -95,14 +102,23 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     private void tryStop() {
-        if (mQueue.getCurrentRequests().size() == 0) {
+        if (mQueue != null && mQueue.getCurrentRequests().size() == 0) {
             if (VERSION.SDK_INT >= VERSION_CODES.N) {
                 stopForeground(STOP_FOREGROUND_REMOVE);
             } else {
                 stopForeground(true);
             }
             stopSelf();
+            // Send a task finished broadcast
+            // to the activity for display the download progress
+            // if it is already open, then it should be closed now
             sendBroadcast(new Intent("euphoria.psycho.tasks.FINISH"));
+            // Try to open the video list
+            // because the new version of the Android system
+            // may restrict the app to open activity from the service
+            Intent intent = new Intent(this, VideoListActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
     }
 
@@ -115,17 +131,24 @@ public class VideoService extends Service implements RequestEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
+        FileShare.initialize(this);
+        mDirectory = FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
+                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (!mDirectory.exists()) {
+            mDirectory.mkdirs();
+        }
         mNotificationManager = ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE));
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            createNotificationChannel(this, DOWNLOAD_CHANNEL);
+            createNotificationChannel(this);
         }
         VideoManager.newInstance(this);
         mQueue = new RequestQueue();
         VideoManager.getInstance().setQueue(mQueue);
         mQueue.addRequestEventListener(this);
         mQueue.start();
-        startForeground(android.R.drawable.stat_sys_download, getBuilder(this,
-                DOWNLOAD_CHANNEL).build());
+        startForeground(android.R.drawable.stat_sys_download, getBuilder(this)
+                .setContentText(getString(R.string.download_ready))
+                .build());
 
     }
 
@@ -144,8 +167,8 @@ public class VideoService extends Service implements RequestEventListener {
         if (
                 event == RequestEvent.REQUEST_FINISHED
                         || event == RequestEvent.REQUEST_QUEUED) {
-            Notification.Builder builder = getBuilder(this, DOWNLOAD_CHANNEL);
-            builder.setContentText(String.format("正在下载 %s 视频", mQueue.getCurrentRequests().size()));
+            Notification.Builder builder = getBuilder(this);
+            builder.setContentText(String.format("正在下载 %s 个视频", mQueue.getCurrentRequests().size()));
             mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
         }
         if (event == RequestEvent.REQUEST_FINISHED && mQueue.getCurrentRequests().size() == 0) {

@@ -10,8 +10,8 @@ import android.widget.EditText;
 
 public class DialogShare {
 
-    public static AlertDialog.Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
-        return new AlertDialog.Builder(context)
+    public static Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
+        return new Builder(context)
                 .setTitle(title)
                 .setPositiveButton(android.R.string.ok, p)
                 .setNegativeButton("取消", n);

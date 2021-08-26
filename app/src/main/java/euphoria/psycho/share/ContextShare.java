@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import euphoria.psycho.explorer.R;
 
 public class ContextShare {
     private static float sPixelDensity = -1f;
