@@ -179,6 +179,34 @@ public class VideoService extends Service implements RequestEventListener {
         }
     }
 
+    public static String[] getInfos(String uri) {
+        String m3u8String;
+        String fileName;
+        try {
+            m3u8String = M3u8Utils.getString(uri);
+            if (m3u8String == null) {
+                return null;
+            }
+            fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
+            if (fileName == null) {
+                return null;
+            }
+        } catch (Exception ignored) {
+            return null;
+        }
+        return new String[]{m3u8String, fileName};
+    }
+
+    public static boolean checkTask(Context context, RequestQueue q, String fileName) {
+        if (q.getCurrentRequests()
+                .stream()
+                .anyMatch(r -> r.getVideoTask().FileName.equals(fileName))) {
+            context.sendBroadcast(new Intent(VideoActivity.ACTION_REFRESH));
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Get the video download address from the intent
@@ -190,31 +218,18 @@ public class VideoService extends Service implements RequestEventListener {
             // Calculate the hash value of the m3u8 content
             // as the file name and unique Id,
             // try to avoid downloading the video repeatedly
-            String m3u8String;
-            String fileName;
-            try {
-                m3u8String = M3u8Utils.getString(uri.toString());
-                if (m3u8String == null) {
-                    toastTaskFailed();
-                    return;
-                }
-                fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
-                if (fileName == null) {
-                    toastTaskFailed();
-                    return;
-                }
-            } catch (Exception ignored) {
+            String[] infos = getInfos(uri.toString());
+            if (infos == null) {
                 toastTaskFailed();
                 return;
             }
-            if (mQueue.getCurrentRequests().stream().anyMatch(r -> r.getVideoTask().FileName.equals(fileName))) {
-                sendBroadcast(new Intent(VideoActivity.ACTION_REFRESH));
+            if (checkTask(this, mQueue, infos[1])) {
                 return;
             }
             // Query task from the database
-            VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(fileName);
+            VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(infos[1]);
             if (videoTask == null) {
-                videoTask = createTask(uri.toString(), fileName, m3u8String);
+                videoTask = createTask(uri.toString(), infos[1], infos[0]);
                 if (videoTask == null) {
                     toastTaskFailed();
                     return;

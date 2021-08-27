@@ -58,7 +58,7 @@ public class VideoAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.title.setText(getItem(position).Uri);
+        ViewHolder.renderVideoTask(viewHolder, getItem(position));
         return convertView;
     }
 }
