@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     defaultConfig {
         applicationId "euphoria.psycho.explorer"
-        minSdkVersion 23
-        targetSdkVersion 29
+        minSdkVersion 24
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0.2"
         ndk {
-            abiFilters 'armeabi-v7a'
+            abiFilters 'arm64-v8a'
         }
     }
     buildTypes {

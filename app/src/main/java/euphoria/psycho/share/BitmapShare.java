@@ -3,16 +3,12 @@ package euphoria.psycho.share;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.os.Build;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class BitmapShare {
     private static final String TAG = "BitmapUtils";

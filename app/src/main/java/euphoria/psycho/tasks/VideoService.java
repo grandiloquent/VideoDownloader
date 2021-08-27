@@ -77,7 +77,6 @@ public class VideoService extends Service implements RequestEventListener {
     private void submitTask(VideoTask videoTask) {
         VideoManager.getInstance().getHandler()
                 .post(() -> {
-                    VideoManager.getInstance().addTask(videoTask);
                     Request request = new Request(VideoService.this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
                     request.setRequestQueue(mQueue);
                     mQueue.add(request);
@@ -140,9 +139,7 @@ public class VideoService extends Service implements RequestEventListener {
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             createNotificationChannel(this);
         }
-        VideoManager.newInstance(this);
-        mQueue = new RequestQueue();
-        VideoManager.getInstance().setQueue(mQueue);
+        mQueue = VideoManager.getInstance().getQueue();
         mQueue.addRequestEventListener(this);
         mQueue.start();
         startForeground(android.R.drawable.stat_sys_download, getBuilder(this)
@@ -166,11 +163,16 @@ public class VideoService extends Service implements RequestEventListener {
         if (
                 event == RequestEvent.REQUEST_FINISHED
                         || event == RequestEvent.REQUEST_QUEUED) {
-            Notification.Builder builder = getBuilder(this);
+            Builder builder = getBuilder(this);
             builder.setContentText(String.format("正在下载 %s 个视频", mQueue.getCurrentRequests().size()));
             mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
         }
-        if (event == RequestEvent.REQUEST_FINISHED && mQueue.getCurrentRequests().size() == 0) {
+        if (event == RequestEvent.REQUEST_FINISHED) {
+            if (mQueue.getCurrentRequests()
+                    .stream()
+                    .anyMatch(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1)) {
+                return;
+            }
             tryStop();
             toastTaskFinished();
         }
@@ -203,6 +205,11 @@ public class VideoService extends Service implements RequestEventListener {
             } catch (Exception ignored) {
                 toastTaskFailed();
                 return;
+            }
+            for (Request request : mQueue.getCurrentRequests()) {
+                if (request.getVideoTask().FileName.equals(fileName)) {
+                    return;
+                }
             }
             // Query task from the database
             VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(fileName);

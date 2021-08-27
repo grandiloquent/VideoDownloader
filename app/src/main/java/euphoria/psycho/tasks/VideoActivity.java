@@ -5,23 +5,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.Logger;
+import euphoria.psycho.tasks.RequestQueue.RequestEvent;
+import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
-public class VideoActivity extends Activity implements VideoManager.Listener {
+public class VideoActivity extends Activity implements RequestEventListener {
     private ListView mListView;
     private VideoAdapter mVideoAdapter;
     private final List<LifeCycle> mLifeCycles = new ArrayList<>();
@@ -29,6 +25,19 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
 
     public void addLifeCycle(LifeCycle lifeCycle) {
         mLifeCycles.add(lifeCycle);
+    }
+
+    @Override
+    public void onRequestEvent(Request Request, int event) {
+        if (event == RequestEvent.REQUEST_QUEUED) {
+            mProgressBar.setVisibility(View.GONE);
+            mListView.setVisibility(View.VISIBLE);
+            List<VideoTask> videoTasks = new ArrayList<>();
+            for (Request request : VideoManager.getInstance().getQueue().getCurrentRequests()) {
+                videoTasks.add(request.getVideoTask());
+            }
+            mVideoAdapter.update(videoTasks);
+        }
     }
 
     public void removeLifeCycle(LifeCycle lifeCycle) {
@@ -45,7 +54,6 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
-        VideoManager.newInstance(this).addListener(this);
         mProgressBar = findViewById(R.id.progress_bar);
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new VideoAdapter(this);
@@ -54,9 +62,10 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
         IntentFilter filter = new IntentFilter();
         filter.addAction("euphoria.psycho.tasks.FINISH");
         registerReceiver(mBroadcastReceiver, filter);
+        VideoManager.newInstance(this).getQueue().addRequestEventListener(this);
     }
 
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             finish();
@@ -68,21 +77,10 @@ public class VideoActivity extends Activity implements VideoManager.Listener {
         for (int i = 0; i < mLifeCycles.size(); i++) {
             mLifeCycles.get(i).onDestroy();
         }
-        VideoManager.getInstance().removeListener(this);
         unregisterReceiver(mBroadcastReceiver);
+        VideoManager.getInstance().getQueue().removeRequestEventListener(this);
         super.onDestroy();
     }
 
-    @Override
-    public void addTask() {
-        mProgressBar.setVisibility(View.GONE);
-        mListView.setVisibility(View.VISIBLE);
-        mVideoAdapter.update(VideoManager.getInstance().getVideoTasks());
-    }
-
-    @Override
-    public void finished() {
-        finish();
-    }
 
 }

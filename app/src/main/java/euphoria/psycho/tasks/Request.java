@@ -292,4 +292,7 @@ public class Request implements Comparable<Request> {
         // VideoManager.getInstance().removeTask(mVideoTask);
     }
 
+    public VideoTask getVideoTask() {
+        return mVideoTask;
+    }
 }

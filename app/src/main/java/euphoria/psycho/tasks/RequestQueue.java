@@ -40,6 +40,10 @@ public class RequestQueue {
         }
     }
 
+    public Set<Request> getCurrentRequests() {
+        return mCurrentRequests;
+    }
+
     public int getSequenceNumber() {
         return mSequenceGenerator.incrementAndGet();
     }
@@ -103,13 +107,9 @@ public class RequestQueue {
 
     void finish(Request request) {
         // Remove from the set of requests currently being processed.
-        synchronized (mCurrentRequests) {
-            mCurrentRequests.remove(request);
-        }
+//        synchronized (mCurrentRequests) {
+//            mCurrentRequests.remove(request);
+//        }
         sendRequestEvent(request, RequestEvent.REQUEST_FINISHED);
-    }
-
-    public Set<Request> getCurrentRequests() {
-        return mCurrentRequests;
     }
 }
