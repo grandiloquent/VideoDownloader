@@ -11,6 +11,7 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
@@ -18,6 +19,7 @@ import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
 public class VideoActivity extends Activity implements RequestEventListener {
+    public static final String ACTION_REFRESH = "euphoria.psycho.tasks.REFRESH";
     private ListView mListView;
     private VideoAdapter mVideoAdapter;
     private final List<LifeCycle> mLifeCycles = new ArrayList<>();
@@ -60,6 +62,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
         mListView.setAdapter(mVideoAdapter);
         startService();
         IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_REFRESH);
         filter.addAction("euphoria.psycho.tasks.FINISH");
         registerReceiver(mBroadcastReceiver, filter);
         VideoManager.newInstance(this).getQueue().addRequestEventListener(this);
@@ -68,7 +71,16 @@ public class VideoActivity extends Activity implements RequestEventListener {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            finish();
+            if (intent.getAction().equals(ACTION_REFRESH)) {
+                mProgressBar.setVisibility(View.GONE);
+                mListView.setVisibility(View.VISIBLE);
+                mVideoAdapter.update( VideoManager.getInstance().getQueue().getCurrentRequests()
+                        .stream()
+                        .map(Request::getVideoTask)
+                        .collect(Collectors.toList()));
+            } else {
+                finish();
+            }
         }
     };
 
