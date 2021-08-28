@@ -20,6 +20,12 @@ import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.utils.M3u8Utils;
 
 public class VideoHelper {
+    public static Intent getVideoActivityIntent(Context context) {
+        Intent v = new Intent(context, VideoActivity.class);
+        v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return v;
+    }
+
     public static void deleteVideoDirectory(Context context) {
         File directory =
                 //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :

@@ -2,6 +2,7 @@ package euphoria.psycho.tasks;
 
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -142,9 +143,16 @@ public class VideoService extends Service implements RequestEventListener {
         mQueue.addRequestEventListener(this);
         startForeground(android.R.drawable.stat_sys_download, VideoHelper.getBuilder(this)
                 .setContentText(getString(R.string.download_ready))
+                .setContentIntent(PendingIntent.getActivity(
+                        this,
+                        0,
+                        VideoHelper.getVideoActivityIntent(this),
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                ))
                 .build());
 
     }
+
 
     @Override
     public void onDestroy() {
@@ -157,7 +165,13 @@ public class VideoService extends Service implements RequestEventListener {
         if (
                 event == RequestEvent.REQUEST_FINISHED
                         || event == RequestEvent.REQUEST_QUEUED) {
-            Builder builder = VideoHelper.getBuilder(this);
+            Builder builder = VideoHelper.getBuilder(this)
+                    .setContentIntent(PendingIntent.getActivity(
+                            this,
+                            0,
+                            VideoHelper.getVideoActivityIntent(this),
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    ));
             assert (mQueue != null);
             builder.setContentText(String.format("正在下载 %s 个视频", mQueue.getCurrentRequests().size()));
             mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());

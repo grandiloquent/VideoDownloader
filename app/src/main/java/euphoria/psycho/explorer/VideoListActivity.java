@@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
 import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.IntentShare;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 
 public class VideoListActivity extends Activity {
@@ -59,6 +58,13 @@ public class VideoListActivity extends Activity {
         );
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        List<File> videos = getVideos();
+        mVideoAdapter.update(videos);
+    }
+
     private void initialize() {
         setContentView(R.layout.activity_video_list);
         mGridView = findViewById(R.id.grid_view);
@@ -66,8 +72,8 @@ public class VideoListActivity extends Activity {
         registerForContextMenu(mGridView);
         mVideoAdapter = new VideoAdapter(this);
         mGridView.setAdapter(mVideoAdapter);
-        List<File> videos = getVideos();
-        mVideoAdapter.update(videos);
+//        List<File> videos = getVideos();
+//        mVideoAdapter.update(videos);
         ContextShare.initialize(this);
         mGridView.setOnItemClickListener((parent, view, position, id) -> {
             IntentShare.launchActivity(VideoListActivity.this,

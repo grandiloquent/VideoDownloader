@@ -68,6 +68,7 @@ public class ListenerDelegate {
             }
             if (uri.equals("https://91porn.com/index.php") || uri.startsWith("https://91porn.com/v.php")) {
                 new Porn91(uri, mMainActivity).fetchVideoList(uri);
+                return;
             }
             if (!uri.startsWith("https://") && !uri.startsWith("http://"))
                 mMainActivity.getWebView().loadUrl("https://" + uri);
@@ -110,6 +111,7 @@ public class ListenerDelegate {
         }
         if (url.equals("https://91porn.com/index.php") || url.startsWith("https://91porn.com/v.php")) {
             new Porn91(url, mMainActivity).fetchVideoList(url);
+            return;
         }
         if (mMainActivity.getVideoUrl() != null) {
             try {

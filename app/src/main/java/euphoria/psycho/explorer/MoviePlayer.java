@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.audiofx.AudioEffect;
 import android.media.audiofx.Virtualizer;
 import android.net.Uri;
 import android.os.Build;
@@ -23,7 +22,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.VideoView;
-
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -167,7 +165,9 @@ public class MoviePlayer implements
         } else {
             final Integer bookmark = mBookmarker.getBookmark(mUri);
             if (bookmark != null) {
-                showResumeDialog(movieActivity, bookmark);
+                mVideoView.seekTo(bookmark);
+                startVideo();
+                //showResumeDialog(movieActivity, bookmark);
             } else {
                 startVideo();
             }
