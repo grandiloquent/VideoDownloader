@@ -15,7 +15,6 @@ import java.io.File;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
@@ -40,7 +39,7 @@ public class VideoService extends Service implements RequestEventListener {
                 .getDatabase()
                 .insertVideoTask(videoTask);
         if (result == -1) {
-            VideoManager.getInstance().getHandler().post(() -> Toast.makeText(VideoService.this, getString(R.string.insert_task_failed), Toast.LENGTH_LONG).show());
+            VideoManager.post(() -> Toast.makeText(VideoService.this, getString(R.string.insert_task_failed), Toast.LENGTH_LONG).show());
             return null;
         }
         videoTask.Id = result;
@@ -54,7 +53,6 @@ public class VideoService extends Service implements RequestEventListener {
             // try to avoid downloading the video repeatedly
             String[] infos = VideoHelper.getInfos(uri);
             if (infos == null) {
-                Logger.d(String.format("submitRequest: %s", "infos"));
                 toastTaskFailed();
                 return;
             }
@@ -81,28 +79,25 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     private void submitTask(VideoTask videoTask) {
-        VideoManager.getInstance().getHandler()
-                .post(() -> {
-                    Request request = new Request(VideoService.this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
-                    request.setRequestQueue(mQueue);
-                    mQueue.add(request);
-                });
+        VideoManager.post(() -> {
+            Request request = new Request(VideoService.this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+            request.setRequestQueue(mQueue);
+            mQueue.add(request);
+        });
     }
 
     private void toastTaskFailed() {
-        VideoManager.getInstance().getHandler()
-                .post(() -> {
-                    Toast.makeText(VideoService.this, "视频下载失败", Toast.LENGTH_LONG).show();
-                    tryStop();
-                });
+        VideoManager.post(() -> {
+            Toast.makeText(VideoService.this, "视频下载失败", Toast.LENGTH_LONG).show();
+            tryStop();
+        });
     }
 
     private void toastTaskFinished() {
-        VideoManager.getInstance().getHandler()
-                .post(() -> {
-                    Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_LONG).show();
-                    tryStop();
-                });
+        VideoManager.post(() -> {
+            Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_LONG).show();
+            tryStop();
+        });
     }
 
     private void tryStop() {

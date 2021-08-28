@@ -9,9 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.explorer.App;
-import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
-public class VideoManager implements VideoTaskListener, RequestEventListener {
+public class VideoManager implements VideoTaskListener {
 
     private static WeakReference<VideoManager> sVideoManager;
     private final Context mContext;
@@ -67,10 +66,6 @@ public class VideoManager implements VideoTaskListener, RequestEventListener {
     }
 
     @Override
-    public void onRequestEvent(Request Request, int event) {
-    }
-
-    @Override
     public void synchronizeTask(VideoTask videoTask) {
         mDatabase.updateVideoTask(videoTask);
         mVideoTaskListeners.forEach(videoTaskListener -> videoTaskListener.synchronizeTask(videoTask));
@@ -87,6 +82,10 @@ public class VideoManager implements VideoTaskListener, RequestEventListener {
     @Override
     public void taskStart(VideoTask videoTask) {
         mVideoTaskListeners.forEach(videoTaskListener -> videoTaskListener.taskStart(videoTask));
+    }
+
+    public static void post(Runnable runnable) {
+        getInstance().getHandler().post(runnable);
     }
 
 
