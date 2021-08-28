@@ -137,7 +137,7 @@ public class VideoService extends Service implements RequestEventListener {
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             VideoHelper.createNotificationChannel(this, mNotificationManager);
         }
-        mQueue = VideoManager.getInstance().getQueue();
+        mQueue = VideoManager.newInstance(this).getQueue();
         mQueue.addRequestEventListener(this);
         startForeground(android.R.drawable.stat_sys_download, VideoHelper.getBuilder(this)
                 .setContentText(getString(R.string.download_ready))
@@ -183,7 +183,7 @@ public class VideoService extends Service implements RequestEventListener {
         if (videoList != null) {
             for (int i = 0; i < videoList.length; i++) {
                 Logger.d(String.format("onStartCommand: %s", videoList[i]));
-                // submitRequest(videoList[i]);
+                submitRequest(videoList[i]);
             }
             return START_NOT_STICKY;
         }

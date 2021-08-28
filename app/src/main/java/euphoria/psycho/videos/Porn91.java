@@ -78,14 +78,20 @@ public class Porn91 extends BaseVideoExtractor<String> {
     }
 
     public void fetchVideoList(String uri) {
-        String response = getString(uri, null);
-        Matcher matcher = MATCH_91PORN.matcher(response);
-        List<String> videoList = new ArrayList<>();
-        while (matcher.find()) {
-            videoList.add(matcher.group());
-        }
-        Intent service = new Intent(mMainActivity, VideoService.class);
-        service.putExtra(VideoService.KEY_VIDEO_LIST, videoList.toArray(new String[0]));
-        mMainActivity.startService(service);
+        new Thread(() -> {
+            String response = getString(uri, null);
+            Matcher matcher = MATCH_91PORN.matcher(response);
+            List<String> videoList = new ArrayList<>();
+            while (matcher.find()) {
+                videoList.add(matcher.group());
+            }
+            mMainActivity.runOnUiThread(() -> {
+                Intent service = new Intent(mMainActivity, VideoService.class);
+                service.putExtra(VideoService.KEY_VIDEO_LIST, videoList.toArray(new String[0]));
+                mMainActivity.startService(service);
+            });
+        }).start();
+
+
     }
 }
