@@ -1,16 +1,22 @@
 package euphoria.psycho.videos;
 
+import android.content.Intent;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.explorer.NativeShare;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
+import euphoria.psycho.tasks.VideoService;
 
 public class Porn91 extends BaseVideoExtractor<String> {
+
+    private static Pattern MATCH_91PORN = Pattern.compile("(?<=<a href=\")https://91porn.com/view_video.php\\?[^\"]+(?=\")");
 
     public Porn91(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -69,5 +75,17 @@ public class Porn91 extends BaseVideoExtractor<String> {
     @Override
     protected void processVideo(String videoUri) {
         viewVideoBetter(mMainActivity, videoUri);
+    }
+
+    public void fetchVideoList(String uri) {
+        String response = getString(uri, null);
+        Matcher matcher = MATCH_91PORN.matcher(response);
+        List<String> videoList = new ArrayList<>();
+        while (matcher.find()) {
+            videoList.add(matcher.group());
+        }
+        Intent service = new Intent(mMainActivity, VideoService.class);
+        service.putExtra(VideoService.KEY_VIDEO_LIST, videoList.toArray(new String[0]));
+        mMainActivity.startService(service);
     }
 }

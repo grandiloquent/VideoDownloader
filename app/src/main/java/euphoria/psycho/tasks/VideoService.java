@@ -1,8 +1,6 @@
 package euphoria.psycho.tasks;
 
-import android.app.Notification;
 import android.app.Notification.Builder;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -10,51 +8,26 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.os.Environment;
 import android.os.IBinder;
 import android.widget.Toast;
 
 import java.io.File;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.explorer.VideoListActivity;
-import euphoria.psycho.share.KeyShare;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
-import euphoria.psycho.utils.M3u8Utils;
+
 
 public class VideoService extends Service implements RequestEventListener {
 
-    private static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
+    public static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
+    public static final String KEY_VIDEO_LIST = "video_list";
     private RequestQueue mQueue;
     private NotificationManager mNotificationManager;
     private File mDirectory;
 
-    private static Notification.Builder getBuilder(Context context) {
-        Builder builder;
-        if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            builder = new Builder(context,
-                    VideoService.DOWNLOAD_CHANNEL);
-        } else {
-            builder = new Builder(context);
-        }
-        builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                .setLocalOnly(true)
-                .setColor(context.getColor(android.R.color.primary_text_dark))
-                .setOngoing(true);
-        return builder;
-    }
-
-    @RequiresApi(api = VERSION_CODES.O)
-    private void createNotificationChannel(Context context) {
-        final NotificationChannel notificationChannel = new NotificationChannel(
-                VideoService.DOWNLOAD_CHANNEL,
-                context.getString(R.string.channel_download_videos),
-                NotificationManager.IMPORTANCE_LOW);
-        mNotificationManager.createNotificationChannel(notificationChannel);
-    }
 
     private VideoTask createTask(String uri, String fileName, String content) {
         VideoTask videoTask = new VideoTask();
@@ -72,6 +45,38 @@ public class VideoService extends Service implements RequestEventListener {
         }
         videoTask.Id = result;
         return videoTask;
+    }
+
+    private void submitRequest(String uri) {
+        new Thread(() -> {
+            // Calculate the hash value of the m3u8 content
+            // as the file name and unique Id,
+            // try to avoid downloading the video repeatedly
+            String[] infos = VideoHelper.getInfos(uri);
+            if (infos == null) {
+                toastTaskFailed();
+                return;
+            }
+            if (VideoHelper.checkTask(this, mQueue, infos[1])) {
+                return;
+            }
+            // Query task from the database
+            VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(infos[1]);
+            if (videoTask == null) {
+                videoTask = createTask(uri.toString(), infos[1], infos[0]);
+                if (videoTask == null) {
+                    toastTaskFailed();
+                    return;
+                }
+            } else {
+                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
+                    toastTaskFinished();
+                    return;
+                }
+            }
+            submitTask(videoTask);
+
+        }).start();
     }
 
     private void submitTask(VideoTask videoTask) {
@@ -114,9 +119,7 @@ public class VideoService extends Service implements RequestEventListener {
             // Try to open the video list
             // because the new version of the Android system
             // may restrict the app to open activity from the service
-            Intent intent = new Intent(this, VideoListActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            VideoHelper.startVideoListActivity(this);
         }
     }
 
@@ -129,20 +132,14 @@ public class VideoService extends Service implements RequestEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        mDirectory =
-                //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
-                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        if (!mDirectory.exists()) {
-            mDirectory.mkdirs();
-        }
+        mDirectory = VideoHelper.setVideoDownloadDirectory(this);
         mNotificationManager = ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE));
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            createNotificationChannel(this);
+            VideoHelper.createNotificationChannel(this, mNotificationManager);
         }
         mQueue = VideoManager.getInstance().getQueue();
         mQueue.addRequestEventListener(this);
-        mQueue.start();
-        startForeground(android.R.drawable.stat_sys_download, getBuilder(this)
+        startForeground(android.R.drawable.stat_sys_download, VideoHelper.getBuilder(this)
                 .setContentText(getString(R.string.download_ready))
                 .build());
 
@@ -150,12 +147,8 @@ public class VideoService extends Service implements RequestEventListener {
 
     @Override
     public void onDestroy() {
-        if (mQueue != null) {
-            mQueue.stop();
-            mQueue = null;
-        }
+        mQueue.removeRequestEventListener(this);
         super.onDestroy();
-
     }
 
     @Override
@@ -163,7 +156,7 @@ public class VideoService extends Service implements RequestEventListener {
         if (
                 event == RequestEvent.REQUEST_FINISHED
                         || event == RequestEvent.REQUEST_QUEUED) {
-            Builder builder = getBuilder(this);
+            Builder builder = VideoHelper.getBuilder(this);
             assert (mQueue != null);
             builder.setContentText(String.format("正在下载 %s 个视频", mQueue.getCurrentRequests().size()));
             mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
@@ -179,70 +172,25 @@ public class VideoService extends Service implements RequestEventListener {
         }
     }
 
-    public static String[] getInfos(String uri) {
-        String m3u8String;
-        String fileName;
-        try {
-            m3u8String = M3u8Utils.getString(uri);
-            if (m3u8String == null) {
-                return null;
-            }
-            fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
-            if (fileName == null) {
-                return null;
-            }
-        } catch (Exception ignored) {
-            return null;
-        }
-        return new String[]{m3u8String, fileName};
-    }
-
-    public static boolean checkTask(Context context, RequestQueue q, String fileName) {
-        if (q.getCurrentRequests()
-                .stream()
-                .anyMatch(r -> r.getVideoTask().FileName.equals(fileName))) {
-            context.sendBroadcast(new Intent(VideoActivity.ACTION_REFRESH));
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Get the video download address from the intent
         Uri uri;
-        if (intent == null || ((uri = intent.getData()) == null)) {
+        if (intent == null) {
             return START_NOT_STICKY;
         }
-        new Thread(() -> {
-            // Calculate the hash value of the m3u8 content
-            // as the file name and unique Id,
-            // try to avoid downloading the video repeatedly
-            String[] infos = getInfos(uri.toString());
-            if (infos == null) {
-                toastTaskFailed();
-                return;
+        String[] videoList = intent.getStringArrayExtra(KEY_VIDEO_LIST);
+        if (videoList != null) {
+            for (int i = 0; i < videoList.length; i++) {
+                Logger.d(String.format("onStartCommand: %s", videoList[i]));
+                // submitRequest(videoList[i]);
             }
-            if (checkTask(this, mQueue, infos[1])) {
-                return;
-            }
-            // Query task from the database
-            VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(infos[1]);
-            if (videoTask == null) {
-                videoTask = createTask(uri.toString(), infos[1], infos[0]);
-                if (videoTask == null) {
-                    toastTaskFailed();
-                    return;
-                }
-            } else {
-                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
-                    toastTaskFinished();
-                    return;
-                }
-            }
-            submitTask(videoTask);
-
-        }).start();
+            return START_NOT_STICKY;
+        }
+        if (((uri = intent.getData()) == null)) {
+            return START_NOT_STICKY;
+        }
+        submitRequest(uri.toString());
         return super.onStartCommand(intent, flags, startId);
     }
 

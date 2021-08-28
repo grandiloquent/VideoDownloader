@@ -46,8 +46,10 @@ public class VideoManager implements VideoTaskListener, RequestEventListener {
     }
 
     public RequestQueue getQueue() {
-        if (mQueue == null)
+        if (mQueue == null) {
             mQueue = new RequestQueue();
+            mQueue.start();
+        }
         return mQueue;
     }
 

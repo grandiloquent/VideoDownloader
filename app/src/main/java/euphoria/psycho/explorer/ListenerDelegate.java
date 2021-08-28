@@ -66,6 +66,9 @@ public class ListenerDelegate {
             if (TikTok.handle(uri, mMainActivity)) {
                 return;
             }
+            if (uri.equals("https://91porn.com/index.php") || uri.startsWith("https://91porn.com/v.php")) {
+                new Porn91(uri, mMainActivity).fetchVideoList(uri);
+            }
             if (!uri.startsWith("https://") && !uri.startsWith("http://"))
                 mMainActivity.getWebView().loadUrl("https://" + uri);
             else
@@ -105,7 +108,9 @@ public class ListenerDelegate {
         if (Twitter.handle(url, mMainActivity)) {
             return;
         }
-
+        if (url.equals("https://91porn.com/index.php") || url.startsWith("https://91porn.com/v.php")) {
+            new Porn91(url, mMainActivity).fetchVideoList(url);
+        }
         if (mMainActivity.getVideoUrl() != null) {
             try {
                 mMainActivity.getWebView().loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mMainActivity.getVideoUrl(), "UTF-8"));
