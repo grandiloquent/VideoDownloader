@@ -2,7 +2,6 @@ package euphoria.psycho.tasks;
 
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -117,7 +116,7 @@ public class VideoService extends Service implements RequestEventListener {
             // Send a task finished broadcast
             // to the activity for display the download progress
             // if it is already open, then it should be closed now
-            sendBroadcast(new Intent("euphoria.psycho.tasks.FINISH"));
+            sendBroadcast(new Intent(VideoActivity.ACTION_FINISH));
             // Try to open the video list
             // because the new version of the Android system
             // may restrict the app to open activity from the service
@@ -143,12 +142,6 @@ public class VideoService extends Service implements RequestEventListener {
         mQueue.addRequestEventListener(this);
         startForeground(android.R.drawable.stat_sys_download, VideoHelper.getBuilder(this)
                 .setContentText(getString(R.string.download_ready))
-                .setContentIntent(PendingIntent.getActivity(
-                        this,
-                        0,
-                        VideoHelper.getVideoActivityIntent(this),
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                ))
                 .build());
 
     }
@@ -165,21 +158,14 @@ public class VideoService extends Service implements RequestEventListener {
         if (
                 event == RequestEvent.REQUEST_FINISHED
                         || event == RequestEvent.REQUEST_QUEUED) {
-            Builder builder = VideoHelper.getBuilder(this)
-                    .setContentIntent(PendingIntent.getActivity(
-                            this,
-                            0,
-                            VideoHelper.getVideoActivityIntent(this),
-                            PendingIntent.FLAG_UPDATE_CURRENT
-                    ));
-            assert (mQueue != null);
-            builder.setContentText(String.format("正在下载 %s 个视频", mQueue.getCurrentRequests().size()));
+            Builder builder = VideoHelper.getBuilder(this);
+            builder.setContentText(String.format("正在下载 %s/%s 个视频",
+                    VideoHelper.getRunningTasksSize(mQueue),
+                    mQueue.getCurrentRequests().size()));
             mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
         }
         if (event == RequestEvent.REQUEST_FINISHED) {
-            if (mQueue.getCurrentRequests()
-                    .stream()
-                    .anyMatch(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1)) {
+            if (VideoHelper.checkIfExistsRunningTask(mQueue)) {
                 return;
             }
             tryStop();
@@ -187,22 +173,23 @@ public class VideoService extends Service implements RequestEventListener {
         }
     }
 
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Get the video download address from the intent
-        Uri uri;
         if (intent == null) {
             return START_NOT_STICKY;
         }
         String[] videoList = intent.getStringArrayExtra(KEY_VIDEO_LIST);
         if (videoList != null) {
-            for (int i = 0; i < videoList.length; i++) {
-                submitRequest(videoList[i]);
+            for (String s : videoList) {
+                submitRequest(s);
             }
             VideoHelper.startVideoActivity(this);
             return START_NOT_STICKY;
         }
-        if (((uri = intent.getData()) == null)) {
+        // Get the video download address from the intent
+        Uri uri = intent.getData();
+        if (uri == null) {
             return START_NOT_STICKY;
         }
         submitRequest(uri.toString());

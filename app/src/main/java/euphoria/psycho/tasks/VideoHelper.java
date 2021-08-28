@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build.VERSION;
@@ -20,9 +21,22 @@ import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.utils.M3u8Utils;
 
 public class VideoHelper {
+    public static boolean checkIfExistsRunningTask(RequestQueue queue) {
+        return queue.getCurrentRequests()
+                .stream()
+                .anyMatch(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1);
+    }
+    public static long getRunningTasksSize(RequestQueue queue) {
+        return queue.getCurrentRequests()
+                .stream()
+                .filter(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1)
+                .count();
+    }
+
     public static Intent getVideoActivityIntent(Context context) {
         Intent v = new Intent(context, VideoActivity.class);
         v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        v.putExtra("update", true);
         return v;
     }
 
@@ -72,7 +86,13 @@ public class VideoHelper {
         builder.setSmallIcon(android.R.drawable.stat_sys_download)
                 .setLocalOnly(true)
                 .setColor(context.getColor(android.R.color.primary_text_dark))
-                .setOngoing(true);
+                .setOngoing(true)
+                .setContentIntent(PendingIntent.getActivity(
+                        context,
+                        0,
+                        getVideoActivityIntent(context),
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                ));
         return builder;
     }
 

@@ -19,27 +19,30 @@ import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
 public class VideoActivity extends Activity implements RequestEventListener {
+    public static final String ACTION_FINISH = "euphoria.psycho.tasks.FINISH";
     public static final String ACTION_REFRESH = "euphoria.psycho.tasks.REFRESH";
+    private final List<LifeCycle> mLifeCycles = new ArrayList<>();
     private ListView mListView;
     private VideoAdapter mVideoAdapter;
-    private final List<LifeCycle> mLifeCycles = new ArrayList<>();
     private View mProgressBar;
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_REFRESH)) {
+                mProgressBar.setVisibility(View.GONE);
+                mListView.setVisibility(View.VISIBLE);
+                mVideoAdapter.update( VideoManager.getInstance().getQueue().getCurrentRequests()
+                        .stream()
+                        .map(Request::getVideoTask)
+                        .collect(Collectors.toList()));
+            } else {
+                finish();
+            }
+        }
+    };
 
     public void addLifeCycle(LifeCycle lifeCycle) {
         mLifeCycles.add(lifeCycle);
-    }
-
-    @Override
-    public void onRequestEvent(Request Request, int event) {
-        if (event == RequestEvent.REQUEST_QUEUED) {
-            mProgressBar.setVisibility(View.GONE);
-            mListView.setVisibility(View.VISIBLE);
-            List<VideoTask> videoTasks = new ArrayList<>();
-            for (Request request : VideoManager.getInstance().getQueue().getCurrentRequests()) {
-                videoTasks.add(request.getVideoTask());
-            }
-            mVideoAdapter.update(videoTasks);
-        }
     }
 
     public void removeLifeCycle(LifeCycle lifeCycle) {
@@ -68,22 +71,6 @@ public class VideoActivity extends Activity implements RequestEventListener {
         VideoManager.newInstance(this).getQueue().addRequestEventListener(this);
     }
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ACTION_REFRESH)) {
-                mProgressBar.setVisibility(View.GONE);
-                mListView.setVisibility(View.VISIBLE);
-                mVideoAdapter.update( VideoManager.getInstance().getQueue().getCurrentRequests()
-                        .stream()
-                        .map(Request::getVideoTask)
-                        .collect(Collectors.toList()));
-            } else {
-                finish();
-            }
-        }
-    };
-
     @Override
     protected void onDestroy() {
         for (int i = 0; i < mLifeCycles.size(); i++) {
@@ -92,6 +79,19 @@ public class VideoActivity extends Activity implements RequestEventListener {
         unregisterReceiver(mBroadcastReceiver);
         VideoManager.getInstance().getQueue().removeRequestEventListener(this);
         super.onDestroy();
+    }
+
+    @Override
+    public void onRequestEvent(Request Request, int event) {
+        if (event == RequestEvent.REQUEST_QUEUED) {
+            mProgressBar.setVisibility(View.GONE);
+            mListView.setVisibility(View.VISIBLE);
+            List<VideoTask> videoTasks = new ArrayList<>();
+            for (Request request : VideoManager.getInstance().getQueue().getCurrentRequests()) {
+                videoTasks.add(request.getVideoTask());
+            }
+            mVideoAdapter.update(videoTasks);
+        }
     }
 
 

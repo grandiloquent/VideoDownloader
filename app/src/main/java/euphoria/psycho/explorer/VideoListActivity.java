@@ -87,6 +87,10 @@ public class VideoListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize();
+        if (getIntent().getBooleanExtra("update", false)) {
+            List<File> videos = getVideos();
+            mVideoAdapter.update(videos);
+        }
     }
 
     @Override
