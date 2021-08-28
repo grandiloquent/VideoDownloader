@@ -54,6 +54,7 @@ public class VideoService extends Service implements RequestEventListener {
             // try to avoid downloading the video repeatedly
             String[] infos = VideoHelper.getInfos(uri);
             if (infos == null) {
+                Logger.d(String.format("submitRequest: %s", "infos"));
                 toastTaskFailed();
                 return;
             }
@@ -63,7 +64,7 @@ public class VideoService extends Service implements RequestEventListener {
             // Query task from the database
             VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(infos[1]);
             if (videoTask == null) {
-                videoTask = createTask(uri.toString(), infos[1], infos[0]);
+                videoTask = createTask(uri, infos[1], infos[0]);
                 if (videoTask == null) {
                     toastTaskFailed();
                     return;
@@ -91,7 +92,7 @@ public class VideoService extends Service implements RequestEventListener {
     private void toastTaskFailed() {
         VideoManager.getInstance().getHandler()
                 .post(() -> {
-                    Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_LONG).show();
+                    Toast.makeText(VideoService.this, "视频下载失败", Toast.LENGTH_LONG).show();
                     tryStop();
                 });
     }
@@ -182,9 +183,9 @@ public class VideoService extends Service implements RequestEventListener {
         String[] videoList = intent.getStringArrayExtra(KEY_VIDEO_LIST);
         if (videoList != null) {
             for (int i = 0; i < videoList.length; i++) {
-                Logger.d(String.format("onStartCommand: %s", videoList[i]));
                 submitRequest(videoList[i]);
-            }
+            } 
+            VideoHelper.startVideoActivity(this);
             return START_NOT_STICKY;
         }
         if (((uri = intent.getData()) == null)) {

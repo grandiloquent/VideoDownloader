@@ -434,6 +434,8 @@ public class FileShare {
                     recursivelyDeleteFile(file);
                 }
             }
+        } else {
+            currentFile.delete();
         }
 
     }

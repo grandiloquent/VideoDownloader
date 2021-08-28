@@ -107,7 +107,7 @@ public class Request implements Comparable<Request> {
         File directory = createVideoDirectory(m3u8String);
         if (directory == null) return;
         if (!createLogFile(directory)) return;
-        parseVideos(m3u8String);
+        if (!parseVideos(m3u8String)) return;
         if (!downloadVideos()) return;
         if (!mergeVideo()) return;
         deleteCacheFiles(directory);
@@ -230,7 +230,7 @@ public class Request implements Comparable<Request> {
         }
     }
 
-    private void parseVideos(String m3u8String) {
+    private boolean parseVideos(String m3u8String) {
         String[] segments = m3u8String.split("\n");
         mVideos = new ArrayList<>();
         for (int i = 0; i < segments.length; i++) {
@@ -240,8 +240,13 @@ public class Request implements Comparable<Request> {
                 i++;
             }
         }
-        mVideoTask.TotalFiles = mVideos.size();
-        emitSynchronizeTask(TaskStatus.PARSE_VIDEOS);
+        if (mVideos.size() > 0) {
+            mVideoTask.TotalFiles = mVideos.size();
+            emitSynchronizeTask(TaskStatus.PARSE_VIDEOS);
+            return true;
+        }
+        return false;
+
     }
 
     private void setBookmark(String uri, long size) {

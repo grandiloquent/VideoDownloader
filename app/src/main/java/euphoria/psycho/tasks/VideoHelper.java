@@ -15,10 +15,27 @@ import java.io.File;
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
+import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.utils.M3u8Utils;
 
 public class VideoHelper {
+    public static void deleteVideoDirectory(Context context) {
+        File directory =
+                //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
+                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        FileShare.recursivelyDeleteFile(directory);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+    }
+
+    public static void startVideoActivity(Context context) {
+        Intent v = new Intent(context, VideoActivity.class);
+        v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(v);
+    }
+
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
         if (q.getCurrentRequests()
                 .stream()

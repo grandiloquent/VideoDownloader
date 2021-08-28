@@ -2,16 +2,13 @@ package euphoria.psycho.videos;
 
 import android.content.Intent;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.NetShare;
-import euphoria.psycho.share.StringShare;
 import euphoria.psycho.tasks.VideoService;
 
 public class Porn91 extends BaseVideoExtractor<String> {
@@ -31,39 +28,10 @@ public class Porn91 extends BaseVideoExtractor<String> {
         return false;
     }
 
+    //
     @Override
     protected String fetchVideoUri(String uri) {
-        // We need to use fake IPs to
-        // get around the 50 views per day
-        // for non members limitation
-        String response = getString(uri, new String[][]{
-                {"Referer", "https://91porn.com"},
-                {"X-Forwarded-For", NetShare.randomIp()}
-        });
-        if (response == null) {
-//        byte[] buffer = new byte[128];
-//        byte[] buf = uri.getBytes(StandardCharsets.UTF_8);
-//        int result = NativeShare.get91Porn(buf, buf.length, buffer, 128);
-//        if (result == 0) {
-            return null;
-        }
-        // maybe that is the fast way to
-        // extract the encoded code which
-        // contains the real video uri
-        String encoded = StringShare.substring(response, "document.write(strencode2(\"", "\"));");
-        String htm = null;
-        try {
-            // translate from the javascript code 'window.unescape'
-            htm = URLDecoder.decode(encoded, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        if (htm != null) {
-            // the decoded code is some html
-            // we need to locate the video uri
-            return StringShare.substring(htm, "src='", "'");
-        }
-        return null;
+        return VideosHelper.extract91PornVideoAddress(uri);
         //return new String(buffer, 0, result);
     }
 
@@ -85,9 +53,13 @@ public class Porn91 extends BaseVideoExtractor<String> {
             while (matcher.find()) {
                 videoList.add(matcher.group());
             }
+            videoList = videoList.parallelStream()
+                    .map(VideosHelper::extract91PornVideoAddress)
+                    .collect(Collectors.toList());
+            List<String> finalVideoList = videoList;
             mMainActivity.runOnUiThread(() -> {
                 Intent service = new Intent(mMainActivity, VideoService.class);
-                service.putExtra(VideoService.KEY_VIDEO_LIST, videoList.toArray(new String[0]));
+                service.putExtra(VideoService.KEY_VIDEO_LIST, finalVideoList.toArray(new String[0]));
                 mMainActivity.startService(service);
             });
         }).start();
