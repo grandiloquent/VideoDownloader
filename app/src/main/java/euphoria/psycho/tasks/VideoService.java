@@ -184,7 +184,7 @@ public class VideoService extends Service implements RequestEventListener {
         if (videoList != null) {
             for (int i = 0; i < videoList.length; i++) {
                 submitRequest(videoList[i]);
-            } 
+            }
             VideoHelper.startVideoActivity(this);
             return START_NOT_STICKY;
         }
@@ -194,6 +194,4 @@ public class VideoService extends Service implements RequestEventListener {
         submitRequest(uri.toString());
         return super.onStartCommand(intent, flags, startId);
     }
-
-
 }
