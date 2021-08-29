@@ -81,7 +81,9 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     protected void onDestroy() {
-        mLifeCycles.forEach(LifeCycle::onDestroy);
+        for (int i = 0; i < mLifeCycles.size(); i++) {
+            mLifeCycles.get(i).onDestroy();
+        }
         unregisterReceiver(mBroadcastReceiver);
         VideoManager.getInstance().getQueue().removeRequestEventListener(this);
         super.onDestroy();

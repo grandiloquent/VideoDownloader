@@ -26,4 +26,19 @@ if (window.location.hostname === "m.iqiyi.com") {
         mIqyGuideLayer.style.display = 'none';
     }
 }
+if (window.location.hostname.indexOf("xvideos.com") !== -1) {
+const adHeaderMobileContener = document.querySelector("#ad-header-mobile-contener");
+				if (adHeaderMobileContener) {
+        adHeaderMobileContener.style.display = 'none';
+    }
 
+    const adFooter = document.querySelector("#ad-footer");
+    if (adFooter) {
+        adFooter.style.display = 'none';
+    }
+    const thumbAd = [...document.querySelectorAll(".thumb-ad")];
+    thumbAd.forEach(i => {
+        i.style.display = 'none';
+    });
+
+}

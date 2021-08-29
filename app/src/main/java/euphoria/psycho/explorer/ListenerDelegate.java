@@ -81,7 +81,7 @@ public class ListenerDelegate {
 
     private void onDownloadFile(View view) {
         mMainActivity.getWebView().saveWebArchive(
-                new File(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "index.html").getAbsolutePath()
+                new File(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "index.mhtml").getAbsolutePath()
         );
         if (XVideosRedShare.parsingXVideos(mMainActivity, null)) return;
         String url = mMainActivity.getWebView().getUrl();
