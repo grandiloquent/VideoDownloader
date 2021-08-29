@@ -24,5 +24,7 @@
     <string name="need_permissions">The application cannot run without the necessary permissions</string>
     <string name="failed_to_get_video_list">Failed to get video list</string>
     <string name="failed_to_create_task">Failed to create task</string>
+    <string name="download_video">Download video</string>
+
 
 </resources>

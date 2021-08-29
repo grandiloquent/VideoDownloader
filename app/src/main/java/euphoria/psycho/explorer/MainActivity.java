@@ -129,6 +129,9 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Intent movie=new Intent(this, VideoActivity.class);
 //        movie.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/a2d5195cfca3623a56aedc29b56603f4.mp4"));
 //        startActivity(movie);
+//        Intent intent = new Intent(this, VideoActivity.class);
+//        intent.setData(Uri.parse("https://cdn.91p07.com//m3u8/515057/515057.m3u8?st=tt7QAQt7O7BWXDLHQTHVOA&e=1630280254"));
+//        startActivity(intent);
     }
 
     private void loadStartPage() {

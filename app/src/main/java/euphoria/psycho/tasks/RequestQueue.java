@@ -119,6 +119,16 @@ public class RequestQueue {
         return new int[]{total, running};
     }
 
+    List<VideoTask> getVideoTasks() {
+        List<VideoTask> videoTasks = new ArrayList<>();
+        synchronized (mCurrentRequests) {
+            for (Request request : mCurrentRequests) {
+                videoTasks.add(request.getVideoTask());
+            }
+        }
+        return videoTasks;
+    }
+
     void finish(Request request) {
         // Remove from the set of requests currently being processed.
 //        synchronized (mCurrentRequests) {

@@ -13,8 +13,6 @@ import android.os.Environment;
 import android.view.View;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
@@ -32,7 +30,6 @@ public class VideoHelper {
     }
 
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
-
         if (q.getCurrentRequests()
                 .stream()
                 .anyMatch(r -> r.getVideoTask().FileName.equals(fileName))) {
@@ -140,11 +137,7 @@ public class VideoHelper {
     public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {
         progressBar.setVisibility(View.GONE);
         listView.setVisibility(View.VISIBLE);
-        List<VideoTask> videoTasks = new ArrayList<>();
-        for (Request request : VideoManager.getInstance().getQueue().getCurrentRequests()) {
-            videoTasks.add(request.getVideoTask());
-        }
-        videoAdapter.update(videoTasks);
+        videoAdapter.update(VideoManager.getInstance().getQueue().getVideoTasks());
     }
 
 }
