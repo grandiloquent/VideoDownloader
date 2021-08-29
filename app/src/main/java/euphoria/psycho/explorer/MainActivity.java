@@ -24,7 +24,6 @@ import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
-import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.YouTube;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -206,9 +205,6 @@ public class MainActivity extends Activity implements ClientInterface {
             return true;
         }
         if (AcFunShare.parsingVideo(this, uri)) {
-            return true;
-        }
-        if (XVideos.handle(uri, this)) {
             return true;
         }
         if (PornHub.handle(uri, this)) {

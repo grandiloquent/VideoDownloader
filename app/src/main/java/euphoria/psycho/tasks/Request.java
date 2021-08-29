@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,18 +211,14 @@ public class Request implements Comparable<Request> {
             String outputPath = new File(mVideoTask.Directory,
                     StringShare.substringAfterLast(mVideoTask.Directory, "/") + ".mp4")
                     .getAbsolutePath();
-            OutputStream fileOutputStream = new FileOutputStream(outputPath);
-            byte[] b = new byte[4096];
-            for (File video : mVideoFiles) {
-                FileInputStream fileInputStream = new FileInputStream(video);
-                int len;
-                while ((len = fileInputStream.read(b)) != -1) {
-                    fileOutputStream.write(b, 0, len);
+            try (FileChannel fc = new FileOutputStream(outputPath).getChannel()) {
+                for (File video : mVideoFiles) {
+                    try (FileChannel fci = new FileInputStream(video).getChannel()) {
+                        fci.transferTo(0, fci.size(), fc);
+                    }
                 }
-                fileInputStream.close();
-                fileOutputStream.flush();
+                fc.force(true);
             }
-            fileOutputStream.close();
             emitSynchronizeTask(TaskStatus.MERGE_VIDEO_FINISHED);
             return true;
         } catch (IOException e) {

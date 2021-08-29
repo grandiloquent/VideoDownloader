@@ -10,8 +10,11 @@ import android.content.Intent;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Environment;
+import android.view.View;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
@@ -21,39 +24,11 @@ import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.utils.M3u8Utils;
 
 public class VideoHelper {
+
     public static boolean checkIfExistsRunningTask(RequestQueue queue) {
         return queue.getCurrentRequests()
                 .stream()
                 .anyMatch(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1);
-    }
-    public static long getRunningTasksSize(RequestQueue queue) {
-        return queue.getCurrentRequests()
-                .stream()
-                .filter(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1)
-                .count();
-    }
-
-    public static Intent getVideoActivityIntent(Context context) {
-        Intent v = new Intent(context, VideoActivity.class);
-        v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        v.putExtra("update", true);
-        return v;
-    }
-
-    public static void deleteVideoDirectory(Context context) {
-        File directory =
-                //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
-                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        FileShare.recursivelyDeleteFile(directory);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-    }
-
-    public static void startVideoActivity(Context context) {
-        Intent v = new Intent(context, VideoActivity.class);
-        v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(v);
     }
 
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
@@ -73,6 +48,16 @@ public class VideoHelper {
                 context.getString(R.string.channel_download_videos),
                 NotificationManager.IMPORTANCE_LOW);
         manager.createNotificationChannel(notificationChannel);
+    }
+
+    public static void deleteVideoDirectory(Context context) {
+        File directory =
+                //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
+                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        FileShare.recursivelyDeleteFile(directory);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
     }
 
     public static Notification.Builder getBuilder(Context context) {
@@ -114,6 +99,20 @@ public class VideoHelper {
         return new String[]{m3u8String, fileName};
     }
 
+    public static long getRunningTasksSize(RequestQueue queue) {
+        return queue.getCurrentRequests()
+                .stream()
+                .filter(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1)
+                .count();
+    }
+
+    public static Intent getVideoActivityIntent(Context context) {
+        Intent v = new Intent(context, VideoActivity.class);
+        v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        v.putExtra(VideoActivity.KEY_UPDATE, true);
+        return v;
+    }
+
     public static File setVideoDownloadDirectory(Context context) {
         File directory =
                 //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
@@ -125,10 +124,26 @@ public class VideoHelper {
         return directory;
     }
 
+    public static void startVideoActivity(Context context) {
+        Intent v = new Intent(context, VideoActivity.class);
+        v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(v);
+    }
+
     public static void startVideoListActivity(Context context) {
         Intent intent = new Intent(context, VideoListActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {
+        progressBar.setVisibility(View.GONE);
+        listView.setVisibility(View.VISIBLE);
+        List<VideoTask> videoTasks = new ArrayList<>();
+        for (Request request : VideoManager.getInstance().getQueue().getCurrentRequests()) {
+            videoTasks.add(request.getVideoTask());
+        }
+        videoAdapter.update(videoTasks);
     }
 
 }
