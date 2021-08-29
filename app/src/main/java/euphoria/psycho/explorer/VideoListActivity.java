@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import euphoria.psycho.player.VideoActivity;
 import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.IntentShare;
@@ -77,7 +78,7 @@ public class VideoListActivity extends Activity {
         ContextShare.initialize(this);
         mGridView.setOnItemClickListener((parent, view, position, id) -> {
             IntentShare.launchActivity(VideoListActivity.this,
-                    MovieActivity.class,
+                    VideoActivity.class,
                     Uri.fromFile(mVideoAdapter.getItem(position)));
 
         });

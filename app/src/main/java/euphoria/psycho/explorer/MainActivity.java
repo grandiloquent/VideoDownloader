@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -124,10 +125,10 @@ public class MainActivity extends Activity implements ClientInterface {
 //        new Porn91("", this).fetchVideoList(
 //                "https://91porn.com/index.php"
 //        );
-
-        Intent movie=new Intent(this,MovieActivity.class);
-        movie.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/a2d5195cfca3623a56aedc29b56603f4.mp4"));
-        startActivity(movie);
+//
+//        Intent movie=new Intent(this, VideoActivity.class);
+//        movie.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/a2d5195cfca3623a56aedc29b56603f4.mp4"));
+//        startActivity(movie);
     }
 
     private void loadStartPage() {
@@ -140,6 +141,12 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        Logger.d("attachBaseContext");
+        super.attachBaseContext(newBase);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
@@ -147,7 +154,20 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     @Override
+    protected void onApplyThemeResource(Resources.Theme theme, int resid, boolean first) {
+        Logger.d("onApplyThemeResource");
+        super.onApplyThemeResource(theme, resid, first);
+    }
+
+    @Override
+    protected void onChildTitleChanged(Activity childActivity, CharSequence title) {
+        Logger.d("onChildTitleChanged");
+        super.onChildTitleChanged(childActivity, title);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Logger.d("onCreate");
         super.onCreate(savedInstanceState);
         // Check if we have obtained all
         // the permissions required  to run the app
@@ -156,11 +176,84 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     @Override
+    protected void onDestroy() {
+        Logger.d("onDestroy");
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Logger.d("onNewIntent");
+        super.onNewIntent(intent);
+    }
+
+    @Override
     protected void onPause() {
+        Logger.d("onPause");
         // WebView can be null when the pause event occurs
         if (mWebView != null)
             PreferenceShare.putString(LAST_ACCESSED, mWebView.getUrl());
         super.onPause();
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        Logger.d("onPostCreate");
+        super.onPostCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onPostResume() {
+        Logger.d("onPostResume");
+        super.onPostResume();
+    }
+
+    @Override
+    protected void onRestart() {
+        Logger.d("onRestart");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Logger.d("onRestoreInstanceState");
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onResume() {
+        Logger.d("onResume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Logger.d("onSaveInstanceState");
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onStart() {
+        Logger.d("onStart");
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        Logger.d("onStop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onTitleChanged(CharSequence title, int color) {
+        Logger.d("onTitleChanged");
+        super.onTitleChanged(title, color);
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        Logger.d("onUserLeaveHint");
+        super.onUserLeaveHint();
     }
 
     @Override

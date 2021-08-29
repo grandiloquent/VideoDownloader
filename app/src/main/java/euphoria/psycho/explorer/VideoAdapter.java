@@ -15,19 +15,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VideoAdapter extends BaseAdapter {
-    private final List<File> mVideos = new ArrayList<>();
-    private final LayoutInflater mInflater;
     private final Context mContext;
+    private final LayoutInflater mInflater;
+    private final List<File> mVideos = new ArrayList<>();
 
     public VideoAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
         mContext = context;
-
     }
 
-    @Override
-    public boolean hasStableIds() {
-        return true;
+    public void update(List<File> videos) {
+        mVideos.clear();
+        mVideos.addAll(videos);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -67,10 +67,9 @@ public class VideoAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public void update(List<File> videos) {
-        mVideos.clear();
-        mVideos.addAll(videos);
-        notifyDataSetChanged();
+    @Override
+    public boolean hasStableIds() {
+        return true;
     }
 
     public static class ViewHolder {

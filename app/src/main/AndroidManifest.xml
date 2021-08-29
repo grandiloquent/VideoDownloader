@@ -15,6 +15,7 @@
 
     <application
         android:name=".App"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
@@ -65,7 +66,7 @@
         <activity android:name=".BookmarkActivity" />
         <activity
             android:name=".VideoListActivity"
-            android:label="@string/video_list_name"></activity>
+            android:label="@string/video_list_name" />
         <activity
             android:name="euphoria.psycho.player.VideoActivity"
             android:hardwareAccelerated="true"
