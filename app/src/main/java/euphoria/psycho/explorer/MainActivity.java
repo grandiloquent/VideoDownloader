@@ -120,9 +120,9 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Logger.d(String.format("initialize: %b", checkSelfPermission(permission.MANAGE_EXTERNAL_STORAGE)));
 //        if (SDK_INT >= VERSION_CODES.R && FileShare.isHasSD() && !Environment.isExternalStorageManager())
 //            startActivity(getStoragePermissionIntent(this));
-        new Porn91("", this).fetchVideoList(
-                "https://91porn.com/index.php"
-        );
+//        new Porn91("", this).fetchVideoList(
+//                "https://91porn.com/index.php"
+//        );
     }
 
     private void loadStartPage() {
