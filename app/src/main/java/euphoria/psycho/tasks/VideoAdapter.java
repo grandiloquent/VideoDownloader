@@ -14,23 +14,12 @@ import java.util.List;
 import euphoria.psycho.explorer.R;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
-    private final List<VideoTask> mVideoTasks = new ArrayList<>();
     private final VideoActivity mVideoActivity;
+    private final List<VideoTask> mVideoTasks = new ArrayList<>();
+    private List<ViewHolder> mViewHolders = new ArrayList<>();
 
     public VideoAdapter(VideoActivity videoActivity) {
         mVideoActivity = videoActivity;
-    }
-
-    @Override
-    public void synchronizeTask(VideoTask videoTask) {
-        for (ViewHolder viewHolder : mViewHolders) {
-            if (videoTask.FileName.equals(viewHolder.tag)) {
-                renderVideoTask(viewHolder, videoTask);
-                return;
-            }
-        }
-
-
     }
 
     public static void renderVideoTask(ViewHolder viewHolder, VideoTask videoTask) {
@@ -57,14 +46,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         }
     }
 
-    @Override
-    public void taskProgress(VideoTask videoTask) {
-    }
-
-    @Override
-    public void taskStart(VideoTask videoTask) {
-    }
-
     public void update(List<VideoTask> videoTasks) {
         mVideoTasks.clear();
         mVideoTasks.addAll(videoTasks);
@@ -85,8 +66,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     public long getItemId(int position) {
         return position;
     }
-
-    private List<ViewHolder> mViewHolders = new ArrayList<>();
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -125,5 +104,25 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
             viewHolder.progressBar.setProgress((int) ((videoTask.DownloadedFiles * 1.0 / videoTask.TotalFiles) * 100));
         }
         return convertView;
+    }
+
+    @Override
+    public void synchronizeTask(VideoTask videoTask) {
+        for (ViewHolder viewHolder : mViewHolders) {
+            if (videoTask.FileName.equals(viewHolder.tag)) {
+                renderVideoTask(viewHolder, videoTask);
+                return;
+            }
+        }
+
+
+    }
+
+    @Override
+    public void taskProgress(VideoTask videoTask) {
+    }
+
+    @Override
+    public void taskStart(VideoTask videoTask) {
     }
 }

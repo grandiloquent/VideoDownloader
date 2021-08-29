@@ -46,6 +46,13 @@ public class VideoActivity extends Activity implements RequestEventListener {
         mLifeCycles.add(lifeCycle);
     }
 
+    public static void registerBroadcastReceiver(Context context, BroadcastReceiver receiver) {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_REFRESH);
+        filter.addAction(ACTION_FINISH);
+        context.registerReceiver(receiver, filter);
+    }
+
     public void removeLifeCycle(LifeCycle lifeCycle) {
         mLifeCycles.remove(lifeCycle);
     }
@@ -69,17 +76,21 @@ public class VideoActivity extends Activity implements RequestEventListener {
         startService();
         registerBroadcastReceiver(this, mBroadcastReceiver);
         VideoManager.newInstance(this).getQueue().addRequestEventListener(this);
-        VideoManager.getInstance().addVideoTaskListener(mVideoAdapter);
         if (getIntent().getBooleanExtra(KEY_UPDATE, false)) {
             VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }
     }
 
-    public static void registerBroadcastReceiver(Context context, BroadcastReceiver receiver) {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_REFRESH);
-        filter.addAction(ACTION_FINISH);
-        context.registerReceiver(receiver, filter);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        VideoManager.getInstance().addVideoTaskListener(mVideoAdapter);
+    }
+
+    @Override
+    protected void onPause() {
+        VideoManager.getInstance().removeVideoTaskListener(mVideoAdapter);
+        super.onPause();
     }
 
     @Override
