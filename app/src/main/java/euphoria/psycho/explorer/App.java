@@ -7,7 +7,6 @@ import android.os.StrictMode;
 import java.util.concurrent.Executor;
 
 import androidx.annotation.NonNull;
-import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.utils.Executors;
 import euphoria.psycho.utils.ImageLoader;
 
@@ -46,7 +45,7 @@ public class App extends Application {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         //FileShare.initialize(this);
-        VideoHelper.deleteVideoDirectory(this);
+        //VideoHelper.deleteVideoDirectory(this);
 
     }
 }
