@@ -24,4 +24,6 @@
     <string name="download_ready">准备下载视频</string>
     <string name="insert_task_failed">添加任务失败</string>
     <string name="need_permissions">缺少必要权限，程序无法运行</string>
+    <string name="failed_to_get_video_list">获取视频列表失败</string>
+    <string name="failed_to_create_task">创建任务失败</string>
 </resources>

@@ -22,7 +22,7 @@
     <string name="insert_task_failed">Failed to add task</string>
     <string name="download_ready">Ready to download the video</string>
     <string name="need_permissions">The application cannot run without the necessary permissions</string>
-    <string name="failed_to_get_video_list">获取视频列表失败</string>
-    <string name="failed_to_create_task">创建任务失败</string>
+    <string name="failed_to_get_video_list">Failed to get video list</string>
+    <string name="failed_to_create_task">Failed to create task</string>
 
 </resources>
