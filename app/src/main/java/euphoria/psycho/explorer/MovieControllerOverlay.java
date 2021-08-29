@@ -132,26 +132,26 @@ public class MovieControllerOverlay extends CommonControllerOverlay implements
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (super.onTouchEvent(event)) {
-            return true;
-        }
-
-        if (hidden) {
-            show();
-            return true;
-        }
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                cancelHiding();
-                if (mState == State.PLAYING || mState == State.PAUSED) {
-                    mListener.onPlayPause();
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                maybeStartHiding();
-                break;
-        }
-        return true;
+//        if (super.onTouchEvent(event)) {
+//            return true;
+//        }
+//
+//        if (hidden) {
+//            show();
+//            return true;
+//        }
+//        switch (event.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                cancelHiding();
+//                if (mState == State.PLAYING || mState == State.PAUSED) {
+//                    mListener.onPlayPause();
+//                }
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                maybeStartHiding();
+//                break;
+//        }
+        return super.onTouchEvent(event);
     }
 
     @Override

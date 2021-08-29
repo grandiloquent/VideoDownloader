@@ -16,10 +16,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.VideoView;
 
@@ -29,6 +32,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
 import euphoria.psycho.share.DateTimeShare;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.utils.ApiHelper;
 import euphoria.psycho.utils.BlobCache;
 import euphoria.psycho.utils.CacheManager;
@@ -50,6 +54,7 @@ public class MoviePlayer implements
     private static final String SERVICECMD = "com.android.music.musicservicecommand";
     private static final String CMDNAME = "command";
     private static final String CMDPAUSE = "pause";
+    private static final int TOUCH_FLAG_SEEK = 1 << 2;
 
     private static final String VIRTUALIZE_EXTRA = "virtualize";
     private static final long BLACK_TIMEOUT = 500;
@@ -79,6 +84,14 @@ public class MoviePlayer implements
 
     private Virtualizer mVirtualizer;
 
+    private static final int TOUCH_NONE = 0;
+    private static final int TOUCH_VOLUME = 1;
+    private static final int TOUCH_BRIGHTNESS = 2;
+    private static final int TOUCH_MOVE = 3;
+    private static final int TOUCH_SEEK = 4;
+    private static final int TOUCH_IGNORE = 5;
+
+
     private final Runnable mPlayingChecker = new Runnable() {
         @Override
         public void run() {
@@ -98,13 +111,136 @@ public class MoviePlayer implements
         }
     };
 
+    private float mNumberOfTaps;
+    private float mLastTapTimeMs;
+    private float mTouchDownMs;
+    private int mTouchAction;
+    private float mInitTouchY;
+    private float mInitTouchX;
+    private float mTouchY;
+    private float mTouchX;
+    private boolean mVerticalTouchActive;
+    private float mLastMove;
+
     public MoviePlayer(View rootView, final MovieActivity movieActivity,
                        Uri videoUri, Bundle savedInstance, boolean canReplay) {
         mContext = movieActivity.getApplicationContext();
         mVideoView = rootView.findViewById(R.id.surface_view);
+        DisplayMetrics metrics = movieActivity.getResources().getDisplayMetrics();
         mBookmarker = new Bookmarker(movieActivity);
         mUri = videoUri;
         mController = new MovieControllerOverlay(mContext);
+        mController.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                float xChanged = (mTouchX != -1f && mTouchY != -1f) ? event.getX() - mTouchX : 0f;
+                float yChanged = (mTouchX != -1f && mTouchY != -1f) ? event.getY() - mTouchY : 0f;
+                float coef = Math.abs(yChanged / xChanged);
+                float xgesturesize = xChanged / metrics.xdpi * 2.54f;
+                float deltaY = Math.max(((Math.abs(mInitTouchY - event.getY()) / metrics.xdpi + 0.5f) * 2f), 1f);
+                int xTouch = (int) event.getX();
+                int yTouch = (int) event.getY();
+                long now = System.currentTimeMillis();
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        Logger.d(String.format("onTouch: %s", "MotionEvent.ACTION_DOWN"));
+                        mTouchDownMs = now;
+                        mVerticalTouchActive = false;
+                        // Audio;
+                        mInitTouchY = event.getY();
+                        mInitTouchX = event.getX();
+                        mTouchY = mInitTouchY;
+                        //player.initAudioVolume();
+                        mTouchAction = TOUCH_NONE;
+                        // Seek;
+                        mTouchX = event.getX();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        Logger.d(String.format("onTouch: %s", "MotionEvent.ACTION_MOVE"));
+                        if (mTouchAction == TOUCH_IGNORE) return false;
+                        // Mouse events for the core;
+                        // player.sendMouseEvent(MotionEvent.ACTION_MOVE, xTouch, yTouch);
+                        // No volume/brightness action if coef < 2 or a secondary display is connected;
+                        //TODO : Volume action when a secondary display is connected;
+                        Logger.d(String.format("onTouch: %s", coef));
+                        if (mTouchAction != TOUCH_SEEK && coef > 2) {
+                            if (!mVerticalTouchActive) {
+//                                    if (Math.abs(yChanged / yRange) >= 0.05) {
+//                                        mVerticalTouchActive = true;
+//                                        mTouchY = event.getY();
+//                                        mTouchX = event.getX();
+//                                    }
+                                return false;
+                            }
+                            mTouchY = event.getY();
+                            mTouchX = event.getX();
+                            //doVerticalTouchAction(yChanged);
+                        } else if (mInitTouchX < metrics.widthPixels * 0.95) {
+                            // Seek (Right or Left move);
+                            doSeekTouch((int) deltaY, xgesturesize, false);
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        Logger.d(String.format("onTouch: %s", "MotionEvent.ACTION_UP"));
+                        float touchSlop = ViewConfiguration.get(movieActivity).getScaledTouchSlop();
+                        if (mTouchAction == TOUCH_IGNORE) mTouchAction = TOUCH_NONE;
+                        // Mouse events for the core;
+                        //player.sendMouseEvent(MotionEvent.ACTION_UP, xTouch, yTouch);
+                        mTouchX = -1f;
+                        mTouchY = -1f;
+                        // Seek;
+                        if (mTouchAction == TOUCH_SEEK) {
+                            doSeekTouch((int) deltaY, xgesturesize, true);
+                            return true;
+                        }
+                        // Vertical actions;
+                        if (mTouchAction == TOUCH_VOLUME || mTouchAction == TOUCH_BRIGHTNESS) {
+                            // doVerticalTouchAction(yChanged);
+                            return true;
+                        }
+                        mHandler.removeCallbacksAndMessages(null);
+                        if (now - mTouchDownMs > ViewConfiguration.getDoubleTapTimeout()) {
+                            ;
+                            //it was not a tap;
+                            mNumberOfTaps = 0;
+                            mLastTapTimeMs = 0;
+                        }
+                        ;
+                        //verify that the touch coordinate distance did not exceed the touchslop to increment the count tap;
+                        if (Math.abs(event.getX() - mInitTouchX) < touchSlop && Math.abs(event.getY() - mInitTouchY) < touchSlop) {
+                            if (mNumberOfTaps > 0 && now - mLastTapTimeMs < ViewConfiguration.getDoubleTapTimeout()) {
+                                mNumberOfTaps += 1;
+                            } else {
+                                mNumberOfTaps = 1;
+                            }
+                        }
+                        mLastTapTimeMs = now;
+                        //handle multi taps;
+                        if (mNumberOfTaps > 1) {
+                            if (TOUCH_FLAG_SEEK == 0) {
+                                // player.doPlayPause();
+                            } else {
+//                                val range = (if (screenConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) screenConfig.xRange else screenConfig.yRange).toFloat();
+//                                if (BuildConfig.DEBUG) Log.d("VideoTouchDelegate", "Landscape: ${screenConfig.orientation == Configuration.ORIENTATION_LANDSCAPE} range: $range eventx: ${event.x}");
+//                                when {;
+//                                    event.x < range / 4f -> seekDelta(-10000);
+//                                    event.x > range * 0.75 -> seekDelta(10000);
+//                                    else -> player.doPlayPause();
+//                                };
+                            }
+                        }
+                        if (mNumberOfTaps == 1) {
+                            Logger.d(String.format("onTouch: %s", mNumberOfTaps));
+                            mHandler.sendMessageDelayed(Message.obtain(), ViewConfiguration.getDoubleTapTimeout());
+                        }
+                        break;
+
+                }
+                // mController.show();
+                return true;//mTouchAction != TOUCH_NONE;
+            }
+        });
         ((ViewGroup) rootView).addView(mController.getView());
         mController.setListener(this);
         mController.setCanReplay(canReplay);
@@ -122,19 +258,8 @@ public class MoviePlayer implements
                 Log.w(TAG, "no audio session to virtualize");
             }
         }
-        mVideoView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                mController.show();
-                return true;
-            }
-        });
         mVideoView.setOnPreparedListener(player -> {
-            if (!mVideoView.canSeekForward() || !mVideoView.canSeekBackward()) {
-                mController.setSeekable(false);
-            } else {
-                mController.setSeekable(true);
-            }
+            mController.setSeekable(mVideoView.canSeekForward() && mVideoView.canSeekBackward());
             setProgress();
         });
         // The SurfaceView is transparent before drawing the first frame.
@@ -174,6 +299,30 @@ public class MoviePlayer implements
         }
     }
 
+    private void doSeekTouch(int coef, float gesturesize, boolean seek) {
+        if (coef == 0) coef = 1;
+        // No seek action if coef > 0.5 and gesturesize < 1cm;
+        if (Math.abs(gesturesize) < 1 || !(mVideoView.canSeekForward() || mVideoView.canSeekBackward()))
+            return;
+        if (mTouchAction != TOUCH_NONE && mTouchAction != TOUCH_SEEK) return;
+        mTouchAction = TOUCH_SEEK;
+        int length = mVideoView.getDuration();
+        int time = mVideoView.getCurrentPosition();
+        float sign;
+        if (gesturesize > 0) {
+            sign = 1f;
+        } else if (gesturesize < 0) {
+            sign = -1f;
+        } else {
+            sign = 0;
+        }
+        int jump = (int) (sign * (600000 * Math.pow((gesturesize / 8), 4.0) + 3000) / coef);
+        if (jump > 0 && time + jump > length) jump = (length - time);
+        if (jump < 0 && time + jump < 0) jump = (-time);
+        if (seek && length > 0) mVideoView.seekTo(time + jump);
+
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void setOnSystemUiVisibilityChangeListener() {
         if (!ApiHelper.HAS_VIEW_SYSTEM_UI_FLAG_HIDE_NAVIGATION) return;
@@ -188,6 +337,7 @@ public class MoviePlayer implements
                         mLastSystemUiVis = visibility;
                         if ((diff & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                                 && (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
+                            Logger.d(String.format("onSystemUiVisibilityChange: %s", ""));
                             mController.show();
                         }
                     }

@@ -27,13 +27,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ShareActionProvider;
 
-
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.utils.ApiHelper;
 
 /**
  * This activity plays a video from a specified URI.
- *
+ * <p>
  * The client of this activity can pass a logo bitmap in the intent (KEY_LOGO_BITMAP)
  * to set the action bar logo so the playback process looks more seamlessly integrated with
  * the original activity.
@@ -62,15 +61,11 @@ public class MovieActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
         requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-
         setContentView(R.layout.movie_view);
         View rootView = findViewById(R.id.movie_view_root);
-
         setSystemUiVisibility(rootView);
-
         Intent intent = getIntent();
         initializeActionBar(intent);
         mFinishOnCompletion = intent.getBooleanExtra(
@@ -98,7 +93,6 @@ public class MovieActivity extends Activity {
         winParams.buttonBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_OFF;
         winParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
         win.setAttributes(winParams);
-
         // We set the background in the theme to have the launching animation.
         // But for the performance (and battery), we remove the background here.
         win.setBackgroundDrawable(null);
@@ -122,43 +116,42 @@ public class MovieActivity extends Activity {
         actionBar.setDisplayOptions(
                 ActionBar.DISPLAY_HOME_AS_UP,
                 ActionBar.DISPLAY_HOME_AS_UP);
-
         String title = intent.getStringExtra(Intent.EXTRA_TITLE);
         if (title != null) {
             actionBar.setTitle(title);
-        } else {
-            // Displays the filename as title, reading the filename from the
-            // interface: {@link android.provider.OpenableColumns#DISPLAY_NAME}.
-            AsyncQueryHandler queryHandler =
-                    new AsyncQueryHandler(getContentResolver()) {
-                @Override
-                protected void onQueryComplete(int token, Object cookie,
-                        Cursor cursor) {
-                    try {
-                        if ((cursor != null) && cursor.moveToFirst()) {
-                            String displayName = cursor.getString(0);
-
-                            // Just show empty title if other apps don't set
-                            // DISPLAY_NAME
-                            actionBar.setTitle((displayName == null) ? "" :
-                                    displayName);
-                        }
-                    } finally {
-                        FileShare.closeSilently(cursor);
-                    }
-                }
-            };
-            queryHandler.startQuery(0, null, mUri,
-                    new String[] {OpenableColumns.DISPLAY_NAME}, null, null,
-                    null);
         }
+    }
+
+    private void setTitle(ActionBar actionBar) {
+        // Displays the filename as title, reading the filename from the
+        // interface: {@link android.provider.OpenableColumns#DISPLAY_NAME}.
+        AsyncQueryHandler queryHandler =
+                new AsyncQueryHandler(getContentResolver()) {
+                    @Override
+                    protected void onQueryComplete(int token, Object cookie,
+                                                   Cursor cursor) {
+                        try {
+                            if ((cursor != null) && cursor.moveToFirst()) {
+                                String displayName = cursor.getString(0);
+                                // Just show empty title if other apps don't set
+                                // DISPLAY_NAME
+                                actionBar.setTitle((displayName == null) ? "" :
+                                        displayName);
+                            }
+                        } finally {
+                            FileShare.closeSilently(cursor);
+                        }
+                    }
+                };
+        queryHandler.startQuery(0, null, mUri,
+                new String[]{OpenableColumns.DISPLAY_NAME}, null, null,
+                null);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.movie, menu);
-
         // Document says EXTRA_STREAM should be a content: Uri
         // So, we only share the video if it's "content:".
         MenuItem shareItem = menu.findItem(R.id.action_share);
@@ -202,11 +195,10 @@ public class MovieActivity extends Activity {
     public void onStart() {
         ((AudioManager) getSystemService(AUDIO_SERVICE))
                 .requestAudioFocus(null, AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
         super.onStart();
-
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,"Euphoria:WAKE_LOCK");
+        mWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Euphoria:WAKE_LOCK");
         mWakeLock.acquire();
 
     }
@@ -216,7 +208,6 @@ public class MovieActivity extends Activity {
         ((AudioManager) getSystemService(AUDIO_SERVICE))
                 .abandonAudioFocus(null);
         super.onStop();
-
         mWakeLock.release();
 
     }
