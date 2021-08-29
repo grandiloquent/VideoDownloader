@@ -53,7 +53,7 @@ public class VideoService extends Service implements RequestEventListener {
             // try to avoid downloading the video repeatedly
             String[] infos = VideoHelper.getInfos(uri);
             if (infos == null) {
-                toastTaskFailed();
+                toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
             if (VideoHelper.checkTask(this, mQueue, infos[1])) {
@@ -64,7 +64,7 @@ public class VideoService extends Service implements RequestEventListener {
             if (videoTask == null) {
                 videoTask = createTask(uri, infos[1], infos[0]);
                 if (videoTask == null) {
-                    toastTaskFailed();
+                    toastTaskFailed(getString(R.string.failed_to_create_task));
                     return;
                 }
             } else {
@@ -86,9 +86,9 @@ public class VideoService extends Service implements RequestEventListener {
         });
     }
 
-    private void toastTaskFailed() {
+    private void toastTaskFailed(String message) {
         VideoManager.post(() -> {
-            Toast.makeText(VideoService.this, "视频下载失败", Toast.LENGTH_LONG).show();
+            Toast.makeText(VideoService.this, message, Toast.LENGTH_LONG).show();
             tryStop();
         });
     }
@@ -161,7 +161,8 @@ public class VideoService extends Service implements RequestEventListener {
             mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
         }
         if (event == RequestEvent.REQUEST_FINISHED) {
-            if (VideoHelper.checkIfExistsRunningTask(mQueue)) {
+            int[] counts = mQueue.count();
+            if (counts[0] > 0) {
                 return;
             }
             tryStop();
