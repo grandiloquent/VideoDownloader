@@ -15,6 +15,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -123,6 +124,7 @@ public class MainActivity extends Activity implements ClientInterface {
 //        new Porn91("", this).fetchVideoList(
 //                "https://91porn.com/index.php"
 //        );
+
         Intent movie=new Intent(this,MovieActivity.class);
         movie.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/a2d5195cfca3623a56aedc29b56603f4.mp4"));
         startActivity(movie);

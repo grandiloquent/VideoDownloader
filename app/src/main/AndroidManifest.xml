@@ -9,7 +9,7 @@
     <uses-permission android:name="android.webkit.PermissionRequest" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-<!--    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />-->
+    <!--    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />-->
     <!--    <uses-permission android:name="android.permission.CAMERA" />-->
     <!--    <uses-feature android:name="android.hardware.camera" />-->
 
@@ -67,9 +67,12 @@
             android:name=".VideoListActivity"
             android:label="@string/video_list_name"></activity>
         <activity
-            android:name=".MovieActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/movie_view_label">
+            android:name="euphoria.psycho.player.VideoActivity"
+            android:hardwareAccelerated="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -95,6 +98,7 @@
                 <data android:mimeType="video/3gpp2" />
                 <data android:mimeType="video/webm" />
                 <data android:mimeType="video/avi" />
+                <data android:mimeType="application/sdp" />
             </intent-filter>
             <intent-filter>
                 <!-- HTTP live support -->
@@ -110,13 +114,13 @@
                 <data android:mimeType="application/vnd.apple.mpegurl" />
                 <data android:mimeType="application/x-mpegurl" />
             </intent-filter>
+
         </activity>
         <activity android:name="euphoria.psycho.tasks.VideoActivity">
 
         </activity>
 
 
-        <service android:name=".DownloadService" />
         <service android:name="euphoria.psycho.tasks.VideoService" />
     </application>
 </manifest>

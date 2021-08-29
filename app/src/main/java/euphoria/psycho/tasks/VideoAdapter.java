@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import euphoria.psycho.explorer.MovieActivity;
 import euphoria.psycho.explorer.R;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
@@ -42,7 +41,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
             viewHolder.title.setText(videoTask.FileName);
             viewHolder.subtitle.setText("合并完成");
             viewHolder.layout.setOnClickListener(v -> {
-                Intent intent = new Intent(v.getContext(), MovieActivity.class);
+                Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
                 intent.setData(Uri.fromFile(new File(
                         videoTask.Directory + ".mp4"
                 )));
@@ -112,7 +111,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
             viewHolder.progressBar.setVisibility(View.INVISIBLE);
             viewHolder.subtitle.setText("合并完成");
             viewHolder.layout.setOnClickListener(v -> {
-                Intent intent = new Intent(v.getContext(), MovieActivity.class);
+                Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
                 intent.setData(Uri.fromFile(new File(
                         videoTask.Directory + ".mp4"
                 )));

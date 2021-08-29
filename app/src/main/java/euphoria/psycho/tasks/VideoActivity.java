@@ -61,7 +61,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_video);
+        setContentView(R.layout.activity_video_s);
         mProgressBar = findViewById(R.id.progress_bar);
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new VideoAdapter(this);
