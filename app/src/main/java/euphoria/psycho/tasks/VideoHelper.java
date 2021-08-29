@@ -32,6 +32,7 @@ public class VideoHelper {
     }
 
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
+
         if (q.getCurrentRequests()
                 .stream()
                 .anyMatch(r -> r.getVideoTask().FileName.equals(fileName))) {

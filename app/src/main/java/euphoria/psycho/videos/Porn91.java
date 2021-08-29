@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
 
 public class Porn91 extends BaseVideoExtractor<String> {
@@ -58,9 +59,9 @@ public class Porn91 extends BaseVideoExtractor<String> {
                     .collect(Collectors.toList());
             List<String> finalVideoList = videoList;
             mMainActivity.runOnUiThread(() -> {
-                Intent service = new Intent(mMainActivity, VideoService.class);
+                Intent service = new Intent(mMainActivity, VideoActivity.class);
                 service.putExtra(VideoService.KEY_VIDEO_LIST, finalVideoList.toArray(new String[0]));
-                mMainActivity.startService(service);
+                mMainActivity.startActivity(service);
             });
         }).start();
 

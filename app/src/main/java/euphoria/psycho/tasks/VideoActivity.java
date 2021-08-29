@@ -52,6 +52,8 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     private void startService() {
         Intent service = new Intent(this, VideoService.class);
+        String[] videoList = getIntent().getStringArrayExtra(VideoService.KEY_VIDEO_LIST);
+        service.putExtra(VideoService.KEY_VIDEO_LIST, videoList);
         service.setData(getIntent().getData());
         startService(service);
     }
@@ -67,6 +69,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
         startService();
         registerBroadcastReceiver(this, mBroadcastReceiver);
         VideoManager.newInstance(this).getQueue().addRequestEventListener(this);
+        VideoManager.getInstance().addVideoTaskListener(mVideoAdapter);
         if (getIntent().getBooleanExtra(KEY_UPDATE, false)) {
             VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }

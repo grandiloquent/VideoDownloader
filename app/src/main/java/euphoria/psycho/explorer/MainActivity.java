@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.webkit.URLUtil;
@@ -25,8 +24,6 @@ import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
 import euphoria.psycho.videos.YouTube;
-
-import static android.os.Build.VERSION.SDK_INT;
 
 public class MainActivity extends Activity implements ClientInterface {
     public static final String LAST_ACCESSED = "lastAccessed";
@@ -72,10 +69,8 @@ public class MainActivity extends Activity implements ClientInterface {
             needPermissions.add(permission.WRITE_EXTERNAL_STORAGE);
         }
         if (needPermissions.size() > 0) {
-            if (SDK_INT >= VERSION_CODES.M) {
-                requestPermissions(needPermissions.toArray(new String[0]), REQUEST_PERMISSION);
-                return true;
-            }
+            requestPermissions(needPermissions.toArray(new String[0]), REQUEST_PERMISSION);
+            return true;
         }
         return false;
     }
@@ -125,6 +120,9 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Logger.d(String.format("initialize: %b", checkSelfPermission(permission.MANAGE_EXTERNAL_STORAGE)));
 //        if (SDK_INT >= VERSION_CODES.R && FileShare.isHasSD() && !Environment.isExternalStorageManager())
 //            startActivity(getStoragePermissionIntent(this));
+        new Porn91("", this).fetchVideoList(
+                "https://91porn.com/index.php"
+        );
     }
 
     private void loadStartPage() {

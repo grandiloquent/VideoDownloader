@@ -1,7 +1,6 @@
 package euphoria.psycho.explorer;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +14,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import euphoria.psycho.share.VideoShare;
-import euphoria.psycho.utils.Executors;
-import euphoria.psycho.utils.ImageLoader;
-import euphoria.psycho.utils.ImageLoader.Callback;
-
 public class VideoAdapter extends BaseAdapter {
     private final List<File> mVideos = new ArrayList<>();
     private final LayoutInflater mInflater;
@@ -31,6 +23,11 @@ public class VideoAdapter extends BaseAdapter {
         mInflater = LayoutInflater.from(context);
         mContext = context;
 
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
     }
 
     @Override

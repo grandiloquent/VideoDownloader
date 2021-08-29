@@ -154,9 +154,10 @@ public class VideoService extends Service implements RequestEventListener {
                 event == RequestEvent.REQUEST_FINISHED
                         || event == RequestEvent.REQUEST_QUEUED) {
             Builder builder = VideoHelper.getBuilder(this);
+            int[] counts = mQueue.count();
             builder.setContentText(String.format("正在下载 %s/%s 个视频",
-                    VideoHelper.getRunningTasksSize(mQueue),
-                    mQueue.getCurrentRequests().size()));
+                    counts[1],
+                    counts[0]));
             mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
         }
         if (event == RequestEvent.REQUEST_FINISHED) {
@@ -179,7 +180,6 @@ public class VideoService extends Service implements RequestEventListener {
             for (String s : videoList) {
                 submitRequest(s);
             }
-            VideoHelper.startVideoActivity(this);
             return START_NOT_STICKY;
         }
         // Get the video download address from the intent

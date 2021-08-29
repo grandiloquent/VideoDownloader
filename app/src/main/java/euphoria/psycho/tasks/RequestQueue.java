@@ -105,6 +105,20 @@ public class RequestQueue {
         }
     }
 
+    int[] count() {
+        int running = 0;
+        int total = 0;
+        synchronized (mCurrentRequests) {
+            total = mCurrentRequests.size();
+            for (Request request : mCurrentRequests) {
+                if (request.getVideoTask().Status != 7 && request.getVideoTask().Status > -1) {
+                    running++;
+                }
+            }
+        }
+        return new int[]{total, running};
+    }
+
     void finish(Request request) {
         // Remove from the set of requests currently being processed.
 //        synchronized (mCurrentRequests) {
