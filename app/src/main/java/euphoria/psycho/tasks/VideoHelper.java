@@ -122,6 +122,14 @@ public class VideoHelper {
         return directory;
     }
 
+    public static void showNotification(Context context, NotificationManager manager, int[] counts) {
+        Builder builder = VideoHelper.getBuilder(context);
+        builder.setContentText(String.format("正在下载 %s/%s 个视频",
+                counts[1],
+                counts[0]));
+        manager.notify(android.R.drawable.stat_sys_download, builder.build());
+    }
+
     public static void startVideoActivity(Context context) {
         Intent v = new Intent(context, VideoActivity.class);
         v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

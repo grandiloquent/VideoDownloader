@@ -1,6 +1,5 @@
 package euphoria.psycho.tasks;
 
-import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -17,6 +16,8 @@ import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
+
+import static euphoria.psycho.tasks.VideoHelper.showNotification;
 
 
 public class VideoService extends Service implements RequestEventListener {
@@ -147,21 +148,12 @@ public class VideoService extends Service implements RequestEventListener {
     @Override
     public void onRequestEvent(Request Request, int event) {
         if (event == RequestEvent.REQUEST_QUEUED) {
-            Builder builder = VideoHelper.getBuilder(this);
             int[] counts = mQueue.count();
-            builder.setContentText(String.format("正在下载 %s/%s 个视频",
-                    counts[1],
-                    counts[0]));
-            mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
-        }
-        if (event == RequestEvent.REQUEST_FINISHED) {
+            showNotification(this, mNotificationManager, counts);
+        } else if (event == RequestEvent.REQUEST_FINISHED) {
             int[] counts = mQueue.count();
             if (counts[1] > 0) {
-                Builder builder = VideoHelper.getBuilder(this);
-                builder.setContentText(String.format("正在下载 %s/%s 个视频",
-                        counts[1],
-                        counts[0]));
-                mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
+                showNotification(this, mNotificationManager, counts);
                 return;
             }
             tryStop();
