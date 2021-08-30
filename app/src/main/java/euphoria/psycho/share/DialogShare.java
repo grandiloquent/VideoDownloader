@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.view.WindowManager.LayoutParams;
 import android.widget.EditText;
 
+import euphoria.psycho.explorer.R;
+
 public class DialogShare {
 
     public static Builder createAlertDialogBuilder(Context context, String title, DialogInterface.OnClickListener p, DialogInterface.OnClickListener n) {
@@ -41,7 +43,7 @@ public class DialogShare {
 
     public static ProgressDialog createProgressDialog(Context context) {
         ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("解析...");
+        progressDialog.setMessage(context.getString(R.string.parsing));
         progressDialog.show();
         return progressDialog;
     }

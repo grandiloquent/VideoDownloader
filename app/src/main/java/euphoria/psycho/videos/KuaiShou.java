@@ -1,21 +1,13 @@
 package euphoria.psycho.videos;
 
-import android.app.ProgressDialog;
-import android.os.Process;
-import android.widget.Toast;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
+
+import static euphoria.psycho.videos.VideosHelper.getString;
 
 public class KuaiShou extends BaseVideoExtractor<String> {
     private static final Pattern MATCH_KUAISHOU = Pattern.compile("https://v\\.kuaishou(app)?\\.com(/s)?/\\S+");

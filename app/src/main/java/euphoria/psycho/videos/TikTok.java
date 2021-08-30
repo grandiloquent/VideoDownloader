@@ -1,20 +1,20 @@
 package euphoria.psycho.videos;
 
-import android.os.Environment;
-
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
+
+import static euphoria.psycho.videos.VideosHelper.getLocationAddCookie;
+import static euphoria.psycho.videos.VideosHelper.getResponse;
+import static euphoria.psycho.videos.VideosHelper.postFormUrlencoded;
 
 public class TikTok extends BaseVideoExtractor<String> {
     private static Pattern MATCH_TIKTOK_SHARE = Pattern.compile("https://[a-zA-Z]{2}\\.tiktok\\.com/\\w+/");
@@ -65,7 +65,7 @@ public class TikTok extends BaseVideoExtractor<String> {
 
     private String getLocation(String uri) throws IOException {
         String[] response = getLocationAddCookie(uri, null);
-        String location = getLocation(response[0], new String[][]{
+        String location = VideosHelper.getLocation(response[0], new String[][]{
                 {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"},
                 {"Cookie", response[1]}
         });

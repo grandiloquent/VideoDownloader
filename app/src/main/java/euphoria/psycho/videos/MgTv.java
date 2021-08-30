@@ -17,6 +17,9 @@ import java.util.regex.Pattern;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.Logger;
 
+import static euphoria.psycho.videos.VideosHelper.getString;
+import static euphoria.psycho.videos.VideosHelper.launchDialog;
+
 public class MgTv extends BaseVideoExtractor<List<Pair<String, String>>> {
     private static Pattern MATCH_MGTV = Pattern.compile("mgtv\\.com/[a-z]/\\d+/(\\d+)\\.html");
 

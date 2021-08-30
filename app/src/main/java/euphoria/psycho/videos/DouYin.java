@@ -3,14 +3,14 @@ package euphoria.psycho.videos;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
+
+import static euphoria.psycho.videos.VideosHelper.getLocation;
+import static euphoria.psycho.videos.VideosHelper.getString;
 
 public class DouYin extends BaseVideoExtractor<String> {
 

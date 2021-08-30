@@ -13,6 +13,10 @@ import java.util.regex.Pattern;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.StringShare;
 
+import static euphoria.psycho.videos.VideosHelper.getResponse;
+import static euphoria.psycho.videos.VideosHelper.getString;
+import static euphoria.psycho.videos.VideosHelper.launchDialog;
+
 public class PornHub extends BaseVideoExtractor<List<Pair<String, String>>> {
     private static Pattern MATCH_PORNHUB = Pattern.compile("pornhub\\.com/view_video\\.php");
 

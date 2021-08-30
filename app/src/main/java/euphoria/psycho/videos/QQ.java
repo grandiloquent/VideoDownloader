@@ -11,6 +11,8 @@ import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 
+import static euphoria.psycho.videos.VideosHelper.getString;
+
 public class QQ extends BaseVideoExtractor<String> {
     private static Pattern MATCH_QQ = Pattern.compile("qq\\.com");
     public static final String PLAYER_VERSION = "3.2.19.333";

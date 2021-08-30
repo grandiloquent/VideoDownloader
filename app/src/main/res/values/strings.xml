@@ -25,6 +25,9 @@
     <string name="failed_to_get_video_list">Failed to get video list</string>
     <string name="failed_to_create_task">Failed to create task</string>
     <string name="download_video">Download video</string>
+    <string name="whether_to_use_the_browser_to_open_the_video_link">Whether to use the browser to open the video link</string>
+    <string name="download">download</string>
+    <string name="parsing">Parsing...</string>
 
 
 </resources>

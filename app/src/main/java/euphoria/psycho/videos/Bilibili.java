@@ -10,18 +10,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Pattern;
 
-import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
+
+import static euphoria.psycho.videos.VideosHelper.getString;
 
 public class Bilibili extends BaseVideoExtractor<String> {
     private static Pattern MATCH_BILIBILI = Pattern.compile("bilibili\\.com/.+");

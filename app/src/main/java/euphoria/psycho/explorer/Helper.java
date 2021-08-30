@@ -1,17 +1,10 @@
 package euphoria.psycho.explorer;
 
-import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.webkit.DownloadListener;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.IntentShare;
@@ -19,6 +12,7 @@ import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.videos.VideosHelper;
 
 public class Helper {
 
@@ -61,12 +55,6 @@ public class Helper {
                 .show();
     }
 
-    public static void videoChooser(Context context, String uri) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(uri));
-        context.startActivity(Intent.createChooser(intent, "打开视频链接"));
-    }
-
     public static void viewVideo(MainActivity mainActivity, String uri) {
         //String uri = URLEncoder.encode(value, "UTF-8");
         DialogShare.createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
@@ -74,7 +62,7 @@ public class Helper {
             if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
                 IntentShare.launchChrome(mainActivity, uri);
             } else {
-                Helper.videoChooser(mainActivity, uri);
+                VideosHelper.videoChooser(mainActivity, uri);
             }
         }, (dialog, which) -> {
             mainActivity.getWebView().loadUrl(uri);

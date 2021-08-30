@@ -12,6 +12,9 @@ import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
 
+import static euphoria.psycho.videos.VideosHelper.getString;
+import static euphoria.psycho.videos.VideosHelper.viewVideoBetter;
+
 public class Porn91 extends BaseVideoExtractor<String> {
 
     private static Pattern MATCH_91PORN = Pattern.compile("(?<=<a href=\")https://91porn.com/view_video.php\\?[^\"]+(?=\")");
