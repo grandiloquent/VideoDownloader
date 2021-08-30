@@ -79,10 +79,6 @@ public class VideoManager implements VideoTaskListener {
         mVideoTaskListeners.forEach(videoTaskListener -> videoTaskListener.taskProgress(videoTask));
     }
 
-    @Override
-    public void taskStart(VideoTask videoTask) {
-        mVideoTaskListeners.forEach(videoTaskListener -> videoTaskListener.taskStart(videoTask));
-    }
 
     public static void post(Runnable runnable) {
         getInstance().getHandler().post(runnable);

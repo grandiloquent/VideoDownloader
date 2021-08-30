@@ -1,5 +1,6 @@
 package euphoria.psycho.tasks;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -13,7 +14,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import euphoria.psycho.explorer.App;
 import euphoria.psycho.explorer.R;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
@@ -25,26 +25,12 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         mVideoActivity = videoActivity;
     }
 
-    public static void renderVideoTask(ViewHolder viewHolder, VideoTask videoTask) {
+    public static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
         if (videoTask.Status == TaskStatus.MERGE_VIDEO) {
             viewHolder.title.setText(videoTask.FileName);
             viewHolder.subtitle.setText("合并开始");
         } else if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
-            viewHolder.progressBar.setProgress(100);
-            viewHolder.subtitle.setText("合并完成");
-            File videoFile = new File(
-                    videoTask.Directory + ".mp4"
-            );
-            Glide
-                    .with(App.getContext())
-                    .load(videoFile)
-                    .centerInside()
-                    .into(viewHolder.thumbnail);
-            viewHolder.layout.setOnClickListener(v -> {
-                Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
-                intent.setData(Uri.fromFile(videoFile));
-                v.getContext().startActivity(intent);
-            });
+            renderCompletedStatus(context, viewHolder, videoTask);
 
         } else {
             viewHolder.title.setText(videoTask.FileName);
@@ -76,6 +62,23 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         return position;
     }
 
+    public static void renderCompletedStatus(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+        viewHolder.progressBar.setProgress(100);
+        viewHolder.subtitle.setText(context.getString(R.string.merge_complete));
+        File videoFile = new File(
+                videoTask.Directory + ".mp4"
+        );
+        Glide.with(context)
+                .load(videoFile)
+                .fitCenter()
+                .into(viewHolder.thumbnail);
+        viewHolder.layout.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
+            intent.setData(Uri.fromFile(videoFile));
+            v.getContext().startActivity(intent);
+        });
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
@@ -97,21 +100,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         viewHolder.tag = videoTask.FileName;
         viewHolder.title.setText(videoTask.FileName);
         if (videoTask.TotalFiles > 0 && videoTask.DownloadedFiles == videoTask.TotalFiles) {
-            viewHolder.progressBar.setProgress(100);
-            viewHolder.subtitle.setText("合并完成");
-            File videoFile = new File(
-                    videoTask.Directory + ".mp4"
-            );
-            Glide
-                    .with(parent.getContext())
-                    .load(videoFile)
-                    .fitCenter()
-                    .into(viewHolder.thumbnail);
-            viewHolder.layout.setOnClickListener(v -> {
-                Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
-                intent.setData(Uri.fromFile(videoFile));
-                v.getContext().startActivity(intent);
-            });
+            renderCompletedStatus(parent.getContext(), viewHolder, videoTask);
         } else {
             viewHolder.subtitle.setText(String.format("%s/%s",
                     videoTask.DownloadedFiles,
@@ -125,7 +114,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     public void synchronizeTask(VideoTask videoTask) {
         for (ViewHolder viewHolder : mViewHolders) {
             if (videoTask.FileName.equals(viewHolder.tag)) {
-                renderVideoTask(viewHolder, videoTask);
+                renderVideoTask(mVideoActivity, viewHolder, videoTask);
                 return;
             }
         }
@@ -137,7 +126,5 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     public void taskProgress(VideoTask videoTask) {
     }
 
-    @Override
-    public void taskStart(VideoTask videoTask) {
-    }
+
 }

@@ -28,6 +28,7 @@
     <string name="whether_to_use_the_browser_to_open_the_video_link">Whether to use the browser to open the video link</string>
     <string name="download">download</string>
     <string name="parsing">Parsing...</string>
+    <string name="merge_complete">Merger complete</string>
 
 
 </resources>

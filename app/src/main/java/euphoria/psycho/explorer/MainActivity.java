@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
@@ -20,7 +19,6 @@ import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -120,9 +118,9 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Intent movie=new Intent(this, VideoActivity.class);
 //        movie.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/a2d5195cfca3623a56aedc29b56603f4.mp4"));
 //        startActivity(movie);
-        Intent intent = new Intent(this, VideoActivity.class);
-        intent.setData(Uri.parse("https://cdn.91p07.com//m3u8/515038/515038.m3u8"));
-        startActivity(intent);
+//        Intent intent = new Intent(this, VideoActivity.class);
+//        intent.setData(Uri.parse("https://cdn.91p07.com//m3u8/515038/515038.m3u8"));
+//        startActivity(intent);
     }
 
     private void loadStartPage() {

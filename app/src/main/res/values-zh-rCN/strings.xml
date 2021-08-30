@@ -30,5 +30,6 @@
     <string name="whether_to_use_the_browser_to_open_the_video_link">是否使用浏览器打开视频链接</string>
     <string name="download">下载</string>
     <string name="parsing">解析...</string>
+    <string name="merge_complete">合并完成</string>
 
 </resources>

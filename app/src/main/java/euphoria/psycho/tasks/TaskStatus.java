@@ -15,6 +15,7 @@ public interface TaskStatus {
     int MERGE_VIDEO = 6;
     //  emitSynchronizeTask(TaskStatus.MERGE_VIDEO_FINISHED);
     int MERGE_VIDEO_FINISHED = 7;
+    int START = 8;
     //  emitSynchronizeTask(TaskStatus.PARSE_VIDEOS);
     int ERROR_CREATE_DIRECTORY = -1;
     //  emitSynchronizeTask(TaskStatus.CREATE_VIDEO_DIRECTORY);

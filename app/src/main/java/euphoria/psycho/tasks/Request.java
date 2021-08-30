@@ -102,7 +102,7 @@ public class Request implements Comparable<Request> {
     }
 
     public void start() {
-        emitTaskStart();
+        emitSynchronizeTask(TaskStatus.START);
         String m3u8String = mVideoTask.Content;
         if (m3u8String == null) return;
         File directory = createVideoDirectory(m3u8String);
@@ -185,11 +185,6 @@ public class Request implements Comparable<Request> {
         });
     }
 
-    private void emitTaskStart() {
-        mHandler.post(() -> {
-            mListener.taskStart(mVideoTask);
-        });
-    }
 
     private long getBookmark(String uri) {
         try {

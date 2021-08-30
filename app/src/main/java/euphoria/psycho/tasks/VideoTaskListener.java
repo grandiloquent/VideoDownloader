@@ -5,6 +5,5 @@ public interface VideoTaskListener {
 
     void taskProgress(VideoTask videoTask);
 
-    void taskStart(VideoTask videoTask);
 }
 
