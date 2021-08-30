@@ -185,4 +185,5 @@ public class ListenerDelegate {
         builderSingle.setAdapter(arrayAdapter, (dialog, which) -> mMainActivity.getWebView().loadUrl(arrayAdapter.getItem(which).Url));
         builderSingle.show();
     }
+
 }

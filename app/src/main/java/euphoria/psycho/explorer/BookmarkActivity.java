@@ -82,7 +82,7 @@ public class BookmarkActivity extends Activity {
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
             if (convertView == null) {
-                convertView = mLayoutInflater.inflate(R.layout.bookmark_row, null);
+                convertView = mLayoutInflater.inflate(R.layout.bookmark_row, parent,false);
                 holder = new ViewHolder();
                 holder.text = (TextView) convertView.findViewById(R.id.row_text);
                 holder.icon = (ImageView) convertView.findViewById(R.id.row_icon);

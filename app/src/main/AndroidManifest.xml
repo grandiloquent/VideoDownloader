@@ -33,6 +33,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:configChanges="keyboard|keyboardHidden"
             android:theme="@android:style/Theme.Material.Light.NoActionBar"
             android:windowSoftInputMode="adjustNothing">
 
@@ -66,7 +67,8 @@
         <activity android:name=".BookmarkActivity" />
         <activity
             android:name=".VideoListActivity"
-            android:label="@string/video_list_name" />
+            android:label="@string/video_list_name"
+            android:launchMode="singleTop" />
         <activity
             android:name="euphoria.psycho.player.VideoActivity"
             android:hardwareAccelerated="true"
@@ -119,7 +121,7 @@
         </activity>
         <activity
             android:name="euphoria.psycho.tasks.VideoActivity"
-            android:label="@string/download_video"></activity>
+            android:label="@string/download_video" />
 
 
         <service android:name="euphoria.psycho.tasks.VideoService" />
