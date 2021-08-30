@@ -3,7 +3,6 @@ package euphoria.psycho.share;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +25,8 @@ public class NetShare {
     private static final int[][] range = {{607649792, 608174079}, {1038614528, 1039007743}, {1783627776, 1784676351},
             {2035023872, 2035154943}, {2078801920, 2079064063}, {-1950089216, -1948778497}, {-1425539072, -1425014785},
             {-1236271104, -1235419137}, {-770113536, -768606209}, {-569376768, -564133889},};
+    public static final String USER_AGENT_PC ="Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36";
+
 
     public static void addDefaultRequestHeaders(HttpURLConnection urlConnection) {
         urlConnection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");

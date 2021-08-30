@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
@@ -28,8 +29,7 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
         }
         return false;
     }
-
-
+    //  Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36
 
     private void parseHls(String hlsUri, List<Pair<String, String>> videoList) {
         String hls = getString(hlsUri, null);
@@ -49,7 +49,9 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
     @Override
     protected List<Pair<String, String>> fetchVideoUri(String uri) {
         List<Pair<String, String>> videoList = new ArrayList<>();
-        String htmlCode = getString(uri, null);
+        String htmlCode = getString(uri, new String[][]{
+                {"User-Agent", NetShare.USER_AGENT_PC}
+        });
         if (htmlCode == null) return null;
         String low = StringShare.substring(htmlCode, "html5player.setVideoUrlLow('", "'");
         if (low != null) {
