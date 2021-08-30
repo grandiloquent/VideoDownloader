@@ -18,7 +18,7 @@ import euphoria.psycho.share.StringShare;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
 
-public class Bilibili extends BaseVideoExtractor<String> {
+public class Bilibili extends BaseExtractor<String> {
     private static Pattern MATCH_BILIBILI = Pattern.compile("bilibili\\.com/.+");
 
     protected Bilibili(String inputUri, MainActivity mainActivity) {

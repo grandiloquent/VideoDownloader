@@ -12,7 +12,7 @@ import euphoria.psycho.explorer.MainActivity;
 import static euphoria.psycho.videos.VideosHelper.getLocation;
 import static euphoria.psycho.videos.VideosHelper.getString;
 
-public class DouYin extends BaseVideoExtractor<String> {
+public class DouYin extends BaseExtractor<String> {
 
     private String mVideoId;
 

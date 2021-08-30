@@ -2,17 +2,10 @@ package euphoria.psycho.videos;
 
 import android.app.AlertDialog;
 import android.app.DownloadManager;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.Process;
-import android.text.TextUtils;
 import android.util.Pair;
-import android.webkit.CookieManager;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,25 +13,18 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.StringShare;
-import euphoria.psycho.videos.XVideosRedShare.Callback;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
-public class Iqiyi extends BaseVideoExtractor<List<Pair<String, String>>> {
+public class Iqiyi extends BaseExtractor<List<Pair<String, String>>> {
     public static Pattern MATCH_IQIYI = Pattern.compile("\\.iqiyi\\.com/v_");
 
     public Iqiyi(String inputUri, MainActivity mainActivity) {

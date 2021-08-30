@@ -9,7 +9,7 @@ import euphoria.psycho.share.StringShare;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
 
-public class KuaiShou extends BaseVideoExtractor<String> {
+public class KuaiShou extends BaseExtractor<String> {
     private static final Pattern MATCH_KUAISHOU = Pattern.compile("https://v\\.kuaishou(app)?\\.com(/s)?/\\S+");
 
     protected KuaiShou(String inputUri, MainActivity mainActivity) {

@@ -7,18 +7,14 @@ import android.widget.Toast;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.DialogShare;
 
-public abstract class BaseVideoExtractor<T> {
-    public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
+public abstract class BaseExtractor<T> {
     private final String mInputUri;
     protected final MainActivity mMainActivity;
 
-    protected BaseVideoExtractor(String inputUri, MainActivity mainActivity) {
+    protected BaseExtractor(String inputUri, MainActivity mainActivity) {
         mInputUri = inputUri;
         mMainActivity = mainActivity;
     }
-
-
-
 
     public void parsingVideo() {
         ProgressDialog progressDialog = DialogShare.createProgressDialog(mMainActivity);
@@ -27,12 +23,7 @@ public abstract class BaseVideoExtractor<T> {
         performTask(uri, progressDialog);
     }
 
-
-
-
     protected abstract T fetchVideoUri(String uri);
-
-
 
     protected abstract String processUri(String inputUri);
 

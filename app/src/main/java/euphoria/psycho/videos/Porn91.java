@@ -9,15 +9,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
 import static euphoria.psycho.videos.VideosHelper.viewVideoBetter;
 
-public class Porn91 extends BaseVideoExtractor<String> {
+public class Porn91 extends BaseExtractor<String> {
 
-    private static Pattern MATCH_91PORN = Pattern.compile("(?<=<a href=\")https://91porn.com/view_video.php\\?[^\"]+(?=\")");
+    private static final Pattern MATCH_91PORN = Pattern.compile("(?<=<a href=\")https://91porn.com/view_video.php\\?[^\"]+(?=\")");
 
     public Porn91(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -52,6 +53,9 @@ public class Porn91 extends BaseVideoExtractor<String> {
     public void fetchVideoList(String uri) {
         new Thread(() -> {
             String response = getString(uri, null);
+            if (response == null) {
+                Logger.d(String.format("'%s' is null.", "response"));
+            }
             Matcher matcher = MATCH_91PORN.matcher(response);
             List<String> videoList = new ArrayList<>();
             while (matcher.find()) {

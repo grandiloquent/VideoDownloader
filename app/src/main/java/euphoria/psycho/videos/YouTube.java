@@ -20,7 +20,7 @@ import at.huber.youtubeExtractor.YtFile;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.Logger;
 
-public class YouTube extends BaseVideoExtractor<List<Pair<String, YtFile>>> {
+public class YouTube extends BaseExtractor<List<Pair<String, YtFile>>> {
     protected YouTube(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }

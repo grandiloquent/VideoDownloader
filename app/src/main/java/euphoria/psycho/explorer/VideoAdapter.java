@@ -61,7 +61,7 @@ public class VideoAdapter extends BaseAdapter {
         Glide
                 .with(mContext)
                 .load(mVideos.get(position))
-                .fitCenter()
+                .centerCrop()
                 //.placeholder(R.drawable.loading_spinner)
                 .into(viewHolder.thumbnail);
         return convertView;

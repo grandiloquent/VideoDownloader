@@ -20,7 +20,7 @@ import euphoria.psycho.share.Logger;
 import static euphoria.psycho.videos.VideosHelper.getString;
 import static euphoria.psycho.videos.VideosHelper.launchDialog;
 
-public class MgTv extends BaseVideoExtractor<List<Pair<String, String>>> {
+public class MgTv extends BaseExtractor<List<Pair<String, String>>> {
     private static Pattern MATCH_MGTV = Pattern.compile("mgtv\\.com/[a-z]/\\d+/(\\d+)\\.html");
 
     protected MgTv(String inputUri, MainActivity mainActivity) {

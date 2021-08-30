@@ -1,10 +1,6 @@
 package euphoria.psycho.videos;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.os.Process;
-import android.util.Pair;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,13 +29,10 @@ import java.util.zip.GZIPInputStream;
 import androidx.annotation.NonNull;
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.StringShare;
 import euphoria.psycho.videos.Twitter.TwitterVideo;
 
-public class Twitter extends BaseVideoExtractor<List<TwitterVideo>> {
+public class Twitter extends BaseExtractor<List<TwitterVideo>> {
     private static final Pattern MATCH_TWITTER = Pattern.compile("twitter\\.com/.+/status/(\\d+)");
 
     protected Twitter(String inputUri, MainActivity mainActivity) {

@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -21,6 +20,7 @@ import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -28,7 +28,7 @@ import euphoria.psycho.videos.PornOne;
 import euphoria.psycho.videos.YouTube;
 
 public class MainActivity extends Activity implements ClientInterface {
-    public static final String LAST_ACCESSED = "lastAccessed";
+    public static final String KEY_LAST_ACCESSED = "lastAccessed";
     private static final int REQUEST_PERMISSION = 66;
     private WebView mWebView;
     private BookmarkDatabase mBookmarkDatabase;
@@ -46,15 +46,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return mWebView;
     }
 
-    static Intent getStoragePermissionIntent(Context context) {
-        Intent intent = new Intent("android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION");//Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
-        intent.setData(Uri.parse("package:" + context.getPackageName()));
-        if (context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
-            intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            intent.setData(Uri.parse("package:" + context.getPackageName()));
-        }
-        return intent;
-    }
 
     private void checkChrome() {
         if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
@@ -129,9 +120,9 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Intent movie=new Intent(this, VideoActivity.class);
 //        movie.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/a2d5195cfca3623a56aedc29b56603f4.mp4"));
 //        startActivity(movie);
-//        Intent intent = new Intent(this, VideoActivity.class);
-//        intent.setData(Uri.parse("https://cdn.91p07.com//m3u8/515057/515057.m3u8?st=tt7QAQt7O7BWXDLHQTHVOA&e=1630280254"));
-//        startActivity(intent);
+        Intent intent = new Intent(this, VideoActivity.class);
+        intent.setData(Uri.parse("https://cdn.91p07.com//m3u8/515038/515038.m3u8"));
+        startActivity(intent);
     }
 
     private void loadStartPage() {
@@ -139,7 +130,7 @@ public class MainActivity extends Activity implements ClientInterface {
             mWebView.loadUrl(getIntent().getData().toString());
         } else {
             mWebView.loadUrl(PreferenceShare.getPreferences()
-                    .getString(LAST_ACCESSED, ListenerDelegate.HELP_URL));
+                    .getString(KEY_LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
     }
 
@@ -176,6 +167,8 @@ public class MainActivity extends Activity implements ClientInterface {
         // the permissions required  to run the app
         if (checkPermissions()) return;
         initialize();
+
+
     }
 
     @Override
@@ -195,7 +188,7 @@ public class MainActivity extends Activity implements ClientInterface {
         Logger.d("onPause");
         // WebView can be null when the pause event occurs
         if (mWebView != null)
-            PreferenceShare.putString(LAST_ACCESSED, mWebView.getUrl());
+            PreferenceShare.putString(KEY_LAST_ACCESSED, mWebView.getUrl());
         super.onPause();
     }
 

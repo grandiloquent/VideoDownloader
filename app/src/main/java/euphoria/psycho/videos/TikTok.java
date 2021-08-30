@@ -16,7 +16,7 @@ import static euphoria.psycho.videos.VideosHelper.getLocationAddCookie;
 import static euphoria.psycho.videos.VideosHelper.getResponse;
 import static euphoria.psycho.videos.VideosHelper.postFormUrlencoded;
 
-public class TikTok extends BaseVideoExtractor<String> {
+public class TikTok extends BaseExtractor<String> {
     private static Pattern MATCH_TIKTOK_SHARE = Pattern.compile("https://[a-zA-Z]{2}\\.tiktok\\.com/\\w+/");
     private static Pattern MATCH_TIKTOK_PC = Pattern.compile("https://www\\.tiktok\\.com/@\\w+/video/\\d{19,}");
 

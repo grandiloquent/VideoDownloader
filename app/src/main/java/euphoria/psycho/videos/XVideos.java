@@ -13,7 +13,7 @@ import euphoria.psycho.share.StringShare;
 import static euphoria.psycho.videos.VideosHelper.getString;
 import static euphoria.psycho.videos.VideosHelper.launchDialog;
 
-public class XVideos extends BaseVideoExtractor<List<Pair<String, String>>> {
+public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
 
 
     public XVideos(String inputUri, MainActivity mainActivity) {

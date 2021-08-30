@@ -62,7 +62,7 @@ public class Helper {
             if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
                 IntentShare.launchChrome(mainActivity, uri);
             } else {
-                VideosHelper.videoChooser(mainActivity, uri);
+                VideosHelper.viewerChooser(mainActivity, uri);
             }
         }, (dialog, which) -> {
             mainActivity.getWebView().loadUrl(uri);

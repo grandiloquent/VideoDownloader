@@ -14,7 +14,7 @@ import euphoria.psycho.share.StringShare;
 import static euphoria.psycho.videos.VideosHelper.getString;
 import static euphoria.psycho.videos.VideosHelper.launchDialog;
 
-public class PornOne extends BaseVideoExtractor<List<Pair<String, String>>> {
+public class PornOne extends BaseExtractor<List<Pair<String, String>>> {
     private static Pattern MATCH_PORNONE = Pattern.compile("pornone\\.com/.+/.+/\\d{5,}");
 
     protected PornOne(String inputUri, MainActivity mainActivity) {

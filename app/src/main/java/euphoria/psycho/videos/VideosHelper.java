@@ -32,11 +32,13 @@ import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.tasks.VideoActivity;
 
 public class VideosHelper {
+    public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
+
     public static String[] getResponse(String uri, String[][] headers) {
         try {
             URL url = new URL(uri);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            urlConnection.setRequestProperty("User-Agent", USER_AGENT);
             if (headers != null) {
                 for (String[] header : headers) {
                     urlConnection.setRequestProperty(header[0], header[1]);
@@ -72,7 +74,7 @@ public class VideosHelper {
                 urlConnection.setRequestProperty(header[0], header[1]);
             }
         }
-        urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+        urlConnection.setRequestProperty("User-Agent", USER_AGENT);
         urlConnection.setInstanceFollowRedirects(false);
         return urlConnection.getHeaderField("Location");
     }
@@ -84,7 +86,7 @@ public class VideosHelper {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("POST");
             urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            urlConnection.setRequestProperty("User-Agent", USER_AGENT);
             if (headers != null) {
                 for (String[] header : headers) {
                     urlConnection.setRequestProperty(header[0], header[1]);
@@ -164,7 +166,7 @@ public class VideosHelper {
                 urlConnection.setRequestProperty(header[0], header[1]);
             }
         }
-        urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+        urlConnection.setRequestProperty("User-Agent", USER_AGENT);
         urlConnection.setInstanceFollowRedirects(false);
         Map<String, List<String>> listMap = urlConnection.getHeaderFields();
         StringBuilder stringBuilder = new StringBuilder();
@@ -183,7 +185,7 @@ public class VideosHelper {
         try {
             URL url = new URL(uri);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("User-Agent", BaseVideoExtractor.USER_AGENT);
+            urlConnection.setRequestProperty("User-Agent", USER_AGENT);
             if (headers != null) {
                 for (String[] header : headers) {
                     urlConnection.setRequestProperty(header[0], header[1]);
@@ -220,7 +222,7 @@ public class VideosHelper {
         context.startActivity(intent);
     }
 
-    public static void videoChooser(Context context, String uri) {
+    public static void viewerChooser(Context context, String uri) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(uri));
         context.startActivity(Intent.createChooser(intent, "打开视频链接"));
@@ -233,7 +235,7 @@ public class VideosHelper {
             if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
                 IntentShare.launchChrome(mainActivity, uri);
             } else {
-                VideosHelper.videoChooser(mainActivity, uri);
+                VideosHelper.viewerChooser(mainActivity, uri);
             }
         }, (dialog, which) -> {
             mainActivity.getWebView().loadUrl(uri);
@@ -251,7 +253,7 @@ public class VideosHelper {
                 if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
                     VideosHelper.useChromeLoad(mainActivity, videoUri);
                 } else {
-                    VideosHelper.videoChooser(mainActivity, uri);
+                    VideosHelper.viewerChooser(mainActivity, uri);
                 }
             }, (dialog, which) -> {
                 dialog.dismiss();
@@ -260,7 +262,7 @@ public class VideosHelper {
                     intent.setData(Uri.parse(videoUri));
                     mainActivity.startActivity(intent);
                 } else {
-                    WebViewShare.downloadFile(mainActivity, KeyShare.toHex(videoUri.getBytes(StandardCharsets.UTF_8)), videoUri, BaseVideoExtractor.USER_AGENT);
+                    WebViewShare.downloadFile(mainActivity, KeyShare.toHex(videoUri.getBytes(StandardCharsets.UTF_8)), videoUri, USER_AGENT);
                 }
             })
                     .setMessage(R.string.whether_to_use_the_browser_to_open_the_video_link)

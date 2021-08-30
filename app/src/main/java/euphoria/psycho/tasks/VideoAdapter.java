@@ -7,10 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import euphoria.psycho.explorer.App;
 import euphoria.psycho.explorer.R;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
@@ -27,13 +30,19 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
             viewHolder.title.setText(videoTask.FileName);
             viewHolder.subtitle.setText("合并开始");
         } else if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
-            viewHolder.title.setText(videoTask.FileName);
+            viewHolder.progressBar.setProgress(100);
             viewHolder.subtitle.setText("合并完成");
+            File videoFile = new File(
+                    videoTask.Directory + ".mp4"
+            );
+            Glide
+                    .with(App.getContext())
+                    .load(videoFile)
+                    .centerInside()
+                    .into(viewHolder.thumbnail);
             viewHolder.layout.setOnClickListener(v -> {
                 Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
-                intent.setData(Uri.fromFile(new File(
-                        videoTask.Directory + ".mp4"
-                )));
+                intent.setData(Uri.fromFile(videoFile));
                 v.getContext().startActivity(intent);
             });
 
@@ -78,6 +87,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
             viewHolder.title = convertView.findViewById(R.id.title);
             viewHolder.subtitle = convertView.findViewById(R.id.subtitle);
             viewHolder.progressBar = convertView.findViewById(R.id.progress_bar);
+            viewHolder.thumbnail = convertView.findViewById(R.id.thumbnail);
             mViewHolders.add(viewHolder);
             convertView.setTag(viewHolder);
         } else {
@@ -87,17 +97,22 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         viewHolder.tag = videoTask.FileName;
         viewHolder.title.setText(videoTask.FileName);
         if (videoTask.TotalFiles > 0 && videoTask.DownloadedFiles == videoTask.TotalFiles) {
-            viewHolder.progressBar.setVisibility(View.INVISIBLE);
+            viewHolder.progressBar.setProgress(100);
             viewHolder.subtitle.setText("合并完成");
+            File videoFile = new File(
+                    videoTask.Directory + ".mp4"
+            );
+            Glide
+                    .with(parent.getContext())
+                    .load(videoFile)
+                    .fitCenter()
+                    .into(viewHolder.thumbnail);
             viewHolder.layout.setOnClickListener(v -> {
                 Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
-                intent.setData(Uri.fromFile(new File(
-                        videoTask.Directory + ".mp4"
-                )));
+                intent.setData(Uri.fromFile(videoFile));
                 v.getContext().startActivity(intent);
             });
         } else {
-            viewHolder.progressBar.setVisibility(View.VISIBLE);
             viewHolder.subtitle.setText(String.format("%s/%s",
                     videoTask.DownloadedFiles,
                     videoTask.TotalFiles));
