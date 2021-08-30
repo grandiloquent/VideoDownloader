@@ -30,6 +30,23 @@ public class VideoTask {
     public int hashCode() {
         return FileName.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "VideoTask{" +
+                "Id=" + Id +
+                ", Uri='" + Uri + '\'' +
+                ", Directory='" + Directory + '\'' +
+                ", FileName='" + FileName + '\'' +
+                ", Status=" + Status +
+                ", DownloadedFiles=" + DownloadedFiles +
+                ", TotalFiles=" + TotalFiles +
+                ", DownloadedSize=" + DownloadedSize +
+                ", TotalSize=" + TotalSize +
+                ", CreateAt=" + CreateAt +
+                ", UpdateAt=" + UpdateAt +
+                '}';
+    }
 }
 
 

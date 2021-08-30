@@ -100,22 +100,20 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     private void tryStop() {
-        if (mQueue != null && mQueue.getCurrentRequests().size() == 0) {
-            if (VERSION.SDK_INT >= VERSION_CODES.N) {
-                stopForeground(STOP_FOREGROUND_REMOVE);
-            } else {
-                stopForeground(true);
-            }
-            stopSelf();
-            // Send a task finished broadcast
-            // to the activity for display the download progress
-            // if it is already open, then it should be closed now
-            sendBroadcast(new Intent(VideoActivity.ACTION_FINISH));
-            // Try to open the video list
-            // because the new version of the Android system
-            // may restrict the app to open activity from the service
-            VideoHelper.startVideoListActivity(this);
+        if (VERSION.SDK_INT >= VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE);
+        } else {
+            stopForeground(true);
         }
+        stopSelf();
+        // Send a task finished broadcast
+        // to the activity for display the download progress
+        // if it is already open, then it should be closed now
+        sendBroadcast(new Intent(VideoActivity.ACTION_FINISH));
+        // Try to open the video list
+        // because the new version of the Android system
+        // may restrict the app to open activity from the service
+        VideoHelper.startVideoListActivity(this);
     }
 
     @Nullable
@@ -134,9 +132,10 @@ public class VideoService extends Service implements RequestEventListener {
         }
         mQueue = VideoManager.newInstance(this).getQueue();
         mQueue.addRequestEventListener(this);
-        startForeground(android.R.drawable.stat_sys_download, VideoHelper.getBuilder(this)
-                .setContentText(getString(R.string.download_ready))
-                .build());
+        startForeground(android.R.drawable.stat_sys_download,
+                VideoHelper.getBuilder(this)
+                        .setContentText(getString(R.string.download_ready))
+                        .build());
     }
 
     @Override
@@ -147,9 +146,7 @@ public class VideoService extends Service implements RequestEventListener {
 
     @Override
     public void onRequestEvent(Request Request, int event) {
-        if (
-                event == RequestEvent.REQUEST_FINISHED
-                        || event == RequestEvent.REQUEST_QUEUED) {
+        if (event == RequestEvent.REQUEST_QUEUED) {
             Builder builder = VideoHelper.getBuilder(this);
             int[] counts = mQueue.count();
             builder.setContentText(String.format("正在下载 %s/%s 个视频",
@@ -160,6 +157,11 @@ public class VideoService extends Service implements RequestEventListener {
         if (event == RequestEvent.REQUEST_FINISHED) {
             int[] counts = mQueue.count();
             if (counts[1] > 0) {
+                Builder builder = VideoHelper.getBuilder(this);
+                builder.setContentText(String.format("正在下载 %s/%s 个视频",
+                        counts[1],
+                        counts[0]));
+                mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
                 return;
             }
             tryStop();

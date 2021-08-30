@@ -45,7 +45,7 @@ public class App extends Application {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         //FileShare.initialize(this);
-        //VideoHelper.deleteVideoDirectory(this);
+       // VideoHelper.deleteVideoDirectory(this);
 
     }
 }
