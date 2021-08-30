@@ -13,14 +13,12 @@ import euphoria.psycho.explorer.App;
 public class VideoManager implements VideoTaskListener {
 
     private static WeakReference<VideoManager> sVideoManager;
-    private final Context mContext;
     private final VideoTaskDatabase mDatabase;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private RequestQueue mQueue;
     private final List<VideoTaskListener> mVideoTaskListeners = new ArrayList<>();
 
     public VideoManager(Context context) {
-        mContext = context;
         mDatabase = VideoTaskDatabase.getInstance(context);
     }
 

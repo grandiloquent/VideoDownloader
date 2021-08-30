@@ -122,7 +122,6 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     public void onRequestEvent(Request Request, int event) {
-        Logger.e("onRequestEvent, " + event);
         if (event == RequestEvent.REQUEST_QUEUED) {
             VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }

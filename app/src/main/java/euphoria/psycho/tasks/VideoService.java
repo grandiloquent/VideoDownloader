@@ -39,7 +39,6 @@ public class VideoService extends Service implements RequestEventListener {
                 .getDatabase()
                 .insertVideoTask(videoTask);
         if (result == -1) {
-            VideoManager.post(() -> Toast.makeText(VideoService.this, getString(R.string.insert_task_failed), Toast.LENGTH_LONG).show());
             return null;
         }
         videoTask.Id = result;
@@ -138,9 +137,7 @@ public class VideoService extends Service implements RequestEventListener {
         startForeground(android.R.drawable.stat_sys_download, VideoHelper.getBuilder(this)
                 .setContentText(getString(R.string.download_ready))
                 .build());
-
     }
-
 
     @Override
     public void onDestroy() {
@@ -162,7 +159,7 @@ public class VideoService extends Service implements RequestEventListener {
         }
         if (event == RequestEvent.REQUEST_FINISHED) {
             int[] counts = mQueue.count();
-            if (counts[0] > 0) {
+            if (counts[1] > 0) {
                 return;
             }
             tryStop();
