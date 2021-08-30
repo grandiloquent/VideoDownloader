@@ -50,7 +50,7 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
     protected List<Pair<String, String>> fetchVideoUri(String uri) {
         List<Pair<String, String>> videoList = new ArrayList<>();
         String htmlCode = getString(uri, new String[][]{
-                {"User-Agent", NetShare.USER_AGENT_PC}
+                {"User-Agent", NetShare.PC_USER_AGENT}
         });
         if (htmlCode == null) return null;
         String low = StringShare.substring(htmlCode, "html5player.setVideoUrlLow('", "'");
