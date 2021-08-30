@@ -11,7 +11,6 @@ import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,17 +79,17 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void initialize() {
-        new Thread(() -> {
-            byte[] buffer = new byte[128];
-            byte[] buf = "c8fe382e726ae919036f"
-                    .getBytes(StandardCharsets.UTF_8);
-            int result = NativeShare.get91Porn(buf,
-                    buffer,
-                    128
-            );
-           Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
-
-        }).start();
+//        new Thread(() -> {
+//            byte[] buffer = new byte[128];
+//            byte[] buf = "c8fe382e726ae919036f"
+//                    .getBytes(StandardCharsets.UTF_8);
+//            int result = NativeShare.get91Porn(buf,
+//                    buffer,
+//                    128
+//            );
+//           Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
+//
+//        }).start();
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         // check whether the chrome is installed

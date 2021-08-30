@@ -4,13 +4,12 @@
 #include "http.h"
 #include "str.h"
 #include "url.h"
-// 
+//
 
 int get91PornVideo(char *request, size_t request_len) {
     // =========================
     uintptr_t rc = HAL_TCP_Establish("91porn.com", 80);
     if (rc == -1) return -1;
-    LOGE("%s", request);
     // =========================
     int32_t ret = HAL_TCP_Write(rc, request, request_len, 5000);
     if (ret == -1) return -1;
