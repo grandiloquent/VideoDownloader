@@ -79,17 +79,6 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void initialize() {
-//        new Thread(() -> {
-//            byte[] buffer = new byte[128];
-//            byte[] buf = "c8fe382e726ae919036f"
-//                    .getBytes(StandardCharsets.UTF_8);
-//            int result = NativeShare.get91Porn(buf,
-//                    buffer,
-//                    128
-//            );
-//           Logger.d(String.format("run: %d %s", result, new String(buffer, 0, result)));
-//
-//        }).start();
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         // check whether the chrome is installed
@@ -103,24 +92,6 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView();
         loadStartPage();
-        //new File(getExternalCacheDir(), "tasks.db").delete();
-        //  Intent service = new Intent(this, DownloadService.class);
-//        service.setData(Uri.parse("https://cdn.91p07.com//m3u8/505694/505694.m3u8?st=L4N4OdIeD2TqZBQRo4logA&e=1629536998"));
-        // startService(service);
-        // QQ.handle("https://v.qq.com/x/cover/k16928rkrk217zb/z00401l30ys.html", this);
-//        Logger.d(String.format("initialize: %b", checkSelfPermission(permission.MANAGE_EXTERNAL_STORAGE)));
-//        if (SDK_INT >= VERSION_CODES.R && FileShare.isHasSD() && !Environment.isExternalStorageManager())
-//            startActivity(getStoragePermissionIntent(this));
-//        new Porn91("", this).fetchVideoList(
-//                "https://91porn.com/index.php"
-//        );
-//
-//        Intent movie=new Intent(this, VideoActivity.class);
-//        movie.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/a2d5195cfca3623a56aedc29b56603f4.mp4"));
-//        startActivity(movie);
-//        Intent intent = new Intent(this, VideoActivity.class);
-//        intent.setData(Uri.parse("https://cdn.91p07.com//m3u8/515038/515038.m3u8"));
-//        startActivity(intent);
     }
 
     private void loadStartPage() {
