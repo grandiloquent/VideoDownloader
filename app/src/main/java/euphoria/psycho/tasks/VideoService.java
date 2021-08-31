@@ -18,6 +18,7 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
+import euphoria.psycho.utils.FileLog;
 
 import static euphoria.psycho.tasks.VideoHelper.showNotification;
 
@@ -27,6 +28,7 @@ public class VideoService extends Service implements RequestEventListener {
     public static final String CHECK_UNFINISHED_VIDEO_TASKS = "CheckUnfinishedVideoTasks";
     public static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
     public static final String KEY_VIDEO_LIST = "video_list";
+    private static final String TAG = "VideoService";
     private RequestQueue mQueue;
     private NotificationManager mNotificationManager;
 
@@ -67,17 +69,20 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     private void submitRequest(String uri) {
+        FileLog.d(TAG, "submitRequest, " + uri);
         new Thread(() -> {
             // Calculate the hash value of the m3u8 content
             // as the file name and unique Id,
             // try to avoid downloading the video repeatedly
             String[] infos = VideoHelper.getInfos(uri);
             if (infos == null) {
+                FileLog.e(TAG, "submitRequest, VideoHelper.getInfos failed");
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
             // Check whether the task has been added to the task queue
             if (VideoHelper.checkTask(this, mQueue, infos[1])) {
+                FileLog.d(TAG, "submitRequest, " + infos[1] + "任务已添加");
                 return;
             }
             // Query task from the database

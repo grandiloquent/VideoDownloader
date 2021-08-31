@@ -19,9 +19,12 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
+import euphoria.psycho.utils.FileLog;
 import euphoria.psycho.utils.M3u8Utils;
 
 public class VideoHelper {
+
+    private static final String TAG = "VideoHelper";
 
     public static boolean checkIfExistsRunningTask(RequestQueue queue) {
         return queue.getCurrentRequests()
@@ -30,9 +33,11 @@ public class VideoHelper {
     }
 
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
+        FileLog.d(TAG, "checkTask, " + fileName);
         if (q.getCurrentRequests()
                 .stream()
                 .anyMatch(r -> r.getVideoTask().FileName.equals(fileName))) {
+            FileLog.d(TAG, "checkTask, " + fileName + " 已添加下载任务");
             context.sendBroadcast(new Intent(VideoActivity.ACTION_REFRESH));
             return true;
         }

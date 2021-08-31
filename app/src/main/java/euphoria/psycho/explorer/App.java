@@ -4,6 +4,10 @@ import android.app.Application;
 import android.content.Context;
 import android.os.StrictMode;
 
+import java.io.File;
+
+import euphoria.psycho.utils.FileLog;
+
 public class App extends Application {
 
     private static Context sContext;
@@ -20,6 +24,10 @@ public class App extends Application {
         StrictMode.setVmPolicy(builder.build());
         //FileShare.initialize(this);
         //VideoHelper.deleteVideoDirectory(this);
-
+        File logDir = new File(getFilesDir(), "log");
+        if (!logDir.exists()) {
+            logDir.mkdirs();
+        }
+        FileLog.setDir(logDir);
     }
 }
