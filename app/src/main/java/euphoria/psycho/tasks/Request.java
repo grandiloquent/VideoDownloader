@@ -173,6 +173,7 @@ public class Request implements Comparable<Request> {
         }
         return result;
     }
+  
     private boolean downloadVideos() {
         for (String video : mVideos) {
             final String fileName = FileShare.getFileNameFromUri(video);
