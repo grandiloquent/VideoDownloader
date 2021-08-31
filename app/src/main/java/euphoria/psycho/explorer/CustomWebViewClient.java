@@ -1,7 +1,6 @@
 package euphoria.psycho.explorer;
 
 import android.graphics.Bitmap;
-import android.os.Message;
 import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -77,7 +76,11 @@ public class CustomWebViewClient extends WebViewClient {
     @SuppressWarnings("deprecation")
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
         if (url.contains("://fans.91p20.space/")
-                || url.contains("://ssl.google-analytics.com/")) {
+                || url.contains("://ssl.google-analytics.com/")
+                || url.contains("://syndication.realsrv.com/")
+                || url.contains("://rpc-php.trafficfactory.biz/")
+                || url.contains("://a.realsrv.com/")
+                || url.contains("://www.gstatic.com/")) {
             return mEmptyResponse;
         }
         return super.shouldInterceptRequest(view, url);
