@@ -3,13 +3,11 @@ package euphoria.psycho.explorer;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
@@ -80,9 +78,9 @@ public class ListenerDelegate {
     }
 
     private void onDownloadFile(View view) {
-        mMainActivity.getWebView().saveWebArchive(
-                new File(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "index.mhtml").getAbsolutePath()
-        );
+//        mMainActivity.getWebView().saveWebArchive(
+//                new File(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "index.mhtml").getAbsolutePath()
+//        );
         if (XVideosRedShare.parsingXVideos(mMainActivity, null)) return;
         String url = mMainActivity.getWebView().getUrl();
         if (Porn91.handle(url, mMainActivity)) {
