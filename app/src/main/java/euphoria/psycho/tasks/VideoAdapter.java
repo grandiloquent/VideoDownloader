@@ -15,11 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.share.Logger;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     private final VideoActivity mVideoActivity;
     private final List<VideoTask> mVideoTasks = new ArrayList<>();
-    private List<ViewHolder> mViewHolders = new ArrayList<>();
+    private final List<ViewHolder> mViewHolders = new ArrayList<>();
 
     public VideoAdapter(VideoActivity videoActivity) {
         mVideoActivity = videoActivity;
@@ -43,12 +44,12 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     public static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+        Logger.d(String.format("renderVideoTask: %s", videoTask.Status));
         if (videoTask.Status == TaskStatus.MERGE_VIDEO) {
             viewHolder.title.setText(videoTask.FileName);
             viewHolder.subtitle.setText("合并开始");
         } else if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
             renderCompletedStatus(context, viewHolder, videoTask);
-
         } else {
             viewHolder.title.setText(videoTask.FileName);
             viewHolder.subtitle.setText(String.format("%s/%s",
@@ -124,8 +125,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
                 return;
             }
         }
-
-
     }
 
     @Override

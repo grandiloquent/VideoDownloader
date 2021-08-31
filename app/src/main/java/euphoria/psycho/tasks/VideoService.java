@@ -42,7 +42,6 @@ public class VideoService extends Service implements RequestEventListener {
             stopSelf();
             return;
         }
-        Logger.d(String.format("checkUncompletedVideoTasks: %s", videoTasks.size()));
         for (VideoTask videoTask : videoTasks) {
             videoTask.DownloadedFiles = 0;
             submitTask(videoTask);

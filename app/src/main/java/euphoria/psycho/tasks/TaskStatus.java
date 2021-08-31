@@ -29,4 +29,6 @@ public interface TaskStatus {
     int ERROR_MERGE_VIDEO_FAILED = -5;
 
     int ERROR_DELETE_FILE_FAILED = -6;
+
+    int ERROR_STATUS_CODE = -7;
 }

@@ -106,11 +106,24 @@ public class Request implements Comparable<Request> {
         String m3u8String = mVideoTask.Content;
         if (m3u8String == null) return;
         File directory = createVideoDirectory(m3u8String);
+        // if \(!*?([a-zA-Z0-9]+)\(\w*?\)\)(?= return;)
         if (directory == null) return;
-        if (!createLogFile(directory)) return;
-        if (!parseVideos(m3u8String)) return;
-        if (!downloadVideos()) return;
-        if (!mergeVideo()) return;
+        if (!createLogFile(directory)) {
+            Logger.d("Error, createLogFile");
+            return;
+        }
+        if (!parseVideos(m3u8String)) {
+            Logger.d("Error, parseVideos");
+            return;
+        }
+        if (!downloadVideos()) {
+            Logger.d("Error, downloadVideos");
+            return;
+        }
+        if (!mergeVideo()) {
+            Logger.d("Error, mergeVideo");
+            return;
+        }
         deleteCacheFiles(directory);
     }
 
@@ -155,10 +168,11 @@ public class Request implements Comparable<Request> {
             result = transferData(is, out);
             FileShare.closeSilently(is);
             FileShare.closeSilently(out);
+        } else {
+            emitSynchronizeTask(TaskStatus.ERROR_STATUS_CODE);
         }
         return result;
     }
-
     private boolean downloadVideos() {
         for (String video : mVideos) {
             final String fileName = FileShare.getFileNameFromUri(video);
@@ -169,6 +183,7 @@ public class Request implements Comparable<Request> {
             emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEOS);
             try {
                 if (!downloadFile(video, videoFile)) {
+                    Logger.d("Error, downloadFile");
                     return false;
                 }
                 emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
