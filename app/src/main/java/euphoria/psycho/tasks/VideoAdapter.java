@@ -44,7 +44,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     public static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
-        Logger.d(String.format("renderVideoTask: %s", videoTask.Status));
+        Logger.d(String.format("renderVideoTask: %s %s", videoTask.FileName, videoTask.Status));
         if (videoTask.Status == TaskStatus.MERGE_VIDEO) {
             viewHolder.title.setText(videoTask.FileName);
             viewHolder.subtitle.setText("合并开始");

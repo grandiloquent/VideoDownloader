@@ -44,12 +44,12 @@ public class VideoService extends Service implements RequestEventListener {
         }
         for (VideoTask videoTask : videoTasks) {
             videoTask.DownloadedFiles = 0;
-            videoTask.Content = null;
             submitTask(videoTask);
         }
     }
 
     private VideoTask createTask(String uri, String fileName, String content) {
+        Logger.d(String.format("createTask: %s", uri));
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
         videoTask.FileName = fileName;
@@ -59,7 +59,6 @@ public class VideoService extends Service implements RequestEventListener {
                 .getInstance()
                 .getDatabase()
                 .insertVideoTask(videoTask);
-        Logger.d(String.format("createTask: %s", result));
         if (result == -1) {
             return null;
         }
@@ -90,6 +89,7 @@ public class VideoService extends Service implements RequestEventListener {
                     return;
                 }
             } else {
+                Logger.d(String.format("submitRequest: database %s", videoTask.Status));
                 if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
                     toastTaskFinished();
                     return;
