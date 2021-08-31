@@ -16,6 +16,7 @@ public class VideoTask {
     public long CreateAt;
     public long UpdateAt;
     public Request Request;
+    public boolean IsPaused;
 
     @Override
     public boolean equals(Object o) {

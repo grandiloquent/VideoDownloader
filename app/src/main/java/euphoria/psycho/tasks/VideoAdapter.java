@@ -25,6 +25,23 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         mVideoActivity = videoActivity;
     }
 
+    public static void renderCompletedStatus(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+        viewHolder.progressBar.setProgress(100);
+        viewHolder.subtitle.setText(context.getString(R.string.merge_complete));
+        File videoFile = new File(
+                videoTask.Directory + ".mp4"
+        );
+        Glide.with(context)
+                .load(videoFile)
+                .fitCenter()
+                .into(viewHolder.thumbnail);
+        viewHolder.layout.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
+            intent.setData(Uri.fromFile(videoFile));
+            v.getContext().startActivity(intent);
+        });
+    }
+
     public static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
         if (videoTask.Status == TaskStatus.MERGE_VIDEO) {
             viewHolder.title.setText(videoTask.FileName);
@@ -47,6 +64,15 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         notifyDataSetChanged();
     }
 
+    private static void bindViewHolder(ViewHolder viewHolder, View v) {
+        viewHolder.layout = v;
+        viewHolder.title = v.findViewById(R.id.title);
+        viewHolder.subtitle = v.findViewById(R.id.subtitle);
+        viewHolder.progressBar = v.findViewById(R.id.progress_bar);
+        viewHolder.thumbnail = v.findViewById(R.id.thumbnail);
+        viewHolder.button = v.findViewById(R.id.button);
+    }
+
     @Override
     public int getCount() {
         return mVideoTasks.size();
@@ -62,23 +88,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         return position;
     }
 
-    public static void renderCompletedStatus(Context context, ViewHolder viewHolder, VideoTask videoTask) {
-        viewHolder.progressBar.setProgress(100);
-        viewHolder.subtitle.setText(context.getString(R.string.merge_complete));
-        File videoFile = new File(
-                videoTask.Directory + ".mp4"
-        );
-        Glide.with(context)
-                .load(videoFile)
-                .fitCenter()
-                .into(viewHolder.thumbnail);
-        viewHolder.layout.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
-            intent.setData(Uri.fromFile(videoFile));
-            v.getContext().startActivity(intent);
-        });
-    }
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
@@ -86,11 +95,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
             convertView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.video_item, parent, false);
             viewHolder = new ViewHolder();
-            viewHolder.layout = convertView;
-            viewHolder.title = convertView.findViewById(R.id.title);
-            viewHolder.subtitle = convertView.findViewById(R.id.subtitle);
-            viewHolder.progressBar = convertView.findViewById(R.id.progress_bar);
-            viewHolder.thumbnail = convertView.findViewById(R.id.thumbnail);
+            bindViewHolder(viewHolder, convertView);
             mViewHolders.add(viewHolder);
             convertView.setTag(viewHolder);
         } else {
@@ -106,6 +111,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
                     videoTask.DownloadedFiles,
                     videoTask.TotalFiles));
             viewHolder.progressBar.setProgress((int) ((videoTask.DownloadedFiles * 1.0 / videoTask.TotalFiles) * 100));
+            viewHolder.button.setOnClickListener(v -> videoTask.IsPaused = true);
         }
         return convertView;
     }

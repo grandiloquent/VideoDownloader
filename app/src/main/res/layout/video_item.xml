@@ -8,8 +8,8 @@
         android:id="@+id/thumbnail"
         android:layout_width="60dp"
         android:layout_height="match_parent"
-        android:scaleType="centerInside"
         android:padding="8dp"
+        android:scaleType="centerInside"
         android:src="@drawable/ic_action_file_download" />
 
     <LinearLayout
@@ -51,6 +51,7 @@
     </LinearLayout>
 
     <ImageButton
+        android:id="@+id/button"
         android:layout_width="60dp"
         android:layout_height="match_parent"
         android:background="@null"

@@ -29,27 +29,32 @@ public class VideoService extends Service implements RequestEventListener {
     public static final String KEY_VIDEO_LIST = "video_list";
     private RequestQueue mQueue;
     private NotificationManager mNotificationManager;
-    private File mDirectory;
+
+    private File mVideoDirectory;
 
     public void checkUncompletedVideoTasks() {
-        List<VideoTask> videoTasks = VideoManager.newInstance(this)
-                .getDatabase().getPendingVideoTasks();
+        // Query all tasks that have not been completed
+        List<VideoTask> videoTasks = VideoManager
+                .newInstance(this)
+                .getDatabase()
+                .getPendingVideoTasks();
         if (videoTasks.size() == 0) {
             stopSelf();
             return;
         }
+        Logger.d(String.format("checkUncompletedVideoTasks: %s", videoTasks.size()));
         for (VideoTask videoTask : videoTasks) {
             videoTask.DownloadedFiles = 0;
             submitTask(videoTask);
         }
     }
 
-     
+
     private VideoTask createTask(String uri, String fileName, String content) {
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
         videoTask.FileName = fileName;
-        videoTask.Directory = new File(mDirectory, fileName).getAbsolutePath();
+        videoTask.Directory = new File(mVideoDirectory, fileName).getAbsolutePath();
         videoTask.Content = content;
         long result = VideoManager
                 .getInstance()
@@ -73,6 +78,7 @@ public class VideoService extends Service implements RequestEventListener {
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
+            // Check whether the task has been added to the task queue
             if (VideoHelper.checkTask(this, mQueue, infos[1])) {
                 return;
             }
@@ -89,6 +95,7 @@ public class VideoService extends Service implements RequestEventListener {
                     toastTaskFinished();
                     return;
                 }
+                videoTask.DownloadedFiles = 0;
             }
             submitTask(videoTask);
 
@@ -143,7 +150,7 @@ public class VideoService extends Service implements RequestEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        mDirectory = VideoHelper.setVideoDownloadDirectory(this);
+        mVideoDirectory = VideoHelper.setVideoDownloadDirectory(this);
         mNotificationManager = ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE));
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             VideoHelper.createNotificationChannel(this, mNotificationManager);

@@ -1,6 +1,7 @@
 package euphoria.psycho.tasks;
 
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -12,5 +13,6 @@ public class ViewHolder {
     public View layout;
     public String tag;
     public ImageView thumbnail;
+    public ImageButton button;
 
 }

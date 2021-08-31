@@ -124,22 +124,27 @@ public class Request implements Comparable<Request> {
         FileShare.recursivelyDeleteFile(directory, f -> true);
     }
 
-    private void downloadFile(String videoUri, File videoFile) throws IOException {
+    private boolean downloadFile(String videoUri, File videoFile) throws IOException {
+        if (mVideoTask.IsPaused) {
+            emitSynchronizeTask(TaskStatus.Paused);
+            return false;
+        }
         if (videoFile.exists()) {
             long size = getBookmark(videoFile.getName());
             if (videoFile.length() == size) {
-                return;
+                return true;
             } else {
                 boolean result = videoFile.delete();
                 if (!result) {
                     emitSynchronizeTask(TaskStatus.ERROR_DELETE_FILE_FAILED);
-                    return;
+                    return false;
                 }
             }
         }
         String tsUri = mBaseUri + videoUri;
         HttpURLConnection connection = (HttpURLConnection) new URL(tsUri).openConnection();
         int statusCode = connection.getResponseCode();
+        boolean result = false;
         if (statusCode >= 200 && statusCode < 400) {
             long size = Long.parseLong(connection.getHeaderField("Content-Length"));
             //mVideoTask.TotalSize += size;
@@ -147,10 +152,11 @@ public class Request implements Comparable<Request> {
             setBookmark(videoFile.getName(), size);
             InputStream is = connection.getInputStream();
             FileOutputStream out = new FileOutputStream(videoFile);
-            transferData(is, out);
+            result = transferData(is, out);
             FileShare.closeSilently(is);
             FileShare.closeSilently(out);
         }
+        return result;
     }
 
     private boolean downloadVideos() {
@@ -162,7 +168,9 @@ public class Request implements Comparable<Request> {
             emitTaskProgress();
             emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEOS);
             try {
-                downloadFile(video, videoFile);
+                if (!downloadFile(video, videoFile)) {
+                    return false;
+                }
                 emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
             } catch (IOException e) {
                 emitSynchronizeTask(TaskStatus.ERROR_DOWNLOAD_FILE);
@@ -254,9 +262,13 @@ public class Request implements Comparable<Request> {
         }
     }
 
-    private void transferData(InputStream in, OutputStream out) {
+    private boolean transferData(InputStream in, OutputStream out) {
         final byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
+            if (mVideoTask.IsPaused) {
+                emitSynchronizeTask(TaskStatus.Paused);
+                return false;
+            }
             int len;
             try {
                 len = in.read(buffer);
@@ -274,6 +286,7 @@ public class Request implements Comparable<Request> {
                 throw new Error(e);
             }
         }
+        return true;
 
     }
 
