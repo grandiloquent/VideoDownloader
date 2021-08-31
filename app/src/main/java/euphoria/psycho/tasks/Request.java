@@ -23,6 +23,7 @@ import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.utils.BlobCache;
+import euphoria.psycho.utils.M3u8Utils;
 
 public class Request implements Comparable<Request> {
 
@@ -103,6 +104,13 @@ public class Request implements Comparable<Request> {
 
     public void start() {
         emitSynchronizeTask(TaskStatus.START);
+        if (mVideoTask.Content == null) {
+            try {
+                mVideoTask.Content = M3u8Utils.getString(mVideoTask.Uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         String m3u8String = mVideoTask.Content;
         if (m3u8String == null) return;
         File directory = createVideoDirectory(m3u8String);
@@ -173,7 +181,7 @@ public class Request implements Comparable<Request> {
         }
         return result;
     }
-  
+
     private boolean downloadVideos() {
         for (String video : mVideos) {
             final String fileName = FileShare.getFileNameFromUri(video);

@@ -44,10 +44,10 @@ public class VideoService extends Service implements RequestEventListener {
         }
         for (VideoTask videoTask : videoTasks) {
             videoTask.DownloadedFiles = 0;
+            videoTask.Content = null;
             submitTask(videoTask);
         }
     }
-
 
     private VideoTask createTask(String uri, String fileName, String content) {
         VideoTask videoTask = new VideoTask();
