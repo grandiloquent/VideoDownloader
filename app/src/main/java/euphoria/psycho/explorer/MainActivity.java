@@ -14,7 +14,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -110,25 +109,25 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        Logger.d("attachBaseContext");
+       
         super.attachBaseContext(newBase);
     }
 
     @Override
     protected void onApplyThemeResource(Resources.Theme theme, int resid, boolean first) {
-        Logger.d("onApplyThemeResource");
+       
         super.onApplyThemeResource(theme, resid, first);
     }
 
     @Override
     protected void onChildTitleChanged(Activity childActivity, CharSequence title) {
-        Logger.d("onChildTitleChanged");
+       
         super.onChildTitleChanged(childActivity, title);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Logger.d("onCreate");
+       
         super.onCreate(savedInstanceState);
         // Check if we have obtained all
         // the permissions required  to run the app
@@ -140,19 +139,19 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     protected void onDestroy() {
-        Logger.d("onDestroy");
+       
         super.onDestroy();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Logger.d("onNewIntent");
+       
         super.onNewIntent(intent);
     }
 
     @Override
     protected void onPause() {
-        Logger.d("onPause");
+       
         // WebView can be null when the pause event occurs
         if (mWebView != null)
             PreferenceShare.putString(KEY_LAST_ACCESSED, mWebView.getUrl());
@@ -161,61 +160,61 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
-        Logger.d("onPostCreate");
+       
         super.onPostCreate(savedInstanceState);
     }
 
     @Override
     protected void onPostResume() {
-        Logger.d("onPostResume");
+       
         super.onPostResume();
     }
 
     @Override
     protected void onRestart() {
-        Logger.d("onRestart");
+       
         super.onRestart();
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Logger.d("onRestoreInstanceState");
+       
         super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
     protected void onResume() {
-        Logger.d("onResume");
+       
         super.onResume();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Logger.d("onSaveInstanceState");
+       
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onStart() {
-        Logger.d("onStart");
+       
         super.onStart();
     }
 
     @Override
     protected void onStop() {
-        Logger.d("onStop");
+       
         super.onStop();
     }
 
     @Override
     protected void onTitleChanged(CharSequence title, int color) {
-        Logger.d("onTitleChanged");
+       
         super.onTitleChanged(title, color);
     }
 
     @Override
     protected void onUserLeaveHint() {
-        Logger.d("onUserLeaveHint");
+       
         super.onUserLeaveHint();
     }
 

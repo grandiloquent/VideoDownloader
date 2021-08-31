@@ -2,10 +2,12 @@ package euphoria.psycho.explorer;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Environment;
 import android.os.StrictMode;
 
 import java.io.File;
 
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.utils.FileLog;
 
 public class App extends Application {
@@ -24,10 +26,13 @@ public class App extends Application {
         StrictMode.setVmPolicy(builder.build());
         //FileShare.initialize(this);
         //VideoHelper.deleteVideoDirectory(this);
-        File logDir = new File(getFilesDir(), "log");
+        File logDir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log");
         if (!logDir.exists()) {
             logDir.mkdirs();
         }
+        Logger.d(logDir.getAbsolutePath());
         FileLog.setDir(logDir);
+
+        // adb pull /storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Documents/log/. log
     }
 }

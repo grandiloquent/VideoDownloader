@@ -15,7 +15,6 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 import euphoria.psycho.utils.FileLog;
@@ -51,7 +50,7 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     private VideoTask createTask(String uri, String fileName, String content) {
-        Logger.d(String.format("createTask: %s", uri));
+        FileLog.d(TAG, "createTask, " + fileName);
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
         videoTask.FileName = fileName;
@@ -82,7 +81,7 @@ public class VideoService extends Service implements RequestEventListener {
             }
             // Check whether the task has been added to the task queue
             if (VideoHelper.checkTask(this, mQueue, infos[1])) {
-                FileLog.d(TAG, "submitRequest, " + infos[1] + "任务已添加");
+                FileLog.d(TAG, "submitRequest, 任务已添加" + infos[1]);
                 return;
             }
             // Query task from the database
@@ -91,10 +90,14 @@ public class VideoService extends Service implements RequestEventListener {
                 videoTask = createTask(uri, infos[1], infos[0]);
                 if (videoTask == null) {
                     toastTaskFailed(getString(R.string.failed_to_create_task));
+                    FileLog.e(TAG, String.format("submitRequest, createTask %s", infos[1]));
                     return;
                 }
             } else {
-                Logger.d(String.format("submitRequest: database %s", videoTask.Status));
+                FileLog.d(TAG, String.format("submitRequest, 数据已存在 %s %s",
+                        videoTask.FileName,
+                        videoTask.Status
+                ));
                 if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
                     toastTaskFinished();
                     return;
