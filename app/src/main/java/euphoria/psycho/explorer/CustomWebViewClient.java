@@ -10,7 +10,6 @@ import android.webkit.WebViewClient;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import euphoria.psycho.share.FileShare;
 
@@ -24,14 +23,14 @@ public class CustomWebViewClient extends WebViewClient {
             new ByteArrayInputStream("".getBytes())
     );
     private String mJavaScript;
-    private final Stream<String> mBlocks = Arrays.stream(new String[]{
+    private final String[] mBlocks =new String[]{
             "://a.realsrv.com/",
             "://fans.91p20.space/",
             "://rpc-php.trafficfactory.biz/",
             "://ssl.google-analytics.com/",
             "://syndication.realsrv.com/",
             "://www.gstatic.com/"
-    });
+    };
 
     public CustomWebViewClient(ClientInterface clientInterface) {
         mClientInterface = clientInterface;
@@ -77,14 +76,13 @@ public class CustomWebViewClient extends WebViewClient {
             view.loadUrl(url);
         }
         return true;
-
     }
 
 
     @Override
     @SuppressWarnings("deprecation")
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        if (mBlocks.anyMatch(url::contains)) {
+        if (Arrays.stream(mBlocks).anyMatch(url::contains)) {
             return mEmptyResponse;
         }
         return super.shouldInterceptRequest(view, url);
