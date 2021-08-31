@@ -19,6 +19,7 @@ import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.tasks.VideoService;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -73,7 +74,7 @@ public class MainActivity extends Activity implements ClientInterface {
         });
         WebViewShare.setWebView(mWebView, Helper.createCacheDirectory(this).getAbsolutePath());
         mWebView.setWebViewClient(new CustomWebViewClient(this));
-        mWebView.setWebChromeClient(new CustomWebChromeClient(this));
+        mWebView.setWebChromeClient(new CustomWebChromeClient());
         mWebView.setDownloadListener(Helper.getDownloadListener(this));
         WebViewShare.supportCookie(mWebView);
     }
@@ -92,6 +93,10 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView();
         loadStartPage();
+        Intent service = new Intent(this, VideoService.class);
+        service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
+        startService(service);
+
     }
 
     private void loadStartPage() {
@@ -107,13 +112,6 @@ public class MainActivity extends Activity implements ClientInterface {
     protected void attachBaseContext(Context newBase) {
         Logger.d("attachBaseContext");
         super.attachBaseContext(newBase);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-        }
     }
 
     @Override

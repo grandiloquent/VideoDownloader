@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
@@ -66,10 +67,14 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     private void startService() {
         Logger.e("startService");
-        Intent service = new Intent(this, VideoService.class);
         String[] videoList = getIntent().getStringArrayExtra(VideoService.KEY_VIDEO_LIST);
+        Uri videoUri = getIntent().getData();
+        if (videoList == null && videoUri == null) {
+            return;
+        }
+        Intent service = new Intent(this, VideoService.class);
         service.putExtra(VideoService.KEY_VIDEO_LIST, videoList);
-        service.setData(getIntent().getData());
+        service.setData(videoUri);
         startService(service);
     }
 

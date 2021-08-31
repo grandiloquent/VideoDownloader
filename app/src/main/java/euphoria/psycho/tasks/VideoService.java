@@ -11,9 +11,11 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.List;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
@@ -22,13 +24,27 @@ import static euphoria.psycho.tasks.VideoHelper.showNotification;
 
 public class VideoService extends Service implements RequestEventListener {
 
+    public static final String CHECK_UNFINISHED_VIDEO_TASKS = "CheckUnfinishedVideoTasks";
     public static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
     public static final String KEY_VIDEO_LIST = "video_list";
     private RequestQueue mQueue;
     private NotificationManager mNotificationManager;
     private File mDirectory;
 
+    public void checkUncompletedVideoTasks() {
+        List<VideoTask> videoTasks = VideoManager.newInstance(this)
+                .getDatabase().getPendingVideoTasks();
+        if (videoTasks.size() == 0) {
+            stopSelf();
+            return;
+        }
+        for (VideoTask videoTask : videoTasks) {
+            videoTask.DownloadedFiles = 0;
+            submitTask(videoTask);
+        }
+    }
 
+     
     private VideoTask createTask(String uri, String fileName, String content) {
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
@@ -39,6 +55,7 @@ public class VideoService extends Service implements RequestEventListener {
                 .getInstance()
                 .getDatabase()
                 .insertVideoTask(videoTask);
+        Logger.d(String.format("createTask: %s", result));
         if (result == -1) {
             return null;
         }
@@ -161,7 +178,6 @@ public class VideoService extends Service implements RequestEventListener {
         }
     }
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
@@ -177,6 +193,8 @@ public class VideoService extends Service implements RequestEventListener {
         // Get the video download address from the intent
         Uri uri = intent.getData();
         if (uri == null) {
+            if (intent.getAction() != null && intent.getAction().equals(CHECK_UNFINISHED_VIDEO_TASKS))
+                checkUncompletedVideoTasks();
             return START_NOT_STICKY;
         }
         submitRequest(uri.toString());

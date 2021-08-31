@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.Nullable;
 
@@ -33,13 +35,10 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
     }
 
     public static VideoTaskDatabase getInstance(Context context) {
-        File dir =
-//                FileShare.isHasSD() ?
-//                        new File(FileShare.getExternalStoragePath(context), "Videos")
-//                        :
-                        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         File database = new File(dir,
                 "tasks.db");
+        // adb pull /storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/tasks.db
         return new VideoTaskDatabase(context, database.getAbsolutePath());
     }
 
@@ -48,23 +47,40 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
                 new String[]{fileName});
         VideoTask videoTask = null;
         if (cursor.moveToNext()) {
-            videoTask = new VideoTask();
-            videoTask.Id = cursor.getLong(0);
-            videoTask.Uri = cursor.getString(1);
-            videoTask.Directory = cursor.getString(2);
-            videoTask.FileName = cursor.getString(3);
-            videoTask.Content = cursor.getString(4);
-            videoTask.Status = cursor.getInt(5);
-            videoTask.DownloadedFiles = cursor.getInt(6);
-            videoTask.TotalFiles = cursor.getInt(7);
-            videoTask.DownloadedSize = cursor.getLong(8);
-            videoTask.TotalSize = cursor.getLong(9);
-            videoTask.CreateAt = cursor.getLong(10);
-            videoTask.UpdateAt = cursor.getLong(11);
+            videoTask = createVideoTaskFromCursor(cursor);
         }
         cursor.close();
         return videoTask;
     }
+
+    public List<VideoTask> getPendingVideoTasks() {
+        Cursor cursor = getReadableDatabase().rawQuery("select * from " + TABLE + " where status != 7 and status >-1 ",
+                null);
+        List<VideoTask> videoTasks = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            videoTasks.add(createVideoTaskFromCursor(cursor));
+        }
+        cursor.close();
+        return videoTasks;
+    }
+
+    private static VideoTask createVideoTaskFromCursor(Cursor cursor) {
+        VideoTask videoTask = new VideoTask();
+        videoTask.Id = cursor.getLong(0);
+        videoTask.Uri = cursor.getString(1);
+        videoTask.Directory = cursor.getString(2);
+        videoTask.FileName = cursor.getString(3);
+        videoTask.Content = cursor.getString(4);
+        videoTask.Status = cursor.getInt(5);
+        videoTask.DownloadedFiles = cursor.getInt(6);
+        videoTask.TotalFiles = cursor.getInt(7);
+        videoTask.DownloadedSize = cursor.getLong(8);
+        videoTask.TotalSize = cursor.getLong(9);
+        videoTask.CreateAt = cursor.getLong(10);
+        videoTask.UpdateAt = cursor.getLong(11);
+        return videoTask;
+    }
+
 
     public long insertVideoTask(VideoTask videoTask) {
         ContentValues contentValues = new ContentValues();

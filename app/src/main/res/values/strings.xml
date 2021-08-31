@@ -1,25 +1,10 @@
 <resources>
     <string name="app_name">Video Browser</string>
-    <string name="loading_video">Loading video\u2026</string>
-    <string name="accessibility_play_video">Play video</string>
-    <string name="accessibility_pause_video">Pause video</string>
-    <string name="accessibility_reload_video">Reload video</string>
-    <string name="accessibility_time_bar">Video player time bar</string>
     <string name="share">Share</string>
-    <string name="resume_playing_title">Resume video</string>
-    <string name="resume_playing_message">Resume playing from %s ?</string>
-    <string name="resume_playing_resume">Resume playing</string>
-    <string name="resume_playing_restart">Start over</string>
-    <string name="details_ms">%1$02d:%2$02d</string>
-    <string name="details_hms">%1$d:%2$02d:%3$02d</string>
-    <string name="movie_view_label">Video player</string>
     <string name="delete">Delete</string>
     <string name="video_list_name">Browse videos</string>
     <string name="ask">Ask</string>
     <string name="channel_download_videos">Download Videos</string>
-    <string name="download_done">Download Done</string>
-    <string name="download_failed">Download Failed</string>
-    <string name="insert_task_failed">Failed to add task</string>
     <string name="download_ready">Ready to download the video</string>
     <string name="need_permissions">The application cannot run without the necessary permissions</string>
     <string name="failed_to_get_video_list">Failed to get video list</string>
