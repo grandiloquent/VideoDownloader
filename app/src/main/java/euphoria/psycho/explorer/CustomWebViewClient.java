@@ -9,9 +9,10 @@ import android.webkit.WebViewClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.Logger;
 
 public class CustomWebViewClient extends WebViewClient {
 
@@ -23,6 +24,14 @@ public class CustomWebViewClient extends WebViewClient {
             new ByteArrayInputStream("".getBytes())
     );
     private String mJavaScript;
+    private final Stream<String> mBlocks = Arrays.stream(new String[]{
+            "://a.realsrv.com/",
+            "://fans.91p20.space/",
+            "://rpc-php.trafficfactory.biz/",
+            "://ssl.google-analytics.com/",
+            "://syndication.realsrv.com/",
+            "://www.gstatic.com/"
+    });
 
     public CustomWebViewClient(ClientInterface clientInterface) {
         mClientInterface = clientInterface;
@@ -75,12 +84,7 @@ public class CustomWebViewClient extends WebViewClient {
     @Override
     @SuppressWarnings("deprecation")
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        if (url.contains("://fans.91p20.space/")
-                || url.contains("://ssl.google-analytics.com/")
-                || url.contains("://syndication.realsrv.com/")
-                || url.contains("://rpc-php.trafficfactory.biz/")
-                || url.contains("://a.realsrv.com/")
-                || url.contains("://www.gstatic.com/")) {
+        if (mBlocks.anyMatch(url::contains)) {
             return mEmptyResponse;
         }
         return super.shouldInterceptRequest(view, url);
