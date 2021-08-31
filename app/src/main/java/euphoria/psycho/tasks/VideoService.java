@@ -15,6 +15,7 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 import euphoria.psycho.utils.FileLog;
@@ -211,6 +212,7 @@ public class VideoService extends Service implements RequestEventListener {
                 checkUncompletedVideoTasks();
             return START_NOT_STICKY;
         }
+        Logger.d(uri.toString());
         submitRequest(uri.toString());
         return super.onStartCommand(intent, flags, startId);
     }

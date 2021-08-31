@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
@@ -45,13 +44,11 @@ public class VideoActivity extends Activity implements RequestEventListener {
     };
 
     public void addLifeCycle(LifeCycle lifeCycle) {
-        Logger.e("addLifeCycle");
         mLifeCycles.add(lifeCycle);
     }
 
 
     public static void registerBroadcastReceiver(Context context, BroadcastReceiver receiver) {
-        Logger.e("registerBroadcastReceiver");
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_REFRESH);
         filter.addAction(ACTION_FINISH);
@@ -60,13 +57,11 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
 
     public void removeLifeCycle(LifeCycle lifeCycle) {
-        Logger.e("removeLifeCycle");
         mLifeCycles.remove(lifeCycle);
     }
 
 
     private void startService() {
-        Logger.e("startService");
         String[] videoList = getIntent().getStringArrayExtra(VideoService.KEY_VIDEO_LIST);
         Uri videoUri = getIntent().getData();
         if (videoList == null && videoUri == null) {
@@ -81,7 +76,6 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        Logger.e("onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_s);
         mProgressBar = findViewById(R.id.progress_bar);
@@ -99,7 +93,6 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     protected void onDestroy() {
-        Logger.e("onDestroy");
         for (int i = 0; i < mLifeCycles.size(); i++) {
             mLifeCycles.get(i).onDestroy();
         }
@@ -111,7 +104,6 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     protected void onPause() {
-        Logger.e("onPause");
         VideoManager.getInstance().removeVideoTaskListener(mVideoAdapter);
         super.onPause();
     }
@@ -119,7 +111,6 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     protected void onResume() {
-        Logger.e("onResume");
         super.onResume();
         VideoManager.getInstance().addVideoTaskListener(mVideoAdapter);
     }

@@ -95,7 +95,9 @@ public class MainActivity extends Activity implements ClientInterface {
         Intent service = new Intent(this, VideoService.class);
         service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
         startService(service);
-
+//        Intent intent = new Intent(this, VideoActivity.class);
+//        intent.setData(Uri.parse("https://cdn77-vid.xvideos-cdn.com/5t2WJXb5xBlk8Xx_Y3Oucg==,1630434948/videos/hls/06/c5/75/06c575eb599a2c0984ddfd9b1a107f1d/hls-720p-238c3.m3u8"));
+//        startActivity(intent);
     }
 
     private void loadStartPage() {
@@ -109,25 +111,21 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     protected void attachBaseContext(Context newBase) {
-       
         super.attachBaseContext(newBase);
     }
 
     @Override
     protected void onApplyThemeResource(Resources.Theme theme, int resid, boolean first) {
-       
         super.onApplyThemeResource(theme, resid, first);
     }
 
     @Override
     protected void onChildTitleChanged(Activity childActivity, CharSequence title) {
-       
         super.onChildTitleChanged(childActivity, title);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-       
         super.onCreate(savedInstanceState);
         // Check if we have obtained all
         // the permissions required  to run the app
@@ -139,19 +137,16 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     protected void onDestroy() {
-       
         super.onDestroy();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
-       
         super.onNewIntent(intent);
     }
 
     @Override
     protected void onPause() {
-       
         // WebView can be null when the pause event occurs
         if (mWebView != null)
             PreferenceShare.putString(KEY_LAST_ACCESSED, mWebView.getUrl());
@@ -160,61 +155,51 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
-       
         super.onPostCreate(savedInstanceState);
     }
 
     @Override
     protected void onPostResume() {
-       
         super.onPostResume();
     }
 
     @Override
     protected void onRestart() {
-       
         super.onRestart();
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-       
         super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
     protected void onResume() {
-       
         super.onResume();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-       
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onStart() {
-       
         super.onStart();
     }
 
     @Override
     protected void onStop() {
-       
         super.onStop();
     }
 
     @Override
     protected void onTitleChanged(CharSequence title, int color) {
-       
         super.onTitleChanged(title, color);
     }
 
     @Override
     protected void onUserLeaveHint() {
-       
         super.onUserLeaveHint();
     }
 

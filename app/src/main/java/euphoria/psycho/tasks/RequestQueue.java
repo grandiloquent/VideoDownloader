@@ -35,6 +35,7 @@ public class RequestQueue {
     }
 
     public void addRequestEventListener(RequestEventListener listener) {
+        //Logger.e(String.format("addRequestEventListener, %s", listener.getClass().getSimpleName()));
         synchronized (mEventListeners) {
             mEventListeners.add(listener);
         }
