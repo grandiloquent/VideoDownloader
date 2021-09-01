@@ -143,8 +143,8 @@ public class VideoHelper {
 
     public static void startVideoListActivity(Context context) {
         Intent intent = new Intent(context, VideoListActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
