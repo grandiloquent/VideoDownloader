@@ -27,6 +27,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     public static void renderCompletedStatus(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+        viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
         viewHolder.progressBar.setProgress(100);
         viewHolder.subtitle.setText(context.getString(R.string.merge_complete));
         File videoFile = new File(

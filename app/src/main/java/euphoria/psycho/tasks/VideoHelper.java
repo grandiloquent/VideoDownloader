@@ -153,4 +153,57 @@ public class VideoHelper {
         videoAdapter.update(VideoManager.getInstance().getQueue().getVideoTasks());
     }
 
+    public static String statusToString(int status) {
+        switch (status) {
+            case TaskStatus.PARSE_VIDEOS: {
+                return "Parse Videos";
+            }
+            case TaskStatus.CREATE_VIDEO_DIRECTORY: {
+                return "Create Video Directory";
+            }
+            case TaskStatus.DOWNLOAD_VIDEOS: {
+                return "Download Videos";
+            }
+            case TaskStatus.PARSE_CONTENT_LENGTH: {
+                return "Parse Content Length";
+            }
+            case TaskStatus.DOWNLOAD_VIDEO_FINISHED: {
+                return "Download Video Finished";
+            }
+            case TaskStatus.MERGE_VIDEO: {
+                return "Merge Video";
+            }
+            case TaskStatus.MERGE_VIDEO_FINISHED: {
+                return "Merge Video Finished";
+            }
+            case TaskStatus.START: {
+                return "Start";
+            }
+            case TaskStatus.PAUSED: {
+                return "Paused";
+            }
+            case TaskStatus.ERROR_CREATE_DIRECTORY: {
+                return "Error Create Directory";
+            }
+            case TaskStatus.ERROR_CREATE_LOG_FILE: {
+                return "Error Create Log File";
+            }
+            case TaskStatus.ERROR_READ_M3U8: {
+                return "Error Read M3u8";
+            }
+            case TaskStatus.ERROR_DOWNLOAD_FILE: {
+                return "Error Download File";
+            }
+            case TaskStatus.ERROR_MERGE_VIDEO_FAILED: {
+                return "Error Merge Video Failed";
+            }
+            case TaskStatus.ERROR_DELETE_FILE_FAILED: {
+                return "Error Delete File Failed";
+            }
+            case TaskStatus.ERROR_STATUS_CODE: {
+                return "Error Status Code";
+            }
+        }
+        return null;
+    }
 }
