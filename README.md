@@ -2,7 +2,7 @@
 
 一个解析视频地址的浏览器
 
-<img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%">
+<img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%"><img src="images/3.gif" width="33.3%"><img src="images/4.gif" width="33.3%">
 
 ## 下载
 
