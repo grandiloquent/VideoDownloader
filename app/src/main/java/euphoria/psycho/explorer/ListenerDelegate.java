@@ -18,6 +18,7 @@ import java.util.List;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Bilibili;
 import euphoria.psycho.videos.DouYin;
@@ -71,8 +72,7 @@ public class ListenerDelegate {
     }
 
     private void onPlaylist() {
-        Intent intent = new Intent(mMainActivity, VideoListActivity.class);
-        mMainActivity.startActivity(intent);
+        VideoHelper.startVideoListActivity(mMainActivity);
     }
 
     private void onAddLink(View view) {
