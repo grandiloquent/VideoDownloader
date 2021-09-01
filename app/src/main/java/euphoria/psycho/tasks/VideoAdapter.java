@@ -45,7 +45,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     public static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
-        Logger.e(String.format("renderVideoTask, %s", videoTask.Status));
+        Logger.e(String.format("renderVideoTask, %s", VideoHelper.statusToString(videoTask.Status)));
         switch (videoTask.Status) {
             case TaskStatus.PARSE_VIDEOS: {
                 break;
@@ -54,7 +54,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
                 break;
             }
             case TaskStatus.DOWNLOAD_VIDEOS: {
-                viewHolder.title.setText(videoTask.FileName);
                 viewHolder.subtitle.setText(String.format("%s/%s",
                         videoTask.DownloadedFiles,
                         videoTask.TotalFiles));
@@ -70,8 +69,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
                 break;
             }
             case TaskStatus.MERGE_VIDEO: {
-                viewHolder.title.setText(videoTask.FileName);
-                viewHolder.subtitle.setText("合并开始");
+                viewHolder.subtitle.setText(R.string.merge_start);
                 break;
             }
             case TaskStatus.MERGE_VIDEO_FINISHED: {
@@ -79,7 +77,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
                 break;
             }
             case TaskStatus.START: {
-                viewHolder.title.setText(videoTask.FileName);
                 break;
             }
             case TaskStatus.PAUSED: {
@@ -155,6 +152,8 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         }
         VideoTask videoTask = getItem(position);
         viewHolder.tag = videoTask.FileName;
+        viewHolder.title.setText(videoTask.FileName);
+        viewHolder.subtitle.setText(R.string.waiting);
         viewHolder.button.setOnClickListener(v -> {
             if (!videoTask.IsPaused)
                 videoTask.IsPaused = true;

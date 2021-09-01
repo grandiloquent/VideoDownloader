@@ -20,5 +20,7 @@
     <string name="copy_button">复制</string>
     <string name="playlist_play">视频</string>
     <string name="help_outline">帮助</string>
+    <string name="merge_start">mergeStart</string>
 
+<string name="waiting">Waiting</string>
 </resources>
