@@ -3,6 +3,9 @@ package euphoria.psycho.share;
 
 import android.content.Context;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 public class DateTimeShare {
     // Returns a (localized) string for the given duration (in seconds).
@@ -17,5 +20,11 @@ public class DateTimeShare {
             durationValue = String.format("%d:%02d:%02d", h, m, s);
         }
         return durationValue;
+    }
+
+    public static String getShortDateString() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+        return simpleDateFormat.format(new Date());
+
     }
 }

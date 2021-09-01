@@ -41,10 +41,6 @@ public class FileShare {
     public static String sSDPath;
     private static boolean sIsHasSD;
 
-    public static boolean isHasSD() {
-        return sIsHasSD;
-    }
-
     public static void appendAllText(File file, String contents) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
         writer.write(contents);
@@ -360,6 +356,10 @@ public class FileShare {
     public static boolean isFile(String path) {
         return new File(path).isFile();
     }
+
+    public static boolean isHasSD() {
+        return sIsHasSD;
+    }
 //    public static String getExtension(String file) {
 //        int lastSep = file.lastIndexOf('/');
 //        int lastDot = file.lastIndexOf('.');
@@ -531,10 +531,27 @@ public class FileShare {
 //        }
     }
 
+    public static String toString(InputStream stream) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "utf-8"));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\r\n");
+        }
+        reader.close();
+        return sb.toString();
+    }
+
     public static void writeAllBytes(String path, byte[] bytes) throws IOException {
         FileOutputStream fs = new FileOutputStream(path);
         fs.write(bytes, 0, bytes.length);
         fs.close();
+    }
+
+    public static void writeAllText(File file, String contents) throws IOException {
+        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+        writer.write(contents);
+        writer.close();
     }
 
     static Intent getStoragePermissionIntent(Context context) {

@@ -3,7 +3,6 @@ package euphoria.psycho.explorer;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -14,18 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -36,19 +29,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import euphoria.psycho.share.FileShare;
+
 public class Share {
-    public static List<Long> collectLongs(String s) {
-        if (TextUtils.isEmpty(s)) {
-            return null;
-        }
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(s);
-        List<Long> integers = new ArrayList<>();
-        while (matcher.find()) {
-            integers.add(Long.parseLong(matcher.group()));
-        }
-        return integers;
-    }
 
     public static boolean downloadFile(String url, String fileName) {
         HttpURLConnection connection = null;
@@ -119,73 +102,10 @@ public class Share {
         return null;
     }
 
-    public static String getShortDateString() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
-        return simpleDateFormat.format(new Date());
-    }
-
-    public static boolean isDigit(String s) {
-        if (isNullOrWhiteSpace(s))
-            return false;
-        for (int i = 0; i < s.length(); i++) {
-            if (!Character.isDigit(s.charAt(i))) return false;
-        }
-        return true;
-    }
-
-    public static boolean isLetterOrDigit(String value) {
-        for (int i = 0; i < value.length(); i++) {
-            if (!Character.isLetterOrDigit(value.charAt(i))) return false;
-        }
-        return true;
-    }
-
-    public static boolean isNullOrWhiteSpace(String value) {
-        return value == null || value.trim().length() == 0;
-    }
-
-    public static String join(String separator, List<String> value) {
-        if (value == null || value.size() == 0) return null;
-        if (separator == null) separator = "";
-        StringBuilder sb = new StringBuilder();
-        sb.append(value.get(0));
-        int length = value.size();
-        if (length > 1) {
-            for (int i = 1; i < length; i++) {
-                sb.append(separator).append(value.get(i));
-            }
-        }
-        return sb.toString();
-    }
-
-    public static String padStart(String s, int length, char padChar) {
-        if (length < 0)
-            throw new IllegalArgumentException(String.format("Desired length %d is less than zero.", length));
-        if (length <= s.length())
-            return s;
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length - s.length(); i++) {
-            sb.append(padChar);
-        }
-        sb.append(s);
-        return sb.toString();
-    }
-
     public static void setClipboardText(Context context, String s) {
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboardManager != null)
             clipboardManager.setPrimaryClip(ClipData.newPlainText(null, s));
-    }
-
-    public static String toString(InputStream stream) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "utf-8"));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line).append("\r\n");
-        }
-        reader.close();
-        return sb.toString();
     }
 
     public static String touchServer(String url, String method, String accessToken, String jsonBody) {
@@ -250,7 +170,7 @@ public class Share {
                 Log.e("TAG/Utils", "[ERROR][touch]: " + code);
                 sb.append("Method: ").append(method).append(";\n")
                         .append("ResponseCode: ").append(code).append(";\n")
-                        .append("Error: ").append(toString(connection.getErrorStream()));
+                        .append("Error: ").append(FileShare.toString(connection.getErrorStream()));
             }
             return sb.toString();
         } catch (IOException e) {
@@ -261,12 +181,6 @@ public class Share {
                 connection.disconnect();
             }
         }
-    }
-
-    public static void writeAllText(File file, String contents) throws IOException {
-        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-        writer.write(contents);
-        writer.close();
     }
 
     private static void disableSSLCertificateChecking() {

@@ -4,8 +4,30 @@ import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StringShare {
+    public static List<Long> collectLongs(String s) {
+        if (TextUtils.isEmpty(s)) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(s);
+        List<Long> integers = new ArrayList<>();
+        while (matcher.find()) {
+            integers.add(Long.parseLong(matcher.group()));
+        }
+        return integers;
+    }
+
+    public static int count(String s, char c) {
+        int i = 0;
+        for (int j = 0; j < s.length(); j++) {
+            if (s.charAt(j) == c) i++;
+        }
+        return i;
+    }
 
     public static byte[] getBytes(String in) {
         byte[] result = new byte[in.length() * 2];
@@ -17,9 +39,56 @@ public class StringShare {
         return result;
     }
 
+    public static boolean isDigit(String s) {
+        if (isNullOrWhiteSpace(s))
+            return false;
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isDigit(s.charAt(i))) return false;
+        }
+        return true;
+    }
+
+    public static boolean isLetterOrDigit(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isLetterOrDigit(value.charAt(i))) return false;
+        }
+        return true;
+    }
+
     //
     public static boolean isNullOrEmpty(String exifMake) {
         return TextUtils.isEmpty(exifMake);
+    }
+
+    public static boolean isNullOrWhiteSpace(String value) {
+        return value == null || value.trim().length() == 0;
+    }
+
+    public static String join(String separator, List<String> value) {
+        if (value == null || value.size() == 0) return null;
+        if (separator == null) separator = "";
+        StringBuilder sb = new StringBuilder();
+        sb.append(value.get(0));
+        int length = value.size();
+        if (length > 1) {
+            for (int i = 1; i < length; i++) {
+                sb.append(separator).append(value.get(i));
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String padStart(String s, int length, char padChar) {
+        if (length < 0)
+            throw new IllegalArgumentException(String.format("Desired length %d is less than zero.", length));
+        if (length <= s.length())
+            return s;
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length - s.length(); i++) {
+            sb.append(padChar);
+        }
+        sb.append(s);
+        return sb.toString();
     }
 
     public static float parseFloatSafely(String content, float defaultValue) {
@@ -45,28 +114,6 @@ public class StringShare {
         if (start == -1) return null;
         start += first.length();
         int end = string.indexOf(second, start);
-        if (end == -1) return null;
-        return string.substring(start, end);
-    }
-
-    public static String substringLeast(String string, String first, String second) {
-        int start = string.indexOf(first);
-        if (start == -1) return null;
-        start += first.length();
-        int end = string.indexOf(second, start);
-        if (end == -1) return null;
-        int tmp = string.lastIndexOf(first, end);
-        if (tmp != -1) {
-            start = tmp;
-        }
-        return string.substring(start, end);
-    }
-
-    public static String substringMax(String string, String first, String second) {
-        int start = string.indexOf(first);
-        if (start == -1) return null;
-        start += first.length();
-        int end = string.lastIndexOf(second);
         if (end == -1) return null;
         return string.substring(start, end);
     }
@@ -144,6 +191,19 @@ public class StringShare {
         return list;
     }
 
+    public static String substringLeast(String string, String first, String second) {
+        int start = string.indexOf(first);
+        if (start == -1) return null;
+        start += first.length();
+        int end = string.indexOf(second, start);
+        if (end == -1) return null;
+        int tmp = string.lastIndexOf(first, end);
+        if (tmp != -1) {
+            start = tmp;
+        }
+        return string.substring(start, end);
+    }
+
     public static String substringLine(String s, String delimiter) {
         int index = s.indexOf(delimiter);
         if (index == -1) return null;
@@ -160,12 +220,13 @@ public class StringShare {
         return s.substring(index, end);
     }
 
-    public static int count(String s, char c) {
-        int i = 0;
-        for (int j = 0; j < s.length(); j++) {
-            if (s.charAt(j) == c) i++;
-        }
-        return i;
+    public static String substringMax(String string, String first, String second) {
+        int start = string.indexOf(first);
+        if (start == -1) return null;
+        start += first.length();
+        int end = string.lastIndexOf(second);
+        if (end == -1) return null;
+        return string.substring(start, end);
     }
 
 }
