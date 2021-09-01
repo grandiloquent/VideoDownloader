@@ -13,5 +13,4 @@ public class CustomWebChromeClient extends WebChromeClient {
         //Log.e("TAG/", "Debug: onConsoleMessage, \n" + consoleMessage.message());
         return super.onConsoleMessage(consoleMessage);
     }
-
 }

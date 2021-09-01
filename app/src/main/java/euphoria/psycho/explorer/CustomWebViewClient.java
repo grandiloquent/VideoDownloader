@@ -14,8 +14,6 @@ import java.util.Arrays;
 import euphoria.psycho.share.FileShare;
 
 public class CustomWebViewClient extends WebViewClient {
-
-
     private final ClientInterface mClientInterface;
     private final WebResourceResponse mEmptyResponse = new WebResourceResponse(
             "text/plain",
@@ -23,7 +21,7 @@ public class CustomWebViewClient extends WebViewClient {
             new ByteArrayInputStream("".getBytes())
     );
     private String mJavaScript;
-    private final String[] mBlocks =new String[]{
+    private final String[] mBlocks = new String[]{
             "://a.realsrv.com/",
             "://fans.91p20.space/",
             "://rpc-php.trafficfactory.biz/",
@@ -78,7 +76,6 @@ public class CustomWebViewClient extends WebViewClient {
         return true;
     }
 
-
     @Override
     @SuppressWarnings("deprecation")
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
@@ -88,10 +85,8 @@ public class CustomWebViewClient extends WebViewClient {
         return super.shouldInterceptRequest(view, url);
     }
 
-
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         return super.shouldInterceptRequest(view, request);
     }
-
 }

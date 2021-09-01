@@ -7,11 +7,10 @@ import android.os.StrictMode;
 
 import java.io.File;
 
-import euphoria.psycho.share.Logger;
+import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.utils.FileLog;
 
 public class App extends Application {
-
     private static Context sContext;
 
     public static Context getContext() {
@@ -25,12 +24,11 @@ public class App extends Application {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         //FileShare.initialize(this);
-        // VideoHelper.deleteVideoDirectory(this);
+        VideoHelper.deleteVideoDirectory(this);
         File logDir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log");
         if (!logDir.exists()) {
             logDir.mkdirs();
         }
-        Logger.d(logDir.getAbsolutePath());
         FileLog.setDir(logDir);
         // adb pull /storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Documents/log/. log
     }

@@ -17,7 +17,6 @@ import android.widget.TextView;
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 
 public class BookmarkActivity extends Activity {
-
     private BookmarkAdapter mBookmarkAdapter;
     private ListView mListView;
 
@@ -26,7 +25,6 @@ public class BookmarkActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bookmark_layout);
         mListView = (ListView) findViewById(R.id.list);
-
         BookmarkDatabase bookmarkDatabase = new BookmarkDatabase(this);
         // Use an existing ListAdapter that will map an array of strings to TextViews
         mBookmarkAdapter = new BookmarkAdapter(this,
@@ -82,7 +80,7 @@ public class BookmarkActivity extends Activity {
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
             if (convertView == null) {
-                convertView = mLayoutInflater.inflate(R.layout.bookmark_row, parent,false);
+                convertView = mLayoutInflater.inflate(R.layout.bookmark_row, parent, false);
                 holder = new ViewHolder();
                 holder.text = (TextView) convertView.findViewById(R.id.row_text);
                 holder.icon = (ImageView) convertView.findViewById(R.id.row_icon);

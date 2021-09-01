@@ -80,7 +80,6 @@ public class VideoListActivity extends Activity {
             IntentShare.launchActivity(VideoListActivity.this,
                     VideoActivity.class,
                     Uri.fromFile(mVideoAdapter.getItem(position)));
-
         });
     }
 

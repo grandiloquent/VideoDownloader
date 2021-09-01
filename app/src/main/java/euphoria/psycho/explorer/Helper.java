@@ -8,23 +8,16 @@ import java.io.File;
 
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.IntentShare;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.videos.VideosHelper;
 
 public class Helper {
-
-
     public static File createCacheDirectory(Context context) {
         File cacheDirectory = new File(new File(context.getCacheDir(), "Explorer"), "Cache");
-        Logger.d(String.format("createCacheDirectory: 览器储存目录 = %s", cacheDirectory.getAbsolutePath()));
         if (!cacheDirectory.isDirectory()) {
-            boolean result = cacheDirectory.mkdirs();
-            if (!result) {
-                Logger.d(String.format("createCacheDirectory: 创建目录 %s 失败", cacheDirectory.getAbsolutePath()));
-            }
+            cacheDirectory.mkdirs();
         }
         return cacheDirectory;
     }

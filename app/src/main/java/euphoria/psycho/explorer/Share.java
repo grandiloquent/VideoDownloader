@@ -1,40 +1,23 @@
 package euphoria.psycho.explorer;
 
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
-import android.webkit.WebView;
-import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -53,12 +36,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import euphoria.psycho.share.StringShare;
-import euphoria.psycho.share.ThreadShare;
-
 public class Share {
-
-    
     public static List<Long> collectLongs(String s) {
         if (TextUtils.isEmpty(s)) {
             return null;
@@ -71,7 +49,6 @@ public class Share {
         }
         return integers;
     }
-
 
     public static boolean downloadFile(String url, String fileName) {
         HttpURLConnection connection = null;
@@ -133,27 +110,13 @@ public class Share {
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboardManager != null) {
             ClipData clipData = clipboardManager.getPrimaryClip();
-
             if (clipData != null && clipData.getItemCount() > 0) {
                 CharSequence c = clipData.getItemAt(0).getText();
                 if (c != null)
                     return c.toString();
-
             }
         }
         return null;
-    }
-
-    public static String getFileNameFromURL(String url) {
-        String uri = StringShare.substringAfterLast(url, '/');
-        uri = StringShare.substringBefore(uri, '?');
-        if (uri.length() == 0) {
-            uri = "filename";
-        }
-        if (uri.length() > 100) {
-            uri = uri.substring(0, 100);
-        }
-        return uri;
     }
 
     public static String getShortDateString() {
@@ -195,49 +158,6 @@ public class Share {
         return sb.toString();
     }
 
-    public static void launchDialog(Context context, String title, String message, View view, OnClickListener positiveCallback) {
-        new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setMessage(message)
-                .setView(view)
-                .setPositiveButton(android.R.string.ok, positiveCallback)
-                .setNegativeButton(android.R.string.cancel, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).show();
-    }
-
-    public static void launchAskDialog(Context context, String message, OnClickListener positiveCallback) {
-        new AlertDialog.Builder(context)
-                .setTitle("询问")
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, positiveCallback)
-                .setNegativeButton(android.R.string.cancel, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).show();
-    }
-
-    public static ProgressDialog launchProgressDialog(Context context, String message) {
-        ProgressDialog dialog = new ProgressDialog(context);
-        dialog.setMessage(message);
-        dialog.show();
-        return dialog;
-    }
-
-    public static void message(final Context context, final String message) {
-        ThreadShare.postOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
     public static String padStart(String s, int length, char padChar) {
         if (length < 0)
             throw new IllegalArgumentException(String.format("Desired length %d is less than zero.", length));
@@ -251,13 +171,11 @@ public class Share {
         return sb.toString();
     }
 
-
     public static void setClipboardText(Context context, String s) {
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboardManager != null)
             clipboardManager.setPrimaryClip(ClipData.newPlainText(null, s));
     }
-
 
     public static String toString(InputStream stream) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -269,7 +187,6 @@ public class Share {
         reader.close();
         return sb.toString();
     }
-
 
     public static String touchServer(String url, String method, String accessToken, String jsonBody) {
         Log.e("TAG/Utils", "[ERROR][touch]: " + url);
@@ -347,11 +264,8 @@ public class Share {
     }
 
     public static void writeAllText(File file, String contents) throws IOException {
-
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-
         writer.write(contents);
-
         writer.close();
     }
 
