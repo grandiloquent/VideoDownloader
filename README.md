@@ -2,12 +2,12 @@
 
 一个解析视频地址的浏览器
 
+<img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%">
+
 ## 下载
 
 * [示例](https://github.com/grandiloquent/VideoBrowser/releases)
 * [国内](https://lucidu.cn/article/jqdkgl)
-
-<img src="images/1.gif" width="30%"><img src="images/2.gif" width="30%">
 
 ## 支持的视频网站
 
