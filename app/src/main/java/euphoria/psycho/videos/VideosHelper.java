@@ -251,9 +251,9 @@ public class VideosHelper {
             createAlertDialogBuilder(mainActivity, mainActivity.getString(R.string.ask), (dialog, which) -> {
                 dialog.dismiss();
                 if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
-                    VideosHelper.useChromeLoad(mainActivity, videoUri);
+                    VideosHelper.useChromeLoad(mainActivity, "https://hxz315.com?v=" + videoUri);
                 } else {
-                    VideosHelper.viewerChooser(mainActivity, uri);
+                    VideosHelper.viewerChooser(mainActivity, "https://hxz315.com?v=" + videoUri);
                 }
             }, (dialog, which) -> {
                 dialog.dismiss();
