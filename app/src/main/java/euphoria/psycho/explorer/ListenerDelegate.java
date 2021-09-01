@@ -1,12 +1,16 @@
 package euphoria.psycho.explorer;
 
 import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import com.cocosw.bottomsheet.BottomSheet;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -35,17 +39,38 @@ public class ListenerDelegate {
 
     public ListenerDelegate(MainActivity mainActivity) {
         mMainActivity = mainActivity;
-        mMainActivity.findViewById(R.id.refresh_button).setOnClickListener(this::onRefresh);
-        mMainActivity.findViewById(R.id.copy_button).setOnClickListener(this::onCopy);
-        mMainActivity.findViewById(R.id.favorite_border).setOnClickListener(this::onFavorite);
-        mMainActivity.findViewById(R.id.bookmark2_button).setOnClickListener(this::onShowBookmark);
-        mMainActivity.findViewById(R.id.help_outline).setOnClickListener(this::onHelp);
+//        mMainActivity.findViewById(R.id.refresh_button).setOnClickListener(this::onRefresh);
+//        mMainActivity.findViewById(R.id.copy_button).setOnClickListener(this::onCopy);
+//        mMainActivity.findViewById(R.id.favorite_border).setOnClickListener(this::onFavorite);
+//        mMainActivity.findViewById(R.id.bookmark2_button).setOnClickListener(this::onShowBookmark);
+//        mMainActivity.findViewById(R.id.help_outline).setOnClickListener(this::onHelp);
         mainActivity.findViewById(R.id.file_download).setOnClickListener(this::onDownloadFile);
         mMainActivity.findViewById(R.id.add_link).setOnClickListener(this::onAddLink);
-        mainActivity.findViewById(R.id.playlist_play).setOnClickListener(this::onPlaylist);
+        mainActivity.findViewById(R.id.more_vert).setOnClickListener(this::onMore);
     }
 
-    private void onPlaylist(View view) {
+    private void onMore(View view) {
+        new BottomSheet.Builder(mMainActivity).title("菜单").grid().sheet(R.menu.list).listener(new OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (R.id.favorite_border == which) {
+                    onFavorite();
+                } else if (R.id.bookmark2_button == which) {
+                    onShowBookmark();
+                } else if (R.id.refresh_button == which) {
+                    onRefresh();
+                } else if (R.id.copy_button == which) {
+                    onCopy();
+                } else if (R.id.playlist_play == which) {
+                    onPlaylist();
+                } else if (R.id.help_outline == which) {
+                    onHelp();
+                }
+            }
+        }).show();
+    }
+
+    private void onPlaylist() {
         Intent intent = new Intent(mMainActivity, VideoListActivity.class);
         mMainActivity.startActivity(intent);
     }
@@ -126,7 +151,7 @@ public class ListenerDelegate {
     }
 
 
-    private void onHelp(View view) {
+    private void onHelp() {
         mMainActivity.getWebView().loadUrl(HELP_URL);
     }
 
@@ -146,11 +171,11 @@ public class ListenerDelegate {
         return arrayAdapter;
     }
 
-    private void onCopy(View view) {
+    private void onCopy() {
         Share.setClipboardText(mMainActivity, mMainActivity.getWebView().getUrl());
     }
 
-    private void onFavorite(View view) {
+    private void onFavorite() {
         String name = mMainActivity.getWebView().getTitle();
         String url = mMainActivity.getWebView().getUrl();
         DialogShare.createAlertDialogBuilder(mMainActivity, "询问", (dialog, which) -> {
@@ -166,12 +191,12 @@ public class ListenerDelegate {
                 .show();
     }
 
-    private void onRefresh(View v) {
+    private void onRefresh() {
         mMainActivity.getWebView().clearCache(true);
         mMainActivity.getWebView().reload();
     }
 
-    private void onShowBookmark(View view) {
+    private void onShowBookmark() {
         Builder builderSingle = new Builder(mMainActivity).setPositiveButton(
                 "修改",
                 (dialog, which) -> {

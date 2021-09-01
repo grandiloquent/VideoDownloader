@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="#f2f2f2"
-        android:orientation="horizontal"
-        android:weightSum="9">
+        android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/add_link"
@@ -17,39 +16,20 @@
             android:src="@drawable/ic_action_add_link" />
 
         <ImageButton
-            android:id="@+id/favorite_border"
-            style="@style/ImageButton"
-            android:src="@drawable/ic_action_favorite_border" />
-
-        <ImageButton
-            android:id="@+id/bookmark2_button"
-            style="@style/ImageButton"
-            android:src="@drawable/ic_action_bookmark_border" />
-
-        <ImageButton
-            android:id="@+id/refresh_button"
-            style="@style/ImageButton"
-            android:src="@drawable/ic_action_refresh" />
-
-        <ImageButton
-            android:id="@+id/copy_button"
-            style="@style/ImageButton"
-            android:src="@drawable/ic_action_content_copy" />
-
-        <ImageButton
             android:id="@+id/file_download"
             style="@style/ImageButton"
             android:src="@drawable/ic_action_file_download" />
 
-        <ImageButton
-            android:id="@+id/playlist_play"
-            style="@style/ImageButton"
-            android:src="@drawable/ic_action_playlist_play" />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
         <ImageButton
-            android:id="@+id/help_outline"
+            android:id="@+id/more_vert"
             style="@style/ImageButton"
-            android:src="@drawable/ic_action_help_outline" />
+            android:src="@drawable/ic_action_more_vert" />
+
 
     </LinearLayout>
 

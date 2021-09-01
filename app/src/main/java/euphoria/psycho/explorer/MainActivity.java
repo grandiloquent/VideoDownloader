@@ -3,6 +3,7 @@ package euphoria.psycho.explorer;
 import android.Manifest.permission;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -10,6 +11,8 @@ import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
+
+import com.cocosw.bottomsheet.BottomSheet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +98,7 @@ public class MainActivity extends Activity implements ClientInterface {
         Intent service = new Intent(this, VideoService.class);
         service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
         startService(service);
+
 //        Intent intent = new Intent(this, VideoActivity.class);
 //        intent.setData(Uri.parse("https://cdn77-vid.xvideos-cdn.com/RAKvKR40HiCIrs6pS-44rA==,1630465665/videos/hls/06/c5/75/06c575eb599a2c0984ddfd9b1a107f1d/hls-720p-238c3.m3u8"));
 //        startActivity(intent);

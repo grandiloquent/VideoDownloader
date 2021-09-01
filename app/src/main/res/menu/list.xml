@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/favorite_border"
+        android:icon="@drawable/ic_action_favorite_border"
+        android:title="@string/favorite_border" />
+    <item
+        android:id="@+id/bookmark2_button"
+        android:icon="@drawable/ic_action_bookmark_border"
+        android:title="@string/bookmark2_button" />
+    <item
+        android:id="@+id/refresh_button"
+        android:icon="@drawable/ic_action_refresh"
+        android:title="@string/refresh_button" />
+    <item
+        android:id="@+id/copy_button"
+        android:icon="@drawable/ic_action_content_copy"
+        android:title="@string/copy_button" />
+    <item
+        android:id="@+id/playlist_play"
+        android:icon="@drawable/ic_action_playlist_play"
+        android:title="@string/playlist_play" />
+    <item
+        android:id="@+id/help_outline"
+        android:icon="@drawable/ic_action_help_outline"
+        android:title="@string/help_outline" />
+</menu>
