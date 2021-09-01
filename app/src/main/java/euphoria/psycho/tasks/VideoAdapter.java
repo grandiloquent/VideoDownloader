@@ -44,18 +44,68 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     public static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
-        Logger.e(String.format("renderVideoTask, %s", ""));
-        if (videoTask.Status == TaskStatus.MERGE_VIDEO) {
-            viewHolder.title.setText(videoTask.FileName);
-            viewHolder.subtitle.setText("合并开始");
-        } else if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
-            renderCompletedStatus(context, viewHolder, videoTask);
-        } else {
-            viewHolder.title.setText(videoTask.FileName);
-            viewHolder.subtitle.setText(String.format("%s/%s",
-                    videoTask.DownloadedFiles,
-                    videoTask.TotalFiles));
-            viewHolder.progressBar.setProgress((int) ((videoTask.DownloadedFiles * 1.0 / videoTask.TotalFiles) * 100));
+        Logger.e(String.format("renderVideoTask, %s", videoTask.Status));
+        switch (videoTask.Status) {
+            case TaskStatus.PARSE_VIDEOS: {
+                break;
+            }
+            case TaskStatus.CREATE_VIDEO_DIRECTORY: {
+                break;
+            }
+            case TaskStatus.DOWNLOAD_VIDEOS: {
+                viewHolder.title.setText(videoTask.FileName);
+                viewHolder.subtitle.setText(String.format("%s/%s",
+                        videoTask.DownloadedFiles,
+                        videoTask.TotalFiles));
+                viewHolder.button.setImageResource(R.drawable.ic_action_pause);
+                viewHolder.progressBar.setProgress((int) ((videoTask.DownloadedFiles * 1.0 / videoTask.TotalFiles) * 100));
+                break;
+            }
+            case TaskStatus.PARSE_CONTENT_LENGTH: {
+                break;
+            }
+            case TaskStatus.DOWNLOAD_VIDEO_FINISHED: {
+                renderCompletedStatus(context, viewHolder, videoTask);
+                break;
+            }
+            case TaskStatus.MERGE_VIDEO: {
+                viewHolder.title.setText(videoTask.FileName);
+                viewHolder.subtitle.setText("合并开始");
+                break;
+            }
+            case TaskStatus.MERGE_VIDEO_FINISHED: {
+                renderCompletedStatus(context, viewHolder, videoTask);
+                break;
+            }
+            case TaskStatus.START: {
+                viewHolder.title.setText(videoTask.FileName);
+                break;
+            }
+            case TaskStatus.PAUSED: {
+                viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
+                break;
+            }
+            case TaskStatus.ERROR_CREATE_DIRECTORY: {
+                break;
+            }
+            case TaskStatus.ERROR_CREATE_LOG_FILE: {
+                break;
+            }
+            case TaskStatus.ERROR_READ_M3U8: {
+                break;
+            }
+            case TaskStatus.ERROR_DOWNLOAD_FILE: {
+                break;
+            }
+            case TaskStatus.ERROR_MERGE_VIDEO_FAILED: {
+                break;
+            }
+            case TaskStatus.ERROR_DELETE_FILE_FAILED: {
+                break;
+            }
+            case TaskStatus.ERROR_STATUS_CODE: {
+                break;
+            }
         }
     }
 
@@ -104,15 +154,21 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         }
         VideoTask videoTask = getItem(position);
         viewHolder.tag = videoTask.FileName;
-        viewHolder.title.setText(videoTask.FileName);
+        viewHolder.button.setOnClickListener(v -> {
+            if (!videoTask.IsPaused)
+                videoTask.IsPaused = true;
+            else {
+                videoTask.IsPaused = false;
+                VideoManager.getInstance().getQueue().removeVideoTask(videoTask);
+                videoTask.DownloadedFiles = 0;
+                Request request = new Request(parent.getContext(), videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+                request.setRequestQueue(VideoManager.getInstance().getQueue());
+                VideoManager.getInstance().getQueue().add(request);
+            }
+        });
+        renderVideoTask(parent.getContext(), viewHolder, videoTask);
         if (videoTask.TotalFiles > 0 && videoTask.DownloadedFiles == videoTask.TotalFiles) {
             renderCompletedStatus(parent.getContext(), viewHolder, videoTask);
-        } else {
-            viewHolder.subtitle.setText(String.format("%s/%s",
-                    videoTask.DownloadedFiles,
-                    videoTask.TotalFiles));
-            viewHolder.progressBar.setProgress((int) ((videoTask.DownloadedFiles * 1.0 / videoTask.TotalFiles) * 100));
-            viewHolder.button.setOnClickListener(v -> videoTask.IsPaused = true);
         }
         return convertView;
     }

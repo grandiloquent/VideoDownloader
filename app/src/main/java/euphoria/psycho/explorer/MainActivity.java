@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
@@ -18,6 +19,7 @@ import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
@@ -95,9 +97,9 @@ public class MainActivity extends Activity implements ClientInterface {
         Intent service = new Intent(this, VideoService.class);
         service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
         startService(service);
-//        Intent intent = new Intent(this, VideoActivity.class);
-//        intent.setData(Uri.parse("https://cdn77-vid.xvideos-cdn.com/5t2WJXb5xBlk8Xx_Y3Oucg==,1630434948/videos/hls/06/c5/75/06c575eb599a2c0984ddfd9b1a107f1d/hls-720p-238c3.m3u8"));
-//        startActivity(intent);
+        Intent intent = new Intent(this, VideoActivity.class);
+        intent.setData(Uri.parse("https://cdn77-vid.xvideos-cdn.com/RAKvKR40HiCIrs6pS-44rA==,1630465665/videos/hls/06/c5/75/06c575eb599a2c0984ddfd9b1a107f1d/hls-720p-238c3.m3u8"));
+        startActivity(intent);
     }
 
     private void loadStartPage() {

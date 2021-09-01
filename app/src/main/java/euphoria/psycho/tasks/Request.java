@@ -117,19 +117,15 @@ public class Request implements Comparable<Request> {
         // if \(!*?([a-zA-Z0-9]+)\(\w*?\)\)(?= return;)
         if (directory == null) return;
         if (!createLogFile(directory)) {
-            Logger.d("Error, createLogFile");
             return;
         }
         if (!parseVideos(m3u8String)) {
-            Logger.d("Error, parseVideos");
             return;
         }
         if (!downloadVideos()) {
-            Logger.d("Error, downloadVideos");
             return;
         }
         if (!mergeVideo()) {
-            Logger.d("Error, mergeVideo");
             return;
         }
         deleteCacheFiles(directory);
@@ -147,7 +143,7 @@ public class Request implements Comparable<Request> {
 
     private boolean downloadFile(String videoUri, File videoFile) throws IOException {
         if (mVideoTask.IsPaused) {
-            emitSynchronizeTask(TaskStatus.Paused);
+            emitSynchronizeTask(TaskStatus.PAUSED);
             return false;
         }
         if (videoFile.exists()) {
@@ -192,7 +188,6 @@ public class Request implements Comparable<Request> {
             emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEOS);
             try {
                 if (!downloadFile(video, videoFile)) {
-                    Logger.d("Error, downloadFile");
                     return false;
                 }
                 emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
@@ -226,8 +221,7 @@ public class Request implements Comparable<Request> {
                     new ByteArrayInputStream(data));
             dis.readUTF();
             return dis.readLong();
-        } catch (Throwable t) {
-            Logger.d(String.format("getBookmark: %s", t.getMessage()));
+        } catch (Throwable ignored) {
         }
         return 0;
     }
@@ -281,8 +275,7 @@ public class Request implements Comparable<Request> {
             dos.writeLong(size);
             dos.flush();
             mBlobCache.insert(uri.hashCode(), bos.toByteArray());
-        } catch (Throwable t) {
-            Logger.d(String.format("setBookmark: %s", t.getMessage()));
+        } catch (Throwable ignored) {
         }
     }
 
@@ -290,7 +283,7 @@ public class Request implements Comparable<Request> {
         final byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
             if (mVideoTask.IsPaused) {
-                emitSynchronizeTask(TaskStatus.Paused);
+                emitSynchronizeTask(TaskStatus.PAUSED);
                 return false;
             }
             int len;

@@ -18,7 +18,6 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
-import euphoria.psycho.utils.FileLog;
 
 import static euphoria.psycho.tasks.VideoHelper.showNotification;
 
@@ -51,7 +50,6 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     private VideoTask createTask(String uri, String fileName, String content) {
-        FileLog.d(TAG, "createTask, " + fileName);
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
         videoTask.FileName = fileName;
@@ -69,20 +67,17 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     private void submitRequest(String uri) {
-        FileLog.d(TAG, "submitRequest, " + uri);
         new Thread(() -> {
             // Calculate the hash value of the m3u8 content
             // as the file name and unique Id,
             // try to avoid downloading the video repeatedly
             String[] infos = VideoHelper.getInfos(uri);
             if (infos == null) {
-                FileLog.e(TAG, "submitRequest, VideoHelper.getInfos failed");
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
             // Check whether the task has been added to the task queue
             if (VideoHelper.checkTask(this, mQueue, infos[1])) {
-                FileLog.d(TAG, "submitRequest, 任务已添加" + infos[1]);
                 return;
             }
             // Query task from the database
@@ -91,14 +86,9 @@ public class VideoService extends Service implements RequestEventListener {
                 videoTask = createTask(uri, infos[1], infos[0]);
                 if (videoTask == null) {
                     toastTaskFailed(getString(R.string.failed_to_create_task));
-                    FileLog.e(TAG, String.format("submitRequest, createTask %s", infos[1]));
                     return;
                 }
             } else {
-                FileLog.d(TAG, String.format("submitRequest, 数据已存在 %s %s",
-                        videoTask.FileName,
-                        videoTask.Status
-                ));
                 if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
                     toastTaskFinished();
                     return;
@@ -212,7 +202,7 @@ public class VideoService extends Service implements RequestEventListener {
                 checkUncompletedVideoTasks();
             return START_NOT_STICKY;
         }
-        Logger.d(uri.toString());
+        Logger.e(String.format("onStartCommand, %s", uri));
         submitRequest(uri.toString());
         return super.onStartCommand(intent, flags, startId);
     }

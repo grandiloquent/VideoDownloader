@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.explorer.App;
-import euphoria.psycho.share.Logger;
 
 public class VideoManager implements VideoTaskListener {
 
@@ -25,7 +24,6 @@ public class VideoManager implements VideoTaskListener {
 
 
     public void addVideoTaskListener(VideoTaskListener taskListener) {
-        Logger.e(String.format("addVideoTaskListener, %s", taskListener.getClass().getSimpleName()));
         mVideoTaskListeners.add(taskListener);
     }
 

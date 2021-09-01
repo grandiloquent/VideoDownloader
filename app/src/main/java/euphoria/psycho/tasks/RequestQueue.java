@@ -120,6 +120,21 @@ public class RequestQueue {
         return new int[]{total, running};
     }
 
+    void removeVideoTask(VideoTask videoTask) {
+        synchronized (mCurrentRequests) {
+            Request src = null;
+            for (Request request : mCurrentRequests) {
+                if (request.getVideoTask().FileName.equals(videoTask.FileName)) {
+                    src = request;
+                    break;
+                }
+            }
+            if (src != null) {
+                mCurrentRequests.remove(src);
+            }
+        }
+    }
+
     List<VideoTask> getVideoTasks() {
         List<VideoTask> videoTasks = new ArrayList<>();
         synchronized (mCurrentRequests) {
@@ -129,6 +144,7 @@ public class RequestQueue {
         }
         return videoTasks;
     }
+
 
     void finish(Request request) {
         // Remove from the set of requests currently being processed.
