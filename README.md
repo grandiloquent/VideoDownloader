@@ -2,11 +2,14 @@
 
 一个解析视频地址的浏览器
 
-[示例下载](https://lucidu.cn/article/jqdkgl)
+## 下载
 
-![](images/1.gif)
+* [示例](https://github.com/grandiloquent/VideoBrowser/releases)
+* [国内](https://lucidu.cn/article/jqdkgl)
 
-![](images/2.gif)
+|||
+|---|---|
+|![](images/1.gif)|![](images/2.gif)|
 
 ## 支持的视频网站
 
