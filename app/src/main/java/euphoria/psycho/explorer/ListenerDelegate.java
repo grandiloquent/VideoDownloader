@@ -1,8 +1,6 @@
 package euphoria.psycho.explorer;
 
 import android.app.AlertDialog.Builder;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.view.View;
@@ -51,24 +49,25 @@ public class ListenerDelegate {
     }
 
     private void onMore(View view) {
-        new BottomSheet.Builder(mMainActivity).title("菜单").grid().sheet(R.menu.list).listener(new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (R.id.favorite_border == which) {
-                    onFavorite();
-                } else if (R.id.bookmark2_button == which) {
-                    onShowBookmark();
-                } else if (R.id.refresh_button == which) {
-                    onRefresh();
-                } else if (R.id.copy_button == which) {
-                    onCopy();
-                } else if (R.id.playlist_play == which) {
-                    onPlaylist();
-                } else if (R.id.help_outline == which) {
-                    onHelp();
-                }
-            }
-        }).show();
+        new BottomSheet.Builder(mMainActivity)
+                .title("菜单")
+                .grid()
+                .sheet(R.menu.list)
+                .listener((dialog, which) -> {
+                    if (R.id.favorite_border == which) {
+                        onFavorite();
+                    } else if (R.id.bookmark2_button == which) {
+                        onShowBookmark();
+                    } else if (R.id.refresh_button == which) {
+                        onRefresh();
+                    } else if (R.id.copy_button == which) {
+                        onCopy();
+                    } else if (R.id.playlist_play == which) {
+                        onPlaylist();
+                    } else if (R.id.help_outline == which) {
+                        onHelp();
+                    }
+                }).show();
     }
 
     private void onPlaylist() {

@@ -23,4 +23,7 @@
     <string name="merge_start">mergeStart</string>
     <string name="waiting">Waiting</string>
     <string name="edit">Edit</string>
+    <string name="clear">清空数据库</string>
+    <string name="save">保存页面</string>
+    <string name="settings">设置</string>
 </resources>

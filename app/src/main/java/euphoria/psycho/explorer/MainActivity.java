@@ -94,8 +94,9 @@ public class MainActivity extends Activity implements ClientInterface {
         service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
         startService(service);
 //        Intent intent = new Intent(this, VideoActivity.class);
-//        intent.setData(Uri.parse("https://cdn77-vid.xvideos-cdn.com/RAKvKR40HiCIrs6pS-44rA==,1630465665/videos/hls/06/c5/75/06c575eb599a2c0984ddfd9b1a107f1d/hls-720p-238c3.m3u8"));
+//        intent.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/c271c470ab12ae4c79385304302d0d1c.mp4"));
 //        startActivity(intent);
+
     }
 
     private void loadStartPage() {

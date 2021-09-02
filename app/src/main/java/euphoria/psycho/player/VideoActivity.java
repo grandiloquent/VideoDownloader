@@ -1,17 +1,12 @@
 package euphoria.psycho.player;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.TextureView;
 import android.view.View;
 import android.view.WindowManager;
@@ -47,16 +42,14 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
 
 import java.io.File;
-import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
+import euphoria.psycho.share.Logger;
 
 import static com.google.android.exoplayer2.C.INDEX_UNSET;
 import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
@@ -93,76 +86,33 @@ public class VideoActivity extends BaseVideoActivity implements
     private Runnable mUpdateProgressAction = this::updateProgress;
     private Runnable mHideAction = this::hide;
 
-    private void actionDeleteVideo() {
-        if (isPlaying()) {
-            mControlDispatcher.dispatchSetPlayWhenReady(mPlayer, false);
+    private static void applyTextureViewRotation(TextureView textureView,
+                                                 int textureViewRotation) {
+        float textureViewWidth = textureView.getWidth();
+        float textureViewHeight = textureView.getHeight();
+        if (textureViewWidth == 0 || textureViewHeight == 0 || textureViewRotation == 0) {
+            textureView.setTransform(null);
+        } else {
+            Matrix transformMatrix = new Matrix();
+            float pivotX = textureViewWidth / 2;
+            float pivotY = textureViewHeight / 2;
+            transformMatrix.postRotate(textureViewRotation, pivotX, pivotY);
+            // After rotation, scale the rotated texture to fit the TextureView size.
+            RectF originalTextureRect = new RectF(0, 0, textureViewWidth, textureViewHeight);
+            RectF rotatedTextureRect = new RectF();
+            transformMatrix.mapRect(rotatedTextureRect, originalTextureRect);
+            transformMatrix.postScale(
+                    textureViewWidth / rotatedTextureRect.width(),
+                    textureViewHeight / rotatedTextureRect.height(),
+                    pivotX,
+                    pivotY);
+            textureView.setTransform(transformMatrix);
         }
-        String fileName = getCurrentUri();
-
-        openDeleteVideoDialog(this, fileName, new OperationResultCallback() {
-            @Override
-            public void onCancel() {
-            }
-
-            @Override
-            public void onFinished(boolean result) {
-                Context context = VideoActivity.this;
-
-                new File(fileName).delete();
-                mPlayer.stop();
-                if (mStartWindow + 1 < mFiles.length) {
-                    MediaSource mediaSource = generateMediaSource(Uri.fromFile(mFiles[mStartWindow + 1]));
-                    mPlayer.prepare(mediaSource);
-                    seekToFile(mFiles[mStartWindow]);
-
-                } else if (mStartWindow - 1 >= 0) {
-                    MediaSource mediaSource = generateMediaSource(Uri.fromFile(mFiles[mStartWindow + -1]));
-                    mPlayer.prepare(mediaSource);
-                    seekToFile(mFiles[mStartWindow]);
-                }
-                setRefreshResult();
-
-            }
-        });
     }
 
-    private void actionRenamFile() {
-        if (isPlaying()) {
-            mControlDispatcher.dispatchSetPlayWhenReady(mPlayer, false);
-        }
-        String fileName = getCurrentUri();
-//        FileUtils.showFileDialog(this, FileUtils.getFileName(fileName),
-//                "重命名", new FileUtils.DialogListener() {
-//                    @Override
-//                    public void onConfirmed(CharSequence value) {
-//                        Context context = VideoActivity.this;
-//                        File targetFile = new File(FileUtils.getDirectoryName(fileName), value.toString());
-//                        if (fileName.startsWith(FileUtils.getRemovableStoragePath())) {
-//                            String treeUri = mPreferences
-//                                    .getString(KEY_TREE_URI, "");
-//                            if (!isNullOrEmpty(treeUri)) {
-//                                DocumentFile documentFile = FileUtils.getDocumentFile(context,
-//                                        fileName, Uri.parse(treeUri));
-//                                try {
-//                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                                        DocumentsContract.renameDocument(context.getContentResolver(), documentFile.getUri(), value.toString());
-//                                    }
-//                                } catch (FileNotFoundException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        } else {
-//                            new File(fileName).renameTo(targetFile);
-//                        }
-//
-//                        seekToFile(targetFile);
-//                        setRefreshResult();
-//                    }
-//
-//                    @Override
-//                    public void onDismiss() {
-//                    }
-//                });
+    private static long usToMs(long us) {
+        if (us == C.TIME_UNSET || us == TIME_END_OF_SOURCE) return us;
+        else return us / 1000;
     }
 
     private SingleSampleMediaSource buildSubtitleMediaSource(File file) {
@@ -185,6 +135,7 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     private MediaSource generateMediaSource(Uri uri) {
+        Logger.e(String.format("generateMediaSource, %s", uri.toString()));
         String sourcePath = uri.getPath();
         File[] files = listVideoFiles(new File(sourcePath).getParent());
         mFiles = files;
@@ -194,7 +145,6 @@ public class VideoActivity extends BaseVideoActivity implements
         FileDataSourceFactory fileDataSourceFactory = new FileDataSourceFactory();
         for (int i = 0; i < length; i++) {
             if (files[i].getAbsolutePath().equals(sourcePath)) {
-                Log.e(TAG, files[i].getAbsolutePath() + " " + i);
                 mStartWindow = i;
             }
             MediaSource mediaSource = new ExtractorMediaSource.Factory(fileDataSourceFactory).createMediaSource(Uri.fromFile(files[i]));
@@ -258,19 +208,16 @@ public class VideoActivity extends BaseVideoActivity implements
                 String userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
                 DefaultDataSourceFactory mediaDataSourceFactory = new DefaultDataSourceFactory(this, BANDWIDTH_METER,
                         new DefaultHttpDataSourceFactory(userAgent, BANDWIDTH_METER));
-
                 if (videoUri.contains(".m3u8"))
                     mediaSource = new HlsMediaSource.Factory(mediaDataSourceFactory)
                             .createMediaSource(uri);
-                else{
-                    mediaSource=new ExtractorMediaSource.Factory(mediaDataSourceFactory).createMediaSource(uri);
+                else {
+                    mediaSource = new ExtractorMediaSource.Factory(mediaDataSourceFactory).createMediaSource(uri);
                 }
 
             } else {
                 mediaSource = generateMediaSource(uri);
             }
-
-
             mPlayer.prepare(mediaSource);
             if (mStartWindow > 0) {
                 seekTo(mStartWindow, C.TIME_UNSET);
@@ -296,21 +243,17 @@ public class VideoActivity extends BaseVideoActivity implements
             return file.isFile() && pattern.matcher(file.getName()).find();
         });
         if (files == null || files.length == 0) return null;
-        Collator collator = Collator.getInstance(Locale.CHINA);
         Arrays.sort(files, new Comparator<File>() {
             @Override
             public int compare(File o1, File o2) {
-//                final long result =o2.lastModified()-o1.lastModified();
-//                if (result < 0) {
-//                    return -1;
-//                } else if (result > 0) {
-//                    return 1;
-//                } else {
-//                    return 0;
-//                }
-                return collator.compare(o1.getName(), o2.getName());
-
-
+                final long result = o2.lastModified() - o1.lastModified();
+                if (result < 0) {
+                    return -1;
+                } else if (result > 0) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             }
         });
         return files;
@@ -376,8 +319,6 @@ public class VideoActivity extends BaseVideoActivity implements
             targetSpeed = (((int) speed - 2) / 2) * 2f;
             targetSpeed = Math.max(targetSpeed, 1);
         }
-
-
         mPlayer.setPlaybackParameters(new PlaybackParameters(targetSpeed, targetSpeed));
         Toast.makeText(this, targetSpeed + " ", Toast.LENGTH_SHORT).show();
     }
@@ -385,7 +326,8 @@ public class VideoActivity extends BaseVideoActivity implements
     private void savePosition() {
         String uri = getCurrentUri();
         if (uri == null || mPlayer == null) return;
-        mBookmarker.setBookmark(uri, (int) mPlayer.getCurrentPosition());
+        if (mPlayer.getDuration() - mPlayer.getCurrentPosition() > 60 * 1000)
+            mBookmarker.setBookmark(uri, (int) mPlayer.getCurrentPosition());
     }
 
     private void seekTo(int windowIndex, long position) {
@@ -397,30 +339,13 @@ public class VideoActivity extends BaseVideoActivity implements
         }
     }
 
-    private void seekToFile(File file) {
-        Uri uri = Uri.fromFile(file);
-        mPlayer.stop();
-
-        MediaSource mediaSource = generateMediaSource(uri);
-        mPlayer.prepare(mediaSource);
-        mPlayer.seekTo(mStartWindow, C.TIME_UNSET);
-
-        getSupportActionBar().setTitle(file.getName());
-        long bookmark = mBookmarker.getBookmark(file.getAbsolutePath());
-        if (bookmark > 0) {
-            seekTo(mPlayer.getCurrentWindowIndex(), bookmark);
-        }
-        mControlDispatcher.dispatchSetPlayWhenReady(mPlayer, true);
-        updateNavigation();
-
-    }
-
     private void seekToLastedState() {
         mStartWindow = mPlayer.getCurrentWindowIndex();
         String uri = getCurrentUri();
         if (uri == null) return;
         long bookmark = mBookmarker.getBookmark(uri);
         if (bookmark > 0) {
+            Logger.e(String.format("seekToLastedState, %s %s %s", bookmark, usToMs(mWindow.getDurationUs()), mPlayer.getDuration() - bookmark));
             seekTo(mPlayer.getCurrentWindowIndex(), bookmark);
         }
         if (getSupportActionBar() != null) {
@@ -439,12 +364,6 @@ public class VideoActivity extends BaseVideoActivity implements
         view.setEnabled(enabled);
         view.setAlpha(enabled ? 1f : 0.3f);
         view.setVisibility(View.VISIBLE);
-    }
-
-    private void setRefreshResult() {
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_REFRESH, true);
-        setResult(RESULT_OK, intent);
     }
 
     private void setupView() {
@@ -499,6 +418,14 @@ public class VideoActivity extends BaseVideoActivity implements
             } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
                 left += mNavigationBarWidth;
             }
+            Logger.e(String.format("" + "\nbottom = %s"
+                            + "\nleft = %s"
+                            + "\nright = %s"
+                            + "\ntop = %s"
+                    , bottom,
+                    left,
+                    right,
+                    top));
             mController.setPadding(left, top, right, bottom);
         }
         hideController();
@@ -551,15 +478,11 @@ public class VideoActivity extends BaseVideoActivity implements
             Timeline timeline = mPlayer.getCurrentTimeline();
             if (!timeline.isEmpty())
                 timeline.getWindow(mPlayer.getCurrentWindowIndex(), mWindow);
-
-
             duration = usToMs(mWindow.getDurationUs());
-
 //            Log.e("TAG/VideoActivity", "[ERROR] updateProgress: " + mPlayer.getDuration() + " "
 //                    + mPlayer.getContentDuration()
 //                    + " " + duration
 //            + mPlayer.du);
-
             position = mPlayer.getCurrentPosition();
             playbackState = mPlayer.getPlaybackState();
         }
@@ -598,57 +521,22 @@ public class VideoActivity extends BaseVideoActivity implements
         mStartWindow = mPlayer.getCurrentWindowIndex();
     }
 
-    private static void applyTextureViewRotation(TextureView textureView,
-                                                 int textureViewRotation) {
-        float textureViewWidth = textureView.getWidth();
-        float textureViewHeight = textureView.getHeight();
-        if (textureViewWidth == 0 || textureViewHeight == 0 || textureViewRotation == 0) {
-            textureView.setTransform(null);
-        } else {
-            Matrix transformMatrix = new Matrix();
-            float pivotX = textureViewWidth / 2;
-            float pivotY = textureViewHeight / 2;
-            transformMatrix.postRotate(textureViewRotation, pivotX, pivotY);
-            // After rotation, scale the rotated texture to fit the TextureView size.
-            RectF originalTextureRect = new RectF(0, 0, textureViewWidth, textureViewHeight);
-            RectF rotatedTextureRect = new RectF();
-            transformMatrix.mapRect(rotatedTextureRect, originalTextureRect);
-            transformMatrix.postScale(
-                    textureViewWidth / rotatedTextureRect.width(),
-                    textureViewHeight / rotatedTextureRect.height(),
-                    pivotX,
-                    pivotY);
-            textureView.setTransform(transformMatrix);
-        }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        initializePlayer();
     }
 
-    public static void openDeleteVideoDialog(Context context, String
-            fileName, OperationResultCallback callback) {
-        new AlertDialog.Builder(context)
-                .setTitle("询问")
-                .setMessage(String.format("确定永久删除 %s 吗？", fileName))
-                .setNegativeButton(android.R.string.cancel, ((dialog, which) -> {
-                    dialog.dismiss();
-                    if (callback != null) {
-                        callback.onCancel();
-                    }
-                }))
-                .setPositiveButton(android.R.string.ok, ((dialog, which) -> {
-                    callback.onFinished(true);
-                })).show();
-    }
-
-    private static long usToMs(long us) {
-        if (us == C.TIME_UNSET || us == TIME_END_OF_SOURCE) return us;
-        else return us / 1000;
+    @Override
+    protected void onStop() {
+        super.onStop();
+        releasePlayer();
     }
 
     @Override
     void initialize() {
         super.initialize();
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         Point point = getNavigationBarSize(this);
         mNavigationBarHeight = point.y;
         mNavigationBarWidth = point.x;
@@ -657,11 +545,6 @@ public class VideoActivity extends BaseVideoActivity implements
         mVideoTouchHelper = new VideoTouchHelper(this, this);
 
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) { //getMenuInflater().inflate(R.menu.video, menu);
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -682,36 +565,14 @@ public class VideoActivity extends BaseVideoActivity implements
      */
     @Override
     public void onLoadingChanged(boolean isLoading) {
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-//            case R.id.action_rename: {
-//                actionRenamFile();
-//                return true;
-//            }
-//            case R.id.action_delete: {
-//                actionDeleteVideo();
-//                return true;
-//
-//            }
-//            case R.id.action_full_screen: {
-//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-//            }
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
     }
 
     @Override
     public void onPlayerError(ExoPlaybackException error) {
-
     }
 
     @Override
@@ -735,12 +596,10 @@ public class VideoActivity extends BaseVideoActivity implements
      */
     @Override
     public void onRenderedFirstFrame() {
-
     }
 
     @Override
     public void onRepeatModeChanged(int repeatMode) {
-
     }
 
     @Override
@@ -748,8 +607,6 @@ public class VideoActivity extends BaseVideoActivity implements
         int delta = (int) distanceX * -100;
         if (Math.abs(delta) > 1000)
             mPlayer.seekTo(delta + mPlayer.getCurrentPosition());
-
-
         return true;
     }
 
@@ -777,35 +634,16 @@ public class VideoActivity extends BaseVideoActivity implements
      */
     @Override
     public void onSeekProcessed() {
-
     }
 
     @Override
     public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
     }
 
     @Override
     public void onSingleTapConfirmed() {
-
         show();
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (Build.VERSION.SDK_INT > 23) {
-            initializePlayer();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (Build.VERSION.SDK_INT > 23) {
-            releasePlayer();
-        }
     }
 
     @Override
@@ -816,7 +654,6 @@ public class VideoActivity extends BaseVideoActivity implements
 
     @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
     }
 
     @Override
@@ -835,11 +672,5 @@ public class VideoActivity extends BaseVideoActivity implements
         }
         applyTextureViewRotation(mTextureView, mTextureViewRotation);
         mExoContentFrame.setAspectRatio(ratio);
-    }
-
-    public interface OperationResultCallback {
-        void onCancel();
-
-        void onFinished(boolean result);
     }
 }
