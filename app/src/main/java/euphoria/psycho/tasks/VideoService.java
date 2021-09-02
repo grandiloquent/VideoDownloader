@@ -131,7 +131,7 @@ public class VideoService extends Service implements RequestEventListener {
         stopSelf();
         // Send a task finished broadcast
         // to the activity for display the download progress
-        // if it is already open, then it should be closed now
+        // if it is already opened it should close
         sendBroadcast(new Intent(VideoActivity.ACTION_FINISH));
         // Try to open the video list
         // because the new version of the Android system

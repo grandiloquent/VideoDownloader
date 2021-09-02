@@ -22,16 +22,6 @@ public class Helper {
         return cacheDirectory;
     }
 
-    //                Request request = new Request(Uri.parse(url));
-//
-//                request.allowScanningByMediaScanner();
-//                request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-//
-//                request.setDestinationInExternalFilesDir(MainActivity.this,
-//                        Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url))));
-//
-//                DownloadManager downloadManager = (DownloadManager) MainActivity.this.getSystemService(DOWNLOAD_SERVICE);
-//                downloadManager.enqueue(request);
     public static DownloadListener getDownloadListener(final Context context) {
         return (url, userAgent, contentDisposition, mimetype, contentLength) -> Share.setClipboardText(context, url);
     }
@@ -61,7 +51,7 @@ public class Helper {
             mainActivity.getWebView().loadUrl(uri);
             dialog.dismiss();
         })
-                .setMessage("是否使用浏览器打开视频链接")
+                .setMessage(R.string.whether_to_use_the_browser_to_open_the_video_link)
                 .show();
     }
 }//

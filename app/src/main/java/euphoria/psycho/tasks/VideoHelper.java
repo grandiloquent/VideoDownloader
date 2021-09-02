@@ -19,7 +19,6 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.utils.FileLog;
 import euphoria.psycho.utils.M3u8Utils;
 
 public class VideoHelper {
@@ -202,7 +201,8 @@ public class VideoHelper {
             case TaskStatus.ERROR_STATUS_CODE: {
                 return "Error Status Code";
             }
+            default:
+                return Integer.toString(status);
         }
-        return null;
     }
 }
