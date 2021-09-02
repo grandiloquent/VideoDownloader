@@ -95,7 +95,7 @@ public class MainActivity extends Activity implements ClientInterface {
         startService(service);
 //        Intent intent = new Intent(this, VideoActivity.class);
 //        intent.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/c271c470ab12ae4c79385304302d0d1c.mp4"));
-//        startActivity(intent); 
+//        startActivity(intent);
 
     }
 
