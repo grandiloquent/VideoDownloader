@@ -37,7 +37,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     AspectRatioFrameLayout mExoContentFrame;
     TextView mExoDuration;
     TextView mExoErrorMessage;
-    ImageButton mExoFfwd;
     ImageButton mExoNext;
     ImageButton mExoPause;
     ImageButton mExoPlay;
@@ -114,7 +113,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
 
     void initialize() {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         mIsHasBar = hasNavBar();
         setContentView(R.layout.activity_video);
         mRootView = findViewById(R.id.root_view);
@@ -126,7 +124,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mExoRew = findViewById(R.id.exo_rew);
         mExoPlay = findViewById(R.id.exo_play);
         mExoPause = findViewById(R.id.exo_pause);
-        mExoFfwd = findViewById(R.id.exo_ffwd);
         mExoNext = findViewById(R.id.exo_next);
         mExoPosition = findViewById(R.id.exo_position);
         mExoProgress = findViewById(R.id.exo_progress);

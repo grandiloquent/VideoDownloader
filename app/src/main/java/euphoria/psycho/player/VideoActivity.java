@@ -128,8 +128,12 @@ public class VideoActivity extends BaseVideoActivity implements
     private void fastForward() {
         if (mPlayer == null) return;
         float speed = mPlayer.getPlaybackParameters().speed;
-        float targetSpeed = (((int) speed + 2) / 2) * 2f;
+        if (speed < 1) {
+            return;
+        }
+        float targetSpeed = (((int) speed + 2) >> 1) * 2f;
         targetSpeed = Math.min(targetSpeed, 8);
+        Logger.e(String.format("fastForward, %s %s", speed, targetSpeed));
         mPlayer.setPlaybackParameters(new PlaybackParameters(targetSpeed, targetSpeed));
         Toast.makeText(this, targetSpeed + " ", Toast.LENGTH_SHORT).show();
     }
@@ -306,23 +310,6 @@ public class VideoActivity extends BaseVideoActivity implements
         }
     }
 
-    private void rewind() {
-        if (mPlayer == null) return;
-        float speed = mPlayer.getPlaybackParameters().speed;
-        float targetSpeed = 0f;
-        if (speed <= 1.0f) {
-            targetSpeed = speed - 0.25f;
-            if (targetSpeed <= 0f) {
-                targetSpeed = 0.25f;
-            }
-        } else {
-            targetSpeed = (((int) speed - 2) / 2) * 2f;
-            targetSpeed = Math.max(targetSpeed, 1);
-        }
-        mPlayer.setPlaybackParameters(new PlaybackParameters(targetSpeed, targetSpeed));
-        Toast.makeText(this, targetSpeed + " ", Toast.LENGTH_SHORT).show();
-    }
-
     private void savePosition() {
         String uri = getCurrentUri();
         if (uri == null || mPlayer == null) return;
@@ -345,7 +332,6 @@ public class VideoActivity extends BaseVideoActivity implements
         if (uri == null) return;
         long bookmark = mBookmarker.getBookmark(uri);
         if (bookmark > 0) {
-            Logger.e(String.format("seekToLastedState, %s %s %s", bookmark, usToMs(mWindow.getDurationUs()), mPlayer.getDuration() - bookmark));
             seekTo(mPlayer.getCurrentWindowIndex(), bookmark);
         }
         if (getSupportActionBar() != null) {
@@ -390,11 +376,16 @@ public class VideoActivity extends BaseVideoActivity implements
             next();
             hideController();
         });
-        mExoFfwd.setOnClickListener(v -> {
-            fastForward();
-        });
         mExoRew.setOnClickListener(v -> {
-            rewind();
+            int orientation = calculateScreenOrientation();
+            if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            }
+
         });
     }
 
@@ -418,14 +409,6 @@ public class VideoActivity extends BaseVideoActivity implements
             } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
                 left += mNavigationBarWidth;
             }
-            Logger.e(String.format("" + "\nbottom = %s"
-                            + "\nleft = %s"
-                            + "\nright = %s"
-                            + "\ntop = %s"
-                    , bottom,
-                    left,
-                    right,
-                    top));
             mController.setPadding(left, top, right, bottom);
         }
         hideController();
@@ -453,8 +436,7 @@ public class VideoActivity extends BaseVideoActivity implements
         }
         setButtonEnabled(enablePrevious, mExoPrev);
         setButtonEnabled(enableNext, mExoNext);
-        setButtonEnabled(isSeekable, mExoFfwd);
-        setButtonEnabled(isSeekable, mExoRew);
+        setButtonEnabled(true, mExoRew);
         mExoProgress.setEnabled(isSeekable);
     }
 
