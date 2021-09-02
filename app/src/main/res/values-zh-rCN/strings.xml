@@ -18,5 +18,13 @@
     <string name="merge_complete">合并完成</string>
     <string name="bs_more">更多</string>
     <string name="merge_start">合并开始</string>
-<string name="waiting">等待中</string>
+    <string name="favorite_border">添加书签</string>
+    <string name="bookmark2_button">书签</string>
+    <string name="refresh_button">刷新</string>
+    <string name="copy_button">复制</string>
+    <string name="playlist_play">视频</string>
+    <string name="help_outline">帮助</string>
+    <string name="waiting">等待中</string>
+    <string name="edit">修改</string>
+
 </resources>

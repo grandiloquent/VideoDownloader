@@ -33,11 +33,9 @@ public class VideoHelper {
     }
 
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
-        FileLog.d(TAG, "checkTask, " + fileName);
         if (q.getCurrentRequests()
                 .stream()
                 .anyMatch(r -> r.getVideoTask().FileName.equals(fileName))) {
-            FileLog.d(TAG, "checkTask, " + fileName + " 已添加下载任务");
             context.sendBroadcast(new Intent(VideoActivity.ACTION_REFRESH));
             return true;
         }

@@ -197,7 +197,7 @@ public class ListenerDelegate {
 
     private void onShowBookmark() {
         Builder builderSingle = new Builder(mMainActivity).setPositiveButton(
-                "修改",
+                R.string.edit,
                 (dialog, which) -> {
                     Intent intent = new Intent(mMainActivity, BookmarkActivity.class);
                     mMainActivity.startActivity(intent);

@@ -12,7 +12,7 @@
     <string name="download_video">Download video</string>
     <string name="whether_to_use_the_browser_to_open_the_video_link">Whether to use the browser to open the video link</string>
     <string name="download">download</string>
-    <string name="parsing">Parsing...</string>
+    <string name="parsing">Parsing…</string>
     <string name="merge_complete">Merger complete</string>
     <string name="favorite_border">添加书签</string>
     <string name="bookmark2_button">书签</string>
@@ -21,6 +21,6 @@
     <string name="playlist_play">视频</string>
     <string name="help_outline">帮助</string>
     <string name="merge_start">mergeStart</string>
-
-<string name="waiting">Waiting</string>
+    <string name="waiting">Waiting</string>
+    <string name="edit">Edit</string>
 </resources>
