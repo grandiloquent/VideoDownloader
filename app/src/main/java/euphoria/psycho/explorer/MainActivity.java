@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
@@ -14,7 +13,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import euphoria.psycho.player.VideoActivity;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
@@ -95,9 +93,9 @@ public class MainActivity extends Activity implements ClientInterface {
         Intent service = new Intent(this, VideoService.class);
         service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
         startService(service);
-        Intent intent = new Intent(this, VideoActivity.class);
-        intent.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/c271c470ab12ae4c79385304302d0d1c.mp4"));
-        startActivity(intent);
+//        Intent intent = new Intent(this, VideoActivity.class);
+//        intent.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/c271c470ab12ae4c79385304302d0d1c.mp4"));
+//        startActivity(intent); 
 
     }
 
