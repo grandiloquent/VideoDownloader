@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.share.Logger;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     private final VideoActivity mVideoActivity;
@@ -165,6 +166,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
 
     @Override
     public void synchronizeTask(VideoTask videoTask) {
+        Logger.e(String.format("synchronizeTask, %s", videoTask.Status));
         for (ViewHolder viewHolder : mViewHolders) {
             if (videoTask.FileName.equals(viewHolder.tag)) {
                 renderVideoTask(mVideoActivity, viewHolder, videoTask);
