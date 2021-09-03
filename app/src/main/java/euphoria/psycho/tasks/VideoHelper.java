@@ -47,7 +47,7 @@ public class VideoHelper {
                 .anyMatch(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1);
     }
 
-    
+
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
         if (q.taskExists(fileName)) {
             context.sendBroadcast(new Intent(VideoActivity.ACTION_REFRESH));

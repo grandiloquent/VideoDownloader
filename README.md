@@ -26,7 +26,7 @@
 * [ ] [腾讯视频](https://v.qq.com/)
 * [x] [Twitter](https://m.twitter.com)
 * [x] [YouTube](https://m.youtube.com)
-* [x] [91porn](https://91porn.com/index.php)
+* [x] [91porn](https://91porn.com/index.php): 批量下载视频
 * [x] [XVideos](https://xvideos.com)
 * [x] [PornHub](https://www.pornhub.com)
 * [x] [PornOne](https://pornone.com/)
