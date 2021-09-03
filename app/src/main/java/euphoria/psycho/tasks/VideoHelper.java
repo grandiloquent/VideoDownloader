@@ -142,7 +142,7 @@ public class VideoHelper {
     public static void showNotification(Context context, NotificationManager manager, int[] counts) {
         Builder builder = VideoHelper.getBuilder(context);
         builder.setContentText(String.format("正在下载 %s/%s 个视频",
-                counts[1],
+                counts[0] - counts[1] + 1,
                 counts[0]));
         manager.notify(android.R.drawable.stat_sys_download, builder.build());
     }
@@ -155,7 +155,6 @@ public class VideoHelper {
 
     public static void startVideoListActivity(Context context) {
         Intent intent = new Intent(context, VideoListActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }

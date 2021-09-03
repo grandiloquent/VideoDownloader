@@ -27,7 +27,6 @@ public class VideoService extends Service implements RequestEventListener {
     public static final String CHECK_UNFINISHED_VIDEO_TASKS = "CheckUnfinishedVideoTasks";
     public static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
     public static final String KEY_VIDEO_LIST = "video_list";
-    private static final String TAG = "VideoService";
     private RequestQueue mQueue;
     private NotificationManager mNotificationManager;
 
@@ -73,6 +72,7 @@ public class VideoService extends Service implements RequestEventListener {
             // try to avoid downloading the video repeatedly
             String[] infos = VideoHelper.getInfos(uri);
             if (infos == null) {
+                Logger.e(String.format("submitRequest, %s", "VideoHelper.getInfos(uri)"));
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
@@ -90,11 +90,13 @@ public class VideoService extends Service implements RequestEventListener {
                 }
             } else {
                 if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
+                    Logger.e(String.format("submitRequest, %s %s", "TaskStatus.MERGE_VIDEO_FINISHED",videoTask.FileName));
                     toastTaskFinished();
                     return;
                 }
                 videoTask.DownloadedFiles = 0;
             }
+            Logger.e(String.format("submitRequest, %s", videoTask.FileName));
             submitTask(videoTask);
 
         }).start();
@@ -117,7 +119,7 @@ public class VideoService extends Service implements RequestEventListener {
 
     private void toastTaskFinished() {
         VideoManager.post(() -> {
-            Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_LONG).show();
+            Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_SHORT).show();
             tryStop();
         });
     }
@@ -169,6 +171,7 @@ public class VideoService extends Service implements RequestEventListener {
 
     @Override
     public void onRequestEvent(Request Request, int event) {
+        Logger.e(String.format("onRequestEvent, %s", event));
         if (event == RequestEvent.REQUEST_QUEUED) {
             int[] counts = mQueue.count();
             showNotification(this, mNotificationManager, counts);

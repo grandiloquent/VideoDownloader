@@ -68,7 +68,7 @@
         <activity
             android:name=".VideoListActivity"
             android:label="@string/video_list_name"
-            android:launchMode="singleTop" />
+            android:launchMode="singleInstance" />
         <activity
             android:name="euphoria.psycho.player.VideoActivity"
             android:configChanges="orientation"

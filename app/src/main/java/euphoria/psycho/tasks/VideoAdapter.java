@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     private final VideoActivity mVideoActivity;
@@ -45,7 +44,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     public static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
-        Logger.e(String.format("renderVideoTask, %s", VideoHelper.statusToString(videoTask.Status)));
         switch (videoTask.Status) {
             case TaskStatus.PARSE_VIDEOS: {
                 break;

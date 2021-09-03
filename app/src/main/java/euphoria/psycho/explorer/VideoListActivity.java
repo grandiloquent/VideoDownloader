@@ -69,7 +69,7 @@ public class VideoListActivity extends Activity {
         });
         return files;
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
