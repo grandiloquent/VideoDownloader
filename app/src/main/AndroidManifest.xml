@@ -71,8 +71,8 @@
             android:launchMode="singleTop" />
         <activity
             android:name="euphoria.psycho.player.VideoActivity"
+            android:configChanges="orientation"
             android:hardwareAccelerated="true"
-            android:taskAffinity=""
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
 

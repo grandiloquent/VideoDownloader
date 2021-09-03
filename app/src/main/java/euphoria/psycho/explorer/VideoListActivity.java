@@ -53,12 +53,23 @@ public class VideoListActivity extends Activity {
     }
 
     private List<File> getVideos() {
-        return FileShare.recursivelyListFiles(
+        List<File> files = FileShare.recursivelyListFiles(
                 getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
                 ".mp4"
         );
+        files.sort((o1, o2) -> {
+            final long result = o2.lastModified() - o1.lastModified();
+            if (result < 0) {
+                return -1;
+            } else if (result > 0) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        return files;
     }
-
+    
     @Override
     protected void onResume() {
         super.onResume();

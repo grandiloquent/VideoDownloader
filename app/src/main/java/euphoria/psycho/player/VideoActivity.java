@@ -1,5 +1,6 @@
 package euphoria.psycho.player;
 
+import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Matrix;
@@ -10,7 +11,6 @@ import android.os.Handler;
 import android.view.TextureView;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
@@ -42,6 +42,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Formatter;
@@ -63,28 +64,24 @@ public class VideoActivity extends BaseVideoActivity implements
         VideoTouchHelper.Listener,
         TimeBar.OnScrubListener {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
-    public static final String EXTRA_REFRESH = "refresh";
-    public static final String KEY_SORT_BY = "sort_by";
-    public static final String KEY_SORT_DIRECTION = "sort_direction_video";
-    private static final String TAG = "VideoActivity";
     private final DefaultControlDispatcher mControlDispatcher = new DefaultControlDispatcher();
     private final FileDataSourceFactory mFileDataSourceFactory = new FileDataSourceFactory();
     private final Handler mHandler = new Handler();
     private final Format mSrtFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP, Format.NO_VALUE, "en");
     private final StringBuilder mStringBuilder = new StringBuilder();
+    private final Formatter mFormatter = new Formatter(mStringBuilder);
+    private final Timeline.Window mWindow = new Timeline.Window();
     private Bookmarker mBookmarker;
-    private File[] mFiles = null;
-    private Formatter mFormatter = new Formatter(mStringBuilder);
+    private List<File> mFiles = null;
     private int mNavigationBarHeight;
     private int mNavigationBarWidth;
     private SimpleExoPlayer mPlayer;
+    private final Runnable mUpdateProgressAction = this::updateProgress;
+    private final Runnable mHideAction = this::hide;
     private boolean mScrubbing;
     private int mStartWindow;
     private int mTextureViewRotation;
     private VideoTouchHelper mVideoTouchHelper;
-    private Timeline.Window mWindow = new Timeline.Window();
-    private Runnable mUpdateProgressAction = this::updateProgress;
-    private Runnable mHideAction = this::hide;
 
     private static void applyTextureViewRotation(TextureView textureView,
                                                  int textureViewRotation) {
@@ -125,25 +122,13 @@ public class VideoActivity extends BaseVideoActivity implements
         return null;
     }
 
-    private void fastForward() {
-        if (mPlayer == null) return;
-        float speed = mPlayer.getPlaybackParameters().speed;
-        if (speed < 1) {
-            return;
-        }
-        float targetSpeed = (((int) speed + 2) >> 1) * 2f;
-        targetSpeed = Math.min(targetSpeed, 8);
-        Logger.e(String.format("fastForward, %s %s", speed, targetSpeed));
-        mPlayer.setPlaybackParameters(new PlaybackParameters(targetSpeed, targetSpeed));
-        Toast.makeText(this, targetSpeed + " ", Toast.LENGTH_SHORT).show();
-    }
-
     private MediaSource generateMediaSource(Uri uri) {
         Logger.e(String.format("generateMediaSource, %s", uri.toString()));
         String sourcePath = uri.getPath();
         File[] files = listVideoFiles(new File(sourcePath).getParent());
-        mFiles = files;
         if (files == null) return null;
+        mFiles = new ArrayList<>();
+        mFiles.addAll(Arrays.asList(files));
         int length = files.length;
         MediaSource[] mediaSources = new MediaSource[length];
         FileDataSourceFactory fileDataSourceFactory = new FileDataSourceFactory();
@@ -174,8 +159,8 @@ public class VideoActivity extends BaseVideoActivity implements
         mStartWindow = mPlayer.getCurrentWindowIndex();
         if (mFiles == null)
             return null;
-        if (mStartWindow >= 0 && mStartWindow < mFiles.length)
-            return mFiles[mStartWindow].getAbsolutePath();
+        if (mStartWindow >= 0 && mStartWindow < mFiles.size())
+            return mFiles.get(mStartWindow).getAbsolutePath();
         return null;
     }
 
@@ -192,6 +177,8 @@ public class VideoActivity extends BaseVideoActivity implements
         mHandler.postDelayed(mHideAction, DEFAULT_SHOW_TIMEOUT_MS);
     }
 
+    MediaSource mMediaSource = null;
+
     private void initializePlayer() {
         hideController();
         if (mPlayer == null) {
@@ -204,7 +191,6 @@ public class VideoActivity extends BaseVideoActivity implements
             videoComponent.addVideoListener(this);
             mPlayer.getTextComponent().addTextOutput(this);
             Uri uri = getIntent().getData();
-            MediaSource mediaSource = null;
             if (uri == null) {
                 String videoUri = getIntent().getStringExtra(Intent.EXTRA_TEXT);
                 uri = Uri.parse(videoUri);
@@ -213,16 +199,16 @@ public class VideoActivity extends BaseVideoActivity implements
                 DefaultDataSourceFactory mediaDataSourceFactory = new DefaultDataSourceFactory(this, BANDWIDTH_METER,
                         new DefaultHttpDataSourceFactory(userAgent, BANDWIDTH_METER));
                 if (videoUri.contains(".m3u8"))
-                    mediaSource = new HlsMediaSource.Factory(mediaDataSourceFactory)
+                    mMediaSource = new HlsMediaSource.Factory(mediaDataSourceFactory)
                             .createMediaSource(uri);
                 else {
-                    mediaSource = new ExtractorMediaSource.Factory(mediaDataSourceFactory).createMediaSource(uri);
+                    mMediaSource = new ExtractorMediaSource.Factory(mediaDataSourceFactory).createMediaSource(uri);
                 }
 
             } else {
-                mediaSource = generateMediaSource(uri);
+                mMediaSource = generateMediaSource(uri);
             }
-            mPlayer.prepare(mediaSource);
+            mPlayer.prepare(mMediaSource);
             if (mStartWindow > 0) {
                 seekTo(mStartWindow, C.TIME_UNSET);
             }
@@ -387,6 +373,20 @@ public class VideoActivity extends BaseVideoActivity implements
             }
 
         });
+        mExoDelete.setOnClickListener(v -> {
+            new Builder(this)
+                    .setTitle("确定删除吗？")
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        dialog.dismiss();
+                        int index = mPlayer.getCurrentWindowIndex();
+                        ((ConcatenatingMediaSource) mMediaSource).removeMediaSource(index);
+                        Logger.e(String.format("setupView, %s", mFiles.size()));
+                        mFiles.remove(index).delete();
+                    })
+                    .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
+                    .show();
+
+        });
     }
 
     private void show() {
@@ -444,7 +444,7 @@ public class VideoActivity extends BaseVideoActivity implements
         boolean requestFocus = false;
         boolean playing = isPlaying();
         mExoPlay.setVisibility(playing ? View.GONE : View.VISIBLE);
-        requestFocus = requestFocus | (playing && mExoPlay.isFocused());
+        requestFocus = playing && mExoPlay.isFocused();
         mExoPause.setVisibility(!playing ? View.GONE : View.VISIBLE);
         requestFocus = requestFocus | (!playing && mExoPause.isFocused());
         if (requestFocus)
@@ -569,7 +569,7 @@ public class VideoActivity extends BaseVideoActivity implements
     @Override
     public void onPositionDiscontinuity(int reason) {
         if (mFiles != null)
-            getSupportActionBar().setTitle(mFiles[mPlayer.getCurrentWindowIndex()].getName());
+            getSupportActionBar().setTitle(mFiles.get(mPlayer.getCurrentWindowIndex()).getName());
     }
 
     /**

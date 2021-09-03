@@ -94,7 +94,13 @@ public class MainActivity extends Activity implements ClientInterface {
         service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
         startService(service);
 //        Intent intent = new Intent(this, VideoActivity.class);
-//        intent.setData(Uri.parse("file:///storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/c271c470ab12ae4c79385304302d0d1c.mp4"));
+//        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+//            try {
+//                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download")).findFirst().get().toFile()));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 //        startActivity(intent);
 
     }
