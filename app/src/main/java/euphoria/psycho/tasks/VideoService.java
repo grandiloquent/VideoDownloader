@@ -1,5 +1,6 @@
 package euphoria.psycho.tasks;
 
+import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -72,7 +73,6 @@ public class VideoService extends Service implements RequestEventListener {
             // try to avoid downloading the video repeatedly
             String[] infos = VideoHelper.getInfos(uri);
             if (infos == null) {
-                Logger.e(String.format("submitRequest, %s", "VideoHelper.getInfos(uri)"));
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
@@ -90,13 +90,11 @@ public class VideoService extends Service implements RequestEventListener {
                 }
             } else {
                 if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
-                    Logger.e(String.format("submitRequest, %s %s", "TaskStatus.MERGE_VIDEO_FINISHED",videoTask.FileName));
                     toastTaskFinished();
                     return;
                 }
                 videoTask.DownloadedFiles = 0;
             }
-            Logger.e(String.format("submitRequest, %s", videoTask.FileName));
             submitTask(videoTask);
 
         }).start();
@@ -112,15 +110,13 @@ public class VideoService extends Service implements RequestEventListener {
 
     private void toastTaskFailed(String message) {
         VideoManager.post(() -> {
-            Toast.makeText(VideoService.this, message, Toast.LENGTH_LONG).show();
-            tryStop();
+            Toast.makeText(VideoService.this, message, Toast.LENGTH_SHORT).show();
         });
     }
 
     private void toastTaskFinished() {
         VideoManager.post(() -> {
             Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_SHORT).show();
-            tryStop();
         });
     }
 
@@ -171,7 +167,6 @@ public class VideoService extends Service implements RequestEventListener {
 
     @Override
     public void onRequestEvent(Request Request, int event) {
-        Logger.e(String.format("onRequestEvent, %s", event));
         if (event == RequestEvent.REQUEST_QUEUED) {
             int[] counts = mQueue.count();
             showNotification(this, mNotificationManager, counts);
@@ -193,6 +188,9 @@ public class VideoService extends Service implements RequestEventListener {
         }
         String[] videoList = intent.getStringArrayExtra(KEY_VIDEO_LIST);
         if (videoList != null) {
+            Builder builder = VideoHelper.getBuilder(this);
+            builder.setContentText(String.format("准备下载 %s 个视频", videoList.length));
+            mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
             for (String s : videoList) {
                 submitRequest(s);
             }

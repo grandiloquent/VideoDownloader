@@ -102,7 +102,6 @@ public class MainActivity extends Activity implements ClientInterface {
 //            }
 //        }
 //        startActivity(intent);
-
     }
 
     private void loadStartPage() {
@@ -121,6 +120,7 @@ public class MainActivity extends Activity implements ClientInterface {
         // the permissions required  to run the app
         if (checkPermissions()) return;
         initialize();
+
     }
 
     @Override

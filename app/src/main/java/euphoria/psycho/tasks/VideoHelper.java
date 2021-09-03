@@ -19,6 +19,7 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.utils.M3u8Utils;
 
 public class VideoHelper {
@@ -97,18 +98,22 @@ public class VideoHelper {
     }
 
     public static String[] getInfos(String uri) {
-        String m3u8String;
-        String fileName;
+        String m3u8String = null;
+        String fileName = null;
         try {
             m3u8String = M3u8Utils.getString(uri);
-            if (m3u8String == null) {
-                return null;
-            }
-            fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
-            if (fileName == null) {
-                return null;
-            }
         } catch (Exception ignored) {
+            Logger.e(String.format("getInfos,%s %s", uri, ignored.getMessage()));
+        }
+        if (m3u8String == null) {
+            return null;
+        }
+        try {
+            fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (fileName == null) {
             return null;
         }
         return new String[]{m3u8String, fileName};
