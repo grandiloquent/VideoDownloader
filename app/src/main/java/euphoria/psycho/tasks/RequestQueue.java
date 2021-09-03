@@ -146,6 +146,15 @@ public class RequestQueue {
     }
 
 
+    boolean taskExists(String fileName) {
+        synchronized (mCurrentRequests) {
+            for (Request request : mCurrentRequests) {
+                if (request.getVideoTask().FileName.equals(fileName)) return true;
+            }
+            return false;
+        }
+    }
+
     void finish(Request request) {
         // Remove from the set of requests currently being processed.
 //        synchronized (mCurrentRequests) {

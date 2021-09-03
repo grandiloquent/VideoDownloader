@@ -57,7 +57,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
                 viewHolder.subtitle.setText(String.format("%s/%s",
                         videoTask.DownloadedFiles,
                         videoTask.TotalFiles));
-                viewHolder.button.setImageResource(R.drawable.ic_action_pause);
                 viewHolder.progressBar.setProgress((int) ((videoTask.DownloadedFiles * 1.0 / videoTask.TotalFiles) * 100));
                 break;
             }
@@ -137,6 +136,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         return position;
     }
 
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
@@ -154,18 +154,10 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         viewHolder.tag = videoTask.FileName;
         viewHolder.title.setText(videoTask.FileName);
         viewHolder.subtitle.setText(R.string.waiting);
-        viewHolder.button.setOnClickListener(v -> {
-            if (!videoTask.IsPaused)
-                videoTask.IsPaused = true;
-            else {
-                videoTask.IsPaused = false;
-                VideoManager.getInstance().getQueue().removeVideoTask(videoTask);
-                videoTask.DownloadedFiles = 0;
-                Request request = new Request(parent.getContext(), videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
-                request.setRequestQueue(VideoManager.getInstance().getQueue());
-                VideoManager.getInstance().getQueue().add(request);
-            }
-        });
+        viewHolder.progressBar.setProgress(0);
+        viewHolder.layout.setOnClickListener(null);
+        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
+        VideoHelper.renderPauseButton(parent.getContext(), viewHolder, videoTask);
         renderVideoTask(parent.getContext(), viewHolder, videoTask);
         if (videoTask.TotalFiles > 0 && videoTask.DownloadedFiles == videoTask.TotalFiles) {
             renderCompletedStatus(parent.getContext(), viewHolder, videoTask);

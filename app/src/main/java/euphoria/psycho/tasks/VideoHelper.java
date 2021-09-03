@@ -25,16 +25,31 @@ public class VideoHelper {
 
     private static final String TAG = "VideoHelper";
 
+    public static void renderPauseButton(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+        viewHolder.button.setImageResource(R.drawable.ic_action_pause);
+        viewHolder.button.setOnClickListener(v -> {
+            if (!videoTask.IsPaused) {
+                videoTask.IsPaused = true;
+            } else {
+                videoTask.IsPaused = false;
+                VideoManager.getInstance().getQueue().removeVideoTask(videoTask);
+                videoTask.DownloadedFiles = 0;
+                Request request = new Request(context, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+                request.setRequestQueue(VideoManager.getInstance().getQueue());
+                VideoManager.getInstance().getQueue().add(request);
+            }
+        });
+    }
+
     public static boolean checkIfExistsRunningTask(RequestQueue queue) {
         return queue.getCurrentRequests()
                 .stream()
                 .anyMatch(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1);
     }
 
+    
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
-        if (q.getCurrentRequests()
-                .stream()
-                .anyMatch(r -> r.getVideoTask().FileName.equals(fileName))) {
+        if (q.taskExists(fileName)) {
             context.sendBroadcast(new Intent(VideoActivity.ACTION_REFRESH));
             return true;
         }
