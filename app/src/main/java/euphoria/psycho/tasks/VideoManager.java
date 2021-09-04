@@ -12,7 +12,7 @@ import euphoria.psycho.explorer.App;
 
 public class VideoManager implements VideoTaskListener {
 
-    private static WeakReference<VideoManager> sVideoManager;
+    private static VideoManager sVideoManager;
     private final VideoTaskDatabase mDatabase;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private RequestQueue mQueue;
@@ -36,10 +36,10 @@ public class VideoManager implements VideoTaskListener {
     }
 
     public static VideoManager getInstance() {
-        if (sVideoManager.get() == null) {
-            sVideoManager = new WeakReference<>(new VideoManager(App.getContext()));
+        if (sVideoManager == null) {
+            sVideoManager = new VideoManager(App.getContext());
         }
-        return sVideoManager.get();
+        return sVideoManager;
     }
 
     public RequestQueue getQueue() {
@@ -52,10 +52,10 @@ public class VideoManager implements VideoTaskListener {
 
 
     public static VideoManager newInstance(Context context) {
-        if (sVideoManager == null || sVideoManager.get() == null) {
-            sVideoManager = new WeakReference<>(new VideoManager(context));
+        if (sVideoManager == null) {
+            sVideoManager = new VideoManager(context);
         }
-        return sVideoManager.get();
+        return sVideoManager;
     }
 
 
@@ -76,7 +76,6 @@ public class VideoManager implements VideoTaskListener {
     public void taskProgress(VideoTask videoTask) {
         mVideoTaskListeners.forEach(videoTaskListener -> videoTaskListener.taskProgress(videoTask));
     }
-
 
     public static void post(Runnable runnable) {
         getInstance().getHandler().post(runnable);

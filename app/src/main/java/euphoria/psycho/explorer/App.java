@@ -7,7 +7,6 @@ import android.os.StrictMode;
 
 import java.io.File;
 
-import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.utils.FileLog;
 
 public class App extends Application {
@@ -24,7 +23,7 @@ public class App extends Application {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         //FileShare.initialize(this);
-        VideoHelper.deleteVideoDirectory(this);
+        //VideoHelper.deleteVideoDirectory(this);
         File logDir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log");
         if (!logDir.exists()) {
             logDir.mkdirs();

@@ -106,6 +106,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     public void update(List<VideoTask> videoTasks) {
+        Logger.e(String.format("update, %s", videoTasks.size()));
         mVideoTasks.clear();
         mVideoTasks.addAll(videoTasks);
         notifyDataSetChanged();

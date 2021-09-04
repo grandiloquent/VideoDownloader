@@ -165,6 +165,7 @@ public class VideoHelper {
     }
 
     public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {
+        Logger.e(String.format("updateList, %s", ""));
         progressBar.setVisibility(View.GONE);
         listView.setVisibility(View.VISIBLE);
         videoAdapter.update(VideoManager.getInstance().getQueue().getVideoTasks());
