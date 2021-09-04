@@ -459,11 +459,11 @@ public class VideoActivity extends BaseVideoActivity implements
         Point point = getNavigationBarSize(this);
         mNavigationBarHeight = getNavigationBarHeight(this);
         mNavigationBarWidth = point.x;
-        Logger.e(String.format("initialize, %s %s", mNavigationBarHeight, mNavigationBarWidth));
+
         mBookmarker = new Bookmarker(this);
         setupView();
         mVideoTouchHelper = new VideoTouchHelper(this, this);
-        // 
+
     }
 
 
