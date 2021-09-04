@@ -52,6 +52,7 @@ import static com.google.android.exoplayer2.C.INDEX_UNSET;
 import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
 import static com.google.android.exoplayer2.C.TIME_UNSET;
 import static euphoria.psycho.player.PlayerHelper.deleteVideo;
+import static euphoria.psycho.player.PlayerHelper.getNavigationBarHeight;
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarSize;
 import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
 import static euphoria.psycho.player.PlayerHelper.isPlaying;
@@ -230,9 +231,6 @@ public class VideoActivity extends BaseVideoActivity implements
             seekTo(mPlayer.getCurrentWindowIndex(), C.TIME_UNSET);
         }
         seekToLastedState();
-    }
-
-    private void preparePlayback() {
     }
 
     private void previous() {
@@ -459,14 +457,15 @@ public class VideoActivity extends BaseVideoActivity implements
         super.initialize();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Point point = getNavigationBarSize(this);
-        mNavigationBarHeight = point.y;
+        mNavigationBarHeight = getNavigationBarHeight(this);
         mNavigationBarWidth = point.x;
+        Logger.e(String.format("initialize, %s %s", mNavigationBarHeight, mNavigationBarWidth));
         mBookmarker = new Bookmarker(this);
         setupView();
         mVideoTouchHelper = new VideoTouchHelper(this, this);
-
-
+        // 
     }
+
 
     @Override
     public void onCues(List<Cue> cues) {
@@ -594,6 +593,7 @@ public class VideoActivity extends BaseVideoActivity implements
             mTextureView.addOnLayoutChangeListener(this);
         }
         applyTextureViewRotation(mTextureView, mTextureViewRotation);
+        //Logger.e(String.format("onVideoSizeChanged, %sx%s %s %s", width, height, pixelWidthHeightRatio, ratio));
         mExoContentFrame.setAspectRatio(ratio);
     }
 }

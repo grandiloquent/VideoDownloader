@@ -1,39 +1,29 @@
 package euphoria.psycho.explorer;
 
-import android.Manifest.permission;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import euphoria.psycho.player.VideoActivity;
-import euphoria.psycho.share.PackageShare;
-import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.tasks.VideoService;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
 import euphoria.psycho.videos.YouTube;
 
+import static euphoria.psycho.explorer.Helper.KEY_LAST_ACCESSED;
+import static euphoria.psycho.explorer.Helper.checkChrome;
+import static euphoria.psycho.explorer.Helper.checkPermissions;
+import static euphoria.psycho.explorer.Helper.checkUnfinishedVideoTasks;
+import static euphoria.psycho.explorer.Helper.configureWebView;
+import static euphoria.psycho.explorer.Helper.loadStartPage;
+import static euphoria.psycho.explorer.Helper.tryPlayVideo;
+
 public class MainActivity extends Activity implements ClientInterface {
-    public static final String KEY_LAST_ACCESSED = "lastAccessed";
-    private static final int REQUEST_PERMISSION = 66;
+
     private WebView mWebView;
     private BookmarkDatabase mBookmarkDatabase;
     private String mVideoUrl;
@@ -50,58 +40,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return mWebView;
     }
 
-    private static void checkUnfinishedVideoTasks(Context context) {
-        Intent service = new Intent(context, VideoService.class);
-        service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
-        context.startService(service);
-    }
-
-    private static void tryPlayVideo(Context context) {
-        Intent intent = new Intent(context, VideoActivity.class);
-        if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            try {
-                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download"))
-                        .filter(path -> path.getFileName().toAbsolutePath().toString().endsWith(".mp4"))
-                        .findFirst().get().toFile()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        context.startActivity(intent);
-    }
-
-    private void checkChrome() {
-        if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
-                PackageShare.isAppInstalled(this, "com.android.chrome")) {
-            PreferenceShare.getEditor().putBoolean("chrome", true).apply();
-        }
-    }
-
-    private boolean checkPermissions() {
-        List<String> needPermissions = new ArrayList<>();
-        // we need the WRITE_EXTERNAL_STORAGE
-        // permission to download video
-        if (!PermissionShare.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE)) {
-            needPermissions.add(permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (needPermissions.size() > 0) {
-            requestPermissions(needPermissions.toArray(new String[0]), REQUEST_PERMISSION);
-            return true;
-        }
-        return false;
-    }
-
-    private void configureWebView() {
-        mWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
-            String fileName = URLUtil.guessFileName(url, contentDisposition, WebViewShare.getFileType(MainActivity.this, url));
-            WebViewShare.downloadFile(MainActivity.this, fileName, url, userAgent);
-        });
-        WebViewShare.setWebView(mWebView, Helper.createCacheDirectory(this).getAbsolutePath());
-        mWebView.setWebViewClient(new CustomWebViewClient(this));
-        mWebView.setWebChromeClient(new CustomWebChromeClient());
-        mWebView.setDownloadListener(Helper.getDownloadListener(this));
-        WebViewShare.supportCookie(mWebView);
-    }
 
     private void initialize() {
         setContentView(R.layout.activity_main);
@@ -109,33 +47,25 @@ public class MainActivity extends Activity implements ClientInterface {
         // check whether the chrome is installed
         // if is such we should like to use the chrome to play the video
         // for better UX
-        checkChrome();
+        checkChrome(this);
         mWebView = findViewById(R.id.web);
         // Bind all event handlers
         new ListenerDelegate(this);
         mBookmarkDatabase = new BookmarkDatabase(this);
         // Set the corresponding parameters of WebView
-        configureWebView();
-        loadStartPage();
+        configureWebView(this, mWebView);
+        loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
-        //tryPlayVideo(this);
+        tryPlayVideo(this);
     }
 
-    private void loadStartPage() {
-        if (getIntent().getData() != null) {
-            mWebView.loadUrl(getIntent().getData().toString());
-        } else {
-            mWebView.loadUrl(PreferenceShare.getPreferences()
-                    .getString(KEY_LAST_ACCESSED, ListenerDelegate.HELP_URL));
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Check if we have obtained all
         // the permissions required  to run the app
-        if (checkPermissions()) return;
+        if (checkPermissions(this)) return;
         initialize();
     }
 

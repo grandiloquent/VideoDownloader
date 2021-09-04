@@ -5,6 +5,7 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -29,25 +30,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PlayerHelper {
-    static void playVideo(Player player, ControlDispatcher controlDispatcher) {
-        if (player == null) return;
-        int playbackState = player.getPlaybackState();
-        if (playbackState == Player.STATE_ENDED)
-            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), C.TIME_UNSET);
-        else controlDispatcher.dispatchSetPlayWhenReady(player, true);
-    }
-
-    static void deleteVideo(Context context, Player player, MediaSource mediaSource, List<File> files) {
-        openDeleteVideoDialog(context, unused -> {
-            int index = player.getCurrentWindowIndex();
-            removeFromPlaylist(mediaSource, index);
-            if (!files.remove(index).delete()) {
-                throw new IllegalStateException();
-            }
-            return null;
-        });
-    }
-
     static void adjustController(AppCompatActivity activity, View view, int navigationBarHeight, int navigationBarWidth) {
         int left = 0;
         int top = 0;
@@ -79,6 +61,17 @@ public class PlayerHelper {
         }
     }
 
+    static void deleteVideo(Context context, Player player, MediaSource mediaSource, List<File> files) {
+        openDeleteVideoDialog(context, unused -> {
+            int index = player.getCurrentWindowIndex();
+            removeFromPlaylist(mediaSource, index);
+            if (!files.remove(index).delete()) {
+                throw new IllegalStateException();
+            }
+            return null;
+        });
+    }
+
     static Point getAppUsableScreenSize(Context context) {
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = windowManager.getDefaultDisplay();
@@ -98,6 +91,15 @@ public class PlayerHelper {
                 return 180;
             case Surface.ROTATION_270:
                 return 270;
+        }
+        return 0;
+    }
+
+    static int getNavigationBarHeight(Context context) {
+        Resources res = context.getResources();
+        int resourceId = res.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return res.getDimensionPixelSize(resourceId);
         }
         return 0;
     }
@@ -185,6 +187,14 @@ public class PlayerHelper {
                 })
                 .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
                 .show();
+    }
+
+    static void playVideo(Player player, ControlDispatcher controlDispatcher) {
+        if (player == null) return;
+        int playbackState = player.getPlaybackState();
+        if (playbackState == Player.STATE_ENDED)
+            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), C.TIME_UNSET);
+        else controlDispatcher.dispatchSetPlayWhenReady(player, true);
     }
 
     static void removeFromPlaylist(MediaSource mediaSource, int index) {
