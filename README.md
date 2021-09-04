@@ -7,7 +7,7 @@
 - m3u8：*Android/data/euphoria.psycho.explorer/files/Download*
 - 其他格式：*Download*
 
-<img src="images/5.gif" width="33.3%"><img src="images/6.gif" width="33.3%"><img src="images/3.gif" width="33.3%"><img src="images/4.gif" width="33.3%">
+<img src="images/5.gif" width="33.3%">
 
 ## 下载
 
