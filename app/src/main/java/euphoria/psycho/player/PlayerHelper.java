@@ -12,6 +12,8 @@ import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
@@ -19,6 +21,7 @@ import com.google.android.exoplayer2.source.MediaSource;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -26,6 +29,25 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PlayerHelper {
+    static void playVideo(Player player, ControlDispatcher controlDispatcher) {
+        if (player == null) return;
+        int playbackState = player.getPlaybackState();
+        if (playbackState == Player.STATE_ENDED)
+            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), C.TIME_UNSET);
+        else controlDispatcher.dispatchSetPlayWhenReady(player, true);
+    }
+
+    static void deleteVideo(Context context, Player player, MediaSource mediaSource, List<File> files) {
+        openDeleteVideoDialog(context, unused -> {
+            int index = player.getCurrentWindowIndex();
+            removeFromPlaylist(mediaSource, index);
+            if (!files.remove(index).delete()) {
+                throw new IllegalStateException();
+            }
+            return null;
+        });
+    }
+
     static void adjustController(AppCompatActivity activity, View view, int navigationBarHeight, int navigationBarWidth) {
         int left = 0;
         int top = 0;

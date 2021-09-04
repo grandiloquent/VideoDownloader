@@ -3,6 +3,7 @@ package euphoria.psycho.player;
 import java.io.File;
 
 public class Utils {
+    // mBx mmBx
     public static boolean isNullOrWhiteSpace(CharSequence charSequence) {
         if (charSequence == null) return true;
         int length = charSequence.length();
@@ -11,6 +12,7 @@ public class Utils {
         }
         return true;
     }
+
     public static String getFileName(String path) {
         if (path != null) {
             int length = path.length();
@@ -22,6 +24,7 @@ public class Utils {
         }
         return path;
     }
+
     public static String changeExtension(String path, String extension) {
         if (path != null) {
             String s = path;

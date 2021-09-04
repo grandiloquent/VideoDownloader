@@ -51,12 +51,12 @@ import euphoria.psycho.share.Logger;
 import static com.google.android.exoplayer2.C.INDEX_UNSET;
 import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
 import static com.google.android.exoplayer2.C.TIME_UNSET;
+import static euphoria.psycho.player.PlayerHelper.deleteVideo;
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarSize;
 import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
 import static euphoria.psycho.player.PlayerHelper.isPlaying;
 import static euphoria.psycho.player.PlayerHelper.listVideoFiles;
-import static euphoria.psycho.player.PlayerHelper.openDeleteVideoDialog;
-import static euphoria.psycho.player.PlayerHelper.removeFromPlaylist;
+import static euphoria.psycho.player.PlayerHelper.playVideo;
 import static euphoria.psycho.player.PlayerHelper.rotateScreen;
 import static euphoria.psycho.player.PlayerHelper.showSystemUI;
 
@@ -308,18 +308,13 @@ public class VideoActivity extends BaseVideoActivity implements
         view.setAlpha(enabled ? 1f : 0.3f);
         view.setVisibility(View.VISIBLE);
     }
-    //
+
 
     private void setupView() {
         mRootView.setOnTouchListener((v, event) -> mVideoTouchHelper.onTouch(event));
         mExoProgress.addListener(this);
         mExoPlay.setOnClickListener(v -> {
-            if (mPlayer == null) return;
-            int playbackState = mPlayer.getPlaybackState();
-            if (playbackState == Player.STATE_IDLE) preparePlayback();
-            else if (playbackState == Player.STATE_ENDED)
-                mControlDispatcher.dispatchSeekTo(mPlayer, mPlayer.getCurrentWindowIndex(), C.TIME_UNSET);
-            else mControlDispatcher.dispatchSetPlayWhenReady(mPlayer, true);
+            playVideo(mPlayer, mControlDispatcher);
             hideController();
         });
         mExoPause.setOnClickListener(v -> {
@@ -339,14 +334,7 @@ public class VideoActivity extends BaseVideoActivity implements
             rotateScreen(this);
         });
         mExoDelete.setOnClickListener(v -> {
-            openDeleteVideoDialog(this, unused -> {
-                int index = mPlayer.getCurrentWindowIndex();
-                removeFromPlaylist(mMediaSource, index);
-                if (!mFiles.remove(index).delete()) {
-                    throw new IllegalStateException();
-                }
-                return null;
-            });
+            deleteVideo(this, mPlayer, mMediaSource, mFiles);
         });
     }
 
