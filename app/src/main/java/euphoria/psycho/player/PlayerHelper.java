@@ -1,6 +1,7 @@
 package euphoria.psycho.player;
 
 import android.app.Activity;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -13,27 +14,18 @@ import android.view.WindowManager;
 
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PlayerHelper {
-
-    static void rotateScreen(AppCompatActivity activity) {
-        int orientation = calculateScreenOrientation(activity);
-        if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            activity.setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-        } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
-            activity.setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
-    }
-
     static void adjustController(AppCompatActivity activity, View view, int navigationBarHeight, int navigationBarWidth) {
         int left = 0;
         int top = 0;
@@ -160,6 +152,32 @@ public class PlayerHelper {
             }
         });
         return files;
+    }
+
+    static void openDeleteVideoDialog(Context context, Function<Void, Void> function) {
+        new Builder(context)
+                .setTitle("确定删除吗？")
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    dialog.dismiss();
+                    function.apply(null);
+                })
+                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    static void removeFromPlaylist(MediaSource mediaSource, int index) {
+        ((ConcatenatingMediaSource) mediaSource).removeMediaSource(index);
+    }
+
+    static void rotateScreen(AppCompatActivity activity) {
+        int orientation = calculateScreenOrientation(activity);
+        if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+        } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
     }
 
     static void showSystemUI(AppCompatActivity activity, boolean toggleActionBarVisibility) {

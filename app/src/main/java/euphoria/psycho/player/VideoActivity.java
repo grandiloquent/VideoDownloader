@@ -1,6 +1,5 @@
 package euphoria.psycho.player;
 
-import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -56,6 +55,8 @@ import static euphoria.psycho.player.PlayerHelper.getNavigationBarSize;
 import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
 import static euphoria.psycho.player.PlayerHelper.isPlaying;
 import static euphoria.psycho.player.PlayerHelper.listVideoFiles;
+import static euphoria.psycho.player.PlayerHelper.openDeleteVideoDialog;
+import static euphoria.psycho.player.PlayerHelper.removeFromPlaylist;
 import static euphoria.psycho.player.PlayerHelper.rotateScreen;
 import static euphoria.psycho.player.PlayerHelper.showSystemUI;
 
@@ -338,20 +339,17 @@ public class VideoActivity extends BaseVideoActivity implements
             rotateScreen(this);
         });
         mExoDelete.setOnClickListener(v -> {
-            new Builder(this)
-                    .setTitle("确定删除吗？")
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        dialog.dismiss();
-                        int index = mPlayer.getCurrentWindowIndex();
-                        ((ConcatenatingMediaSource) mMediaSource).removeMediaSource(index);
-                        Logger.e(String.format("setupView, %s", mFiles.size()));
-                        mFiles.remove(index).delete();
-                    })
-                    .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
-                    .show();
-
+            openDeleteVideoDialog(this, unused -> {
+                int index = mPlayer.getCurrentWindowIndex();
+                removeFromPlaylist(mMediaSource, index);
+                if (!mFiles.remove(index).delete()) {
+                    throw new IllegalStateException();
+                }
+                return null;
+            });
         });
     }
+
 
     private void show() {
         if (mController.getVisibility() == View.VISIBLE) return;
