@@ -19,11 +19,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import euphoria.psycho.player.VideoActivity;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
@@ -60,7 +60,9 @@ public class MainActivity extends Activity implements ClientInterface {
         Intent intent = new Intent(context, VideoActivity.class);
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             try {
-                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download")).findFirst().get().toFile()));
+                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download"))
+                        .filter(path -> path.getFileName().toAbsolutePath().toString().endsWith(".mp4"))
+                        .findFirst().get().toFile()));
             } catch (IOException e) {
                 e.printStackTrace();
             }

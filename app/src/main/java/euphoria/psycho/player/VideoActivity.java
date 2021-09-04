@@ -82,6 +82,7 @@ public class VideoActivity extends BaseVideoActivity implements
     private int mStartWindow;
     private int mTextureViewRotation;
     private VideoTouchHelper mVideoTouchHelper;
+    MediaSource mMediaSource = null;
 
     private static void applyTextureViewRotation(TextureView textureView,
                                                  int textureViewRotation) {
@@ -176,8 +177,6 @@ public class VideoActivity extends BaseVideoActivity implements
     private void hideController() {
         mHandler.postDelayed(mHideAction, DEFAULT_SHOW_TIMEOUT_MS);
     }
-
-    MediaSource mMediaSource = null;
 
     private void initializePlayer() {
         hideController();
@@ -584,11 +583,13 @@ public class VideoActivity extends BaseVideoActivity implements
     public void onRepeatModeChanged(int repeatMode) {
     }
 
+    // 
     @Override
     public boolean onScroll(float distanceX, float distanceY) {
         int delta = (int) distanceX * -100;
-        if (Math.abs(delta) > 1000)
-            mPlayer.seekTo(delta + mPlayer.getCurrentPosition());
+        long positionMs = delta + mPlayer.getCurrentPosition();
+        if (positionMs > 0 && Math.abs(delta) > 1000)
+            mPlayer.seekTo(positionMs);
         return true;
     }
 
