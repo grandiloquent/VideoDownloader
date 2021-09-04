@@ -2,7 +2,6 @@ package euphoria.psycho.player;
 
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.RectF;
@@ -44,10 +43,8 @@ import com.google.android.exoplayer2.video.VideoListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.share.Logger;
@@ -55,6 +52,12 @@ import euphoria.psycho.share.Logger;
 import static com.google.android.exoplayer2.C.INDEX_UNSET;
 import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
 import static com.google.android.exoplayer2.C.TIME_UNSET;
+import static euphoria.psycho.player.PlayerHelper.getNavigationBarSize;
+import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
+import static euphoria.psycho.player.PlayerHelper.isPlaying;
+import static euphoria.psycho.player.PlayerHelper.listVideoFiles;
+import static euphoria.psycho.player.PlayerHelper.rotateScreen;
+import static euphoria.psycho.player.PlayerHelper.showSystemUI;
 
 // https://github.com/google/ExoPlayer
 public class VideoActivity extends BaseVideoActivity implements
@@ -170,7 +173,7 @@ public class VideoActivity extends BaseVideoActivity implements
             mController.setVisibility(View.GONE);
             mHandler.removeCallbacks(mUpdateProgressAction);
             mHandler.removeCallbacks(mHideAction);
-            hideSystemUI(false);
+            hideSystemUI(this, false);
         }
     }
 
@@ -215,38 +218,6 @@ public class VideoActivity extends BaseVideoActivity implements
         updateAll();
     }
 
-    private boolean isPlaying() {
-        SimpleExoPlayer player = mPlayer;
-        if (player == null) return false;
-        int state = player.getPlaybackState();
-        return state != Player.STATE_ENDED
-                && state != Player.STATE_IDLE
-                && player.getPlayWhenReady();
-    }
-
-    private File[] listVideoFiles(String dir) {
-        File directory = new File(dir);
-        Pattern pattern = Pattern.compile("\\.(?:mp4|vm|crdownload)$");
-        File[] files = directory.listFiles(file ->
-        {
-            return file.isFile() && pattern.matcher(file.getName()).find();
-        });
-        if (files == null || files.length == 0) return null;
-        Arrays.sort(files, new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                final long result = o2.lastModified() - o1.lastModified();
-                if (result < 0) {
-                    return -1;
-                } else if (result > 0) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
-        return files;
-    }
 
     private void next() {
         if (mPlayer == null) return;
@@ -287,7 +258,7 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     private void requestPlayPauseFocus() {
-        boolean playing = isPlaying();
+        boolean playing = isPlaying(mPlayer);
         if (!playing) {
             mExoPlay.requestFocus();
         } else {
@@ -336,6 +307,7 @@ public class VideoActivity extends BaseVideoActivity implements
         view.setAlpha(enabled ? 1f : 0.3f);
         view.setVisibility(View.VISIBLE);
     }
+    //
 
     private void setupView() {
         mRootView.setOnTouchListener((v, event) -> mVideoTouchHelper.onTouch(event));
@@ -361,16 +333,9 @@ public class VideoActivity extends BaseVideoActivity implements
             next();
             hideController();
         });
+        //
         mExoRew.setOnClickListener(v -> {
-            int orientation = calculateScreenOrientation();
-            if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            }
-
+            rotateScreen(this);
         });
         mExoDelete.setOnClickListener(v -> {
             new Builder(this)
@@ -394,24 +359,13 @@ public class VideoActivity extends BaseVideoActivity implements
         updateProgress();
         updateNavigation();
         requestPlayPauseFocus();
-        showSystemUI(true);
+        showSystemUI(this, true);
         if (mIsHasBar) {
-            int left = 0;
-            int top = 0;
-            int right = 0;
-            int bottom = 0;
-            int orientation = calculateScreenOrientation();
-            if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                bottom += mNavigationBarHeight;
-            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-                right += mNavigationBarWidth;
-            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
-                left += mNavigationBarWidth;
-            }
-            mController.setPadding(left, top, right, bottom);
+            PlayerHelper.adjustController(this, mController, mNavigationBarHeight, mNavigationBarWidth);
         }
         hideController();
     }
+
 
     private void updateAll() {
         updatePlayPauseButton();
@@ -441,7 +395,7 @@ public class VideoActivity extends BaseVideoActivity implements
 
     private void updatePlayPauseButton() {
         boolean requestFocus = false;
-        boolean playing = isPlaying();
+        boolean playing = isPlaying(mPlayer);
         mExoPlay.setVisibility(playing ? View.GONE : View.VISIBLE);
         requestFocus = playing && mExoPlay.isFocused();
         mExoPause.setVisibility(!playing ? View.GONE : View.VISIBLE);
@@ -583,7 +537,7 @@ public class VideoActivity extends BaseVideoActivity implements
     public void onRepeatModeChanged(int repeatMode) {
     }
 
-    // 
+    //
     @Override
     public boolean onScroll(float distanceX, float distanceY) {
         int delta = (int) distanceX * -100;
