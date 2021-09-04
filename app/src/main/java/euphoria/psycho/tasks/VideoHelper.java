@@ -44,11 +44,6 @@ public class VideoHelper {
         return false;
     }
 
-    public static void checkUnfinishedVideoTasks(Context context) {
-        Intent service = new Intent(context, VideoService.class);
-        service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
-        context.startService(service);
-    }
 
     @RequiresApi(api = VERSION_CODES.O)
     public static void createNotificationChannel(Context context, NotificationManager manager) {
@@ -228,17 +223,7 @@ public class VideoHelper {
         }
     }
 
-    public static void tryPlayVideo(Context context) {
-        Intent intent = new Intent(context, VideoActivity.class);
-        if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            try {
-                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download")).findFirst().get().toFile()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        context.startActivity(intent);
-    }
+
 
     public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {
         Logger.e(String.format("updateList, %s", ""));

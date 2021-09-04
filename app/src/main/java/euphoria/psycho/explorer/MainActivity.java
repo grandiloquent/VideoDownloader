@@ -3,12 +3,19 @@ package euphoria.psycho.explorer;
 import android.Manifest.permission;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +23,8 @@ import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.tasks.VideoHelper;
+import euphoria.psycho.tasks.VideoActivity;
+import euphoria.psycho.tasks.VideoService;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -40,6 +48,24 @@ public class MainActivity extends Activity implements ClientInterface {
 
     public WebView getWebView() {
         return mWebView;
+    }
+
+    private static void checkUnfinishedVideoTasks(Context context) {
+        Intent service = new Intent(context, VideoService.class);
+        service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
+        context.startService(service);
+    }
+
+    private static void tryPlayVideo(Context context) {
+        Intent intent = new Intent(context, VideoActivity.class);
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            try {
+                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download")).findFirst().get().toFile()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        context.startActivity(intent);
     }
 
     private void checkChrome() {
@@ -89,10 +115,9 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView();
         loadStartPage();
-        VideoHelper.checkUnfinishedVideoTasks(this);
-        VideoHelper.tryPlayVideo(this);
+        checkUnfinishedVideoTasks(this);
+        tryPlayVideo(this);
     }
-
 
     private void loadStartPage() {
         if (getIntent().getData() != null) {
