@@ -7,12 +7,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.view.View;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
@@ -26,28 +30,11 @@ public class VideoHelper {
 
     private static final String TAG = "VideoHelper";
 
-    public static void renderPauseButton(Context context, ViewHolder viewHolder, VideoTask videoTask) {
-        viewHolder.button.setImageResource(R.drawable.ic_action_pause);
-        viewHolder.button.setOnClickListener(v -> {
-            if (!videoTask.IsPaused) {
-                videoTask.IsPaused = true;
-            } else {
-                videoTask.IsPaused = false;
-                VideoManager.getInstance().getQueue().removeVideoTask(videoTask);
-                videoTask.DownloadedFiles = 0;
-                Request request = new Request(context, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
-                request.setRequestQueue(VideoManager.getInstance().getQueue());
-                VideoManager.getInstance().getQueue().add(request);
-            }
-        });
-    }
-
     public static boolean checkIfExistsRunningTask(RequestQueue queue) {
         return queue.getCurrentRequests()
                 .stream()
                 .anyMatch(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1);
     }
-
 
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
         if (q.taskExists(fileName)) {
@@ -55,6 +42,12 @@ public class VideoHelper {
             return true;
         }
         return false;
+    }
+
+    public static void checkUnfinishedVideoTasks(Context context) {
+        Intent service = new Intent(context, VideoService.class);
+        service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
+        context.startService(service);
     }
 
     @RequiresApi(api = VERSION_CODES.O)
@@ -133,6 +126,22 @@ public class VideoHelper {
         return v;
     }
 
+    public static void renderPauseButton(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+        viewHolder.button.setImageResource(R.drawable.ic_action_pause);
+        viewHolder.button.setOnClickListener(v -> {
+            if (!videoTask.IsPaused) {
+                videoTask.IsPaused = true;
+            } else {
+                videoTask.IsPaused = false;
+                VideoManager.getInstance().getQueue().removeVideoTask(videoTask);
+                videoTask.DownloadedFiles = 0;
+                Request request = new Request(context, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+                request.setRequestQueue(VideoManager.getInstance().getQueue());
+                VideoManager.getInstance().getQueue().add(request);
+            }
+        });
+    }
+
     public static File setVideoDownloadDirectory(Context context) {
         File directory =
                 //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
@@ -162,13 +171,6 @@ public class VideoHelper {
         Intent intent = new Intent(context, VideoListActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
-    }
-
-    public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {
-        Logger.e(String.format("updateList, %s", ""));
-        progressBar.setVisibility(View.GONE);
-        listView.setVisibility(View.VISIBLE);
-        videoAdapter.update(VideoManager.getInstance().getQueue().getVideoTasks());
     }
 
     public static String statusToString(int status) {
@@ -224,5 +226,24 @@ public class VideoHelper {
             default:
                 return Integer.toString(status);
         }
+    }
+
+    public static void tryPlayVideo(Context context) {
+        Intent intent = new Intent(context, VideoActivity.class);
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            try {
+                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download")).findFirst().get().toFile()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        context.startActivity(intent);
+    }
+
+    public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {
+        Logger.e(String.format("updateList, %s", ""));
+        progressBar.setVisibility(View.GONE);
+        listView.setVisibility(View.VISIBLE);
+        videoAdapter.update(VideoManager.getInstance().getQueue().getVideoTasks());
     }
 }

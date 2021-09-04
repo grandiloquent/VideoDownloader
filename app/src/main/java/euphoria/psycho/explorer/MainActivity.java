@@ -3,7 +3,6 @@ package euphoria.psycho.explorer;
 import android.Manifest.permission;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.webkit.URLUtil;
@@ -17,7 +16,7 @@ import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.tasks.VideoService;
+import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -90,19 +89,10 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView();
         loadStartPage();
-        Intent service = new Intent(this, VideoService.class);
-        service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
-        startService(service);
-//        Intent intent = new Intent(this, VideoActivity.class);
-//        if (VERSION.SDK_INT >= VERSION_CODES.O) {
-//            try {
-//                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download")).findFirst().get().toFile()));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        startActivity(intent);
+        VideoHelper.checkUnfinishedVideoTasks(this);
+        VideoHelper.tryPlayVideo(this);
     }
+
 
     private void loadStartPage() {
         if (getIntent().getData() != null) {
@@ -120,7 +110,6 @@ public class MainActivity extends Activity implements ClientInterface {
         // the permissions required  to run the app
         if (checkPermissions()) return;
         initialize();
-
     }
 
     @Override
