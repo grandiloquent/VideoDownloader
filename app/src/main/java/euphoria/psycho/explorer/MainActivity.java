@@ -39,7 +39,6 @@ public class MainActivity extends Activity implements ClientInterface {
         return mWebView;
     }
 
-
     private void initialize() {
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
