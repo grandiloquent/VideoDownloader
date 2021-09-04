@@ -118,7 +118,7 @@ public class MainActivity extends Activity implements ClientInterface {
         configureWebView();
         loadStartPage();
         checkUnfinishedVideoTasks(this);
-        tryPlayVideo(this);
+        //tryPlayVideo(this);
     }
 
     private void loadStartPage() {

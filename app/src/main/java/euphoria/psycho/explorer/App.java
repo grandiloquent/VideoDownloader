@@ -26,7 +26,9 @@ public class App extends Application {
         // VideoHelper.deleteVideoDirectory(this);
         File logDir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log");
         if (!logDir.exists()) {
-            logDir.mkdirs();
+            if (!logDir.mkdirs()) {
+                throw new IllegalStateException();
+            }
         }
         FileLog.setDir(logDir);
         // adb pull /storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Documents/log/. log
