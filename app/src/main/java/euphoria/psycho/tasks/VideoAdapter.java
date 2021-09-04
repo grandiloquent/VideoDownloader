@@ -150,13 +150,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         VideoTask videoTask = getItem(position);
-        viewHolder.tag = videoTask.FileName;
-        viewHolder.title.setText(videoTask.FileName);
-        viewHolder.subtitle.setText(R.string.waiting);
-        viewHolder.progressBar.setProgress(0);
-        viewHolder.layout.setOnClickListener(null);
-        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
-        VideoHelper.renderPauseButton(parent.getContext(), viewHolder, videoTask);
+        resetViewHolderUI(parent.getContext(), viewHolder, videoTask);
         renderVideoTask(parent.getContext(), viewHolder, videoTask);
         if (videoTask.TotalFiles > 0 && videoTask.DownloadedFiles == videoTask.TotalFiles) {
             renderCompletedStatus(parent.getContext(), viewHolder, videoTask);
@@ -164,9 +158,18 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         return convertView;
     }
 
+    public static void resetViewHolderUI(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+        viewHolder.tag = videoTask.FileName;
+        viewHolder.title.setText(videoTask.FileName);
+        viewHolder.subtitle.setText(R.string.waiting);
+        viewHolder.progressBar.setProgress(0);
+        viewHolder.layout.setOnClickListener(null);
+        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
+        VideoHelper.renderPauseButton(context, viewHolder, videoTask);
+    }
+
     @Override
     public void synchronizeTask(VideoTask videoTask) {
-        Logger.e(String.format("synchronizeTask, %s", videoTask.Status));
         for (ViewHolder viewHolder : mViewHolders) {
             if (videoTask.FileName.equals(viewHolder.tag)) {
                 renderVideoTask(mVideoActivity, viewHolder, videoTask);

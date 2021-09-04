@@ -188,9 +188,6 @@ public class VideoService extends Service implements RequestEventListener {
         }
         String[] videoList = intent.getStringArrayExtra(KEY_VIDEO_LIST);
         if (videoList != null) {
-            Builder builder = VideoHelper.getBuilder(this);
-            builder.setContentText(String.format("准备下载 %s 个视频", videoList.length));
-            mNotificationManager.notify(android.R.drawable.stat_sys_download, builder.build());
             for (String s : videoList) {
                 submitRequest(s);
             }
