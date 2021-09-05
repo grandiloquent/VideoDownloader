@@ -26,7 +26,23 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         mVideoActivity = videoActivity;
     }
 
-    public static void renderCompletedStatus(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+    public void update(List<VideoTask> videoTasks) {
+        Logger.e(String.format("update, %s", videoTasks.size()));
+        mVideoTasks.clear();
+        mVideoTasks.addAll(videoTasks);
+        notifyDataSetChanged();
+    }
+
+    private static void bindViewHolder(ViewHolder viewHolder, View v) {
+        viewHolder.layout = v;
+        viewHolder.title = v.findViewById(R.id.title);
+        viewHolder.subtitle = v.findViewById(R.id.subtitle);
+        viewHolder.progressBar = v.findViewById(R.id.progress_bar);
+        viewHolder.thumbnail = v.findViewById(R.id.thumbnail);
+        viewHolder.button = v.findViewById(R.id.button);
+    }
+
+    private static void renderCompletedStatus(Context context, ViewHolder viewHolder, VideoTask videoTask) {
         viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
         viewHolder.progressBar.setProgress(100);
         viewHolder.subtitle.setText(context.getString(R.string.merge_complete));
@@ -44,7 +60,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         });
     }
 
-    public static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+    private static void renderVideoTask(Context context, ViewHolder viewHolder, VideoTask videoTask) {
         switch (videoTask.Status) {
             case TaskStatus.PARSE_VIDEOS: {
                 break;
@@ -105,20 +121,14 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         }
     }
 
-    public void update(List<VideoTask> videoTasks) {
-        Logger.e(String.format("update, %s", videoTasks.size()));
-        mVideoTasks.clear();
-        mVideoTasks.addAll(videoTasks);
-        notifyDataSetChanged();
-    }
-
-    private static void bindViewHolder(ViewHolder viewHolder, View v) {
-        viewHolder.layout = v;
-        viewHolder.title = v.findViewById(R.id.title);
-        viewHolder.subtitle = v.findViewById(R.id.subtitle);
-        viewHolder.progressBar = v.findViewById(R.id.progress_bar);
-        viewHolder.thumbnail = v.findViewById(R.id.thumbnail);
-        viewHolder.button = v.findViewById(R.id.button);
+    private static void resetViewHolderUI(Context context, ViewHolder viewHolder, VideoTask videoTask) {
+        viewHolder.tag = videoTask.FileName;
+        viewHolder.title.setText(videoTask.FileName);
+        viewHolder.subtitle.setText(R.string.waiting);
+        viewHolder.progressBar.setProgress(0);
+        viewHolder.layout.setOnClickListener(null);
+        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
+        VideoHelper.renderPauseButton(context, viewHolder, videoTask);
     }
 
     @Override
@@ -135,7 +145,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     public long getItemId(int position) {
         return position;
     }
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -157,16 +166,6 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
             renderCompletedStatus(parent.getContext(), viewHolder, videoTask);
         }
         return convertView;
-    }
-
-    public static void resetViewHolderUI(Context context, ViewHolder viewHolder, VideoTask videoTask) {
-        viewHolder.tag = videoTask.FileName;
-        viewHolder.title.setText(videoTask.FileName);
-        viewHolder.subtitle.setText(R.string.waiting);
-        viewHolder.progressBar.setProgress(0);
-        viewHolder.layout.setOnClickListener(null);
-        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
-        VideoHelper.renderPauseButton(context, viewHolder, videoTask);
     }
 
     @Override
