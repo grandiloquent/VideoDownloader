@@ -19,7 +19,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     LinearLayout mController;
     AspectRatioFrameLayout mExoContentFrame;
     TextView mExoDuration;
-    TextView mExoErrorMessage;
     ImageButton mExoNext;
     ImageButton mExoPlay;
     TextView mExoPosition;
@@ -45,7 +44,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_video);
         mRootView = findViewById(R.id.root_view);
         mExoContentFrame = findViewById(R.id.exo_content_frame);
-        mExoErrorMessage = findViewById(R.id.exo_error_message);
         mController = findViewById(R.id.controller);
         mExoPrev = findViewById(R.id.exo_prev);
         mExoRew = findViewById(R.id.exo_rew);

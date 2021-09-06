@@ -14,13 +14,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -29,21 +24,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import euphoria.psycho.explorer.R;
 
 public class PlayerHelper {
-    static File[] getVideos(String videoPath) {
-        File dir = new File(videoPath).getParentFile();
-        if (dir == null) {
-            return null;
-        }
-        return listVideoFiles(dir.getAbsolutePath());
-    }
-
-    static int lookupCurrentVideo(String videoPath,File[] files) {
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].getAbsolutePath().equals(videoPath))
-                return i;
-        }
-        return 0;
-    }
     static void adjustController(AppCompatActivity activity, View view, int navigationBarHeight, int navigationBarWidth) {
         int left = 0;
         int top = 0;
@@ -73,17 +53,6 @@ public class PlayerHelper {
             }
             return standard ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
         }
-    }
-
-    static void deleteVideo(Context context, Player player, MediaSource mediaSource, List<File> files) {
-        openDeleteVideoDialog(context, unused -> {
-            int index = player.getCurrentWindowIndex();
-            removeFromPlaylist(mediaSource, index);
-            if (!files.remove(index).delete()) {
-                throw new IllegalStateException();
-            }
-            return null;
-        });
     }
 
     static Point getAppUsableScreenSize(Context context) {
@@ -141,6 +110,14 @@ public class PlayerHelper {
         return size;
     }
 
+    static File[] getVideos(String videoPath) {
+        File dir = new File(videoPath).getParentFile();
+        if (dir == null) {
+            return null;
+        }
+        return listVideoFiles(dir.getAbsolutePath());
+    }
+
     static boolean hasNavBar(Activity activity) {
         Display display = activity.getWindowManager().getDefaultDisplay();
         DisplayMetrics realMetrics = new DisplayMetrics();
@@ -184,6 +161,14 @@ public class PlayerHelper {
         return files;
     }
 
+    static int lookupCurrentVideo(String videoPath, File[] files) {
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].getAbsolutePath().equals(videoPath))
+                return i;
+        }
+        return 0;
+    }
+
     static void openDeleteVideoDialog(Context context, Function<Void, Void> function) {
         new Builder(context)
                 .setTitle("确定删除吗？")
@@ -206,11 +191,6 @@ public class PlayerHelper {
         textureVideoView.setVideoPath(files[nextPlaybackIndex].getAbsolutePath());
         return nextPlaybackIndex;
     }
-
-    static void removeFromPlaylist(MediaSource mediaSource, int index) {
-        ((ConcatenatingMediaSource) mediaSource).removeMediaSource(index);
-    }
-
     static void rotateScreen(AppCompatActivity activity) {
         int orientation = calculateScreenOrientation(activity);
         if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {

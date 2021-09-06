@@ -20,10 +20,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.Util;
-
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -31,6 +27,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.share.DateTimeShare;
+import euphoria.psycho.share.MathShare;
 
 /**
  * A time bar that shows a current position, buffered position, duration and ad markers.
@@ -295,8 +293,8 @@ public class DefaultTimeBar extends View implements TimeBar {
                     (Math.max(scrubberDisabledSize, Math.max(scrubberEnabledSize, scrubberDraggedSize)) + 1)
                             / 2;
         }
-        duration = C.TIME_UNSET;
-        keyTimeIncrement = C.TIME_UNSET;
+        duration = Long.MIN_VALUE + 1;
+        keyTimeIncrement = Long.MIN_VALUE + 1;
         keyCountIncrement = DEFAULT_INCREMENT_COUNT;
         setFocusable(true);
         maybeSetImportantForAccessibilityV16();
@@ -379,16 +377,14 @@ public class DefaultTimeBar extends View implements TimeBar {
 
     @Override
     public void setKeyTimeIncrement(long time) {
-        Assertions.checkArgument(time > 0);
-        keyCountIncrement = C.INDEX_UNSET;
+        keyCountIncrement = -1;
         keyTimeIncrement = time;
     }
 
     @Override
     public void setKeyCountIncrement(int count) {
-        Assertions.checkArgument(count > 0);
         keyCountIncrement = count;
-        keyTimeIncrement = C.TIME_UNSET;
+        keyTimeIncrement = Long.MIN_VALUE + 1;
     }
 
     @Override
@@ -407,7 +403,7 @@ public class DefaultTimeBar extends View implements TimeBar {
     @Override
     public void setDuration(long duration) {
         this.duration = duration;
-        if (scrubbing && duration == C.TIME_UNSET) {
+        if (scrubbing && duration == Long.MIN_VALUE + 1) {
             stopScrubbing(true);
         }
         update();
@@ -416,8 +412,6 @@ public class DefaultTimeBar extends View implements TimeBar {
     @Override
     public void setAdGroupTimesMs(@Nullable long[] adGroupTimesMs, @Nullable boolean[] playedAdGroups,
                                   int adGroupCount) {
-        Assertions.checkArgument(adGroupCount == 0
-                || (adGroupTimesMs != null && playedAdGroups != null));
         this.adGroupCount = adGroupCount;
         this.adGroupTimesMs = adGroupTimesMs;
         this.playedAdGroups = playedAdGroups;
@@ -662,7 +656,7 @@ public class DefaultTimeBar extends View implements TimeBar {
     }
 
     private void positionScrubber(float xPosition) {
-        scrubberBar.right = Util.constrainValue((int) xPosition, progressBar.left, progressBar.right);
+        scrubberBar.right = MathShare.constrainValue((int) xPosition, progressBar.left, progressBar.right);
     }
 
     private Point resolveRelativeTouchPosition(MotionEvent motionEvent) {
@@ -678,7 +672,7 @@ public class DefaultTimeBar extends View implements TimeBar {
     }
 
     private long getScrubberPosition() {
-        if (progressBar.width() <= 0 || duration == C.TIME_UNSET) {
+        if (progressBar.width() <= 0 || duration == Long.MIN_VALUE + 1) {
             return 0;
         }
         return (scrubberBar.width() * duration) / progressBar.width();
@@ -711,7 +705,7 @@ public class DefaultTimeBar extends View implements TimeBar {
         }
         int adMarkerOffset = adMarkerWidth / 2;
         for (int i = 0; i < adGroupCount; i++) {
-            long adGroupTimeMs = Util.constrainValue(adGroupTimesMs[i], 0, duration);
+            long adGroupTimeMs = MathShare.constrainValue(adGroupTimesMs[i], 0, duration);
             int markerPositionOffset =
                     (int) (progressBar.width() * adGroupTimeMs / duration) - adMarkerOffset;
             int markerLeft = progressBar.left + Math.min(progressBar.width() - adMarkerWidth,
@@ -725,7 +719,7 @@ public class DefaultTimeBar extends View implements TimeBar {
         if (duration <= 0) {
             return;
         }
-        int playheadX = Util.constrainValue(scrubberBar.right, scrubberBar.left, progressBar.right);
+        int playheadX = MathShare.constrainValue(scrubberBar.right, scrubberBar.left, progressBar.right);
         int playheadY = scrubberBar.centerY();
         if (scrubberDrawable == null) {
             int scrubberSize = (scrubbing || isFocused()) ? scrubberDraggedSize
@@ -752,12 +746,12 @@ public class DefaultTimeBar extends View implements TimeBar {
     }
 
     private String getProgressText() {
-        return Util.getStringForTime(formatBuilder, formatter, position);
+        return DateTimeShare.getStringForTime(formatBuilder, formatter, position);
     }
 
     private long getPositionIncrement() {
-        return keyTimeIncrement == C.TIME_UNSET
-                ? (duration == C.TIME_UNSET ? 0 : (duration / keyCountIncrement)) : keyTimeIncrement;
+        return keyTimeIncrement == Long.MIN_VALUE + 1
+                ? (duration == Long.MIN_VALUE + 1 ? 0 : (duration / keyCountIncrement)) : keyTimeIncrement;
     }
 
     /**
@@ -771,7 +765,7 @@ public class DefaultTimeBar extends View implements TimeBar {
             return false;
         }
         long scrubberPosition = getScrubberPosition();
-        scrubPosition = Util.constrainValue(scrubberPosition + positionChange, 0, duration);
+        scrubPosition = MathShare.constrainValue(scrubberPosition + positionChange, 0, duration);
         if (scrubPosition == scrubberPosition) {
             return false;
         }

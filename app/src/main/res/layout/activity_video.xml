@@ -11,16 +11,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="center">
 
-        <TextView
-            android:id="@+id/exo_error_message"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:background="@color/exo_error_message_background_color"
-            android:gravity="center"
-            android:padding="16dp"
-            android:visibility="gone" />
-
         <euphoria.psycho.player.TextureVideoView
             android:id="@+id/texture_video_view"
             android:layout_width="match_parent"

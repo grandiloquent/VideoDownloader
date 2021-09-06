@@ -70,6 +70,9 @@ public class VideoActivity extends BaseVideoActivity implements
         }
         String videoPath = getIntent().getData().getPath();
         mFiles = getVideos(videoPath);
+        if (mFiles == null) {
+            throw new IllegalStateException();
+        }
         mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
         mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
         mPlayer.setOnPreparedListener(new OnPreparedListener() {
@@ -110,12 +113,6 @@ public class VideoActivity extends BaseVideoActivity implements
         mExoPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
         mExoProgress.setPosition(position);
         return position;
-    }
-
-    @Override
-    protected void onPause() {
-        savePosition();
-        super.onPause();
     }
 
     private void setupView() {
@@ -174,6 +171,18 @@ public class VideoActivity extends BaseVideoActivity implements
         hideController();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPlayer.stopPlayback();
+    }
+
+    @Override
+    protected void onPause() {
+        savePosition();
+        mPlayer.suspend();
+        super.onPause();
+    }
 
     @Override
     protected void onStart() {
@@ -182,8 +191,15 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        mPlayer.resume();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
+
     }
 
     @Override

@@ -1,6 +1,9 @@
 package euphoria.psycho.share;
 
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 public class MathShare {
 
     private static final double EARTH_RADIUS_METERS = 6367000.0;
@@ -10,7 +13,7 @@ public class MathShare {
         double dlat = Math.sin(0.5 * (lat2 - lat1));
         double dlng = Math.sin(0.5 * (lng2 - lng1));
         double x = dlat * dlat + dlng * dlng * Math.cos(lat1) * Math.cos(lat2);
-        return (2 * Math.atan2(Math.sqrt(x), Math.sqrt(Math.max(0.0,
+        return (2 * Math.atan2(Math.sqrt(x), Math.sqrt(max(0.0,
                 1.0 - x)))) * EARTH_RADIUS_METERS;
     }
 
@@ -25,19 +28,19 @@ public class MathShare {
     // Returns the input value x clamped to the range [min, max].
     public static float clamp(float x, float min, float max) {
         if (x > max) return max;
-        return Math.max(x, min);
+        return max(x, min);
     }
 
     // Returns the input value x clamped to the range [min, max].
     public static long clamp(long x, long min, long max) {
         if (x > max) return max;
-        return Math.max(x, min);
+        return max(x, min);
     }
 
     // Returns the input value x clamped to the range [min, max].
     public static int clamp(int x, int min, int max) {
         if (x > max) return max;
-        return Math.max(x, min);
+        return max(x, min);
     }
 
     public static int floorLog2(float value) {
@@ -91,4 +94,11 @@ public class MathShare {
     public static double toMile(double meter) {
         return meter / 1609;
     }
+    public static int constrainValue(int value, int min, int max) {
+        return max(min, min(value, max));
+    }
+    public static long constrainValue(long value, long min, long max) {
+        return max(min, min(value, max));
+    }
+
 }
