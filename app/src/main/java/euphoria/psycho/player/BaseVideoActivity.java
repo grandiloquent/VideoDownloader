@@ -30,7 +30,7 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     SharedPreferences mPreferences;
     FrameLayout mRootView;
     ImageButton mExoDelete;
-    TextureVideoView mTextureVideoView;
+    TextureVideoView mPlayer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,6 +55,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mExoPosition = findViewById(R.id.exo_position);
         mExoProgress = findViewById(R.id.exo_progress);
         mExoDuration = findViewById(R.id.exo_duration);
-        mTextureVideoView = findViewById(R.id.texture_video_view);
+        mPlayer = findViewById(R.id.texture_video_view);
     }
 }

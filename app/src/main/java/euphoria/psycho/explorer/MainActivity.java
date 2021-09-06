@@ -66,7 +66,7 @@ public class MainActivity extends Activity implements ClientInterface {
         if (checkPermissions(this)) return;
         initialize();
     }
-
+ 
     @Override
     protected void onPause() {
         // WebView can be null when the pause event occurs

@@ -29,6 +29,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import euphoria.psycho.explorer.R;
 
 public class PlayerHelper {
+    static File[] getVideos(String videoPath) {
+        File dir = new File(videoPath).getParentFile();
+        if (dir == null) {
+            return null;
+        }
+        return listVideoFiles(dir.getAbsolutePath());
+    }
+
+    static int lookupCurrentVideo(String videoPath,File[] files) {
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].getAbsolutePath().equals(videoPath))
+                return i;
+        }
+        return 0;
+    }
     static void adjustController(AppCompatActivity activity, View view, int navigationBarHeight, int navigationBarWidth) {
         int left = 0;
         int top = 0;
