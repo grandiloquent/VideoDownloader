@@ -10,11 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center">
-        <!--TextureView Will be placed here-->
-        <euphoria.psycho.player.SubtitleView
-            android:id="@+id/exo_subtitles"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
 
         <TextView
             android:id="@+id/exo_error_message"
@@ -25,6 +20,10 @@
             android:gravity="center"
             android:padding="16dp"
             android:visibility="gone" />
+        <euphoria.psycho.player.TextureVideoView
+            android:id="@+id/texture_video_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </euphoria.psycho.player.AspectRatioFrameLayout>
 
     <LinearLayout

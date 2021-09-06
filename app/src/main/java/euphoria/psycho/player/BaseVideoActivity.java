@@ -3,8 +3,6 @@ package euphoria.psycho.player;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.TextureView;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -29,13 +27,11 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     DefaultTimeBar mExoProgress;
     ImageButton mExoRew;
 
-    SubtitleView mExoSubtitles;
     boolean mIsHasBar = false;
     SharedPreferences mPreferences;
     FrameLayout mRootView;
-    TextureView mTextureView;
     ImageButton mExoDelete;
-
+    TextureVideoView mTextureVideoView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,7 +46,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_video);
         mRootView = findViewById(R.id.root_view);
         mExoContentFrame = findViewById(R.id.exo_content_frame);
-        mExoSubtitles = findViewById(R.id.exo_subtitles);
         mExoErrorMessage = findViewById(R.id.exo_error_message);
         mController = findViewById(R.id.controller);
         mExoPrev = findViewById(R.id.exo_prev);
@@ -62,11 +57,7 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mExoPosition = findViewById(R.id.exo_position);
         mExoProgress = findViewById(R.id.exo_progress);
         mExoDuration = findViewById(R.id.exo_duration);
-        mTextureView = new TextureView(this);
-        mTextureView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        mExoContentFrame.addView(mTextureView, 0);
-
+        mTextureVideoView = findViewById(R.id.texture_video_view);
     }
 
 

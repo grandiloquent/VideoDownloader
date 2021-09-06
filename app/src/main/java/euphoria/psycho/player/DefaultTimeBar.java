@@ -299,9 +299,7 @@ public class DefaultTimeBar extends View implements TimeBar {
         keyTimeIncrement = C.TIME_UNSET;
         keyCountIncrement = DEFAULT_INCREMENT_COUNT;
         setFocusable(true);
-        if (Util.SDK_INT >= 16) {
-            maybeSetImportantForAccessibilityV16();
-        }
+        maybeSetImportantForAccessibilityV16();
     }
     /**
      * Sets the color for the portion of the time bar representing media before the playback position.
@@ -561,13 +559,8 @@ public class DefaultTimeBar extends View implements TimeBar {
         if (duration <= 0) {
             return;
         }
-        if (Util.SDK_INT >= 21) {
-            info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
-            info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
-        } else if (Util.SDK_INT >= 16) {
-            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-        }
+        info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
+        info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
     }
     @TargetApi(16)
     @Override
@@ -751,11 +744,11 @@ public class DefaultTimeBar extends View implements TimeBar {
         update();
         return true;
     }
-    private boolean setDrawableLayoutDirection(Drawable drawable) {
-        return Util.SDK_INT >= 23 && setDrawableLayoutDirection(drawable, getLayoutDirection());
+    private void setDrawableLayoutDirection(Drawable drawable) {
+        setDrawableLayoutDirection(drawable, getLayoutDirection());
     }
     private static boolean setDrawableLayoutDirection(Drawable drawable, int layoutDirection) {
-        return Util.SDK_INT >= 23 && drawable.setLayoutDirection(layoutDirection);
+        return drawable.setLayoutDirection(layoutDirection);
     }
     public static int getDefaultScrubberColor(int playedColor) {
         return 0xFF000000 | playedColor;

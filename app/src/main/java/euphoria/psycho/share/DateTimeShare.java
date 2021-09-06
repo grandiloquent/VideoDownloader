@@ -5,6 +5,7 @@ import android.content.Context;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Formatter;
 
 
 public class DateTimeShare {
@@ -26,5 +27,17 @@ public class DateTimeShare {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
         return simpleDateFormat.format(new Date());
 
+    }
+    public static String getStringForTime(StringBuilder builder, Formatter formatter, long timeMs) {
+        if (timeMs == Long.MIN_VALUE + 1) {
+            timeMs = 0;
+        }
+        long totalSeconds = (timeMs + 500) / 1000;
+        long seconds = totalSeconds % 60;
+        long minutes = (totalSeconds / 60) % 60;
+        long hours = totalSeconds / 3600;
+        builder.setLength(0);
+        return hours > 0 ? formatter.format("%d:%02d:%02d", hours, minutes, seconds).toString()
+                : formatter.format("%02d:%02d", minutes, seconds).toString();
     }
 }

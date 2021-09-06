@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.share.Logger;
 
 
 /**
@@ -171,6 +172,7 @@ public final class AspectRatioFrameLayout extends FrameLayout {
                 // Ignore target aspect ratio
                 break;
         }
+        Logger.e(String.format("onMeasure, %sx%s",width,height ));
         aspectRatioUpdateDispatcher.scheduleUpdate(videoAspectRatio, viewAspectRatio, true);
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
