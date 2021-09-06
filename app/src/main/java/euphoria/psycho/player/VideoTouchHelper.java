@@ -25,14 +25,12 @@ public class VideoTouchHelper {
         int action = ev.getAction();
         float focusX = ev.getX();
         float focusY = ev.getY();
-
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 mDownFocusX = mLastFocusX = focusX;
                 mDownFocusY = mLastFocusY = focusY;
                 mStillDown = true;
                 mAlwaysInTapRegion = true;
-
             }
             case MotionEvent.ACTION_MOVE: {
                 final float scrollX = mLastFocusX - focusX;
@@ -58,12 +56,10 @@ public class VideoTouchHelper {
             }
             case MotionEvent.ACTION_UP: {
                 mStillDown = false;
-
                 if (mAlwaysInTapRegion && !mIgnoreNextUpEvent) {
                     mListener.onSingleTapConfirmed();
                 }
                 mIgnoreNextUpEvent = false;
-
             }
         }
         return true;
@@ -75,7 +71,5 @@ public class VideoTouchHelper {
         boolean onScroll(float distanceX, float distanceY);
 
         void onSingleTapConfirmed();
-
     }
-
 }

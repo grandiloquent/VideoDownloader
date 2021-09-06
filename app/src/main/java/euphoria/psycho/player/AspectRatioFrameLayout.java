@@ -1,5 +1,4 @@
 package euphoria.psycho.player;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -10,9 +9,6 @@ import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
-
-
 /**
  * A {@link FrameLayout} that resizes itself to match a specified aspect ratio.
  */
@@ -172,7 +168,6 @@ public final class AspectRatioFrameLayout extends FrameLayout {
                 // Ignore target aspect ratio
                 break;
         }
-        Logger.e(String.format("onMeasure, %sx%s",width,height ));
         aspectRatioUpdateDispatcher.scheduleUpdate(videoAspectRatio, viewAspectRatio, true);
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));

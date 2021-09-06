@@ -33,7 +33,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:configChanges="keyboard|keyboardHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.Material.Light.NoActionBar"
             android:windowSoftInputMode="adjustNothing">
 
@@ -72,10 +72,9 @@
 <!--        android:launchMode="singleInstance"-->
         <activity
             android:name="euphoria.psycho.player.VideoActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:hardwareAccelerated="true"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

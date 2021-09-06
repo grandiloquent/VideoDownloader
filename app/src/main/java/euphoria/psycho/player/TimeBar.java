@@ -18,6 +18,7 @@ package euphoria.psycho.player;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+
 /**
  * Interface for time bar views that can display a playback position, buffered position, duration
  * and ad markers, and that have a listener for scrubbing (seeking) events.
@@ -29,16 +30,19 @@ public interface TimeBar {
      * @param listener The listener to add.
      */
     void addListener(OnScrubListener listener);
+
     /**
      * Removes a listener for scrubbing events.
      *
      * @param listener The listener to remove.
      */
     void removeListener(OnScrubListener listener);
+
     /**
      * @see View#isEnabled()
      */
     void setEnabled(boolean enabled);
+
     /**
      * Sets the position increment for key presses and accessibility actions, in milliseconds.
      * <p>
@@ -47,6 +51,7 @@ public interface TimeBar {
      * @param time The time increment, in milliseconds.
      */
     void setKeyTimeIncrement(long time);
+
     /**
      * Sets the position increment for key presses and accessibility actions, as a number of
      * increments that divide the duration of the media. For example, passing 20 will cause key
@@ -57,24 +62,28 @@ public interface TimeBar {
      * @param count The number of increments that divide the duration of the media.
      */
     void setKeyCountIncrement(int count);
+
     /**
      * Sets the current position.
      *
      * @param position The current position to show, in milliseconds.
      */
     void setPosition(long position);
+
     /**
      * Sets the buffered position.
      *
      * @param bufferedPosition The current buffered position to show, in milliseconds.
      */
     void setBufferedPosition(long bufferedPosition);
+
     /**
      * Sets the duration.
      *
      * @param duration The duration to show, in milliseconds.
      */
     void setDuration(long duration);
+
     /**
      * Sets the times of ad groups and whether each ad group has been played.
      *
@@ -87,6 +96,7 @@ public interface TimeBar {
      */
     void setAdGroupTimesMs(@Nullable long[] adGroupTimesMs, @Nullable boolean[] playedAdGroups,
                            int adGroupCount);
+
     /**
      * Listener for scrubbing events.
      */
@@ -98,6 +108,7 @@ public interface TimeBar {
          * @param position The position of the scrubber, in milliseconds.
          */
         void onScrubStart(TimeBar timeBar, long position);
+
         /**
          * Called when the user moves the scrubber.
          *
@@ -105,6 +116,7 @@ public interface TimeBar {
          * @param position The position of the scrubber, in milliseconds.
          */
         void onScrubMove(TimeBar timeBar, long position);
+
         /**
          * Called when the user stops moving the scrubber.
          *

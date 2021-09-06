@@ -222,5 +222,4 @@ public class PlayerHelper {
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
-
 }

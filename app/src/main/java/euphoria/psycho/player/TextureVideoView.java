@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package euphoria.psycho.player;
 
 import android.app.AlertDialog;
@@ -65,7 +64,7 @@ import javax.microedition.khronos.egl.EGLSurface;
  * {@link android.app.Activity#onRestoreInstanceState}.<p>
  * Also note that the audio session id (from {@link #getAudioSessionId}) may
  * change from its previously returned value when the VideoView is restored.<p>
- *
+ * <p>
  * This code is based on the official Android sources for 7.1.1_r13 with the following differences:
  * <ol>
  *     <li>extends {@link android.view.TextureView} instead of a {@link android.view.SurfaceView}
@@ -75,9 +74,8 @@ import javax.microedition.khronos.egl.EGLSurface;
  * </ol>
  */
 public class TextureVideoView extends TextureView
-    implements MediaPlayerControl {
+        implements MediaPlayerControl {
     private static final String TAG = "TextureVideoView";
-
     // all possible internal states
     private static final int STATE_ERROR = -1;
     private static final int STATE_IDLE = 0;
@@ -86,11 +84,9 @@ public class TextureVideoView extends TextureView
     private static final int STATE_PLAYING = 3;
     private static final int STATE_PAUSED = 4;
     private static final int STATE_PLAYBACK_COMPLETED = 5;
-
     // settable by the client
     private Uri mUri;
     private Map<String, String> mHeaders;
-
     // mCurrentState is a TextureVideoView object's current state.
     // mTargetState is the state that a method caller intends to reach.
     // For instance, regardless the TextureVideoView object's current state,
@@ -98,7 +94,6 @@ public class TextureVideoView extends TextureView
     // of STATE_PAUSED.
     private int mCurrentState = STATE_IDLE;
     private int mTargetState = STATE_IDLE;
-
     // All the stuff we need for playing and showing a video
     private Surface mSurface = null;
     private MediaPlayer mMediaPlayer = null;
@@ -127,16 +122,12 @@ public class TextureVideoView extends TextureView
 
     public TextureVideoView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
         mVideoWidth = 0;
         mVideoHeight = 0;
-
         setSurfaceTextureListener(mSurfaceTextureListener);
-
         setFocusable(true);
         setFocusableInTouchMode(true);
         requestFocus();
-
         mCurrentState = STATE_IDLE;
         mTargetState = STATE_IDLE;
     }
@@ -145,26 +136,22 @@ public class TextureVideoView extends TextureView
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         //Log.i("@@@@", "onMeasure(" + MeasureSpec.toString(widthMeasureSpec) + ", "
         //        + MeasureSpec.toString(heightMeasureSpec) + ")");
-
         int width = getDefaultSize(mVideoWidth, widthMeasureSpec);
         int height = getDefaultSize(mVideoHeight, heightMeasureSpec);
         if (mVideoWidth > 0 && mVideoHeight > 0) {
-
             int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
             int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
             int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
             int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
-
             if (widthSpecMode == MeasureSpec.EXACTLY && heightSpecMode == MeasureSpec.EXACTLY) {
                 // the size is fixed
                 width = widthSpecSize;
                 height = heightSpecSize;
-
                 // for compatibility, we adjust size based on aspect ratio
-                if ( mVideoWidth * height  < width * mVideoHeight ) {
+                if (mVideoWidth * height < width * mVideoHeight) {
                     //Log.i("@@@", "image too wide, correcting");
                     width = height * mVideoWidth / mVideoHeight;
-                } else if ( mVideoWidth * height  > width * mVideoHeight ) {
+                } else if (mVideoWidth * height > width * mVideoHeight) {
                     //Log.i("@@@", "image too tall, correcting");
                     height = width * mVideoHeight / mVideoWidth;
                 }
@@ -264,7 +251,7 @@ public class TextureVideoView extends TextureView
             mMediaPlayer.release();
             mMediaPlayer = null;
             mCurrentState = STATE_IDLE;
-            mTargetState  = STATE_IDLE;
+            mTargetState = STATE_IDLE;
             if (mShouldRequestAudioFocus) {
                 AudioManager am = (AudioManager) getContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
                 am.abandonAudioFocus(null);
@@ -281,31 +268,28 @@ public class TextureVideoView extends TextureView
         if (mSurface == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             return;
         }
-
         EGL10 egl = (EGL10) EGLContext.getEGL();
         EGLDisplay display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
         egl.eglInitialize(display, null);
-
         int[] attribList = {
-            EGL10.EGL_RED_SIZE, 8,
-            EGL10.EGL_GREEN_SIZE, 8,
-            EGL10.EGL_BLUE_SIZE, 8,
-            EGL10.EGL_ALPHA_SIZE, 8,
-            EGL10.EGL_RENDERABLE_TYPE, EGL10.EGL_WINDOW_BIT,
-            EGL10.EGL_NONE, 0,      // placeholder for recordable [@-3]
-            EGL10.EGL_NONE
+                EGL10.EGL_RED_SIZE, 8,
+                EGL10.EGL_GREEN_SIZE, 8,
+                EGL10.EGL_BLUE_SIZE, 8,
+                EGL10.EGL_ALPHA_SIZE, 8,
+                EGL10.EGL_RENDERABLE_TYPE, EGL10.EGL_WINDOW_BIT,
+                EGL10.EGL_NONE, 0,      // placeholder for recordable [@-3]
+                EGL10.EGL_NONE
         };
         EGLConfig[] configs = new EGLConfig[1];
         int[] numConfigs = new int[1];
         egl.eglChooseConfig(display, attribList, configs, configs.length, numConfigs);
         EGLConfig config = configs[0];
         EGLContext context = egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, new int[]{
-            12440, 2, EGL10.EGL_NONE
+                12440, 2, EGL10.EGL_NONE
         });
         EGLSurface eglSurface = egl.eglCreateWindowSurface(display, config, mSurface, new int[]{
-            EGL10.EGL_NONE
+                EGL10.EGL_NONE
         });
-
         egl.eglMakeCurrent(display, eglSurface, eglSurface, context);
         GLES20.glClearColor(0, 0, 0, 1);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -324,15 +308,12 @@ public class TextureVideoView extends TextureView
         // we shouldn't clear the target state, because somebody might have
         // called start() previously
         release(false);
-
         if (mShouldRequestAudioFocus) {
             AudioManager am = (AudioManager) getContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         }
-
         try {
             mMediaPlayer = new MediaPlayer();
-
             if (mAudioSession != 0) {
                 mMediaPlayer.setAudioSessionId(mAudioSession);
             } else {
@@ -350,7 +331,6 @@ public class TextureVideoView extends TextureView
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.prepareAsync();
-
             // we don't set the target state here either, but preserve the
             // target state that was there before.
             mCurrentState = STATE_PREPARING;
@@ -382,7 +362,7 @@ public class TextureVideoView extends TextureView
         if (mMediaPlayer != null && mMediaController != null) {
             mMediaController.setMediaPlayer(this);
             View anchorView = this.getParent() instanceof View ?
-                    (View)this.getParent() : this;
+                    (View) this.getParent() : this;
             mMediaController.setAnchorView(anchorView);
             mMediaController.setEnabled(isInPlaybackState());
         }
@@ -399,13 +379,10 @@ public class TextureVideoView extends TextureView
                     }
                 }
             };
-
     MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
         public void onPrepared(MediaPlayer mp) {
             mCurrentState = STATE_PREPARED;
-
             mCanPause = mCanSeekBack = mCanSeekForward = true;
-
             if (mOnPreparedListener != null) {
                 mOnPreparedListener.onPrepared(mMediaPlayer);
             }
@@ -414,7 +391,6 @@ public class TextureVideoView extends TextureView
             }
             mVideoWidth = mp.getVideoWidth();
             mVideoHeight = mp.getVideoHeight();
-
             int seekToPosition = mSeekWhenPrepared;  // mSeekWhenPrepared may be changed after seekTo() call
             if (seekToPosition != 0) {
                 seekTo(seekToPosition);
@@ -445,7 +421,6 @@ public class TextureVideoView extends TextureView
             }
         }
     };
-
     private MediaPlayer.OnCompletionListener mCompletionListener =
             new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
@@ -459,17 +434,15 @@ public class TextureVideoView extends TextureView
                     }
                 }
             };
-
     private MediaPlayer.OnInfoListener mInfoListener =
             new MediaPlayer.OnInfoListener() {
-                public  boolean onInfo(MediaPlayer mp, int arg1, int arg2) {
+                public boolean onInfo(MediaPlayer mp, int arg1, int arg2) {
                     if (mOnInfoListener != null) {
                         mOnInfoListener.onInfo(mp, arg1, arg2);
                     }
                     return true;
                 }
             };
-
     private MediaPlayer.OnErrorListener mErrorListener =
             new MediaPlayer.OnErrorListener() {
                 public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
@@ -479,37 +452,33 @@ public class TextureVideoView extends TextureView
                     if (mMediaController != null) {
                         mMediaController.hide();
                     }
-
-            /* If an error handler has been supplied, use it and finish. */
+                    /* If an error handler has been supplied, use it and finish. */
                     if (mOnErrorListener != null) {
                         if (mOnErrorListener.onError(mMediaPlayer, framework_err, impl_err)) {
                             return true;
                         }
                     }
-
-            /* Otherwise, pop up an error dialog so the user knows that
-             * something bad has happened. Only try and pop up the dialog
-             * if we're attached to a window. When we're going away and no
-             * longer have a window, don't bother showing the user an error.
-             */
+                    /* Otherwise, pop up an error dialog so the user knows that
+                     * something bad has happened. Only try and pop up the dialog
+                     * if we're attached to a window. When we're going away and no
+                     * longer have a window, don't bother showing the user an error.
+                     */
                     if (getWindowToken() != null) {
                         Resources r = getContext().getResources();
                         int messageId;
-
                         if (framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
                             messageId = android.R.string.VideoView_error_text_invalid_progressive_playback;
                         } else {
                             messageId = android.R.string.VideoView_error_text_unknown;
                         }
-
                         new AlertDialog.Builder(getContext())
                                 .setMessage(messageId)
                                 .setPositiveButton(android.R.string.VideoView_error_button,
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int whichButton) {
-                                        /* If we get here, there is no onError listener, so
-                                         * at least inform them that the video is over.
-                                         */
+                                                /* If we get here, there is no onError listener, so
+                                                 * at least inform them that the video is over.
+                                                 */
                                                 if (mOnCompletionListener != null) {
                                                     mOnCompletionListener.onCompletion(mMediaPlayer);
                                                 }
@@ -521,7 +490,6 @@ public class TextureVideoView extends TextureView
                     return true;
                 }
             };
-
     private MediaPlayer.OnBufferingUpdateListener mBufferingUpdateListener =
             new MediaPlayer.OnBufferingUpdateListener() {
                 public void onBufferingUpdate(MediaPlayer mp, int percent) {
@@ -535,8 +503,7 @@ public class TextureVideoView extends TextureView
      *
      * @param l The callback that will be run
      */
-    public void setOnPreparedListener(MediaPlayer.OnPreparedListener l)
-    {
+    public void setOnPreparedListener(MediaPlayer.OnPreparedListener l) {
         mOnPreparedListener = l;
     }
 
@@ -546,8 +513,7 @@ public class TextureVideoView extends TextureView
      *
      * @param l The callback that will be run
      */
-    public void setOnCompletionListener(OnCompletionListener l)
-    {
+    public void setOnCompletionListener(OnCompletionListener l) {
         mOnCompletionListener = l;
     }
 
@@ -559,8 +525,7 @@ public class TextureVideoView extends TextureView
      *
      * @param l The callback that will be run
      */
-    public void setOnErrorListener(OnErrorListener l)
-    {
+    public void setOnErrorListener(OnErrorListener l) {
         mOnErrorListener = l;
     }
 
@@ -574,11 +539,10 @@ public class TextureVideoView extends TextureView
         mOnInfoListener = l;
     }
 
-    TextureView.SurfaceTextureListener mSurfaceTextureListener = new SurfaceTextureListener()
-    {
+    TextureView.SurfaceTextureListener mSurfaceTextureListener = new SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureSizeChanged(final SurfaceTexture surface, final int width, final int height) {
-            boolean isValidState =  (mTargetState == STATE_PLAYING);
+            boolean isValidState = (mTargetState == STATE_PLAYING);
             boolean hasValidSize = (width > 0 && height > 0);
             if (mMediaPlayer != null && isValidState && hasValidSize) {
                 if (mSeekWhenPrepared != 0) {
@@ -605,6 +569,7 @@ public class TextureVideoView extends TextureView
             release(true);
             return true;
         }
+
         @Override
         public void onSurfaceTextureUpdated(final SurfaceTexture surface) {
             // do nothing
@@ -621,7 +586,7 @@ public class TextureVideoView extends TextureView
             mMediaPlayer = null;
             mCurrentState = STATE_IDLE;
             if (cleartargetstate) {
-                mTargetState  = STATE_IDLE;
+                mTargetState = STATE_IDLE;
             }
             if (mShouldRequestAudioFocus) {
                 AudioManager am = (AudioManager) getContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
@@ -647,8 +612,7 @@ public class TextureVideoView extends TextureView
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean isKeyCodeSupported = keyCode != KeyEvent.KEYCODE_BACK &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_UP &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_DOWN &&
@@ -684,7 +648,6 @@ public class TextureVideoView extends TextureView
                 toggleMediaControlsVisiblity();
             }
         }
-
         return super.onKeyDown(keyCode, event);
     }
 
@@ -729,7 +692,6 @@ public class TextureVideoView extends TextureView
         if (isInPlaybackState()) {
             return mMediaPlayer.getDuration();
         }
-
         return -1;
     }
 
@@ -802,8 +764,8 @@ public class TextureVideoView extends TextureView
      * {@link TextureVideoView#setVideoURI(Uri)}. By default, {@link TextureVideoView} will
      * request audio focus.
      *
-     * @param shouldRequestAudioFocus  If {@code true}, {@link TextureVideoView} will request
-     * audio focus before opening a video, else audio focus is not requested
+     * @param shouldRequestAudioFocus If {@code true}, {@link TextureVideoView} will request
+     *                                audio focus before opening a video, else audio focus is not requested
      */
     public void setShouldRequestAudioFocus(boolean shouldRequestAudioFocus) {
         mShouldRequestAudioFocus = shouldRequestAudioFocus;
@@ -818,5 +780,4 @@ public class TextureVideoView extends TextureView
     public boolean shouldRequestAudioFocus() {
         return mShouldRequestAudioFocus;
     }
-
 }
