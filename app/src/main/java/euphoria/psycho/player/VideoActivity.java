@@ -4,20 +4,26 @@ import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Handler;
+import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 
 import java.io.File;
 import java.util.Formatter;
-import java.util.List;
 
+import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DateTimeShare;
 
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarHeight;
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarSize;
 import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
+import static euphoria.psycho.player.PlayerHelper.listVideoFiles;
+import static euphoria.psycho.player.PlayerHelper.openDeleteVideoDialog;
+import static euphoria.psycho.player.PlayerHelper.playNextVideo;
+import static euphoria.psycho.player.PlayerHelper.playPreviousVideo;
 import static euphoria.psycho.player.PlayerHelper.rotateScreen;
 import static euphoria.psycho.player.PlayerHelper.showSystemUI;
+import static euphoria.psycho.player.PlayerHelper.switchPlayState;
 
 // https://github.com/google/ExoPlayer
 public class VideoActivity extends BaseVideoActivity implements
@@ -36,11 +42,12 @@ public class VideoActivity extends BaseVideoActivity implements
     };
     private final Runnable mHideAction = this::hide;
     private Bookmarker mBookmarker;
-    private List<File> mFiles = null;
+    private File[] mFiles = null;
     private int mNavigationBarHeight;
     private int mNavigationBarWidth;
     private boolean mScrubbing;
     private VideoTouchHelper mVideoTouchHelper;
+    private int mCurrentPlaybackIndex;
 
     private void hide() {
         if (mController.getVisibility() == View.VISIBLE) {
@@ -55,9 +62,26 @@ public class VideoActivity extends BaseVideoActivity implements
         mHandler.postDelayed(mHideAction, DEFAULT_SHOW_TIMEOUT_MS);
     }
 
+    static Pair<Integer, File[]> getVideoFiles(String videoPath) {
+        File dir = new File(videoPath).getParentFile();
+        File[] files = listVideoFiles(dir.getAbsolutePath());
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].getAbsolutePath().equals(videoPath))
+                return Pair.create(i, files);
+        }
+        return Pair.create(0, files);
+    }
+
     private void initializePlayer() {
         hideController();
-        mTextureVideoView.setVideoURI(getIntent().getData());
+        if (getIntent().getData() == null) {
+            return;
+        }
+        String videoPath = getIntent().getData().getPath();
+        Pair<Integer, File[]> files = getVideoFiles(videoPath);
+        mFiles = files.second;
+        mCurrentPlaybackIndex = files.first;
+        mTextureVideoView.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
         mTextureVideoView.setOnPreparedListener(new OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
@@ -65,30 +89,29 @@ public class VideoActivity extends BaseVideoActivity implements
                 mExoProgress.setDuration(mp.getDuration());
                 mHandler.post(mProgressChecker);
                 mTextureVideoView.start();
+                seekToLastedState();
+                mExoPlay.setImageResource(R.drawable.exo_controls_pause);
             }
         });
-        seekToLastedState();
+
     }
 
     private void savePosition() {
-//        String uri = getCurrentUri();
-//        if (uri == null || mPlayer == null) return;
-//        if (mPlayer.getDuration() - mPlayer.getCurrentPosition() > 60 * 1000)
-//            mBookmarker.setBookmark(uri, (int) mPlayer.getCurrentPosition());
+        String uri = mFiles[mCurrentPlaybackIndex].getAbsolutePath();
+        if (mTextureVideoView == null) return;
+        if (mTextureVideoView.getDuration() - mTextureVideoView.getCurrentPosition() > 60 * 1000)
+            mBookmarker.setBookmark(uri, (int) mTextureVideoView.getCurrentPosition());
     }
 
     private void seekToLastedState() {
-//        mStartWindow = mPlayer.getCurrentWindowIndex();
-//        String uri = getCurrentUri();
-//        if (uri == null) return;
-//        long bookmark = mBookmarker.getBookmark(uri);
-//        if (bookmark > 0) {
-//            seekTo(mPlayer.getCurrentWindowIndex(), bookmark);
-//        }
-//        if (getSupportActionBar() != null) {
-//            getSupportActionBar().setTitle(Utils.getFileName(uri));
-//        }
-//        updateNavigation();
+        String uri = mFiles[mCurrentPlaybackIndex].getAbsolutePath();
+        long bookmark = mBookmarker.getBookmark(uri);
+        if (bookmark > 0) {
+            mTextureVideoView.seekTo((int) bookmark);
+        }
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(Utils.getFileName(uri));
+        }
     }
 
     private int setProgress() {
@@ -99,26 +122,52 @@ public class VideoActivity extends BaseVideoActivity implements
         return position;
     }
 
+    @Override
+    protected void onPause() {
+        savePosition();
+        super.onPause();
+    }
+
     private void setupView() {
         mRootView.setOnTouchListener((v, event) -> mVideoTouchHelper.onTouch(event));
         mExoProgress.addListener(this);
         mExoPlay.setOnClickListener(v -> {
-            hideController();
-        });
-        mExoPause.setOnClickListener(v -> {
-            hideController();
+            switchPlayState(mTextureVideoView, mExoPlay);
         });
         mExoPrev.setOnClickListener(v -> {
-            hideController();
+            savePosition();
+            mCurrentPlaybackIndex = playPreviousVideo(mCurrentPlaybackIndex, mTextureVideoView, mFiles);
         });
         mExoNext.setOnClickListener(v -> {
-            hideController();
+            savePosition();
+            mCurrentPlaybackIndex = playNextVideo(mCurrentPlaybackIndex, mTextureVideoView, mFiles);
         });
         //
         mExoRew.setOnClickListener(v -> {
             rotateScreen(this);
         });
+        if (mTextureVideoView.isPlaying()) {
+            mTextureVideoView.pause();
+        }
         mExoDelete.setOnClickListener(v -> {
+            openDeleteVideoDialog(this, unused -> {
+
+                int nextPlaybackIndex = mCurrentPlaybackIndex+1;
+                if (mFiles.length > 1) {
+                    if (mCurrentPlaybackIndex >= mFiles.length) {
+                        nextPlaybackIndex = 0;
+                    }
+                    String nextVideoPath = mFiles[nextPlaybackIndex].getAbsolutePath();
+                    mFiles[mCurrentPlaybackIndex].delete();
+                    Pair<Integer, File[]> files = getVideoFiles(nextVideoPath);
+                    mFiles = files.second;
+                    mCurrentPlaybackIndex = files.first;
+                    mTextureVideoView.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
+                } else {
+                    mFiles[mCurrentPlaybackIndex].delete();
+                }
+                return null;
+            });
         });
     }
 
@@ -132,7 +181,6 @@ public class VideoActivity extends BaseVideoActivity implements
         mHandler.post(mProgressChecker);
         hideController();
     }
-
 
 
     @Override

@@ -21,7 +21,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     TextView mExoDuration;
     TextView mExoErrorMessage;
     ImageButton mExoNext;
-    ImageButton mExoPause;
     ImageButton mExoPlay;
     TextView mExoPosition;
     ImageButton mExoPrev;
@@ -52,7 +51,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mExoRew = findViewById(R.id.exo_rew);
         mExoDelete = findViewById(R.id.exo_delete);
         mExoPlay = findViewById(R.id.exo_play);
-        mExoPause = findViewById(R.id.exo_pause);
         mExoNext = findViewById(R.id.exo_next);
         mExoPosition = findViewById(R.id.exo_position);
         mExoProgress = findViewById(R.id.exo_progress);

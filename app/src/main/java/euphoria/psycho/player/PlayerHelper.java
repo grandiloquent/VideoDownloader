@@ -12,11 +12,9 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 
@@ -28,6 +26,7 @@ import java.util.regex.Pattern;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import euphoria.psycho.explorer.R;
 
 public class PlayerHelper {
     static void adjustController(AppCompatActivity activity, View view, int navigationBarHeight, int navigationBarWidth) {
@@ -151,14 +150,6 @@ public class PlayerHelper {
                         View.SYSTEM_UI_FLAG_IMMERSIVE);
     }
 
-    static boolean isPlaying(SimpleExoPlayer player) {
-        if (player == null) return false;
-        int state = player.getPlaybackState();
-        return state != Player.STATE_ENDED
-                && state != Player.STATE_IDLE
-                && player.getPlayWhenReady();
-    }
-
     static File[] listVideoFiles(String dir) {
         File directory = new File(dir);
         Pattern pattern = Pattern.compile("\\.(?:mp4|vm|crdownload)$");
@@ -189,12 +180,16 @@ public class PlayerHelper {
                 .show();
     }
 
-    static void playVideo(Player player, ControlDispatcher controlDispatcher) {
-        if (player == null) return;
-        int playbackState = player.getPlaybackState();
-        if (playbackState == Player.STATE_ENDED)
-            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), C.TIME_UNSET);
-        else controlDispatcher.dispatchSetPlayWhenReady(player, true);
+    static int playNextVideo(int currentPlaybackIndex, TextureVideoView textureVideoView, File[] files) {
+        int nextPlaybackIndex = files.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
+        textureVideoView.setVideoPath(files[nextPlaybackIndex].getAbsolutePath());
+        return nextPlaybackIndex;
+    }
+
+    static int playPreviousVideo(int currentPlaybackIndex, TextureVideoView textureVideoView, File[] files) {
+        int nextPlaybackIndex = currentPlaybackIndex - 1 > -1 ? currentPlaybackIndex - 1 : files.length - 1;
+        textureVideoView.setVideoPath(files[nextPlaybackIndex].getAbsolutePath());
+        return nextPlaybackIndex;
     }
 
     static void removeFromPlaylist(MediaSource mediaSource, int index) {
@@ -221,5 +216,15 @@ public class PlayerHelper {
         activity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+
+    static void switchPlayState(TextureVideoView textureVideoView, ImageButton playButton) {
+        if (textureVideoView.isPlaying()) {
+            textureVideoView.pause();
+            playButton.setImageResource(R.drawable.exo_controls_play);
+        } else {
+            textureVideoView.start();
+            playButton.setImageResource(R.drawable.exo_controls_pause);
+        }
     }
 }
