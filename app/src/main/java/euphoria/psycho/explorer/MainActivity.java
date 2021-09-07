@@ -54,7 +54,7 @@ public class MainActivity extends Activity implements ClientInterface {
         configureWebView(this, mWebView);
         loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
-        //tryPlayVideo(this);
+        // tryPlayVideo(this);
     }
 
     @Override

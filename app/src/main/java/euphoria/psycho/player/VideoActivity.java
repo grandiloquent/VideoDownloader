@@ -2,7 +2,17 @@ package euphoria.psycho.player;
 
 import android.graphics.Point;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnBufferingUpdateListener;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
+import android.media.MediaPlayer.OnSeekCompleteListener;
+import android.media.MediaPlayer.OnTimedMetaDataAvailableListener;
+import android.media.MediaPlayer.OnTimedTextListener;
+import android.media.MediaPlayer.OnVideoSizeChangedListener;
+import android.media.TimedMetaData;
+import android.media.TimedText;
 import android.os.Handler;
 import android.view.View;
 import android.view.WindowManager;
@@ -12,6 +22,7 @@ import java.util.Formatter;
 
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DateTimeShare;
+import euphoria.psycho.share.Logger;
 
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarHeight;
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarSize;
@@ -28,7 +39,8 @@ import static euphoria.psycho.player.PlayerHelper.switchPlayState;
 // https://github.com/google/ExoPlayer
 public class VideoActivity extends BaseVideoActivity implements
         VideoTouchHelper.Listener,
-        TimeBar.OnScrubListener {
+        TimeBar.OnScrubListener,
+        OnPreparedListener, OnCompletionListener, OnBufferingUpdateListener, OnSeekCompleteListener, OnVideoSizeChangedListener, OnTimedTextListener, OnTimedMetaDataAvailableListener, OnErrorListener, OnInfoListener {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
     private final Handler mHandler = new Handler();
     private final StringBuilder mStringBuilder = new StringBuilder();
@@ -62,7 +74,6 @@ public class VideoActivity extends BaseVideoActivity implements
         mHandler.postDelayed(mHideAction, DEFAULT_SHOW_TIMEOUT_MS);
     }
 
-
     private void initializePlayer() {
         hideController();
         if (getIntent().getData() == null) {
@@ -75,18 +86,10 @@ public class VideoActivity extends BaseVideoActivity implements
         }
         mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
         mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
-        mPlayer.setOnPreparedListener(new OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mExoContentFrame.setAspectRatio(mp.getVideoWidth() * 1.0f / mp.getVideoHeight());
-                mExoProgress.setDuration(mp.getDuration());
-                mHandler.post(mProgressChecker);
-                mPlayer.start();
-                seekToLastedState();
-                mExoPlay.setImageResource(R.drawable.exo_controls_pause);
-            }
-        });
-
+        mPlayer.setOnPreparedListener(this);
+        mPlayer.setOnCompletionListener(this);
+        mPlayer.setOnErrorListener(this);
+        mPlayer.setOnInfoListener(this);
     }
 
     private void savePosition() {
@@ -185,15 +188,15 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        initializePlayer();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         mPlayer.resume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        initializePlayer();
     }
 
     @Override
@@ -215,11 +218,43 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     @Override
+    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        mExoPlay.setImageResource(R.drawable.exo_controls_play);
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        Logger.e(String.format("onError, %s %s", what, extra));
+        return false;
+    }
+
+    @Override
+    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        return false;
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mExoContentFrame.setAspectRatio(mp.getVideoWidth() * 1.0f / mp.getVideoHeight());
+        mExoProgress.setDuration(mp.getDuration());
+        mHandler.post(mProgressChecker);
+        mPlayer.start();
+        seekToLastedState();
+        mExoPlay.setImageResource(R.drawable.exo_controls_pause);
+    }
+
+    @Override
     public boolean onScroll(float distanceX, float distanceY) {
         int delta = (int) distanceX * -100;
-        int positionMs = delta + mPlayer.getCurrentPosition();
-        if (positionMs > 0 && Math.abs(delta) > 1000)
+        if (Math.abs(delta) < 1000) return true;
+        int positionMs = (delta / 1000) * 1000 + mPlayer.getCurrentPosition();
+        if (positionMs > 0) {
             mPlayer.seekTo(positionMs);
+        }
         return true;
     }
 
@@ -244,7 +279,24 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     @Override
+    public void onSeekComplete(MediaPlayer mp) {
+    }
+
+    @Override
     public void onSingleTapConfirmed() {
         show();
+    }
+
+
+    @Override
+    public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data) {
+    }
+
+    @Override
+    public void onTimedText(MediaPlayer mp, TimedText text) {
+    }
+
+    @Override
+    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
     }
 }
