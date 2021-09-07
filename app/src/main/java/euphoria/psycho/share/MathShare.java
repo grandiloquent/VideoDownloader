@@ -43,6 +43,14 @@ public class MathShare {
         return max(x, min);
     }
 
+    public static int constrainValue(int value, int min, int max) {
+        return max(min, min(value, max));
+    }
+
+    public static long constrainValue(long value, long min, long max) {
+        return max(min, min(value, max));
+    }
+
     public static int floorLog2(float value) {
         int i;
         for (i = 0; i < 31; i++) {
@@ -93,12 +101,6 @@ public class MathShare {
 
     public static double toMile(double meter) {
         return meter / 1609;
-    }
-    public static int constrainValue(int value, int min, int max) {
-        return max(min, min(value, max));
-    }
-    public static long constrainValue(long value, long min, long max) {
-        return max(min, min(value, max));
     }
 
 }
