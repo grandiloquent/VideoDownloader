@@ -250,8 +250,17 @@ public class VideoActivity extends BaseVideoActivity implements
     @Override
     public boolean onScroll(float distanceX, float distanceY) {
         int delta = (int) distanceX * -100;
-        if (Math.abs(delta) < 1000) return true;
-        int positionMs = (delta / 1000) * 1000 + mPlayer.getCurrentPosition();
+        //if (Math.abs(delta) < 1000) return true;
+        delta = (delta / 1000) * 1000;
+        if (delta == 0) {
+            if (distanceX > 0) {
+                delta = -1000;
+            } else {
+                delta = 1000;
+            }
+        }
+        int positionMs = delta + mPlayer.getCurrentPosition();
+        Logger.e(String.format("onScroll, %s %s %s", distanceX, distanceY, (delta / 1000) * 1000));
         if (positionMs > 0) {
             mPlayer.seekTo(positionMs);
         }
