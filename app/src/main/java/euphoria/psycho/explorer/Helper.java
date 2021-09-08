@@ -131,6 +131,20 @@ public class Helper {
             try {
                 intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download"))
                         .filter(path -> path.getFileName().toAbsolutePath().toString().endsWith(".mp4"))
+                        .sorted((o1, o2) -> {
+                            long result = 0;
+                            try {
+                                result = Files.getLastModifiedTime(o2).toMillis() - Files.getLastModifiedTime(o1).toMillis();
+                            } catch (Exception ignored) {
+                            }
+                            if (result < 0) {
+                                return -1;
+                            } else if (result > 0) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        })
                         .findFirst().get().toFile()));
             } catch (IOException e) {
                 e.printStackTrace();

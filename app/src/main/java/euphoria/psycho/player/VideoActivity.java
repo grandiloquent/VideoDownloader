@@ -239,7 +239,6 @@ public class VideoActivity extends BaseVideoActivity implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mExoContentFrame.setAspectRatio(mp.getVideoWidth() * 1.0f / mp.getVideoHeight());
         mExoProgress.setDuration(mp.getDuration());
         mHandler.post(mProgressChecker);
         mPlayer.start();

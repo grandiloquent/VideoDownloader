@@ -5,17 +5,12 @@
     android:layout_height="match_parent"
     android:background="#000">
 
-    <euphoria.psycho.player.AspectRatioFrameLayout
-        android:id="@+id/exo_content_frame"
+
+    <euphoria.psycho.player.TextureVideoView
+        android:id="@+id/texture_video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center">
-
-        <euphoria.psycho.player.TextureVideoView
-            android:id="@+id/texture_video_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </euphoria.psycho.player.AspectRatioFrameLayout>
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:id="@+id/controller"

@@ -17,7 +17,6 @@ import static euphoria.psycho.player.PlayerHelper.hasNavBar;
 
 public abstract class BaseVideoActivity extends AppCompatActivity {
     LinearLayout mController;
-    AspectRatioFrameLayout mExoContentFrame;
     TextView mExoDuration;
     ImageButton mExoNext;
     ImageButton mExoPlay;
@@ -43,7 +42,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mIsHasBar = hasNavBar(this);
         setContentView(R.layout.activity_video);
         mRootView = findViewById(R.id.root_view);
-        mExoContentFrame = findViewById(R.id.exo_content_frame);
         mController = findViewById(R.id.controller);
         mExoPrev = findViewById(R.id.exo_prev);
         mExoRew = findViewById(R.id.exo_rew);
