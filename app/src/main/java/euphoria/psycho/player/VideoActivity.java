@@ -260,7 +260,6 @@ public class VideoActivity extends BaseVideoActivity implements
             }
         }
         int positionMs = delta + mPlayer.getCurrentPosition();
-        Logger.e(String.format("onScroll, %s %s %s", distanceX, distanceY, (delta / 1000) * 1000));
         if (positionMs > 0) {
             mPlayer.seekTo(positionMs);
         }

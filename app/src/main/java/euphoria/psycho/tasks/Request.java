@@ -61,7 +61,7 @@ public class Request implements Comparable<Request> {
         return true;
     }
 
-    public File createVideoDirectory(String m3u8String) {
+    public File createVideoDirectory() {
         File directory;
         try {
             directory = new File(mVideoTask.Directory);
@@ -112,8 +112,21 @@ public class Request implements Comparable<Request> {
             }
         }
         String m3u8String = mVideoTask.Content;
-        if (m3u8String == null) return;
-        File directory = createVideoDirectory(m3u8String);
+        if (m3u8String == null || m3u8String.length() == 0) {
+            try {
+                m3u8String = M3u8Utils.getString(mVideoTask.Uri);
+                mVideoTask.Content = m3u8String;
+            } catch (IOException e) {
+                emitSynchronizeTask(TaskStatus.ERROR_FETCH_M3U8);
+                return;
+            }
+
+        }
+        if (m3u8String == null || m3u8String.length() == 0) {
+            emitSynchronizeTask(TaskStatus.ERROR_MISSING_M3U8);
+            return;
+        }
+        File directory = createVideoDirectory();
         // if \(!*?([a-zA-Z0-9]+)\(\w*?\)\)(?= return;)
         if (directory == null) return;
         if (!createLogFile(directory)) {
@@ -249,6 +262,7 @@ public class Request implements Comparable<Request> {
     }
 
     private boolean parseVideos(String m3u8String) {
+        Logger.e(String.format("parseVideos, %s", m3u8String));
         String[] segments = m3u8String.split("\n");
         mVideos = new ArrayList<>();
         for (int i = 0; i < segments.length; i++) {

@@ -31,4 +31,7 @@ public interface TaskStatus {
     int ERROR_DELETE_FILE_FAILED = -6;
 
     int ERROR_STATUS_CODE = -7;
+    int ERROR_MISSING_M3U8 = -8;
+
+    int ERROR_FETCH_M3U8=-9;
 }

@@ -1,6 +1,5 @@
 package euphoria.psycho.tasks;
 
-import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
