@@ -262,7 +262,6 @@ public class Request implements Comparable<Request> {
     }
 
     private boolean parseVideos(String m3u8String) {
-        Logger.e(String.format("parseVideos, %s", m3u8String));
         String[] segments = m3u8String.split("\n");
         mVideos = new ArrayList<>();
         for (int i = 0; i < segments.length; i++) {
