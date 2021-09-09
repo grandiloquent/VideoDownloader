@@ -14,6 +14,9 @@ import android.media.MediaPlayer.OnVideoSizeChangedListener;
 import android.media.TimedMetaData;
 import android.media.TimedText;
 import android.os.Handler;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnContextClickListener;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -38,7 +41,7 @@ import static euphoria.psycho.player.PlayerHelper.switchPlayState;
 
 // https://github.com/google/ExoPlayer
 public class VideoActivity extends BaseVideoActivity implements
-        VideoTouchHelper.Listener,
+        GestureDetector.OnGestureListener,
         TimeBar.OnScrubListener,
         OnPreparedListener, OnCompletionListener, OnBufferingUpdateListener, OnSeekCompleteListener, OnVideoSizeChangedListener, OnTimedTextListener, OnTimedMetaDataAvailableListener, OnErrorListener, OnInfoListener {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
@@ -58,7 +61,7 @@ public class VideoActivity extends BaseVideoActivity implements
     private int mNavigationBarHeight;
     private int mNavigationBarWidth;
     private boolean mScrubbing;
-    private VideoTouchHelper mVideoTouchHelper;
+    private GestureDetector mVideoTouchHelper;
     private int mCurrentPlaybackIndex;
 
     private void hide() {
@@ -119,7 +122,10 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     private void setupView() {
-        mRootView.setOnTouchListener((v, event) -> mVideoTouchHelper.onTouch(event));
+        mRootView.setOnTouchListener((v, event) -> {
+            mVideoTouchHelper.onTouchEvent(event);
+            return  true;
+        });
         mExoProgress.addListener(this);
         mExoPlay.setOnClickListener(v -> {
             switchPlayState(mPlayer, mExoPlay);
@@ -214,7 +220,13 @@ public class VideoActivity extends BaseVideoActivity implements
         mNavigationBarWidth = point.x;
         mBookmarker = new Bookmarker(this);
         setupView();
-        mVideoTouchHelper = new VideoTouchHelper(this, this);
+        mVideoTouchHelper = new GestureDetector(this, this);
+        mVideoTouchHelper.setContextClickListener(new OnContextClickListener() {
+            @Override
+            public boolean onContextClick(MotionEvent e) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -227,14 +239,28 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Logger.e(String.format("onError, %s %s", what, extra));
         return false;
     }
 
     @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        return false;
+    }
+
+    @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
         return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
     }
 
     @Override
@@ -247,7 +273,7 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     @Override
-    public boolean onScroll(float distanceX, float distanceY) {
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
         int delta = (int) distanceX * -100;
         //if (Math.abs(delta) < 1000) return true;
         delta = (delta / 1000) * 1000;
@@ -290,10 +316,14 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     @Override
-    public void onSingleTapConfirmed() {
-        show();
+    public void onShowPress(MotionEvent e) {
     }
 
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        show();
+        return true;
+    }
 
     @Override
     public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data) {
