@@ -33,9 +33,9 @@ public class PlayerHelper {
         if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
             bottom += navigationBarHeight;
         } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            right += navigationBarWidth;
+            right += navigationBarHeight;
         } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
-            left += navigationBarWidth;
+            left += navigationBarHeight;
         }
         view.setPadding(left, top, right, bottom);
     }
@@ -191,6 +191,7 @@ public class PlayerHelper {
         textureVideoView.setVideoPath(files[nextPlaybackIndex].getAbsolutePath());
         return nextPlaybackIndex;
     }
+
     static void rotateScreen(AppCompatActivity activity) {
         int orientation = calculateScreenOrientation(activity);
         if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
