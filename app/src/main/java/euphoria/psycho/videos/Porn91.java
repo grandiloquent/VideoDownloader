@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
 
@@ -74,6 +75,7 @@ public class Porn91 extends BaseExtractor<String> {
 
     @Override
     protected void processVideo(String videoUri) {
+        Logger.e(String.format("processVideo, %s", videoUri));
         invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
         //viewVideoBetter(mMainActivity, videoUri);
     }

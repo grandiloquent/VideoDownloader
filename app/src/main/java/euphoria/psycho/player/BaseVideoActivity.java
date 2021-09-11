@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -29,6 +30,7 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     FrameLayout mRootView;
     ImageButton mExoDelete;
     TextureVideoView mPlayer;
+    ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,5 +54,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mExoProgress = findViewById(R.id.exo_progress);
         mExoDuration = findViewById(R.id.exo_duration);
         mPlayer = findViewById(R.id.texture_video_view);
+        mProgressBar = findViewById(R.id.progress_bar);
     }
 }

@@ -18,6 +18,7 @@ import at.huber.youtubeExtractor.VideoMeta;
 import at.huber.youtubeExtractor.YouTubeExtractor;
 import at.huber.youtubeExtractor.YtFile;
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.explorer.Share;
 import euphoria.psycho.share.Logger;
 
 public class YouTube extends BaseExtractor<List<Pair<String, YtFile>>> {
@@ -95,6 +96,7 @@ public class YouTube extends BaseExtractor<List<Pair<String, YtFile>>> {
     }
 
     private void downloadFromUrl(String youtubeDlUrl, String downloadTitle, String fileName) {
+        Share.setClipboardText(mMainActivity,youtubeDlUrl);
         Uri uri = Uri.parse(youtubeDlUrl);
         DownloadManager.Request request = new DownloadManager.Request(uri);
         request.setTitle(downloadTitle);

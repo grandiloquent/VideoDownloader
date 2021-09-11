@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
@@ -110,7 +111,7 @@ public class TextureVideoView extends TextureView
     private boolean mCanPause;
     private boolean mCanSeekBack;
     private boolean mCanSeekForward;
-    private boolean mShouldRequestAudioFocus = true;
+    private boolean mShouldRequestAudioFocus = false;
 
     public TextureVideoView(Context context) {
         this(context, null);
@@ -130,6 +131,10 @@ public class TextureVideoView extends TextureView
         requestFocus();
         mCurrentState = STATE_IDLE;
         mTargetState = STATE_IDLE;
+    }
+
+    public void setOnBufferingUpdateListener(OnBufferingUpdateListener onBufferingUpdateListener) {
+        mOnBufferingUpdateListener = onBufferingUpdateListener;
     }
 
     @Override
@@ -490,11 +495,16 @@ public class TextureVideoView extends TextureView
                     return true;
                 }
             };
+    private MediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener;
     private MediaPlayer.OnBufferingUpdateListener mBufferingUpdateListener =
             new MediaPlayer.OnBufferingUpdateListener() {
                 public void onBufferingUpdate(MediaPlayer mp, int percent) {
                     mCurrentBufferPercentage = percent;
+                    if (mOnBufferingUpdateListener != null) {
+                        mOnBufferingUpdateListener.onBufferingUpdate(mp, percent);
+                    }
                 }
+
             };
 
     /**

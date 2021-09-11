@@ -3,6 +3,7 @@ package euphoria.psycho.explorer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -12,6 +13,7 @@ import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
+import euphoria.psycho.videos.VideosHelper;
 import euphoria.psycho.videos.YouTube;
 
 import static euphoria.psycho.explorer.Helper.KEY_LAST_ACCESSED;
@@ -55,6 +57,7 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
         //tryPlayVideo(this);
+        VideosHelper.invokeVideoPlayer(this, Uri.parse("https://ccn.killcovid2021.com//m3u8/521540/521540.m3u8?st=aM08zWUNiuUDfd4-rs_UUg&e=1631385002"));
     }
 
     @Override

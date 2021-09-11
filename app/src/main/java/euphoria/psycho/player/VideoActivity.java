@@ -43,7 +43,15 @@ import static euphoria.psycho.player.PlayerHelper.switchPlayState;
 public class VideoActivity extends BaseVideoActivity implements
         GestureDetector.OnGestureListener,
         TimeBar.OnScrubListener,
-        OnPreparedListener, OnCompletionListener, OnBufferingUpdateListener, OnSeekCompleteListener, OnVideoSizeChangedListener, OnTimedTextListener, OnTimedMetaDataAvailableListener, OnErrorListener, OnInfoListener {
+        OnPreparedListener,
+        OnCompletionListener,
+        OnBufferingUpdateListener,
+        OnSeekCompleteListener,
+        OnVideoSizeChangedListener,
+        OnTimedTextListener,
+        OnTimedMetaDataAvailableListener,
+        OnErrorListener,
+        OnInfoListener {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
     private final Handler mHandler = new Handler();
     private final StringBuilder mStringBuilder = new StringBuilder();
@@ -85,9 +93,9 @@ public class VideoActivity extends BaseVideoActivity implements
         String videoPath = getIntent().getData().getPath();
         mFiles = getVideos(videoPath);
         if (mFiles == null) {
+            updateUI();
             mPlayer.setVideoURI(getIntent().getData());
-        }
-        else {
+        } else {
             mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
             mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
         }
@@ -95,6 +103,7 @@ public class VideoActivity extends BaseVideoActivity implements
         mPlayer.setOnCompletionListener(this);
         mPlayer.setOnErrorListener(this);
         mPlayer.setOnInfoListener(this);
+        mPlayer.setOnBufferingUpdateListener(this);
     }
 
     private void savePosition() {
@@ -105,7 +114,7 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     private void seekToLastedState() {
-        if(mFiles==null)return;
+        if (mFiles == null) return;
         String uri = mFiles[mCurrentPlaybackIndex].getAbsolutePath();
         long bookmark = mBookmarker.getBookmark(uri);
         if (bookmark > 0) {
@@ -124,10 +133,17 @@ public class VideoActivity extends BaseVideoActivity implements
         return position;
     }
 
+    private void updateUI() {
+        if (mFiles == null) {
+            mExoNext.setVisibility(View.GONE);
+            mExoPrev.setVisibility(View.GONE);
+        }
+    }
+
     private void setupView() {
         mRootView.setOnTouchListener((v, event) -> {
             mVideoTouchHelper.onTouchEvent(event);
-            return  true;
+            return true;
         });
         mExoProgress.addListener(this);
         mExoPlay.setOnClickListener(v -> {
@@ -234,6 +250,7 @@ public class VideoActivity extends BaseVideoActivity implements
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
+        mExoProgress.setBufferedPosition((long) (mPlayer.getDuration()*(1f*percent/100)));
     }
 
     @Override
@@ -268,6 +285,7 @@ public class VideoActivity extends BaseVideoActivity implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        Logger.e(String.format("onPrepared, %s", ""));
         mExoProgress.setDuration(mp.getDuration());
         mHandler.post(mProgressChecker);
         mPlayer.start();
