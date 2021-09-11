@@ -16,7 +16,6 @@ import static euphoria.psycho.videos.VideosHelper.launchDialog;
 
 public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
 
-
     public XVideos(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }
@@ -73,6 +72,7 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
         return inputUri;
     }
 
+
     @Override
     protected void processVideo(List<Pair<String, String>> videoUriList) {
         try {
@@ -81,5 +81,7 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
             e.printStackTrace();
         }
     }
+
+
 }
 

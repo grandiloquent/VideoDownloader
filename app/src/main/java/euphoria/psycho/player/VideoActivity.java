@@ -85,10 +85,12 @@ public class VideoActivity extends BaseVideoActivity implements
         String videoPath = getIntent().getData().getPath();
         mFiles = getVideos(videoPath);
         if (mFiles == null) {
-            throw new IllegalStateException();
+            mPlayer.setVideoURI(getIntent().getData());
         }
-        mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
-        mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
+        else {
+            mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
+            mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
+        }
         mPlayer.setOnPreparedListener(this);
         mPlayer.setOnCompletionListener(this);
         mPlayer.setOnErrorListener(this);
@@ -103,6 +105,7 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     private void seekToLastedState() {
+        if(mFiles==null)return;
         String uri = mFiles[mCurrentPlaybackIndex].getAbsolutePath();
         long bookmark = mBookmarker.getBookmark(uri);
         if (bookmark > 0) {

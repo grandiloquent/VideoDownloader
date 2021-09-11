@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.Pair;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -19,9 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import euphoria.psycho.explorer.App;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.IntentShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
@@ -33,6 +37,12 @@ import euphoria.psycho.tasks.VideoActivity;
 
 public class VideosHelper {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
+
+    static void invokeVideoPlayer(Context context, Uri videoUri) {
+        Intent intent = new Intent(context, euphoria.psycho.player.VideoActivity.class);
+        intent.setData(videoUri);
+        context.startActivity(intent);
+    }
 
     public static String[] getResponse(String uri, String[][] headers) {
         try {
@@ -130,7 +140,8 @@ public class VideosHelper {
         // for non members limitation
         String response = getString(uri, new String[][]{
                 {"Referer", "https://91porn.com"},
-                {"X-Forwarded-For", NetShare.randomIp()}
+                {"X-Forwarded-For", NetShare.randomIp()},
+                {"Cookie","__utmz=50351329.1627063297.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); cf_clearance=4A5XIoRsUirytrat2tb33o6hrjy_oGuUN1ZzaWu__N4-1629235742-0-150; CLIPSHARE=tsi6qmkv4o57nlm03rc2lj20eu; __cf_bm=gqPxyYZA3q5O8.V4Mrn7faaeTWQH1wmH.XDHiNU3VCM-1631371176-0-AQvjPw8VEojAC1UMXyJED1uWUljl3xDKe4i4LicJlUfgpzTXCIe08cX0iORKa/HIAJR+BA5hh70vN+i2R/dsiqt+WbwnVPYtY2lZRULMo5eDvRFYKjcwBhn6cc2gyRNe5g==; covid19=42ebBBKeeySWpzujtunwZYmhCIH4r8JzbSQrIskM; __utma=50351329.529142342.1627063297.1630294846.1631371227.22; __utmb=50351329.0.10.1631371227; __utmc=50351329"}
         });
         if (response == null) {
 //        byte[] buffer = new byte[128];
@@ -139,10 +150,23 @@ public class VideosHelper {
 //        if (result == 0) {
             return null;
         }
+        try {
+            FileShare.writeAllText(
+                    new File(App.getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
+                            "1.txt"),
+                    response
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // maybe that is the fast way to
         // extract the encoded code which
         // contains the real video uri
         String encoded = StringShare.substring(response, "document.write(strencode2(\"", "\"));");
+        if (encoded == null) {
+            Logger.e(String.format("extract91PornVideoAddress, %s", encoded));
+            return null;
+        }
         String htm = null;
         try {
             // translate from the javascript code 'window.unescape'

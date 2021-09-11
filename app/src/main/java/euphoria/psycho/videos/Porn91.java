@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.content.Intent;
+import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
-import static euphoria.psycho.videos.VideosHelper.viewVideoBetter;
+import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class Porn91 extends BaseExtractor<String> {
 
@@ -70,8 +71,10 @@ public class Porn91 extends BaseExtractor<String> {
         return inputUri;
     }
 
+
     @Override
     protected void processVideo(String videoUri) {
-        viewVideoBetter(mMainActivity, videoUri);
+        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
+        //viewVideoBetter(mMainActivity, videoUri);
     }
 }

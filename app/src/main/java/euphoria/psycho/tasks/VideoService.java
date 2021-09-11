@@ -199,7 +199,6 @@ public class VideoService extends Service implements RequestEventListener {
                 checkUncompletedVideoTasks();
             return START_NOT_STICKY;
         }
-        Logger.e(String.format("onStartCommand, %s", uri));
         submitRequest(uri.toString());
         return super.onStartCommand(intent, flags, startId);
     }
