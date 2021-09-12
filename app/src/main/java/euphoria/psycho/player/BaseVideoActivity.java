@@ -56,6 +56,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mExoDuration = findViewById(R.id.exo_duration);
         mPlayer = findViewById(R.id.texture_video_view);
         mProgressBar = findViewById(R.id.progress_bar);
-        mFileDownload = findViewById(R.id.file_download);
+        mFileDownload = findViewById(R.id.exo_file_download);
     }
 }

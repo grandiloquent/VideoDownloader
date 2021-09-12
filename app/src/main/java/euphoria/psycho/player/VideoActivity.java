@@ -19,7 +19,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnContextClickListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
 
 import java.io.File;
@@ -194,13 +193,10 @@ public class VideoActivity extends BaseVideoActivity implements
                 return null;
             });
         });
-        mFileDownload.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(VideoActivity.this, euphoria.psycho.tasks.VideoActivity.class);
-                intent.setData(intent.getData());
-                VideoActivity.this.startActivity(intent);
-            }
+        mFileDownload.setOnClickListener(v -> {
+            Intent intent = new Intent(VideoActivity.this, euphoria.psycho.tasks.VideoActivity.class);
+            intent.setData(intent.getData());
+            VideoActivity.this.startActivity(intent);
         });
     }
 

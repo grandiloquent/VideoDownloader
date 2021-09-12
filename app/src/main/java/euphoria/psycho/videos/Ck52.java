@@ -5,6 +5,7 @@ import android.net.Uri;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 
 import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
@@ -29,7 +30,8 @@ public class Ck52 extends BaseExtractor<String> {
             return null;
         }
         videoUri = videoUri.replace("\\/", "/");
-        return null;
+        Logger.e(String.format("fetchVideoUri, %s", videoUri));
+        return videoUri;
     }
 
     @Override

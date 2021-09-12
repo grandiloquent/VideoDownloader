@@ -18,7 +18,8 @@
         <ImageButton
             android:id="@+id/file_download"
             style="@style/ImageButton"
-            android:src="@drawable/ic_action_file_download" />
+            android:src="@drawable/ic_action_file_download"
+            android:tint="#6F6F6F"/>
 
         <View
             android:layout_width="0dp"
