@@ -107,6 +107,9 @@ public class VideoActivity extends BaseVideoActivity implements
     }
 
     private void savePosition() {
+        if (mFiles == null) {
+            return;
+        }
         String uri = mFiles[mCurrentPlaybackIndex].getAbsolutePath();
         if (mPlayer == null) return;
         if (mPlayer.getDuration() - mPlayer.getCurrentPosition() > 60 * 1000)
@@ -137,6 +140,9 @@ public class VideoActivity extends BaseVideoActivity implements
         if (mFiles == null) {
             mExoNext.setVisibility(View.GONE);
             mExoPrev.setVisibility(View.GONE);
+            mExoDelete.setVisibility(View.GONE);
+        } else {
+            mFileDownload.setVisibility(View.GONE);
         }
     }
 
@@ -250,7 +256,7 @@ public class VideoActivity extends BaseVideoActivity implements
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        mExoProgress.setBufferedPosition((long) (mPlayer.getDuration()*(1f*percent/100)));
+        mExoProgress.setBufferedPosition((long) (mPlayer.getDuration() * (1f * percent / 100)));
     }
 
     @Override
@@ -276,6 +282,7 @@ public class VideoActivity extends BaseVideoActivity implements
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        Logger.e(String.format("onInfo, %s %s", what, extra));
         return false;
     }
 

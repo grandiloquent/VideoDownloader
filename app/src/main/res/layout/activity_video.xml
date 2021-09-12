@@ -56,6 +56,11 @@
                 style="@style/ExoMediaButton.Next"
                 android:src="@drawable/ic_action_clear" />
 
+            <ImageButton
+                android:id="@+id/exo_file_download"
+                style="@style/ExoMediaButton.Next"
+                android:src="@drawable/ic_action_file_download" />
+
         </LinearLayout>
 
         <LinearLayout

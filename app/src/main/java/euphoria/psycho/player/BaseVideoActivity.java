@@ -31,6 +31,7 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     ImageButton mExoDelete;
     TextureVideoView mPlayer;
     ProgressBar mProgressBar;
+    ImageButton mFileDownload;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,5 +56,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mExoDuration = findViewById(R.id.exo_duration);
         mPlayer = findViewById(R.id.texture_video_view);
         mProgressBar = findViewById(R.id.progress_bar);
+        mFileDownload = findViewById(R.id.file_download);
     }
 }
