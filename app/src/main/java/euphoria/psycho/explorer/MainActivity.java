@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.AcFunShare;
+import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
@@ -126,6 +127,9 @@ public class MainActivity extends Activity implements ClientInterface {
             return true;
         }
         if (PornOne.handle(uri, this)) {
+            return true;
+        }
+        if (Ck52.handle(uri, this)) {
             return true;
         }
         return false;

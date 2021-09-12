@@ -27,7 +27,8 @@ public class CustomWebViewClient extends WebViewClient {
             "://rpc-php.trafficfactory.biz/",
             "://ssl.google-analytics.com/",
             "://syndication.realsrv.com/",
-            "://www.gstatic.com/"
+            "://www.gstatic.com/",
+            "/ads/"
     };
 
     public CustomWebViewClient(ClientInterface clientInterface) {

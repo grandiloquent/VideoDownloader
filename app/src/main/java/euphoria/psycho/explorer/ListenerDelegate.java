@@ -19,6 +19,7 @@ import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Bilibili;
+import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.DouYin;
 import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShou;
@@ -134,6 +135,9 @@ public class ListenerDelegate {
             return;
         }
         if (Twitter.handle(url, mMainActivity)) {
+            return;
+        }
+        if (Ck52.handle(url, mMainActivity)) {
             return;
         }
         if (url.equals("https://91porn.com/index.php") || url.startsWith("https://91porn.com/v.php")) {
