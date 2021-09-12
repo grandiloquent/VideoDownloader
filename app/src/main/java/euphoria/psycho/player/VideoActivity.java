@@ -1,5 +1,6 @@
 package euphoria.psycho.player;
 
+import android.content.Intent;
 import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
@@ -18,6 +19,7 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnContextClickListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 
 import java.io.File;
@@ -191,6 +193,14 @@ public class VideoActivity extends BaseVideoActivity implements
                 }
                 return null;
             });
+        });
+        mFileDownload.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(VideoActivity.this, euphoria.psycho.tasks.VideoActivity.class);
+                intent.setData(intent.getData());
+                VideoActivity.this.startActivity(intent);
+            }
         });
     }
 
