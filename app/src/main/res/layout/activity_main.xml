@@ -31,7 +31,6 @@
             style="@style/ImageButton"
             android:src="@drawable/ic_action_more_vert" />
 
-
     </LinearLayout>
 
     <WebView
