@@ -111,6 +111,9 @@ public class PlayerHelper {
     }
 
     static File[] getVideos(String videoPath) {
+        if (videoPath == null) {
+            return null;
+        }
         File dir = new File(videoPath).getParentFile();
         if (dir == null) {
             return null;

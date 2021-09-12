@@ -94,6 +94,7 @@ public class VideoActivity extends BaseVideoActivity implements
         String videoPath = getIntent().getData().getPath();
         mFiles = getVideos(videoPath);
         if (mFiles == null) {
+            Logger.e(String.format("initializePlayer, %s", getIntent().getData()));
             updateUI();
             mPlayer.setVideoURI(getIntent().getData());
         } else {

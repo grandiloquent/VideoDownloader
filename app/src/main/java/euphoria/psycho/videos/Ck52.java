@@ -24,7 +24,7 @@ public class Ck52 extends BaseExtractor<String> {
         if (response == null) {
             return null;
         }
-        String videoUri = StringShare.substringLeast(response, "\"url\":\"", "\",\"");
+        String videoUri = StringShare.substring(response, "\"link_pre\":\"\",\"url\":\"", "\",\"");
         if (videoUri == null) {
             return null;
         }
