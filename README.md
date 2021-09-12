@@ -48,3 +48,7 @@
 2. Click the add link button in the upper left corner
 
 3. Paste the video shared link or page address into the input,then click the ok button.
+
+## 问题
+
+* 如果某些页面的视频无法下载，请点击顶部工具栏的刷新按钮刷新页面
