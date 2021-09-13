@@ -14,6 +14,7 @@ import android.media.MediaPlayer.OnTimedTextListener;
 import android.media.MediaPlayer.OnVideoSizeChangedListener;
 import android.media.TimedMetaData;
 import android.media.TimedText;
+import android.net.Uri;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnContextClickListener;
@@ -22,11 +23,14 @@ import android.view.View;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DateTimeShare;
+import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.WebViewShare;
 
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarHeight;
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarSize;
@@ -39,6 +43,7 @@ import static euphoria.psycho.player.PlayerHelper.playPreviousVideo;
 import static euphoria.psycho.player.PlayerHelper.rotateScreen;
 import static euphoria.psycho.player.PlayerHelper.showSystemUI;
 import static euphoria.psycho.player.PlayerHelper.switchPlayState;
+import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
 // https://github.com/google/ExoPlayer
 public class VideoActivity extends BaseVideoActivity implements
@@ -195,9 +200,15 @@ public class VideoActivity extends BaseVideoActivity implements
             });
         });
         mFileDownload.setOnClickListener(v -> {
-            Intent intent = new Intent(VideoActivity.this, euphoria.psycho.tasks.VideoActivity.class);
-            intent.setData(intent.getData());
-            VideoActivity.this.startActivity(intent);
+            Uri videoUri = getIntent().getData();
+            if (videoUri.toString().contains("m3u8")) {
+                Intent intent = new Intent(VideoActivity.this, euphoria.psycho.tasks.VideoActivity.class);
+                intent.setData(videoUri);
+                VideoActivity.this.startActivity(intent);
+            } else {
+                WebViewShare.downloadFile(v.getContext(), KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
+            }
+
         });
     }
 

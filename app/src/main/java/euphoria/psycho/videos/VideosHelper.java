@@ -194,7 +194,8 @@ public class VideosHelper {
         }
         new AlertDialog.Builder(mainActivity)
                 .setItems(names, (dialog, which) -> {
-                    viewVideoBetter(mainActivity, videoList.get(which).second);
+                    invokeVideoPlayer(mainActivity, Uri.parse(videoList.get(which).second));
+                    //viewVideoBetter(mainActivity, videoList.get(which).second);
                 })
                 .show();
         //
