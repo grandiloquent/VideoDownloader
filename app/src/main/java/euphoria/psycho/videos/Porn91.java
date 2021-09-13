@@ -70,6 +70,5 @@ public class Porn91 extends BaseExtractor<String> {
     @Override
     protected void processVideo(String videoUri) {
         invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
-        //viewVideoBetter(mMainActivity, videoUri);
     }
 }

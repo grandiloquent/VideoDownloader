@@ -67,7 +67,6 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
         return videoList;
     }
 
-
     @Override
     protected void processVideo(List<Pair<String, String>> videoUriList) {
         try {
@@ -76,7 +75,5 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
             e.printStackTrace();
         }
     }
-
-
 }
 
