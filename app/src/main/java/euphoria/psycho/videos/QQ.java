@@ -310,11 +310,6 @@ public class QQ extends BaseExtractor<String> {
     }
 
     @Override
-    protected String processUri(String inputUri) {
-        return inputUri;
-    }
-
-    @Override
     protected void processVideo(String videoUri) {
     }
 }

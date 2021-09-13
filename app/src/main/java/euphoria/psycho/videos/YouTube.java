@@ -62,11 +62,6 @@ public class YouTube extends BaseExtractor<List<Pair<String, YtFile>>> {
     }
 
     @Override
-    protected String processUri(String inputUri) {
-        return inputUri;
-    }
-
-    @Override
     protected void processVideo(List<Pair<String, YtFile>> videoList) {
         String[] names = new String[videoList.size()];
         for (int i = 0; i < names.length; i++) {

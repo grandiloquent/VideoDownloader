@@ -66,11 +66,6 @@ public class Porn91 extends BaseExtractor<String> {
         return VideosHelper.extract91PornVideoAddress(uri);
     }
 
-    @Override
-    protected String processUri(String inputUri) {
-        return inputUri;
-    }
-
 
     @Override
     protected void processVideo(String videoUri) {

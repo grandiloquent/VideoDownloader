@@ -67,11 +67,6 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
         return videoList;
     }
 
-    @Override
-    protected String processUri(String inputUri) {
-        return inputUri;
-    }
-
 
     @Override
     protected void processVideo(List<Pair<String, String>> videoUriList) {

@@ -117,10 +117,6 @@ public class Bilibili extends BaseExtractor<String> {
         return videoUrl;
     }
 
-    @Override
-    protected String processUri(String inputUri) {
-        return inputUri;
-    }
 
     @Override
     protected void processVideo(String videoUri) {

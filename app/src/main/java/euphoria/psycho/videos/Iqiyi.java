@@ -122,11 +122,6 @@ public class Iqiyi extends BaseExtractor<List<Pair<String, String>>> {
     }
 
     @Override
-    protected String processUri(String inputUri) {
-        return inputUri;
-    }
-
-    @Override
     protected void processVideo(List<Pair<String, String>> videoUri) {
         AlertDialog alertDialog =
                 new AlertDialog.Builder(mMainActivity)

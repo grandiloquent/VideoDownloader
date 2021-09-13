@@ -134,10 +134,6 @@ public class Twitter extends BaseExtractor<List<TwitterVideo>> {
         return null;
     }
 
-    @Override
-    protected String processUri(String inputUri) {
-        return inputUri;
-    }
 
     @Override
     protected void processVideo(List<TwitterVideo> videoList) {

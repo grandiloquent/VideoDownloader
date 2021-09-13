@@ -32,10 +32,6 @@ public class Ck52 extends BaseExtractor<String> {
         return videoUri;
     }
 
-    @Override
-    protected String processUri(String inputUri) {
-        return inputUri;
-    }
 
     @Override
     protected void processVideo(String videoUri) {

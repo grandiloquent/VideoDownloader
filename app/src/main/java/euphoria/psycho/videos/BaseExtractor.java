@@ -25,7 +25,11 @@ public abstract class BaseExtractor<T> {
 
     protected abstract T fetchVideoUri(String uri);
 
-    protected abstract String processUri(String inputUri);
+    protected String processUri(String inputUri) {
+        return inputUri;
+    }
+
+    ;
 
     protected abstract void processVideo(T videoUri);
 
