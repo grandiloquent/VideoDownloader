@@ -129,9 +129,6 @@ public class MainActivity extends Activity implements ClientInterface {
         if (PornOne.handle(uri, this)) {
             return true;
         }
-        if (Ck52.handle(uri, this)) {
-            return true;
-        }
-        return false;
+        return Ck52.handle(uri, this);
     }
 }
