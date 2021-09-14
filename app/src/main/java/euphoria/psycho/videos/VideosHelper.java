@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 import android.util.Pair;
 
 import java.io.File;
@@ -46,13 +47,27 @@ public class VideosHelper {
     }
 
     public static String extract91PornVideoAddress(String uri) {
+        String[] headers = null;
+        try {
+            headers = getLocationAddCookie(
+                    "https://91porn.com/index.php",
+                    null
+            );
+        } catch (IOException e) {
+            Log.e("B5aOx2", String.format("extract91PornVideoAddress, %s", e.getMessage()));
+            e.printStackTrace();
+        }
+        Log.e("B5aOx2", String.format("extract91PornVideoAddress, %s", headers[1]));
+        if (headers == null) {
+            return null;
+        }
         // We need to use fake IPs to
         // get around the 50 views per day
         // for non members limitation
         String response = getString(uri, new String[][]{
                 {"Referer", "https://91porn.com"},
                 {"X-Forwarded-For", NetShare.randomIp()},
-                {"Cookie","__utmz=50351329.1627063297.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); cf_clearance=4A5XIoRsUirytrat2tb33o6hrjy_oGuUN1ZzaWu__N4-1629235742-0-150; CLIPSHARE=tsi6qmkv4o57nlm03rc2lj20eu; __cf_bm=gqPxyYZA3q5O8.V4Mrn7faaeTWQH1wmH.XDHiNU3VCM-1631371176-0-AQvjPw8VEojAC1UMXyJED1uWUljl3xDKe4i4LicJlUfgpzTXCIe08cX0iORKa/HIAJR+BA5hh70vN+i2R/dsiqt+WbwnVPYtY2lZRULMo5eDvRFYKjcwBhn6cc2gyRNe5g==; covid19=42ebBBKeeySWpzujtunwZYmhCIH4r8JzbSQrIskM; __utma=50351329.529142342.1627063297.1630294846.1631371227.22; __utmb=50351329.0.10.1631371227; __utmc=50351329"}
+                {"Cookie", headers[1]}
         });
         if (response == null) {
 //        byte[] buffer = new byte[128];
@@ -119,7 +134,7 @@ public class VideosHelper {
         Map<String, List<String>> listMap = urlConnection.getHeaderFields();
         StringBuilder stringBuilder = new StringBuilder();
         for (Entry<String, List<String>> header : listMap.entrySet()) {
-            if (header.getKey() != null && header.getKey().equals("set-cookie")) {
+            if (header.getKey() != null && header.getKey().toLowerCase().equals("set-cookie")) {
                 for (String s : header.getValue()) {
                     stringBuilder.append(StringShare.substringBefore(s, "; "))
                             .append("; ");
@@ -181,7 +196,7 @@ public class VideosHelper {
         return null;
     }
 
-   public static void invokeVideoPlayer(Context context, Uri videoUri) {
+    public static void invokeVideoPlayer(Context context, Uri videoUri) {
         Intent intent = new Intent(context, euphoria.psycho.player.VideoActivity.class);
         intent.setData(videoUri);
         context.startActivity(intent);
