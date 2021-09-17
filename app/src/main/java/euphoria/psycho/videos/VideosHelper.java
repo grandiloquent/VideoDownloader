@@ -5,11 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Environment;
-import android.util.Log;
 import android.util.Pair;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -22,11 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import euphoria.psycho.explorer.App;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.IntentShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
@@ -74,7 +69,7 @@ public class VideosHelper {
 //        if (result == 0) {
             return null;
         }
-        try {
+        /*try {
             FileShare.writeAllText(
                     new File(App.getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
                             "1.txt"),
@@ -82,7 +77,7 @@ public class VideosHelper {
             );
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
         // maybe that is the fast way to
         // extract the encoded code which
         // contains the real video uri
