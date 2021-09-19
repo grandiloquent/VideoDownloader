@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "869801176191",
+    "project_id": "videobrowser-cae43",
+    "storage_bucket": "videobrowser-cae43.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:869801176191:android:6dbe288928ea17ddf0634a",
+        "android_client_info": {
+          "package_name": "euphoria.psycho.explorer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "869801176191-3jds94c7stvs5va3i2na6bvre9a6a7o7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOvaMeAeZrM1S09MOwkuxvLDFj6x6sPAc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "869801176191-3jds94c7stvs5va3i2na6bvre9a6a7o7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
