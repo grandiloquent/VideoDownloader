@@ -10,9 +10,7 @@ import euphoria.psycho.share.StringShare;
 import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class Ck52 extends BaseExtractor<String> {
-
     private static Pattern MATCH_52CK = Pattern.compile("/vodplay/[\\d-]+\\.html");
-
 
     protected Ck52(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -32,11 +30,9 @@ public class Ck52 extends BaseExtractor<String> {
         return videoUri;
     }
 
-
     @Override
     protected void processVideo(String videoUri) {
         invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
-
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {

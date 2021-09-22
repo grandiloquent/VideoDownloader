@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.util.Pair;
 
 import java.io.IOException;
@@ -182,9 +183,11 @@ public class VideosHelper {
             if (code < 400 && code >= 200) {
                 return NetShare.readString(urlConnection);
             } else {
+                Log.e("B5aOx2", String.format("An error occurred while requesting %s, %s", uri, code));
                 return null;
             }
-        } catch (Exception ignored) {
+        } catch (Exception exception) {
+            Log.e("B5aOx2", String.format("An error occurred while requesting %s, %s", uri, exception.getMessage()));
         }
         return null;
     }
