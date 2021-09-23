@@ -242,8 +242,6 @@ public class VideosHelper {
                 return null;
             }
         } catch (Exception ignored) {
-            Logger.d(String.format("getString: %s", ignored.getMessage()));
-
         }
         return null;
     }
