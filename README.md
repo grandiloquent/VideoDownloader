@@ -31,6 +31,7 @@
 * [x] [PornHub](https://www.pornhub.com)
 * [x] [PornOne](https://pornone.com/)
 * [x] http://57ck.cc/
+* [x] https://hxz315/videos/
 
 ## 引用
 
