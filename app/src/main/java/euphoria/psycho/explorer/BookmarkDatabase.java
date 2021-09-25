@@ -40,6 +40,7 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
                 ")");
         insert("YouTube", "https://m.youtube.com", db);
         insert("回形针", "https://lucidu.cn", db);
+        insert("搜索视频", "https://hxz315/videos/", db);
     }
 
     @Override
