@@ -4,6 +4,8 @@ package euphoria.psycho.share;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
+import org.brotli.dec.BrotliInputStream;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +85,9 @@ public class NetShare {
             else if (contentEncoding != null && contentEncoding.equals("br")) {
                 in = new BrotliInputStream(connection.getInputStream());
             } */
-            else {
+            if (contentEncoding != null && contentEncoding.equals("br")) {
+                in = new BrotliInputStream(connection.getInputStream());
+            } else {
                 in = connection.getInputStream();
             }
             reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
@@ -124,7 +128,7 @@ public class NetShare {
         return false;
     }
 
-    public  static void disableSSLCertificateChecking() {
+    public static void disableSSLCertificateChecking() {
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
                     @Override

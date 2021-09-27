@@ -47,9 +47,27 @@ public class VideosHelper {
         try {
             headers = getLocationAddCookie(
                     "https://91porn.com/index.php",
-                    null
+                    new String[][]{
+                            {"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"},
+                            {"Accept-Encoding", "gzip, deflate, br"},
+                            {"Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8"},
+                            {"Cache-Control", "no-cache"},
+                            {"Connection", "keep-alive"},
+                            {"Host", "91porn.com"},
+                            {"Pragma", "no-cache"},
+                            {"sec-ch-ua", "\"Google Chrome\";v=\"93\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"93\""},
+                            {"sec-ch-ua-mobile", "?0"},
+                            {"sec-ch-ua-platform", "\"Windows\""},
+                            {"Sec-Fetch-Dest", "document"},
+                            {"Sec-Fetch-Mode", "navigate"},
+                            {"Sec-Fetch-Site", "none"},
+                            {"Sec-Fetch-User", "?1"},
+                            {"Upgrade-Insecure-Requests", "1"},
+                            {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"}}
             );
+            Log.e("B5aOx2", String.format("extract91PornVideoAddress, %s", headers[1]));
         } catch (IOException e) {
+            Log.e("B5aOx2", String.format("extract91PornVideoAddress, %s", e.getMessage()));
             e.printStackTrace();
         }
         if (headers == null) {
@@ -59,10 +77,26 @@ public class VideosHelper {
         // get around the 50 views per day
         // for non members limitation
         String response = getString(uri, new String[][]{
-                {"Referer", "https://91porn.com"},
+                {"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"},
+                {"Accept-Encoding", "gzip, deflate, br"},
+                {"Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8"},
+                {"Cache-Control", "no-cache"},
+                {"Connection", "keep-alive"},
+                {"Host", "91porn.com"},
+                {"Pragma", "no-cache"},
+                {"sec-ch-ua", "\"Google Chrome\";v=\"93\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"93\""},
+                {"sec-ch-ua-mobile", "?0"},
+                {"sec-ch-ua-platform", "\"Windows\""},
+                {"Sec-Fetch-Dest", "document"},
+                {"Sec-Fetch-Mode", "navigate"},
+                {"Sec-Fetch-Site", "none"},
+                {"Sec-Fetch-User", "?1"},
+                {"Upgrade-Insecure-Requests", "1"},
+                {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"},
                 {"X-Forwarded-For", NetShare.randomIp()},
                 {"Cookie", headers[1]}
         });
+        Log.e("B5aOx2", String.format("extract91PornVideoAddress, %s", response));
         if (response == null) {
 //        byte[] buffer = new byte[128];
 //        byte[] buf = uri.getBytes(StandardCharsets.UTF_8);
@@ -118,12 +152,12 @@ public class VideosHelper {
     public static String[] getLocationAddCookie(String uri, String[][] headers) throws IOException {
         URL url = new URL(uri);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        //urlConnection.setRequestProperty("User-Agent", USER_AGENT);
         if (headers != null) {
             for (String[] header : headers) {
                 urlConnection.setRequestProperty(header[0], header[1]);
             }
         }
-        urlConnection.setRequestProperty("User-Agent", USER_AGENT);
         urlConnection.setInstanceFollowRedirects(false);
         Map<String, List<String>> listMap = urlConnection.getHeaderFields();
         StringBuilder stringBuilder = new StringBuilder();
@@ -135,6 +169,7 @@ public class VideosHelper {
                 }
             }
         }
+        Log.e("B5aOx2", String.format("getLocationAddCookie, %s", urlConnection.getResponseCode()));
         return new String[]{urlConnection.getHeaderField("Location"), stringBuilder.toString()};
     }
 
@@ -179,6 +214,7 @@ public class VideosHelper {
                     urlConnection.setRequestProperty(header[0], header[1]);
                 }
             }
+            //NetShare.iterateResponseHeader(urlConnection);
             int code = urlConnection.getResponseCode();
             if (code < 400 && code >= 200) {
                 return NetShare.readString(urlConnection);
