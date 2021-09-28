@@ -196,8 +196,9 @@ public class ListenerDelegate {
     private void onRefresh() {
         mMainActivity.getWebView().clearCache(true);
         mMainActivity.getWebView().reload();
-        if (mMainActivity.getWebView().getUrl().startsWith("https://91porn.com/v.php"))
-            new Thread(() -> Porn91.fetchVideos(mMainActivity.getWebView().getUrl(), 1)).start();
+        String url=mMainActivity.getWebView().getUrl();
+        if (url.startsWith("https://91porn.com/"))
+            new Thread(() -> Porn91.fetchVideos(url, 1)).start();
 
     }
 

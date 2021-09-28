@@ -90,6 +90,7 @@ public class Porn91 extends BaseExtractor<String> {
     }
 
     public static void fetchVideos(String url, int max) {
+        Log.e("B5aOx2", String.format("fetchVideos, %s", ""));
         String[] headers = null;
         try {
             headers = getLocationAddCookie(
