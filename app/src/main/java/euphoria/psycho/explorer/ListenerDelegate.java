@@ -196,6 +196,9 @@ public class ListenerDelegate {
     private void onRefresh() {
         mMainActivity.getWebView().clearCache(true);
         mMainActivity.getWebView().reload();
+        if (mMainActivity.getWebView().getUrl().startsWith("https://91porn.com/v.php"))
+            new Thread(() -> Porn91.fetchVideos(mMainActivity.getWebView().getUrl(), 1)).start();
+
     }
 
     private void onShowBookmark() {

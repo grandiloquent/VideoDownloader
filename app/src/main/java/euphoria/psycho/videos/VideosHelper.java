@@ -65,9 +65,7 @@ public class VideosHelper {
                             {"Upgrade-Insecure-Requests", "1"},
                             {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"}}
             );
-            Log.e("B5aOx2", String.format("extract91PornVideoAddress, %s", headers[1]));
         } catch (IOException e) {
-            Log.e("B5aOx2", String.format("extract91PornVideoAddress, %s", e.getMessage()));
             e.printStackTrace();
         }
         if (headers == null) {

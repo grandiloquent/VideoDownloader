@@ -9,6 +9,15 @@ import java.util.Formatter;
 
 
 public class DateTimeShare {
+    public static int DurationToSeconds(String duration) {
+        String[] pieces = duration.split(":");
+        int total = 0;
+        for (int i = pieces.length - 1; i > -1; i--) {
+            total += Integer.parseInt(pieces[i]) * Math.pow(60, i);
+        }
+        return total;
+    }
+
     // Returns a (localized) string for the given duration (in seconds).
     public static String formatDuration(final Context context, int duration) {
         int h = duration / 3600;
@@ -28,6 +37,7 @@ public class DateTimeShare {
         return simpleDateFormat.format(new Date());
 
     }
+
     public static String getStringForTime(StringBuilder builder, Formatter formatter, long timeMs) {
         if (timeMs == Long.MIN_VALUE + 1) {
             timeMs = 0;
