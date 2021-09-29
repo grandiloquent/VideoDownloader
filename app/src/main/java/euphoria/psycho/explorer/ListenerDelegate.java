@@ -13,6 +13,7 @@ import com.cocosw.bottomsheet.BottomSheet;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
@@ -196,9 +197,16 @@ public class ListenerDelegate {
     private void onRefresh() {
         mMainActivity.getWebView().clearCache(true);
         mMainActivity.getWebView().reload();
-        String url=mMainActivity.getWebView().getUrl();
+        String url = mMainActivity.getWebView().getUrl();
         if (url.startsWith("https://91porn.com/"))
             new Thread(() -> Porn91.fetchVideos(url, 1)).start();
+        else {
+            Pattern pattern = Pattern.compile("xvideos\\.com/video\\d+");
+            if (pattern.matcher(url).find()) {
+                new Thread(() -> XVideos.fetchVideos(url)).start();
+            }
+
+        }
 
     }
 
