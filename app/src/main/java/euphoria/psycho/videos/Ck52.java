@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.net.Uri;
+import android.util.Log;
 
 import java.util.regex.Pattern;
 
@@ -18,6 +19,7 @@ public class Ck52 extends BaseExtractor<String> {
 
     @Override
     protected String fetchVideoUri(String uri) {
+        Log.e("B5aOx2", String.format("fetchVideoUri, %s", uri));
         String response = VideosHelper.getString(uri, null);
         if (response == null) {
             return null;

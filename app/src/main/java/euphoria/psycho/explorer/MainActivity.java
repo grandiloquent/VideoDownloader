@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import euphoria.psycho.share.DateTimeShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Ck52;
@@ -41,6 +43,7 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     private void initialize() {
+        Log.e("B5aOx2", String.format("initialize, %s", DateTimeShare.DurationToSeconds("30:00")));
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
         // check whether the chrome is installed

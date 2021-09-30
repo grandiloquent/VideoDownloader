@@ -2,6 +2,7 @@ package euphoria.psycho.share;
 
 
 import android.content.Context;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,8 +13,8 @@ public class DateTimeShare {
     public static int DurationToSeconds(String duration) {
         String[] pieces = duration.split(":");
         int total = 0;
-        for (int i = pieces.length - 1; i > -1; i--) {
-            total += Integer.parseInt(pieces[i]) * Math.pow(60, i);
+        for (int i = pieces.length - 1, j = 0; i > -1; i--, j++) {
+            total += Integer.parseInt(pieces[i]) * Math.pow(60, j);
         }
         return total;
     }

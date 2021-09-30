@@ -212,7 +212,6 @@ public class VideosHelper {
                     urlConnection.setRequestProperty(header[0], header[1]);
                 }
             }
-            //NetShare.iterateResponseHeader(urlConnection);
             int code = urlConnection.getResponseCode();
             if (code < 400 && code >= 200) {
                 return NetShare.readString(urlConnection);
