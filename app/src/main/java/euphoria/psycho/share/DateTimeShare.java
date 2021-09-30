@@ -2,7 +2,6 @@ package euphoria.psycho.share;
 
 
 import android.content.Context;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
