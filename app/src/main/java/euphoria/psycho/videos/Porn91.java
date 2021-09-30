@@ -152,6 +152,7 @@ public class Porn91 extends BaseExtractor<String> {
                 video.put("title", videoTitle);
                 video.put("thumbnail", videoThumb);
                 video.put("url", videoUrl);
+                video.put("type",1);
                 int duration = 0;
                 try {
                     duration = DateTimeShare.DurationToSeconds(videoDuration);
