@@ -10,7 +10,13 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0.2"
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_shared'
+            }
+        }
         ndk {
+            // Don't package arm64-v8a or x86_64 , 'x86' 'armeabi-v7a',
             abiFilters 'arm64-v8a'
         }
     }
@@ -20,11 +26,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-//    externalNativeBuild {
-//        cmake {
-//            path "/src/main/cpp/CMakeLists.txt"
-//        }
-//    }
+    externalNativeBuild {
+        cmake {
+            path "/src/main/cpp/CMakeLists.txt"
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
