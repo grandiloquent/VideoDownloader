@@ -70,7 +70,8 @@ public class MainActivity extends Activity implements ClientInterface {
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
-//                Native.fetch91Porn("");
+//                String uri = Native.fetch57Ck("http://458ck.cc/vodplay/1332-1-1.html");
+//                Log.e("B5aOx2", String.format("run, %s", uri));
 //            }
 //        }).start();
     }

@@ -5,7 +5,7 @@ import android.net.Uri;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.StringShare;
+import euphoria.psycho.explorer.Native;
 
 import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
@@ -18,20 +18,7 @@ public class Ck52 extends BaseExtractor<String> {
 
     @Override
     protected String fetchVideoUri(String uri) {
-        String response = VideosHelper.getString(uri, new String[][]{
-                {"X-Forwarded-For", "164.52.39.43"},
-                {"Client-IP","164.52.39.43"}
-
-        });
-        if (response == null) {
-            return null;
-        }
-        String videoUri = StringShare.substring(response, "\"link_pre\":\"\",\"url\":\"", "\",\"");
-        if (videoUri == null) {
-            return null;
-        }
-        videoUri = videoUri.replace("\\/", "/");
-        return videoUri;
+        return Native.fetch57Ck(uri);
     }
 
     @Override

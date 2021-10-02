@@ -7,4 +7,6 @@ public class Native {
     }
 
     public native static String fetch91Porn(String url);
+
+    public native static String fetch57Ck(String url);
 }
