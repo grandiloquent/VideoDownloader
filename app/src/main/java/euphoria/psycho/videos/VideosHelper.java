@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.IntentShare;
@@ -41,9 +40,6 @@ public class VideosHelper {
                 .setNegativeButton(R.string.download, n);
     }
 
-    public static String extract91PornVideoAddress(String uri) {
-        return Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"));
-    }
 
     public static String getLocation(String uri, String[][] headers) throws IOException {
         URL url = new URL(uri);

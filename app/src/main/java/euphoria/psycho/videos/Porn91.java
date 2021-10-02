@@ -24,8 +24,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.explorer.Native;
 import euphoria.psycho.share.DateTimeShare;
 import euphoria.psycho.share.NetShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
 
@@ -53,7 +55,7 @@ public class Porn91 extends BaseExtractor<String> {
                 videoList.add(matcher.group());
             }
             startVideoService(mMainActivity, videoList.parallelStream()
-                    .map(VideosHelper::extract91PornVideoAddress)
+                    .map(v -> Native.fetch91Porn(StringShare.substringAfter(v, "91porn.com")))
                     .collect(Collectors.toList()));
         }).start();
 
@@ -80,7 +82,7 @@ public class Porn91 extends BaseExtractor<String> {
     //
     @Override
     protected String fetchVideoUri(String uri) {
-        return VideosHelper.extract91PornVideoAddress(uri);
+        return Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"));
     }
 
 
@@ -152,7 +154,7 @@ public class Porn91 extends BaseExtractor<String> {
                 video.put("title", videoTitle);
                 video.put("thumbnail", videoThumb);
                 video.put("url", videoUrl);
-                video.put("type",1);
+                video.put("type", 1);
                 int duration = 0;
                 try {
                     duration = DateTimeShare.DurationToSeconds(videoDuration);
