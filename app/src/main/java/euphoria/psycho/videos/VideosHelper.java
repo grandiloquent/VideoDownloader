@@ -13,7 +13,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -21,11 +20,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.IntentShare;
 import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
@@ -43,95 +42,7 @@ public class VideosHelper {
     }
 
     public static String extract91PornVideoAddress(String uri) {
-        String[] headers = null;
-        try {
-            headers = getLocationAddCookie(
-                    "https://91porn.com/index.php",
-                    new String[][]{
-                            {"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"},
-                            {"Accept-Encoding", "gzip, deflate, br"},
-                            {"Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8"},
-                            {"Cache-Control", "no-cache"},
-                            {"Connection", "keep-alive"},
-                            {"Host", "91porn.com"},
-                            {"Pragma", "no-cache"},
-                            {"sec-ch-ua", "\"Google Chrome\";v=\"93\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"93\""},
-                            {"sec-ch-ua-mobile", "?0"},
-                            {"sec-ch-ua-platform", "\"Windows\""},
-                            {"Sec-Fetch-Dest", "document"},
-                            {"Sec-Fetch-Mode", "navigate"},
-                            {"Sec-Fetch-Site", "none"},
-                            {"Sec-Fetch-User", "?1"},
-                            {"Upgrade-Insecure-Requests", "1"},
-                            {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"}}
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (headers == null) {
-            return null;
-        }
-        // We need to use fake IPs to
-        // get around the 50 views per day
-        // for non members limitation
-        String response = getString(uri, new String[][]{
-                {"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"},
-                {"Accept-Encoding", "gzip, deflate, br"},
-                {"Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8"},
-                {"Cache-Control", "no-cache"},
-                {"Connection", "keep-alive"},
-                {"Host", "91porn.com"},
-                {"Pragma", "no-cache"},
-                {"sec-ch-ua", "\"Google Chrome\";v=\"93\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"93\""},
-                {"sec-ch-ua-mobile", "?0"},
-                {"sec-ch-ua-platform", "\"Windows\""},
-                {"Sec-Fetch-Dest", "document"},
-                {"Sec-Fetch-Mode", "navigate"},
-                {"Sec-Fetch-Site", "none"},
-                {"Sec-Fetch-User", "?1"},
-                {"Upgrade-Insecure-Requests", "1"},
-                {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"},
-                {"X-Forwarded-For", NetShare.randomIp()},
-                {"Cookie", headers[1]}
-        });
-        Log.e("B5aOx2", String.format("extract91PornVideoAddress, %s", response));
-        if (response == null) {
-//        byte[] buffer = new byte[128];
-//        byte[] buf = uri.getBytes(StandardCharsets.UTF_8);
-//        int result = NativeShare.get91Porn(buf, buf.length, buffer, 128);
-//        if (result == 0) {
-            return null;
-        }
-        /*try {
-            FileShare.writeAllText(
-                    new File(App.getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
-                            "1.txt"),
-                    response
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-        // maybe that is the fast way to
-        // extract the encoded code which
-        // contains the real video uri
-        String encoded = StringShare.substring(response, "document.write(strencode2(\"", "\"));");
-        if (encoded == null) {
-            Logger.e(String.format("extract91PornVideoAddress, %s", encoded));
-            return null;
-        }
-        String htm = null;
-        try {
-            // translate from the javascript code 'window.unescape'
-            htm = URLDecoder.decode(encoded, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        if (htm != null) {
-            // the decoded code is some html
-            // we need to locate the video uri
-            return StringShare.substring(htm, "src='", "'");
-        }
-        return null;
+        return Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"));
     }
 
     public static String getLocation(String uri, String[][] headers) throws IOException {
