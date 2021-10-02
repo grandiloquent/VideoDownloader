@@ -43,9 +43,6 @@ public class PornHub extends BaseExtractor<List<Pair<String, String>>> {
             return null;
         }
         String suffix = StringShare.substringAfter(javascript, "var media_0=");
-        if (suffix == null) {
-            return null;
-        }
         suffix = StringShare.substringBefore(suffix, ";flashvars");
         suffix = suffix.replaceAll("/\\*[^*]+\\*/", "");
         String[] keys = suffix.split("\\+");

@@ -5,9 +5,7 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.share.StringShare;
-
-import static euphoria.psycho.videos.VideosHelper.getString;
+import euphoria.psycho.explorer.Native;
 
 public class KuaiShou extends BaseExtractor<String> {
     private static final Pattern MATCH_KUAISHOU = Pattern.compile("https://v\\.kuaishou(app)?\\.com(/s)?/\\S+");
@@ -18,13 +16,7 @@ public class KuaiShou extends BaseExtractor<String> {
 
     @Override
     protected String fetchVideoUri(String uri) {
-        String response = getString(uri, new String[][]{
-                {"Cookie", "did=web_9db94f4e2b1d480198b8b2078e5b54da; didv=1628353110000"}
-        });
-        if (response == null) {
-            return null;
-        }
-        return StringShare.substring(response, "\"srcNoMark\":\"", "\"");
+        return Native.fetchKuaiShou(uri);
     }
 
     @Override
