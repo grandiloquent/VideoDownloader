@@ -1,7 +1,7 @@
 package euphoria.psycho.videos;
 
+import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,18 +12,17 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.explorer.Native;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
-import static euphoria.psycho.videos.VideosHelper.launchDialog;
+import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
-public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
+public class XVideos extends BaseExtractor<String> {
 
     public XVideos(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -37,52 +36,15 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
         }
         return false;
     }
-    //  Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36
 
-    private void parseHls(String hlsUri, List<Pair<String, String>> videoList) {
-        String hls = getString(hlsUri, null);
-        if (hls == null) return;
-        String[] pieces = hls.split("\n");
-        for (int i = 0; i < pieces.length; i++) {
-            if (pieces[i].startsWith("#EXT-X-STREAM-INF")) {
-                String name = StringShare.substring(pieces[i], "NAME=\"", "\"");
-                String url = StringShare.substringBeforeLast(hlsUri, "/") + "/" + pieces[i + 1];
-                videoList.add(Pair.create(name, url));
-                i++;
-            }
-        }
-
+    @Override
+    protected String fetchVideoUri(String uri) {
+        return Native.fetchXVideos(uri);
     }
 
     @Override
-    protected List<Pair<String, String>> fetchVideoUri(String uri) {
-        List<Pair<String, String>> videoList = new ArrayList<>();
-        String htmlCode = getString(uri, new String[][]{
-                {"User-Agent", NetShare.PC_USER_AGENT}
-        });
-        if (htmlCode == null) return null;
-        String low = StringShare.substring(htmlCode, "html5player.setVideoUrlLow('", "'");
-        if (low != null) {
-            videoList.add(Pair.create("标清", low));
-        }
-        String high = StringShare.substring(htmlCode, "html5player.setVideoUrlHigh('", "'");
-        if (high != null) {
-            videoList.add(Pair.create("高清", high));
-        }
-        String hls = StringShare.substring(htmlCode, "html5player.setVideoHLS('", "'");
-        if (hls != null) {
-            parseHls(hls, videoList);
-        }
-        return videoList;
-    }
-
-    @Override
-    protected void processVideo(List<Pair<String, String>> videoUriList) {
-        try {
-            launchDialog(mMainActivity, videoUriList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    protected void processVideo(String videoUri) {
+        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 
     public static void fetchVideos(String url) {
@@ -91,9 +53,9 @@ public class XVideos extends BaseExtractor<List<Pair<String, String>>> {
         });
         JSONArray results = new JSONArray();
         String videoUrl = url;
-        String videoTitle = StringShare.substring(htmlCode,"html5player.setVideoTitle('","');");
-        String videoThumb =  StringShare.substring(htmlCode,"html5player.setThumbUrl('","');");
-        String videoDuration = StringShare.substring(htmlCode,"<meta property=\"og:duration\" content=\"","\"");
+        String videoTitle = StringShare.substring(htmlCode, "html5player.setVideoTitle('", "');");
+        String videoThumb = StringShare.substring(htmlCode, "html5player.setThumbUrl('", "');");
+        String videoDuration = StringShare.substring(htmlCode, "<meta property=\"og:duration\" content=\"", "\"");
         JSONObject video = new JSONObject();
         try {
             video.put("title", videoTitle);

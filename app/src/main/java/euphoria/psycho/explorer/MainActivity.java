@@ -4,15 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.IOException;
-
-import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.AcFunShare;
 import euphoria.psycho.videos.Ck52;
@@ -63,24 +57,14 @@ public class MainActivity extends Activity implements ClientInterface {
         checkUnfinishedVideoTasks(this);
         //tryPlayVideo(this);
         //VideosHelper.invokeVideoPlayer(this, Uri.parse("https://ccn.killcovid2021.com//m3u8/521540/521540.m3u8?st=aM08zWUNiuUDfd4-rs_UUg&e=1631385002"));
-        try {
-            File ca=new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),"ca-bundle.crt");
-            FileShare.writeAllText(
-                    ca,
-                    FileShare.readAssetString(this,"ca-bundle.crt")
-            );
-            Log.e("B5aOx2", String.format("initialize, %s", ca.getAbsolutePath()));
-        } catch (IOException e) {
-            Log.e("B5aOx2", String.format("initialize, %s", e.getMessage()));
-        }
+
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
-//                String uri = Native.fetchKuaiShou("https://v.kuaishou.com/crbMeZ");
+//                String uri = Native.fetchXVideos("https://www.xvideos.com/video52592917/pawg_step_aunt_and_nephew_sleepover_-_sunny_hart_-_family_therapy");
 //                Log.e("B5aOx2", String.format("run, %s", uri));
 //            }
 //        }).start();
-        //KuaiShou.handle("https://v.kuaishou.com/crbMeZ",this);
     }
 
     @Override
