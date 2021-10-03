@@ -16,4 +16,6 @@
 /*.apk
 /openssl
 /distribution
-cpp
+brotli
+mbedtls-development
+rapidjson
