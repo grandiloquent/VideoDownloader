@@ -19,3 +19,4 @@
 brotli
 mbedtls-development
 rapidjson
+httplib
