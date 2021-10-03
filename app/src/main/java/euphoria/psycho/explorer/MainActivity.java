@@ -61,7 +61,7 @@ public class MainActivity extends Activity implements ClientInterface {
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
-//                String uri = Native.fetchXVideos("https://www.xvideos.com/video52592917/pawg_step_aunt_and_nephew_sleepover_-_sunny_hart_-_family_therapy");
+//                String uri = Native.fetchDouYin("/dVkQ7eX");
 //                Log.e("B5aOx2", String.format("run, %s", uri));
 //            }
 //        }).start();

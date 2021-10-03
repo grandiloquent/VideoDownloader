@@ -13,4 +13,6 @@ public class Native {
     public native static String fetchKuaiShou(String url);
 
     public native static String fetchXVideos(String url);
+    public native static String fetchDouYin(String url);
+
 }
