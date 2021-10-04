@@ -5,6 +5,6 @@
 
 using namespace std;
 namespace Iqiyi {
-    string FetchVideo(const char *uri, int timeout = 3);
+    vector<std::string>  FetchVideo(const char *uri, int timeout = 3);
 }
 #endif

@@ -38,13 +38,19 @@ Java_euphoria_psycho_explorer_Native_fetchDouYin(JNIEnv *env, jclass clazz, jstr
     return env->NewStringUTF(result.c_str());
 }
 extern "C"
-JNIEXPORT jstring JNICALL
+JNIEXPORT jobjectArray JNICALL
 Java_euphoria_psycho_explorer_Native_fetchIqiyi(JNIEnv *env, jclass clazz, jstring url) {
+    jobjectArray ret;
     const char *uri = env->GetStringUTFChars(url, nullptr);
     auto result = Iqiyi::FetchVideo(
             uri);
+    ret = (jobjectArray) env->NewObjectArray(result.size(), env->FindClass("java/lang/String"),
+                                             env->NewStringUTF(""));
+    for (int i = 0; i < result.size(); i++) env->SetObjectArrayElement(ret, i, env->NewStringUTF(
+                result[i].c_str()));
+
     env->ReleaseStringUTFChars(url, uri);
-    return env->NewStringUTF(result.c_str());
+    return ret;
 }
 extern "C"
 JNIEXPORT jstring JNICALL
