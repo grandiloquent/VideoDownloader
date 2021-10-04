@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.NetShare;
+import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 
 public class VideosHelper {
@@ -132,6 +133,19 @@ public class VideosHelper {
         context.startActivity(intent);
     }
 
+    public static void useChromeLoad(Context context, String uri) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setPackage("com.android.chrome");
+        intent.setData(Uri.parse(uri));
+        context.startActivity(intent);
+    }
+
+    public static void viewerChooser(Context context, String uri) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(uri));
+        context.startActivity(Intent.createChooser(intent, "打开视频链接"));
+    }
+
     public static void launchDialog(MainActivity mainActivity, List<Pair<String, String>> videoList) throws IOException {
         String[] names = new String[videoList.size()];
         for (int i = 0; i < names.length; i++) {
@@ -139,8 +153,12 @@ public class VideosHelper {
         }
         new AlertDialog.Builder(mainActivity)
                 .setItems(names, (dialog, which) -> {
-                    invokeVideoPlayer(mainActivity, Uri.parse(videoList.get(which).second));
-                    //viewVideoBetter(mainActivity, videoList.get(which).second);
+                    String videoUri = videoList.get(which).second;
+                    if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
+                        useChromeLoad(mainActivity, videoUri);
+                    } else {
+                        viewerChooser(mainActivity, videoUri);
+                    }
                 })
                 .show();
         //
