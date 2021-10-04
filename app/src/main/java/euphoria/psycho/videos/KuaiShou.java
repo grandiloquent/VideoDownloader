@@ -1,11 +1,14 @@
 package euphoria.psycho.videos;
 
+import android.net.Uri;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
+
+import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class KuaiShou extends BaseExtractor<String> {
     private static final Pattern MATCH_KUAISHOU = Pattern.compile("https://v\\.kuaishou(app)?\\.com(/s)?/\\S+");
@@ -29,7 +32,7 @@ public class KuaiShou extends BaseExtractor<String> {
 
     @Override
     protected void processVideo(String videoUri) {
-        Helper.viewVideo(mMainActivity, videoUri);
+        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {

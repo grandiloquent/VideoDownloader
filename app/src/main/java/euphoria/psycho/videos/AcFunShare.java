@@ -13,13 +13,14 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.videos.XVideosRedShare.Callback;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
+import euphoria.psycho.videos.XVideosRedShare.Callback;
+
+import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class AcFunShare {
 
@@ -29,7 +30,8 @@ public class AcFunShare {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             performTask(String.format("https://www.acfun.cn/v/ac%s", Uri.parse(uri).getQueryParameter("ac")), value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
-                    Helper.viewVideo(mainActivity, value);
+                    //Helper.viewVideo(mainActivity, value);
+                    invokeVideoPlayer(mainActivity, Uri.parse(value));
                 } else {
                     Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                 }

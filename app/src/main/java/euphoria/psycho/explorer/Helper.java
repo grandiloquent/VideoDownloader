@@ -50,23 +50,6 @@ public class Helper {
                 .show();
     }
 
-    public static void viewVideo(MainActivity mainActivity, String uri) {
-        //String uri = URLEncoder.encode(value, "UTF-8");
-        DialogShare.createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
-            dialog.dismiss();
-            if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
-                IntentShare.launchChrome(mainActivity, uri);
-            } else {
-                VideosHelper.viewerChooser(mainActivity, uri);
-            }
-        }, (dialog, which) -> {
-            mainActivity.getWebView().loadUrl(uri);
-            dialog.dismiss();
-        })
-                .setMessage(R.string.whether_to_use_the_browser_to_open_the_video_link)
-                .show();
-    }
-
     static void checkChrome(Context context) {
         if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
                 PackageShare.isAppInstalled(context, "com.android.chrome")) {

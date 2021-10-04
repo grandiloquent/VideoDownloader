@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.net.Uri;
+import android.util.Log;
 import android.util.Pair;
 
 import org.json.JSONArray;
@@ -89,6 +90,7 @@ public class PornHub extends BaseExtractor<List<Pair<String, String>>> {
         try {
             JSONArray videos = new JSONArray(response);
             for (int i = 0; i < videos.length(); i++) {
+                Log.e("B5aOx2", String.format("fetchVideoUri, %s",videos.getJSONObject(i).getString("videoUrl")));
                 videoList.add(Pair.create(
                         videos.getJSONObject(i).getString("quality"),
                         videos.getJSONObject(i).getString("videoUrl")

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -61,13 +60,13 @@ public class MainActivity extends Activity implements ClientInterface {
 //        new Iqiyi("https://www.iqiyi.com/v_19rrok4nt0.html", this)
 //                .parsingVideo();
         //Log.e("B5aOx2", String.format("initialize, %s", getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)));
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String uri = Native.fetchIqiyi("https://www.iqiyi.com/v_19rrok4nt0.html");
-                Log.e("B5aOx2", String.format("run, %s", uri));
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                String uri = Native.fetchIqiyi("https://www.iqiyi.com/v_19rrok4nt0.html");
+//                Log.e("B5aOx2", String.format("run, %s", uri));
+//            }
+//        }).start();
     }
 
     @Override

@@ -35,7 +35,6 @@ public class XVideosRedShare {
             ProgressDialog progressDialog = DialogShare.createProgressDialog(mainActivity);
             XVideosRedShare.performTask(uri, value -> mainActivity.runOnUiThread(() -> {
                 if (value != null) {
-                    Helper.viewVideo(mainActivity, value);
                 } else {
                     Toast.makeText(mainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                 }

@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.app.AlertDialog;
+import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,10 +28,11 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import androidx.annotation.NonNull;
-import euphoria.psycho.explorer.Helper;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.videos.Twitter.TwitterVideo;
+
+import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class Twitter extends BaseExtractor<List<TwitterVideo>> {
     private static final Pattern MATCH_TWITTER = Pattern.compile("twitter\\.com/.+/status/(\\d+)");
@@ -123,12 +125,9 @@ public class Twitter extends BaseExtractor<List<TwitterVideo>> {
         try {
             Matcher matcher = MATCH_TWITTER.matcher(uri);
             if (matcher.find()) {
-                List<TwitterVideo> videoList = extractTwitterVideo(matcher.group(1));
-                return videoList;
+                return extractTwitterVideo(matcher.group(1));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
         return null;
@@ -143,7 +142,7 @@ public class Twitter extends BaseExtractor<List<TwitterVideo>> {
         }
         new AlertDialog.Builder(mMainActivity)
                 .setItems(names, (dialog, which) -> {
-                    Helper.viewVideo(mMainActivity, videoList.get(which).url);
+                    invokeVideoPlayer(mMainActivity, Uri.parse(videoList.get(which).url));
                 })
                 .show();
     }

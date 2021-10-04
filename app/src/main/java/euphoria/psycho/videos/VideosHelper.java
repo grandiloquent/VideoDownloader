@@ -10,7 +10,6 @@ import android.util.Pair;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -21,14 +20,8 @@ import java.util.Map.Entry;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.IntentShare;
-import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.NetShare;
-import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
-import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.tasks.VideoActivity;
 
 public class VideosHelper {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
@@ -108,7 +101,8 @@ public class VideosHelper {
         }
         return null;
     }
-//
+
+    //
     public static String getString(String uri, String[][] headers) {
         try {
             URL url = new URL(uri);
@@ -186,59 +180,4 @@ public class VideosHelper {
         return null;
     }
 
-    public static void useChromeLoad(Context context, String uri) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setPackage("com.android.chrome");
-        intent.setData(Uri.parse(uri));
-        context.startActivity(intent);
-    }
-
-    public static void viewVideo(MainActivity mainActivity, String uri) {
-        //String uri = URLEncoder.encode(value, "UTF-8");
-        DialogShare.createAlertDialogBuilder(mainActivity, "询问", (dialog, which) -> {
-            dialog.dismiss();
-            if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
-                IntentShare.launchChrome(mainActivity, uri);
-            } else {
-                VideosHelper.viewerChooser(mainActivity, uri);
-            }
-        }, (dialog, which) -> {
-            mainActivity.getWebView().loadUrl(uri);
-            dialog.dismiss();
-        })
-                .setMessage("是否使用浏览器打开视频链接")
-                .show();
-    }
-
-    public static void viewVideoBetter(MainActivity mainActivity, String videoUri) {
-        try {
-            String uri = "https://hxz315.com/?v=" + URLEncoder.encode(videoUri, "UTF-8");
-            createAlertDialogBuilder(mainActivity, mainActivity.getString(R.string.ask), (dialog, which) -> {
-                dialog.dismiss();
-                if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
-                    VideosHelper.useChromeLoad(mainActivity, "https://hxz315.com?v=" + videoUri);
-                } else {
-                    VideosHelper.viewerChooser(mainActivity, "https://hxz315.com?v=" + videoUri);
-                }
-            }, (dialog, which) -> {
-                dialog.dismiss();
-                if (videoUri.contains("m3u8")) {
-                    Intent intent = new Intent(mainActivity, VideoActivity.class);
-                    intent.setData(Uri.parse(videoUri));
-                    mainActivity.startActivity(intent);
-                } else {
-                    WebViewShare.downloadFile(mainActivity, KeyShare.toHex(videoUri.getBytes(StandardCharsets.UTF_8)), videoUri, USER_AGENT);
-                }
-            })
-                    .setMessage(R.string.whether_to_use_the_browser_to_open_the_video_link)
-                    .show();
-        } catch (UnsupportedEncodingException ignored) {
-        }
-    }
-
-    public static void viewerChooser(Context context, String uri) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(uri));
-        context.startActivity(Intent.createChooser(intent, "打开视频链接"));
-    }
 }
