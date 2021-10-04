@@ -1,14 +1,13 @@
 #include <string>
+#include <future>
 #include "httplib/httplib.h"
 #include "Iqiyi.h"
 #include "Shared.h"
 #include "Logger.h"
 #include "rapidjson/document.h"
 
-
 using namespace std;
 using namespace rapidjson;
-
 
 static string GetParametersString(const char *uri, int timeout) {
     auto uriParts = ParseUrl(uri);

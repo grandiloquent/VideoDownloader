@@ -67,9 +67,13 @@ Java_euphoria_psycho_explorer_Native_fetchMangoTV(JNIEnv *env, jclass clazz, jst
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_euphoria_psycho_explorer_Native_fetchXVideos(JNIEnv *env, jclass clazz, jstring url) {
-    const char *uri = env->GetStringUTFChars(url, nullptr);
-    auto result = XVideos::FetchVideo(
-            uri);
-    env->ReleaseStringUTFChars(url, uri);
-    return env->NewStringUTF(result.c_str());
+    try {
+        const char *uri = env->GetStringUTFChars(url, nullptr);
+        auto result = XVideos::FetchVideo(
+                uri);
+        env->ReleaseStringUTFChars(url, uri);
+        return env->NewStringUTF(result.c_str());
+    } catch (const std::exception &ex) {
+        return nullptr;
+    }
 }
