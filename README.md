@@ -38,6 +38,7 @@
 * https://github.com/HaarigerHarald/android-youtubeExtractor
 * https://github.com/soarcn/BottomSheet
 * https://github.com/google/volley
+* https://github.com/Tencent/rapidjson
 
 ## How to download TikTok videos?
 

@@ -53,6 +53,7 @@ add_library(hello-libs SHARED
         XVideos.cpp
         DouYin.cpp
         MangoTV.cpp
+        Iqiyi.cpp
         hello-libs.cpp
         )
 

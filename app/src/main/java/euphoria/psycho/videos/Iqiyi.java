@@ -5,6 +5,7 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 import android.util.Pair;
 
 import org.json.JSONArray;
@@ -21,8 +22,8 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.NetShare;
+import euphoria.psycho.share.StringShare;
 
 public class Iqiyi extends BaseExtractor<List<Pair<String, String>>> {
     public static Pattern MATCH_IQIYI = Pattern.compile("\\.iqiyi\\.com/v_");
@@ -84,6 +85,7 @@ public class Iqiyi extends BaseExtractor<List<Pair<String, String>>> {
             String vid = findJSONValue("\"vid\":", response, true);
             String params = String.format("/vps?tvid=%s&vid=%s&v=0&qypid=%s_12&src=01012001010000000000&t=%d&k_tag=1&k_uid=%s&rs=1",
                     tvid, vid, tvid, System.currentTimeMillis(), getMagicId());
+            Log.e("B5aOx2", String.format("fetchVideoUri, %s", params));
             String hash = KeyShare.md5(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
             String url = String.format("%s%s&vf=%s", "http://cache.video.qiyi.com", params, hash);
             response = getHtml(url);

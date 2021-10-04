@@ -3,6 +3,7 @@ package euphoria.psycho.explorer;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -104,11 +105,10 @@ public class ListenerDelegate {
     }
 
     private void onDownloadFile(View view) {
-//        mMainActivity.getWebView().saveWebArchive(
-//                new File(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "index.mhtml").getAbsolutePath()
-//        );
-        if (XVideosRedShare.parsingXVideos(mMainActivity, null)) return;
+        Log.e("B5aOx2", String.format("onDownloadFile, %s",mMainActivity.getWebView().getUrl()));
+
         String url = mMainActivity.getWebView().getUrl();
+
         if (Porn91.handle(url, mMainActivity)) {
             return;
         }
