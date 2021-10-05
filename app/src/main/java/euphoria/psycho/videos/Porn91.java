@@ -3,6 +3,7 @@ package euphoria.psycho.videos;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,6 +89,10 @@ public class Porn91 extends BaseExtractor<String> {
 
     @Override
     protected void processVideo(String videoUri) {
+        if (videoUri.length() == 0) {
+            Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+            return;
+        }
         invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 

@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.net.Uri;
+import android.widget.Toast;
 
 import java.util.regex.Pattern;
 
@@ -23,6 +24,10 @@ public class Ck52 extends BaseExtractor<String> {
 
     @Override
     protected void processVideo(String videoUri) {
+        if (videoUri.length() == 0) {
+            Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+            return;
+        }
         invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 

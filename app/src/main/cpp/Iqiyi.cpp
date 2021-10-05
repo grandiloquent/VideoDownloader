@@ -42,7 +42,7 @@ static string GetParametersString(const char *uri, int timeout) {
     return ss.str();
 }
 
-static string GetSource(const string &params, const string &hash, int timeout) {
+static string GetSource(const string &params, const string & hash, int timeout) {
     auto hostName = "cache.video.qiyi.com";
     httplib::SSLClient client(hostName, 443);
     client.set_connection_timeout(timeout);
