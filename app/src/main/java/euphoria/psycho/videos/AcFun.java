@@ -14,7 +14,7 @@ import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class AcFun extends BaseExtractor<String> {
 
-    private static final Pattern MATCH_AC_FUN = Pattern.compile("acfun\\.cn/v/.+");
+    private static final Pattern MATCH_AC_FUN = Pattern.compile("acfun\\.cn/((bangumi/(aa|ac)\\d+)|(v/\\?(ab|ac)=\\d+))");
 
     public AcFun(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
