@@ -8,7 +8,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.videos.AcFunShare;
+import euphoria.psycho.videos.AcFun;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -63,7 +63,7 @@ public class MainActivity extends Activity implements ClientInterface {
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
-//                String uri = Native.fetchIqiyi("https://www.iqiyi.com/v_19rrok4nt0.html");
+//                String uri = Native.fetchAcFun("https://www.acfun.cn/v/ac31300265");
 //                Log.e("B5aOx2", String.format("run, %s", uri));
 //            }
 //        }).start();
@@ -130,7 +130,7 @@ public class MainActivity extends Activity implements ClientInterface {
         if (YouTube.handle(uri, this)) {
             return true;
         }
-        if (AcFunShare.parsingVideo(this, uri)) {
+        if (AcFun.handle(uri, this)) {
             return true;
         }
         if (PornHub.handle(uri, this)) {
@@ -139,7 +139,6 @@ public class MainActivity extends Activity implements ClientInterface {
         if (PornOne.handle(uri, this)) {
             return true;
         }
-
         return Ck52.handle(uri, this);
     }
 }

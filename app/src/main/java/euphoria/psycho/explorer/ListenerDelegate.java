@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.tasks.VideoHelper;
-import euphoria.psycho.videos.AcFunShare;
+import euphoria.psycho.videos.AcFun;
 import euphoria.psycho.videos.Bilibili;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.DouYin;
@@ -32,7 +32,6 @@ import euphoria.psycho.videos.PornOne;
 import euphoria.psycho.videos.TikTok;
 import euphoria.psycho.videos.Twitter;
 import euphoria.psycho.videos.XVideos;
-import euphoria.psycho.videos.XVideosRedShare;
 import euphoria.psycho.videos.YouTube;
 
 public class ListenerDelegate {
@@ -105,10 +104,8 @@ public class ListenerDelegate {
     }
 
     private void onDownloadFile(View view) {
-        Log.e("B5aOx2", String.format("onDownloadFile, %s",mMainActivity.getWebView().getUrl()));
-
+        Log.e("B5aOx2", String.format("onDownloadFile, %s", mMainActivity.getWebView().getUrl()));
         String url = mMainActivity.getWebView().getUrl();
-
         if (Porn91.handle(url, mMainActivity)) {
             return;
         }
@@ -119,7 +116,7 @@ public class ListenerDelegate {
             new Iqiyi(url, mMainActivity).parsingVideo();
             return;
         }
-        if (AcFunShare.parsingVideo(mMainActivity, null)) return;
+        if (AcFun.handle(url, mMainActivity)) return;
         if (XVideos.handle(url, mMainActivity)) {
             return;
         }

@@ -54,6 +54,7 @@ add_library(hello-libs SHARED
         DouYin.cpp
         MangoTV.cpp
         Iqiyi.cpp
+        AcFun.cpp
         hello-libs.cpp
         )
 
