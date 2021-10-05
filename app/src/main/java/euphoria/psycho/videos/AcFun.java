@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.net.Uri;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
@@ -13,7 +14,7 @@ import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class AcFun extends BaseExtractor<String> {
 
-    private static final Pattern MATCH_AC_FUN = Pattern.compile("acfun\\.cn/v/sadsa.+");
+    private static final Pattern MATCH_AC_FUN = Pattern.compile("acfun\\.cn/v/.+");
 
     public AcFun(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -21,11 +22,11 @@ public class AcFun extends BaseExtractor<String> {
 
     public static boolean handle(String uri, MainActivity mainActivity) {
         if (MATCH_AC_FUN.matcher(uri).find()) {
+            Log.e("B5aOx2", String.format("handle, %s", uri));
             if (uri.contains("ab=")) {
-                new AcFun(" https://www.acfun.cn/bangumi/aa" +
+                new AcFun("https://www.acfun.cn/bangumi/aa" +
                         StringShare.substringAfterLast(uri, "ab="), mainActivity).parsingVideo();
-            }
-            if (uri.contains("ac=")) {
+            } else if (uri.contains("ac=")) {
                 new AcFun(" https://www.acfun.cn/v/ac" +
                         StringShare.substringAfterLast(uri, "ac="), mainActivity).parsingVideo();
             }
