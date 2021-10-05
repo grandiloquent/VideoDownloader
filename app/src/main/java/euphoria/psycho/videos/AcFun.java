@@ -7,12 +7,13 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
+import euphoria.psycho.share.StringShare;
 
 import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class AcFun extends BaseExtractor<String> {
 
-    private static final Pattern MATCH_AC_FUN = Pattern.compile("acfun\\.cn/v/ac\\d+");
+    private static final Pattern MATCH_AC_FUN = Pattern.compile("acfun\\.cn/v/sadsa.+");
 
     public AcFun(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -20,7 +21,14 @@ public class AcFun extends BaseExtractor<String> {
 
     public static boolean handle(String uri, MainActivity mainActivity) {
         if (MATCH_AC_FUN.matcher(uri).find()) {
-            new Porn91(uri, mainActivity).parsingVideo();
+            if (uri.contains("ab=")) {
+                new AcFun(" https://www.acfun.cn/bangumi/aa" +
+                        StringShare.substringAfterLast(uri, "ab="), mainActivity).parsingVideo();
+            }
+            if (uri.contains("ac=")) {
+                new AcFun(" https://www.acfun.cn/v/ac" +
+                        StringShare.substringAfterLast(uri, "ac="), mainActivity).parsingVideo();
+            }
             return true;
         }
         return false;

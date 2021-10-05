@@ -23,7 +23,6 @@ string AcFun::FetchVideo(const char *uri, int timeout) {
     auto res = client.Get(uriParts.second.c_str(), headers);
 
     if (!res) {
-        LOGE("%s, %s", "!res", "");
         return string();
     }
 
