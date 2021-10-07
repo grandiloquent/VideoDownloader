@@ -12,3 +12,6 @@
 
 **|**: The bitwise OR operator ORs corresponding bits in its operands. If either bit is 1, then the result is 1. If both bits are 0, then the result is 0.
 
+```
+"C:\Program Files\JetBrains\CLion 2021.2.1\bin\cmake\win\bin\cmake.exe" --build C:\Users\psycho\CLionProjects\Key\cmake-build-debug --target Key -- -j 3
+```
