@@ -14,13 +14,6 @@ import java.util.Arrays;
 import euphoria.psycho.share.FileShare;
 
 public class CustomWebViewClient extends WebViewClient {
-    private final ClientInterface mClientInterface;
-    private final WebResourceResponse mEmptyResponse = new WebResourceResponse(
-            "text/plain",
-            "UTF-8",
-            new ByteArrayInputStream("".getBytes())
-    );
-    private String mJavaScript;
     private final String[] mBlocks = new String[]{
             "://a.realsrv.com/",
             "://fans.91p20.space/",
@@ -30,6 +23,13 @@ public class CustomWebViewClient extends WebViewClient {
             "://www.gstatic.com/",
             "/ads/"
     };
+    private final ClientInterface mClientInterface;
+    private final WebResourceResponse mEmptyResponse = new WebResourceResponse(
+            "text/plain",
+            "UTF-8",
+            new ByteArrayInputStream("".getBytes())
+    );
+    private String mJavaScript;
 
     public CustomWebViewClient(ClientInterface clientInterface) {
         mClientInterface = clientInterface;
@@ -56,25 +56,13 @@ public class CustomWebViewClient extends WebViewClient {
     }
 
     @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        super.onPageStarted(view, url, favicon);
-    }
-
-    //
-    @Override
     public void onPageFinished(WebView view, String url) {
         view.evaluateJavascript(mJavaScript, null);
     }
 
     @Override
-    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        String url = request.getUrl().toString();
-        if (mClientInterface.shouldOverrideUrlLoading(url)) {
-            return true;
-        } else if ((url.startsWith("https://") || url.startsWith("http://"))) {
-            view.loadUrl(url);
-        }
-        return true;
+    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        super.onPageStarted(view, url, favicon);
     }
 
     @Override
@@ -89,5 +77,16 @@ public class CustomWebViewClient extends WebViewClient {
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         return super.shouldInterceptRequest(view, request);
+    }
+
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        String url = request.getUrl().toString();
+        if (mClientInterface.shouldOverrideUrlLoading(url)) {
+            return true;
+        } else if ((url.startsWith("https://") || url.startsWith("http://"))) {
+            view.loadUrl(url);
+        }
+        return true;
     }
 }

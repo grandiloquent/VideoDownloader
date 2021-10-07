@@ -47,3 +47,11 @@ if (window.location.hostname.indexOf("xvideos.com") !== -1) {
     });
 
 }
+if (window.location.hostname.indexOf("pornone.com") !== -1) {
+    const ciwShow = document.querySelector('._ciw-show__');
+    if (ciwShow) {
+        ciwShow.remove();
+    }
+}
+
+

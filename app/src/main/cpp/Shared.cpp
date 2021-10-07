@@ -157,7 +157,7 @@ std::string UrlDecode(const std::string &s) {
             if (i >= len)
                 break;
             char t[3] = {s[i - 1], s[i], 0};
-            unsigned char r = strtoul(t, 0, 0x10);
+            unsigned char r = strtoul(t, nullptr, 0x10);
             if (r)
                 res += r;
         }
