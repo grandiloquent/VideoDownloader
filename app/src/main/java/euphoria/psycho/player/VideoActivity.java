@@ -16,8 +16,8 @@ import android.media.TimedMetaData;
 import android.media.TimedText;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnContextClickListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -38,7 +38,6 @@ import static euphoria.psycho.player.PlayerHelper.getVideos;
 import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
 import static euphoria.psycho.player.PlayerHelper.lookupCurrentVideo;
 import static euphoria.psycho.player.PlayerHelper.openDeleteVideoDialog;
-import static euphoria.psycho.player.PlayerHelper.playNextVideo;
 import static euphoria.psycho.player.PlayerHelper.playPreviousVideo;
 import static euphoria.psycho.player.PlayerHelper.rotateScreen;
 import static euphoria.psycho.player.PlayerHelper.showSystemUI;
@@ -91,23 +90,38 @@ public class VideoActivity extends BaseVideoActivity implements
         mHandler.postDelayed(mHideAction, DEFAULT_SHOW_TIMEOUT_MS);
     }
 
-    private void initializePlayer() {
-        hideController();
+    public static final String EXTRA_PLAYLSIT = "extra.PLAYLSIT";
+    private String[] mPlayList;
+
+    private boolean loadPlayList() {
+        mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
+        if (mPlayList != null) {
+            updateUI();
+            mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
+            return true;
+        }
         if (getIntent().getData() == null) {
-            return;
+            return false;
         }
         String videoPath = getIntent().getData().getPath();
         mFiles = getVideos(videoPath);
         if (mFiles == null) {
-            Logger.e(String.format("initializePlayer, %s", getIntent().getData()));
             updateUI();
             mPlayer.setVideoURI(getIntent().getData());
         } else {
             mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
             mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
         }
+        return true;
+    }
+
+    private void initializePlayer() {
+        hideController();
+        if (!loadPlayList())
+            return;
         mPlayer.setOnPreparedListener(this);
         mPlayer.setOnCompletionListener(this);
+        Log.e("B5aOx2", String.format("initializePlayer, %s", ""));
         mPlayer.setOnErrorListener(this);
         mPlayer.setOnInfoListener(this);
         mPlayer.setOnBufferingUpdateListener(this);
@@ -143,16 +157,6 @@ public class VideoActivity extends BaseVideoActivity implements
         return position;
     }
 
-    private void updateUI() {
-        if (mFiles == null) {
-            mExoNext.setVisibility(View.GONE);
-            mExoPrev.setVisibility(View.GONE);
-            mExoDelete.setVisibility(View.GONE);
-        } else {
-            mFileDownload.setVisibility(View.GONE);
-        }
-    }
-
     private void setupView() {
         mRootView.setOnTouchListener((v, event) -> {
             mVideoTouchHelper.onTouchEvent(event);
@@ -168,9 +172,8 @@ public class VideoActivity extends BaseVideoActivity implements
         });
         mExoNext.setOnClickListener(v -> {
             savePosition();
-            mCurrentPlaybackIndex = playNextVideo(mCurrentPlaybackIndex, mPlayer, mFiles);
+            mCurrentPlaybackIndex = playNextVideo(mCurrentPlaybackIndex, mPlayer);
         });
-        //
         mExoRew.setOnClickListener(v -> {
             rotateScreen(this);
         });
@@ -223,6 +226,16 @@ public class VideoActivity extends BaseVideoActivity implements
         hideController();
     }
 
+    private void updateUI() {
+        if (mFiles == null) {
+            mExoNext.setVisibility(View.GONE);
+            mExoPrev.setVisibility(View.GONE);
+            mExoDelete.setVisibility(View.GONE);
+        } else {
+            mFileDownload.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -264,12 +277,7 @@ public class VideoActivity extends BaseVideoActivity implements
         mBookmarker = new Bookmarker(this);
         setupView();
         mVideoTouchHelper = new GestureDetector(this, this);
-        mVideoTouchHelper.setContextClickListener(new OnContextClickListener() {
-            @Override
-            public boolean onContextClick(MotionEvent e) {
-                return false;
-            }
-        });
+        mVideoTouchHelper.setContextClickListener(e -> false);
     }
 
     @Override
@@ -280,6 +288,24 @@ public class VideoActivity extends BaseVideoActivity implements
     @Override
     public void onCompletion(MediaPlayer mp) {
         mExoPlay.setImageResource(R.drawable.exo_controls_play);
+        if (mFiles != null || mPlayList != null) {
+            mCurrentPlaybackIndex = playNextVideo(mCurrentPlaybackIndex, mPlayer);
+        } else {
+            mExoPlay.setImageResource(R.drawable.exo_controls_play);
+        }
+    }
+
+    int playNextVideo(int currentPlaybackIndex, TextureVideoView textureVideoView) {
+        if (mFiles != null) {
+            int nextPlaybackIndex = mFiles.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
+            textureVideoView.setVideoPath(mFiles[nextPlaybackIndex].getAbsolutePath());
+            return nextPlaybackIndex;
+        } else if (mPlayList != null) {
+            int nextPlaybackIndex = mPlayList.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
+            textureVideoView.setVideoPath(mPlayList[nextPlaybackIndex]);
+            return nextPlaybackIndex;
+        }
+        return 0;
     }
 
     @Override
