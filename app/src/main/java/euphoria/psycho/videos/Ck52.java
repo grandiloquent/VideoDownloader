@@ -11,7 +11,7 @@ import euphoria.psycho.explorer.Native;
 import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class Ck52 extends BaseExtractor<String> {
-    private static Pattern MATCH_52CK = Pattern.compile("/vodplay/[\\d-]+\\.html");
+    private static final Pattern MATCH_52CK = Pattern.compile("/vodplay/[\\d-]+\\.html");
 
     protected Ck52(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);

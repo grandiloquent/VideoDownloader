@@ -18,7 +18,7 @@ import static euphoria.psycho.videos.VideosHelper.getString;
 import static euphoria.psycho.videos.VideosHelper.launchDialog;
 
 public class PornHub extends BaseExtractor<List<Pair<String, String>>> {
-    private static Pattern MATCH_PORNHUB = Pattern.compile("pornhub\\.com/view_video\\.php");
+    private static final Pattern MATCH_PORNHUB = Pattern.compile("pornhub\\.com/view_video\\.php");
 
     protected PornHub(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);

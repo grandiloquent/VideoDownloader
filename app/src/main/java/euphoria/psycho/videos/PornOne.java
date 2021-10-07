@@ -1,20 +1,17 @@
 package euphoria.psycho.videos;
 
-import android.util.Pair;
+import android.net.Uri;
+import android.widget.Toast;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
+import euphoria.psycho.explorer.Native;
 import euphoria.psycho.share.StringShare;
 
-import static euphoria.psycho.videos.VideosHelper.getString;
-import static euphoria.psycho.videos.VideosHelper.launchDialog;
+import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
-public class PornOne extends BaseExtractor<List<Pair<String, String>>> {
+public class PornOne extends BaseExtractor<String> {
     private static final Pattern MATCH_PORNONE = Pattern.compile("pornone\\.com/.+/.+/\\d{5,}");
 
     protected PornOne(String inputUri, MainActivity mainActivity) {
@@ -22,38 +19,17 @@ public class PornOne extends BaseExtractor<List<Pair<String, String>>> {
     }
 
     @Override
-    protected List<Pair<String, String>> fetchVideoUri(String uri) {
-        String response = getString(uri, null);
-        if (response == null) {
-            return null;
-        }
-        List<String> videos = StringShare.substringCodes(response, ".mp4", 15);
-        if (videos == null) {
-            return null;
-        }
-        return createVideoList(videos);
-    }
-
-    private List<Pair<String, String>> createVideoList(List<String> videos) {
-        List<Pair<String, String>> videoUriList = new ArrayList<>();
-        final Pattern pattern = Pattern.compile("\\d+_(\\d+)x\\d+_");
-        for (int i = 0; i < videos.size(); i++) {
-            final Matcher matcher = pattern.matcher(videos.get(i));
-            videoUriList.add(Pair.create(
-                    matcher.find() ? matcher.group(1) : videos.get(i),
-                    videos.get(i)
-            ));
-        }
-        return videoUriList;
+    protected String fetchVideoUri(String uri) {
+        return Native.fetchPornOne(StringShare.substringAfter(uri, "pornone.com"));
     }
 
     @Override
-    protected void processVideo(List<Pair<String, String>> videoUriList) {
-        try {
-            launchDialog(mMainActivity, videoUriList);
-        } catch (IOException e) {
-            e.printStackTrace();
+    protected void processVideo(String videoUri) {
+        if (videoUri.length() == 0) {
+            Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+            return;
         }
+        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {

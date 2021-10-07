@@ -55,6 +55,7 @@ add_library(hello-libs SHARED
         MangoTV.cpp
         Iqiyi.cpp
         AcFun.cpp
+        PornOne.cpp
         hello-libs.cpp
         )
 

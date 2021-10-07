@@ -20,6 +20,7 @@ public class Native {
     public native static String fetchMangoTV(String url);
 
     public native static String[] fetchIqiyi(String url);
+    public native static String fetchPornOne(String url);
 
 
 }
