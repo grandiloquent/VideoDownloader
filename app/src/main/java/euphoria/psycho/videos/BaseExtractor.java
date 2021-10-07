@@ -29,8 +29,6 @@ public abstract class BaseExtractor<T> {
         return inputUri;
     }
 
-    ;
-
     protected abstract void processVideo(T videoUri);
 
     private void performTask(String uri, ProgressDialog progressDialog) {
