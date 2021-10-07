@@ -1,7 +1,6 @@
 package euphoria.psycho.videos;
 
 import android.net.Uri;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
@@ -22,7 +21,6 @@ public class AcFun extends BaseExtractor<String> {
 
     public static boolean handle(String uri, MainActivity mainActivity) {
         if (MATCH_AC_FUN.matcher(uri).find()) {
-            Log.e("B5aOx2", String.format("handle, %s", uri));
             if (uri.contains("ab=")) {
                 new AcFun("https://www.acfun.cn/bangumi/aa" +
                         StringShare.substringAfterLast(uri, "ab="), mainActivity).parsingVideo();

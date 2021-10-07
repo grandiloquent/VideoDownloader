@@ -45,9 +45,7 @@ string porn91::FetchVideo(const char *uri, int timeout) {
     headers.insert(std::make_pair("Cookie", cookie));
     headers.insert(std::make_pair("X-Forwarded-For", RandomIp()));
     auto res = client.Get(uri, headers);
-//    for (auto &header : res->headers) {
-//        LOGE("%s %s", header.first.c_str(), header.second.c_str());
-//    }
+
     if (res) {
 
         auto htm = Substring(res->body, "document.write(strencode2(\"", "\"));");
