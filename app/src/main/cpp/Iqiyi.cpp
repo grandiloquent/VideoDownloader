@@ -56,23 +56,8 @@ bool isReady(const std::future<T> &f) {
     }
 }
 
-
-vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
-    std::vector<std::string> readyFutures;
-
-    auto params = GetParametersString(uri, timeout);
-    if (params.empty()) {
-        return readyFutures;
-    }
-    auto hash = Md5Encoded(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
-    auto source = GetSource(params, hash, timeout);
-    if (source.empty()) {
-        return {};
-    }
-
-    // ===============================================
+vector<string> parseVideoClips(const string &source) {
     PARSE_JSON(source.c_str());
-
 
     if (!d.HasMember("data")) {
         return {};
@@ -93,7 +78,6 @@ vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
     if (!videos[0].HasMember("fs")) {
         return {};
     }
-
     if (!vp.HasMember("du")) {
         return {};
     }
@@ -110,10 +94,29 @@ vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
         auto l = string(du) + f["l"].GetString();
         v.emplace_back(l);
     }
-    // ===============================================
+    return v;
+}
+
+vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
+    std::vector<std::string> readyFutures;
+
+    auto params = GetParametersString(uri, timeout);
+    if (params.empty()) {
+        return readyFutures;
+    }
+    auto hash = Md5Encoded(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
+    auto source = GetSource(params, hash, timeout);
+    if (source.empty()) {
+        return {};
+    }
+
+    vector<string> v = parseVideoClips(source);
+
+    if (v.empty()) {
+        return {};
+    }
 
     std::vector<std::future<std::string>> futures;
-
     futures.reserve(v.size());
     for (auto &i : v) {
         futures.push_back(

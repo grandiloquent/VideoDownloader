@@ -41,6 +41,9 @@ string porn91::FetchVideo(const char *uri, int timeout) {
                                     });
     if (res.empty())return {};
     auto htm = Substring(res, "document.write(strencode2(\"", "\"));");
+    if (htm.empty()) {
+        return {};
+    }
     auto decoded = UrlDecode(htm);
     return Substring(decoded, "src='", "'");
 }
