@@ -136,8 +136,8 @@ public class VideoHelper {
     public static File setVideoDownloadDirectory(Context context) {
         File directory =
                 //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
-                // context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        //Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
         if (!directory.exists()) {
             boolean result = directory.mkdirs();

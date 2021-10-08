@@ -46,7 +46,8 @@ namespace HttpUtils {
     GetString(const char *host, const char *path,
               int timeout,
               const string &userAgent,
-              const httplib::Headers &requestHeaders
+              const httplib::Headers &requestHeaders,
+              const function<void(const httplib::Headers &)> &f
     ) {
         httplib::Client client(host, 80);
         client.set_connection_timeout(timeout);
@@ -60,6 +61,9 @@ namespace HttpUtils {
             }
         }
         auto res = client.Get(path, headers);
+        if (f) {
+            f(res->headers);
+        }
         if (!res) {
             return string();
         }
@@ -68,11 +72,12 @@ namespace HttpUtils {
 
     string
     GetString(const char *uri, int timeout,
-              const string &userAgent, const httplib::Headers &requestHeaders
+              const string &userAgent, const httplib::Headers &requestHeaders,
+              const function<void(const httplib::Headers &)> &f
     ) {
         auto uriParts = ParseUrl(uri);
         return GetString(uriParts.first.c_str(),
                          uriParts.second.c_str(), timeout,
-                         userAgent, requestHeaders);
+                         userAgent, requestHeaders, f);
     }
 }

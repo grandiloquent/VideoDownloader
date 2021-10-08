@@ -54,7 +54,7 @@ public class VideoListActivity extends Activity {
 
     private List<File> getVideos() {
         List<File> files = FileShare.recursivelyListFiles(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
                 ".mp4"
         );
         files.sort((o1, o2) -> {

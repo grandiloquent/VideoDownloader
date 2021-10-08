@@ -24,13 +24,15 @@ namespace HttpUtils {
     GetString(const char *host, const char *path,
               int timeout = 3,
               const string &userAgent = USER_AGENT_PC,
-              const httplib::Headers &requestHeaders = {}
+              const httplib::Headers &requestHeaders = {},
+              const function<void(const httplib::Headers&)> &f = {}
     );
 
     string
     GetString(const char *uri, int timeout = 3,
               const string &userAgent = USER_AGENT_PC,
-              const httplib::Headers &requestHeaders = {}
+              const httplib::Headers &requestHeaders = {},
+              const function<void(const httplib::Headers&)> &f = {}
     );
 }
 #endif

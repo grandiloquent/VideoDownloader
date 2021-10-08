@@ -6,32 +6,21 @@
 #include "Logger.h"
 #include "rapidjson/document.h"
 #include "Configuration.h"
+#include "HttpUtils.h"
 
 using namespace std;
 using namespace rapidjson;
 
 static string GetParametersString(const char *uri, int timeout) {
-    auto uriParts = ParseUrl(uri);
-    httplib::SSLClient client(uriParts.first, 443);
-    client.set_connection_timeout(timeout);
-    httplib::Headers headers = {
-            {"Host", uriParts.first},
-            {"User-Agent", USER_AGENT_ANDROID}
-    };
-    client.enable_server_certificate_verification(false);
-    auto res = client.Get(uriParts.second.c_str(), headers);
-    if (!res) {
-        return string();
-    }
-    auto tvid = Substring(res->body, "\"tvid\":", ",");
+    auto res = HttpUtils::GetStrings(uri, timeout, USER_AGENT_ANDROID);
+    auto tvid = Substring(res, "\"tvid\":", ",");
     if (tvid.empty()) {
         return tvid;
     }
-    auto vid = Substring(res->body, R"("vid":")", "\"");
+    auto vid = Substring(res, R"("vid":")", "\"");
     if (vid.empty()) {
         return vid;
     }
-
     stringstream ss;
     ss << "/vps?tvid=" << tvid
        << "&vid=" << vid
@@ -43,37 +32,19 @@ static string GetParametersString(const char *uri, int timeout) {
 }
 
 static string GetSource(const string &params, const string &hash, int timeout) {
-    auto hostName = "cache.video.qiyi.com";
-    httplib::SSLClient client(hostName, 443);
-    client.set_connection_timeout(timeout);
-    httplib::Headers headers = {
-            {"Host", hostName},
-            {"User-Agent", USER_AGENT_ANDROID}
-    };
-    client.enable_server_certificate_verification(false);
-    auto res = client.Get((params + "&vf=" + hash).c_str(), headers);
-    if (!res) {
-        return string();
-    }
-    return res->body;
+    auto host = "cache.video.qiyi.com";
+    auto res = HttpUtils::GetStrings(host, (params + "&vf=" + hash).c_str(),
+                                     timeout, USER_AGENT_ANDROID);
+    return res;
 }
 
 static string GetVideoUri(const char *uri, int timeout) {
-    auto uriParts = ParseUrl(uri);
-    httplib::SSLClient client(uriParts.first, 443);
-    client.set_connection_timeout(timeout);
-    httplib::Headers headers = {
-            {"Host", uriParts.first},
-            {"User-Agent", USER_AGENT_ANDROID}
-    };
-    client.enable_server_certificate_verification(false);
-    auto res = client.Get(uriParts.second.c_str(), headers);
-    if (!res) {
-        return string();
-    }
-    Document d;
-    d.Parse(res->body.c_str());
-    return d["l"].GetString();
+    auto res = HttpUtils::GetStrings(uri, timeout, USER_AGENT_ANDROID);
+    PARSE_JSON(res.c_str());
+
+    if (d.HasMember("l"))
+        return d["l"].GetString();
+    return {};
 }
 
 template<typename T>
@@ -99,13 +70,34 @@ vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
         return {};
     }
 
-    Document d;
-    d.Parse(source.c_str());
-    if (d.HasParseError()) {
+    // ===============================================
+    PARSE_JSON(source.c_str());
+
+
+    if (!d.HasMember("data")) {
         return {};
     }
-    auto videos = d["data"]["vp"]["tkl"][0]["vs"].GetArray();
-    auto du = d["data"]["vp"]["du"].GetString();
+    Value &data = d["data"];
+    if (!data.HasMember("vp")) {
+        return {};
+    }
+    Value &vp = data["vp"];
+    if (!vp.HasMember("tkl")) {
+        return {};
+    }
+    Value &tkl = vp["tkl"];
+    if (!tkl[0].HasMember("vs")) {
+        return {};
+    }
+    auto videos = tkl[0]["vs"].GetArray();
+    if (!videos[0].HasMember("fs")) {
+        return {};
+    }
+
+    if (!vp.HasMember("du")) {
+        return {};
+    }
+    auto du = vp["du"].GetString();
     sort(videos.begin(), videos.end(),
          [](auto &lhs,
             auto &rhs) {
@@ -118,6 +110,7 @@ vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
         auto l = string(du) + f["l"].GetString();
         v.emplace_back(l);
     }
+    // ===============================================
 
     std::vector<std::future<std::string>> futures;
 
