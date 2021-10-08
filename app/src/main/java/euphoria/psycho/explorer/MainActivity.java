@@ -1,12 +1,25 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Process;
+import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import euphoria.psycho.share.NetShare;
+import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.AcFun;
 import euphoria.psycho.videos.Ck52;
@@ -67,9 +80,54 @@ public class MainActivity extends Activity implements ClientInterface {
 //                Log.e("B5aOx2", String.format("run, %s", uri));
 //            }
 //        }).start();
-
+        try {
+            checkUpdate();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
 
     }
+
+    private void checkUpdate() throws Exception {
+        PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+        String version = pInfo.versionName;
+        new Thread(() -> {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            try {
+                HttpURLConnection c = (HttpURLConnection) new URL("http://47.106.105.122/api/video/apk").openConnection();
+                int code = c.getResponseCode();
+                if (code < 400 && code >= 200) {
+                    String lastestVersion = NetShare.readString(c);
+                    if (lastestVersion.compareTo(version) > 0) {
+                        MainActivity.this.runOnUiThread(() -> new Builder(MainActivity.this)
+                                .setMessage("程序有新版本，是否现在下载更新？")
+                                .setPositiveButton("确定", new OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                        intent.setData(Uri.parse("https://lucidu.cn/api/obs/%E8%A7%86%E9%A2%91%E6%B5%8F%E8%A7%88%E5%99%A8.apk"));
+                                        if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
+                                            intent.setPackage("com.android.chrome");
+                                            MainActivity.this.startActivity(intent);
+                                        } else {
+                                            MainActivity.this.startActivity(Intent.createChooser(intent, "下载最新版本"));
+                                        }
+                                    }
+                                })
+                                .setNegativeButton("取消", new OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .show());
+                    }
+                }
+            } catch (Exception e) {
+            }
+        }).start();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
