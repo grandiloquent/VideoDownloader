@@ -25,18 +25,8 @@ public class App extends Application {
         sContext = this;
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
-        //FileShare.initialize(this);
-        // VideoHelper.deleteVideoDirectory(this);
-//        File logDir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log");
-//        if (!logDir.exists()) {
-//            if (!logDir.mkdirs()) {
-//                throw new IllegalStateException();
-//            }
-//        }
-//        FileLog.setDir(logDir);
-        // adb pull /storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Documents/log/. log
         CrashReport.UserStrategy userStrategy = new CrashReport.UserStrategy(this);
-        CrashReport.initCrashReport(this,"97528631ea",true,userStrategy);
+        CrashReport.initCrashReport(this, "97528631ea", true, userStrategy);
     }
 
 

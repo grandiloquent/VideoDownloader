@@ -42,10 +42,11 @@ Java_euphoria_psycho_explorer_Native_fetchDouYin(JNIEnv *env, jclass clazz, jstr
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_euphoria_psycho_explorer_Native_fetchIqiyi(JNIEnv *env, jclass clazz, jstring url) {
-    jobjectArray ret;
+    jobjectArray ret{};
     const char *uri = env->GetStringUTFChars(url, nullptr);
     auto result = Iqiyi::FetchVideo(
             uri);
+    if (result.empty())return ret;
     ret = (jobjectArray) env->NewObjectArray(result.size(), env->FindClass("java/lang/String"),
                                              env->NewStringUTF(""));
     for (int i = 0; i < result.size(); i++)

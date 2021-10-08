@@ -7,16 +7,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.view.View;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
@@ -140,7 +136,9 @@ public class VideoHelper {
     public static File setVideoDownloadDirectory(Context context) {
         File directory =
                 //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
-                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                // context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
         if (!directory.exists()) {
             boolean result = directory.mkdirs();
             if (!result) return null;
@@ -222,7 +220,6 @@ public class VideoHelper {
                 return Integer.toString(status);
         }
     }
-
 
 
     public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {

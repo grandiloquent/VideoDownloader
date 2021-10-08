@@ -4,8 +4,7 @@
 
 **视频保存目录**：
 
-- m3u8：*Android/data/euphoria.psycho.explorer/files/Download*
-- 其他格式：*Download*
+*/storage/emulated/0/Download*
 
 <img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%">
 
@@ -39,6 +38,7 @@
 * https://github.com/soarcn/BottomSheet
 * https://github.com/google/volley
 * https://github.com/Tencent/rapidjson
+* https://github.com/yhirose/cpp-httplib
 
 ## How to download TikTok videos?
 

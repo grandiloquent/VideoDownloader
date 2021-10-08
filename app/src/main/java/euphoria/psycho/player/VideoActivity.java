@@ -97,7 +97,7 @@ public class VideoActivity extends BaseVideoActivity implements
         mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
         if (mPlayList != null) {
             updateUI();
-            mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
+            mPlayer.setVideoPath(mPlayList[mCurrentPlaybackIndex]);
             return true;
         }
         if (getIntent().getData() == null) {

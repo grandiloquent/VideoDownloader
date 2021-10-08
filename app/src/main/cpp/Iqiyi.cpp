@@ -5,6 +5,7 @@
 #include "Shared.h"
 #include "Logger.h"
 #include "rapidjson/document.h"
+#include "Configuration.h"
 
 using namespace std;
 using namespace rapidjson;
@@ -14,16 +15,15 @@ static string GetParametersString(const char *uri, int timeout) {
     httplib::SSLClient client(uriParts.first, 443);
     client.set_connection_timeout(timeout);
     httplib::Headers headers = {
-            {"Host",       uriParts.first},
-            {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"}
+            {"Host", uriParts.first},
+            {"User-Agent", USER_AGENT_ANDROID}
     };
     client.enable_server_certificate_verification(false);
     auto res = client.Get(uriParts.second.c_str(), headers);
     if (!res) {
         return string();
     }
-
-    auto tvid = Substring(res->body, "\"tvId\":", ",");
+    auto tvid = Substring(res->body, "\"tvid\":", ",");
     if (tvid.empty()) {
         return tvid;
     }
@@ -42,7 +42,7 @@ static string GetParametersString(const char *uri, int timeout) {
     return ss.str();
 }
 
-static string GetSource(const string &params, const string & hash, int timeout) {
+static string GetSource(const string &params, const string &hash, int timeout) {
     auto hostName = "cache.video.qiyi.com";
     httplib::SSLClient client(hostName, 443);
     client.set_connection_timeout(timeout);
@@ -63,8 +63,8 @@ static string GetVideoUri(const char *uri, int timeout) {
     httplib::SSLClient client(uriParts.first, 443);
     client.set_connection_timeout(timeout);
     httplib::Headers headers = {
-            {"Host",       uriParts.first},
-            {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"}
+            {"Host", uriParts.first},
+            {"User-Agent", USER_AGENT_ANDROID}
     };
     client.enable_server_certificate_verification(false);
     auto res = client.Get(uriParts.second.c_str(), headers);
@@ -90,6 +90,9 @@ vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
     std::vector<std::string> readyFutures;
 
     auto params = GetParametersString(uri, timeout);
+    if (params.empty()) {
+        return readyFutures;
+    }
     auto hash = Md5Encoded(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
     auto source = GetSource(params, hash, timeout);
     if (source.empty()) {

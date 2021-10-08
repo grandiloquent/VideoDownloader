@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.os.Environment;
 import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
@@ -57,8 +56,6 @@ public class Helper {
 
     static boolean checkPermissions(Activity activity) {
         List<String> needPermissions = new ArrayList<>();
-        // we need the WRITE_EXTERNAL_STORAGE
-        // permission to download video
         if (VERSION.SDK_INT <= 28 && !PermissionShare.checkSelfPermission(activity, permission.WRITE_EXTERNAL_STORAGE)) {
             needPermissions.add(permission.WRITE_EXTERNAL_STORAGE);
         }

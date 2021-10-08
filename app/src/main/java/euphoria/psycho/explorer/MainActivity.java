@@ -67,6 +67,7 @@ public class MainActivity extends Activity implements ClientInterface {
 //                Log.e("B5aOx2", String.format("run, %s", uri));
 //            }
 //        }).start();
+
     }
 
     @Override
