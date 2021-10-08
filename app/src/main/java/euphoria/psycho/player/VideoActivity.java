@@ -112,6 +112,7 @@ public class VideoActivity extends BaseVideoActivity implements
             mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
             mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
         }
+
         return true;
     }
 

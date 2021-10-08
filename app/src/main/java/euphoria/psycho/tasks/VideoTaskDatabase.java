@@ -35,7 +35,7 @@ public class VideoTaskDatabase extends SQLiteOpenHelper {
     }
 
     public static VideoTaskDatabase getInstance(Context context) {
-        File dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File database = new File(dir,
                 "tasks.db");
         // adb pull /storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/tasks.db

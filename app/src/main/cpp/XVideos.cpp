@@ -6,25 +6,14 @@
 #include "httplib/httplib.h"
 #include "Shared.h"
 #include "Logger.h"
+#include "HttpUtils.h"
 
 using namespace std;
 
 string FetchHls(const char *uri, int timeout) {
-    auto uriParts = ParseUrl(uri);
-
-    httplib::SSLClient client(uriParts.first, 443);
-    client.set_connection_timeout(timeout);
-    httplib::Headers headers = {
-            {"Host",       uriParts.first},
-            {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"}
-    };
-    client.enable_server_certificate_verification(false);
-    auto res = client.Get(uriParts.second.c_str(), headers);
-    if (!res) {
-        return string();
-    }
-    return Substring(res->body, "html5player.setVideoHLS('", "');");
-
+    auto res = HttpUtils::GetStrings(uri, timeout);
+    if (res.empty())return {};
+    return Substring(res, "html5player.setVideoHLS('", "');");
 }
 
 string XVideos::FetchVideo(const char *uri, int timeout) {
@@ -32,20 +21,9 @@ string XVideos::FetchVideo(const char *uri, int timeout) {
     if (hls.empty()) {
         return hls;
     }
-    auto uriParts = ParseUrl(hls.c_str());
-
-    httplib::SSLClient client(uriParts.first, 443);
-    client.set_connection_timeout(timeout);
-    httplib::Headers headers = {
-            {"Host",       uriParts.first},
-            {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"}
-    };
-    client.enable_server_certificate_verification(false);
-    auto res = client.Get(uriParts.second.c_str(), headers);
-    if (!res) {
-        return string();
-    }
-    auto lines = Split(res->body, "\n");
+    auto res = HttpUtils::GetStrings(hls.c_str(), timeout);
+    if (res.empty())return {};
+    auto lines = Split(res, "\n");
 
     vector<pair<int, string>> list;
 
@@ -66,6 +44,6 @@ string XVideos::FetchVideo(const char *uri, int timeout) {
     if (list.empty()) {
         return string();
     }
-    return  list[0].second;
+    return list[0].second;
 
 }

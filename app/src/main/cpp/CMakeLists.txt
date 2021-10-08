@@ -56,6 +56,7 @@ add_library(hello-libs SHARED
         Iqiyi.cpp
         AcFun.cpp
         PornOne.cpp
+        HttpUtils.cpp
         hello-libs.cpp
         )
 

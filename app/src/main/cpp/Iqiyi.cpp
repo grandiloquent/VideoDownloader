@@ -47,8 +47,8 @@ static string GetSource(const string &params, const string &hash, int timeout) {
     httplib::SSLClient client(hostName, 443);
     client.set_connection_timeout(timeout);
     httplib::Headers headers = {
-            {"Host",       hostName},
-            {"User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"}
+            {"Host", hostName},
+            {"User-Agent", USER_AGENT_ANDROID}
     };
     client.enable_server_certificate_verification(false);
     auto res = client.Get((params + "&vf=" + hash).c_str(), headers);
@@ -96,12 +96,14 @@ vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
     auto hash = Md5Encoded(params + "1j2k2k3l3l4m4m5n5n6o6o7p7p8q8q9r");
     auto source = GetSource(params, hash, timeout);
     if (source.empty()) {
-        return readyFutures;
+        return {};
     }
 
     Document d;
     d.Parse(source.c_str());
-
+    if (d.HasParseError()) {
+        return {};
+    }
     auto videos = d["data"]["vp"]["tkl"][0]["vs"].GetArray();
     auto du = d["data"]["vp"]["du"].GetString();
     sort(videos.begin(), videos.end(),
