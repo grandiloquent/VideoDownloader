@@ -36,22 +36,5 @@ public class Iqiyi extends BaseExtractor<String[]> {
         mMainActivity.startActivity(intent);
     }
 
-    private void executeTask(String[] videoUris) {
-        DownloadManager manager = (DownloadManager) mMainActivity.getSystemService(Context.DOWNLOAD_SERVICE);
-        for (String uris : videoUris) {
-            downloadFile(manager, uris, KeyShare.md5(uris) + ".f4v", "video/x-f4v");
-        }
-    }
 
-    private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
-        final DownloadManager.Request request;
-        Uri uri = Uri.parse(url);
-        request = new DownloadManager.Request(uri);
-        request.setMimeType(mimetype);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
-        request.allowScanningByMediaScanner();
-        request.setNotificationVisibility(
-                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        manager.enqueue(request);
-    }
 }

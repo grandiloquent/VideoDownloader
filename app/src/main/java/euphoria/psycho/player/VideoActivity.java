@@ -1,5 +1,7 @@
 package euphoria.psycho.player;
 
+import android.app.DownloadManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.media.MediaPlayer;
@@ -15,6 +17,7 @@ import android.media.MediaPlayer.OnVideoSizeChangedListener;
 import android.media.TimedMetaData;
 import android.media.TimedText;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -112,7 +115,6 @@ public class VideoActivity extends BaseVideoActivity implements
             mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
             mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
         }
-
         return true;
     }
 
@@ -204,16 +206,42 @@ public class VideoActivity extends BaseVideoActivity implements
             });
         });
         mFileDownload.setOnClickListener(v -> {
+            this.downloadVideo();
+        });
+    }
+
+    private void executeTask(String[] videoUris) {
+        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        for (String uris : videoUris) {
+            downloadFile(manager, uris, KeyShare.md5(uris) + ".f4v", "video/x-f4v");
+        }
+    }
+
+    private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
+        final DownloadManager.Request request;
+        Uri uri = Uri.parse(url);
+        request = new DownloadManager.Request(uri);
+        request.setMimeType(mimetype);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(
+                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        manager.enqueue(request);
+    }
+
+    private void downloadVideo() {
+        if (mPlayList != null) {
+            executeTask(mPlayList);
+        } else {
             Uri videoUri = getIntent().getData();
             if (videoUri.toString().contains("m3u8")) {
                 Intent intent = new Intent(VideoActivity.this, euphoria.psycho.tasks.VideoActivity.class);
                 intent.setData(videoUri);
                 VideoActivity.this.startActivity(intent);
             } else {
-                WebViewShare.downloadFile(v.getContext(), KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
+                WebViewShare.downloadFile(this, KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
             }
-
-        });
+        }
     }
 
     private void show() {
