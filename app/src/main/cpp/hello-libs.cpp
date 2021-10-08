@@ -85,7 +85,8 @@ Java_euphoria_psycho_explorer_Native_fetchXVideos(JNIEnv *env, jclass clazz, jst
     } catch (const std::exception &ex) {
         return nullptr;
     }
-}extern "C"
+}
+extern "C"
 JNIEXPORT jstring JNICALL
 Java_euphoria_psycho_explorer_Native_fetchAcFun(JNIEnv *env, jclass clazz, jstring url) {
     try {
@@ -97,7 +98,8 @@ Java_euphoria_psycho_explorer_Native_fetchAcFun(JNIEnv *env, jclass clazz, jstri
     } catch (const std::exception &ex) {
         return nullptr;
     }
-}extern "C"
+}
+extern "C"
 JNIEXPORT jstring JNICALL
 Java_euphoria_psycho_explorer_Native_fetchPornOne(JNIEnv *env, jclass clazz, jstring url) {
     const char *uri = env->GetStringUTFChars(url, nullptr);

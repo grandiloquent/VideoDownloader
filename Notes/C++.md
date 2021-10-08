@@ -15,3 +15,6 @@
 ```
 "C:\Program Files\JetBrains\CLion 2021.2.1\bin\cmake\win\bin\cmake.exe" --build C:\Users\psycho\CLionProjects\Key\cmake-build-debug --target Key -- -j 3
 ```
+
+- https://github.com/OpenAtomFoundation/TencentOS-tiny/blob/master/components/connectivity/qcloud-iot-hub-sdk/3rdparty/platform/os/linux/HAL_TCP_linux.c
+- https://github.com/OpenAtomFoundation/TencentOS-tiny/blob/master/components/connectivity/iotkit-embedded-3.0.1/3rdparty/wrappers/os/ubuntu/HAL_UDP_linux.c

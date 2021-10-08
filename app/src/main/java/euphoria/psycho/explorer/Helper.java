@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.os.Environment;
 import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
@@ -20,15 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.player.VideoActivity;
-import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.share.IntentShare;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.tasks.VideoService;
-import euphoria.psycho.videos.VideosHelper;
 
 public class Helper {
     static final String KEY_LAST_ACCESSED = "lastAccessed";
@@ -61,7 +59,7 @@ public class Helper {
         List<String> needPermissions = new ArrayList<>();
         // we need the WRITE_EXTERNAL_STORAGE
         // permission to download video
-        if (!PermissionShare.checkSelfPermission(activity, permission.WRITE_EXTERNAL_STORAGE)) {
+        if (VERSION.SDK_INT <= 28 && !PermissionShare.checkSelfPermission(activity, permission.WRITE_EXTERNAL_STORAGE)) {
             needPermissions.add(permission.WRITE_EXTERNAL_STORAGE);
         }
         if (needPermissions.size() > 0) {
