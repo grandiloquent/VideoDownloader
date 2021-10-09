@@ -116,23 +116,24 @@ vector<std::string> Iqiyi::FetchVideo(const char *uri, int timeout) {
         return {};
     }
 
-    std::vector<std::future<std::string>> futures;
-    futures.reserve(v.size());
-    for (auto &i : v) {
-        futures.push_back(
-                std::async(std::launch::async,
-                           [&](const std::string &uri) {
-                               return GetVideoUri(uri.c_str(), timeout);
-                           }, i)
-        );
-    }
-    do {
-        for (auto &future : futures) {
-            if (isReady(future)) {
-                readyFutures.push_back(future.get());
-            }
-        }
-    } while (readyFutures.size() < futures.size());
-
-    return readyFutures;
+//    std::vector<std::future<std::string>> futures;
+//    futures.reserve(v.size());
+//    for (auto &i : v) {
+//        futures.push_back(
+//                std::async(std::launch::async,
+//                           [&](const std::string &uri) {
+//                               return GetVideoUri(uri.c_str(), timeout);
+//                           }, i)
+//        );
+//    }
+//    do {
+//        for (auto &future : futures) {
+//            if (isReady(future)) {
+//                readyFutures.push_back(future.get());
+//            }
+//        }
+//    } while (readyFutures.size() < futures.size());
+//
+//    return readyFutures;
+return v;
 }

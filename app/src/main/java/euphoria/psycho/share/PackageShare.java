@@ -12,7 +12,8 @@ public class PackageShare {
         try {
             context.getPackageManager().getApplicationInfo(packageName, 0);
             return true;
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (Exception e) {
+            Log.e("B5aOx2", String.format("isAppInstalled, %s", e.getMessage()));
             return false;
         }
     }

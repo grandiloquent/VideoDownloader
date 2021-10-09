@@ -9,6 +9,11 @@ adb tcpip 5000
 adb connect 192.168.0.109:5000
 ```
 
+```
+adb shell cmd package list packages
+adb shell pm list packages -f
+```
+
 ## Logcat
 
 ```
