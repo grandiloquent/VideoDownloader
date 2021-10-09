@@ -34,7 +34,7 @@ public class DownloaderActivity extends Activity implements RequestEventListener
                 mListView.setVisibility(View.VISIBLE);
                 mVideoAdapter.update(DownloaderManager.getInstance().getQueue().getCurrentRequests()
                         .stream()
-                        .map(Request::getVideoTask)
+                        .map(DownloaderRequest::getDownloaderTask)
                         .collect(Collectors.toList()));
             } else {
                 finish();
@@ -113,7 +113,7 @@ public class DownloaderActivity extends Activity implements RequestEventListener
     }
 
     @Override
-    public void onRequestEvent(Request Request, int event) {
+    public void onRequestEvent(DownloaderRequest Request, int event) {
         if (event == RequestEvent.REQUEST_QUEUED) {
             DownloaderHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }

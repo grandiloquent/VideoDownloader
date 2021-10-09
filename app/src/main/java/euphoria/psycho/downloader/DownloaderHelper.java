@@ -28,7 +28,7 @@ public class DownloaderHelper {
     public static boolean checkIfExistsRunningTask(RequestQueue queue) {
         return queue.getCurrentRequests()
                 .stream()
-                .anyMatch(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1);
+                .anyMatch(r -> r.getDownloaderTask().Status != 7 && r.getDownloaderTask().Status > -1);
     }
 
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
@@ -105,7 +105,7 @@ public class DownloaderHelper {
     public static long getRunningTasksSize(RequestQueue queue) {
         return queue.getCurrentRequests()
                 .stream()
-                .filter(r -> r.getVideoTask().Status != 7 && r.getVideoTask().Status > -1)
+                .filter(r -> r.getDownloaderTask().Status != 7 && r.getDownloaderTask().Status > -1)
                 .count();
     }
 
@@ -124,7 +124,7 @@ public class DownloaderHelper {
             } else {
                 videoTask.IsPaused = false;
                 DownloaderManager.getInstance().getQueue().removeVideoTask(videoTask);
-                Request request = new Request(context, videoTask, DownloaderManager.getInstance(), DownloaderManager.getInstance().getHandler());
+                DownloaderRequest request = new DownloaderRequest(context, videoTask, DownloaderManager.getInstance(), DownloaderManager.getInstance().getHandler());
                 request.setRequestQueue(DownloaderManager.getInstance().getQueue());
                 DownloaderManager.getInstance().getQueue().add(request);
             }

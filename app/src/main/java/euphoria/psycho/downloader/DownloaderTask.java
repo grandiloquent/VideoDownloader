@@ -15,7 +15,7 @@ public class DownloaderTask {
     public long TotalSize;
     public long CreateAt;
     public long UpdateAt;
-    public Request Request;
+    public DownloaderRequest Request;
     public boolean IsPaused;
 
     @Override

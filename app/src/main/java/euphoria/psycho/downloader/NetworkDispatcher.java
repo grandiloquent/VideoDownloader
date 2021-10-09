@@ -6,10 +6,10 @@ import java.util.concurrent.BlockingQueue;
 
 
 public class NetworkDispatcher extends Thread {
-    private final BlockingQueue<Request> mQueue;
+    private final BlockingQueue<DownloaderRequest> mQueue;
     private volatile boolean mQuit = false;
 
-    public NetworkDispatcher(BlockingQueue<Request> queue) {
+    public NetworkDispatcher(BlockingQueue<DownloaderRequest> queue) {
         mQueue = queue;
     }//
 
@@ -20,11 +20,11 @@ public class NetworkDispatcher extends Thread {
 
     private void processRequest() throws InterruptedException {
         // Take a request from the queue.
-        Request request = mQueue.take();
+        DownloaderRequest request = mQueue.take();
         processRequest(request);
     }
 
-    private void processRequest(Request request) {
+    private void processRequest(DownloaderRequest request) {
         request.sendEvent(RequestQueue.RequestEvent.REQUEST_NETWORK_DISPATCH_STARTED);
         try {
             request.start();

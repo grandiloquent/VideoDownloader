@@ -29,11 +29,10 @@ public class DownloaderService extends Service implements RequestEventListener {
 
     private void submitTask(DownloaderTask videoTask) {
         DownloaderManager.post(() -> {
-            Request request = new Request(DownloaderService.this,
+            DownloaderRequest request = new DownloaderRequest(DownloaderService.this,
                     videoTask,
                     DownloaderManager.getInstance(),
                     DownloaderManager.getInstance().getHandler());
-            request.setRequestQueue(mQueue);
             mQueue.add(request);
         });
     }
@@ -104,7 +103,7 @@ public class DownloaderService extends Service implements RequestEventListener {
     }
 
     @Override
-    public void onRequestEvent(Request Request, int event) {
+    public void onRequestEvent(DownloaderRequest Request, int event) {
         if (event == RequestEvent.REQUEST_QUEUED) {
             int[] counts = mQueue.count();
             showNotification(this, mNotificationManager, counts);

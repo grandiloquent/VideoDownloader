@@ -12,7 +12,7 @@ public interface TaskStatus {
     //  emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
     int DOWNLOAD_VIDEO_FINISHED = 5;
     //  emitSynchronizeTask(TaskStatus.MERGE_VIDEO);
-    int MERGE_VIDEO = 6;
+    int RANGE = 6;
     //  emitSynchronizeTask(TaskStatus.MERGE_VIDEO_FINISHED);
     int MERGE_VIDEO_FINISHED = 7;
     int START = 8;

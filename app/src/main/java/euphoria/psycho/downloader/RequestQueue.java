@@ -13,17 +13,17 @@ public class RequestQueue {
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
 
 
-    private final Set<Request> mCurrentRequests = new HashSet<>();
+    private final Set<DownloaderRequest> mCurrentRequests = new HashSet<>();
     private final NetworkDispatcher[] mDispatchers;
     private final List<RequestEventListener> mEventListeners = new ArrayList<>();
-    private final PriorityBlockingQueue<Request> mNetworkQueue = new PriorityBlockingQueue<>();
+    private final PriorityBlockingQueue<DownloaderRequest> mNetworkQueue = new PriorityBlockingQueue<>();
     private final AtomicInteger mSequenceGenerator = new AtomicInteger();
 
     public RequestQueue() {
         mDispatchers = new NetworkDispatcher[DEFAULT_NETWORK_THREAD_POOL_SIZE];
     }
 
-    public void add(Request request) {
+    public void add(DownloaderRequest request) {
         // Tag the request as belonging to this queue and add it to the set of current requests.
         request.setRequestQueue(this);
         synchronized (mCurrentRequests) {
@@ -42,7 +42,7 @@ public class RequestQueue {
         }
     }
 
-    public Set<Request> getCurrentRequests() {
+    public Set<DownloaderRequest> getCurrentRequests() {
         return mCurrentRequests;
     }
 
@@ -76,7 +76,7 @@ public class RequestQueue {
     }
 
     public interface RequestEventListener {
-        void onRequestEvent(Request Request, int event);
+        void onRequestEvent(DownloaderRequest Request, int event);
     }
 
     public @interface RequestEvent {
@@ -99,7 +99,7 @@ public class RequestQueue {
         public static final int REQUEST_QUEUED = 0;
     }
 
-    void sendRequestEvent(Request request, @RequestEvent int event) {
+    void sendRequestEvent(DownloaderRequest request, @RequestEvent int event) {
         synchronized (mEventListeners) {
             for (RequestEventListener listener : mEventListeners) {
                 listener.onRequestEvent(request, event);
@@ -112,8 +112,8 @@ public class RequestQueue {
         int total = 0;
         synchronized (mCurrentRequests) {
             total = mCurrentRequests.size();
-            for (Request request : mCurrentRequests) {
-                if (request.getVideoTask().Status != 7 && request.getVideoTask().Status > -1) {
+            for (DownloaderRequest request : mCurrentRequests) {
+                if (request.getDownloaderTask().Status != 7 && request.getDownloaderTask().Status > -1) {
                     running++;
                 }
             }
@@ -123,9 +123,9 @@ public class RequestQueue {
 
     void removeVideoTask(DownloaderTask videoTask) {
         synchronized (mCurrentRequests) {
-          Request src = null;
-            for (Request request : mCurrentRequests) {
-                if (request.getVideoTask().FileName.equals(videoTask.FileName)) {
+          DownloaderRequest src = null;
+            for (DownloaderRequest request : mCurrentRequests) {
+                if (request.getDownloaderTask().FileName.equals(videoTask.FileName)) {
                     src = request;
                     break;
                 }
@@ -139,8 +139,8 @@ public class RequestQueue {
     List<DownloaderTask> getVideoTasks() {
         List<DownloaderTask> videoTasks = new ArrayList<>();
         synchronized (mCurrentRequests) {
-            for (Request request : mCurrentRequests) {
-                videoTasks.add(request.getVideoTask());
+            for (DownloaderRequest request : mCurrentRequests) {
+                videoTasks.add(request.getDownloaderTask());
             }
         }
         return videoTasks;
@@ -149,14 +149,14 @@ public class RequestQueue {
 
     boolean taskExists(String fileName) {
         synchronized (mCurrentRequests) {
-            for (Request request : mCurrentRequests) {
-                if (request.getVideoTask().FileName.equals(fileName)) return true;
+            for (DownloaderRequest request : mCurrentRequests) {
+                if (request.getDownloaderTask().FileName.equals(fileName)) return true;
             }
             return false;
         }
     }
 
-    void finish(Request request) {
+    void finish(DownloaderRequest request) {
         // Remove from the set of requests currently being processed.
 //        synchronized (mCurrentRequests) {
 //            mCurrentRequests.remove(request);
