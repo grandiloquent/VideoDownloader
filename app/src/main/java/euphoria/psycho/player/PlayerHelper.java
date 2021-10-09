@@ -184,11 +184,6 @@ public class PlayerHelper {
     }
 
 
-    static int playPreviousVideo(int currentPlaybackIndex, TextureVideoView textureVideoView, File[] files) {
-        int nextPlaybackIndex = currentPlaybackIndex - 1 > -1 ? currentPlaybackIndex - 1 : files.length - 1;
-        textureVideoView.setVideoPath(files[nextPlaybackIndex].getAbsolutePath());
-        return nextPlaybackIndex;
-    }
 
     static void rotateScreen(AppCompatActivity activity) {
         int orientation = calculateScreenOrientation(activity);

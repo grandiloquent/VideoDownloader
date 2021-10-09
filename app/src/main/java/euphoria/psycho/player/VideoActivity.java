@@ -42,7 +42,6 @@ import static euphoria.psycho.player.PlayerHelper.getVideos;
 import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
 import static euphoria.psycho.player.PlayerHelper.lookupCurrentVideo;
 import static euphoria.psycho.player.PlayerHelper.openDeleteVideoDialog;
-import static euphoria.psycho.player.PlayerHelper.playPreviousVideo;
 import static euphoria.psycho.player.PlayerHelper.rotateScreen;
 import static euphoria.psycho.player.PlayerHelper.showSystemUI;
 import static euphoria.psycho.player.PlayerHelper.switchPlayState;
@@ -83,11 +82,6 @@ public class VideoActivity extends BaseVideoActivity implements
     private GestureDetector mVideoTouchHelper;
     private int mCurrentPlaybackIndex;
     private String[] mPlayList;
-
-    @Override
-    public void onVideoUri(String uri) {
-        runOnUiThread(() -> mPlayer.setVideoPath(uri));
-    }
 
     private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
         final DownloadManager.Request request;
@@ -148,14 +142,18 @@ public class VideoActivity extends BaseVideoActivity implements
         mPlayer.setOnBufferingUpdateListener(this);
     }
 
+    private void playPlayList(int index) {
+        if (mPlayList[index].contains("http://data.video.iqiyi.com")) {
+            Iqiyi.getVideoAddress(mPlayList[index], this);
+        }
+        mPlayer.setVideoPath(mPlayList[index]);
+    }
+
     private boolean loadPlayList() {
         mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
         if (mPlayList != null) {
             updateUI();
-            if (mPlayList[mCurrentPlaybackIndex].contains("http://data.video.iqiyi.com")) {
-                Iqiyi.getVideoAddress(mPlayList[mCurrentPlaybackIndex], this);
-            }
-            mPlayer.setVideoPath(mPlayList[mCurrentPlaybackIndex]);
+            playPlayList(mCurrentPlaybackIndex);
             return true;
         }
         if (getIntent().getData() == null) {
@@ -214,7 +212,7 @@ public class VideoActivity extends BaseVideoActivity implements
         });
         mExoPrev.setOnClickListener(v -> {
             savePosition();
-            mCurrentPlaybackIndex = playPreviousVideo(mCurrentPlaybackIndex, mPlayer, mFiles);
+            mCurrentPlaybackIndex = playPreviousVideo(mCurrentPlaybackIndex, mPlayer);
         });
         mExoNext.setOnClickListener(v -> {
             savePosition();
@@ -434,6 +432,11 @@ public class VideoActivity extends BaseVideoActivity implements
     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
     }
 
+    @Override
+    public void onVideoUri(String uri) {
+        runOnUiThread(() -> mPlayer.setVideoPath(uri));
+    }
+
     int playNextVideo(int currentPlaybackIndex, TextureVideoView textureVideoView) {
         if (mFiles != null) {
             int nextPlaybackIndex = mFiles.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
@@ -441,9 +444,23 @@ public class VideoActivity extends BaseVideoActivity implements
             return nextPlaybackIndex;
         } else if (mPlayList != null) {
             int nextPlaybackIndex = mPlayList.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
-            textureVideoView.setVideoPath(mPlayList[nextPlaybackIndex]);
+            playPlayList(nextPlaybackIndex);
             return nextPlaybackIndex;
         }
         return 0;
     }
+
+    int playPreviousVideo(int currentPlaybackIndex, TextureVideoView textureVideoView) {
+        if (mFiles != null) {
+            int nextPlaybackIndex = currentPlaybackIndex - 1 > -1 ? currentPlaybackIndex - 1 : 0;
+            textureVideoView.setVideoPath(mFiles[nextPlaybackIndex].getAbsolutePath());
+            return nextPlaybackIndex;
+        } else if (mPlayList != null) {
+            int nextPlaybackIndex = currentPlaybackIndex - 1 > -1 ? currentPlaybackIndex - 1 : 0;
+            playPlayList(nextPlaybackIndex);
+            return nextPlaybackIndex;
+        }
+        return 0;
+    }
+
 }
