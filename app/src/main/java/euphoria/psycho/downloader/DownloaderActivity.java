@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
@@ -47,7 +46,6 @@ public class DownloaderActivity extends Activity implements RequestEventListener
         mLifeCycles.add(lifeCycle);
     }
 
-
     public static void registerBroadcastReceiver(Context context, BroadcastReceiver receiver) {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_REFRESH);
@@ -55,44 +53,55 @@ public class DownloaderActivity extends Activity implements RequestEventListener
         context.registerReceiver(receiver, filter);
     }
 
-
     public void removeLifeCycle(LifeCycle lifeCycle) {
         mLifeCycles.remove(lifeCycle);
     }
 
-
-    private void startService() {
-        String[] videoList = getIntent().getStringArrayExtra(VideoService.KEY_VIDEO_LIST);
-        Uri videoUri = getIntent().getData();
-        if (videoList == null && videoUri == null) {
-            return;
-        }
-        Intent service = new Intent(this, VideoService.class);
-        service.putExtra(VideoService.KEY_VIDEO_LIST, videoList);
-        service.setData(videoUri);
-        startService(service);
-    }
-
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_video_s);
+    // Initialize the UI
+    private void initializeUI() {
         mProgressBar = findViewById(R.id.progress_bar);
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new VideoAdapter(this);
         mListView.setAdapter(mVideoAdapter);
+    }
+
+    // Start download service
+    // Register a broadcast receiver
+    // Add this instance as a request handler to the download message queue
+    private void startProcessing() {
         startService();
         registerBroadcastReceiver(this, mBroadcastReceiver);
         DownloadManager.newInstance(this).getQueue().addRequestEventListener(this);
+    }
+
+    // Start the service by providing an array of video addresses
+    private void startService() {
+        String[] videoList = getIntent().getStringArrayExtra(DownloaderService.KEY_VIDEO_LIST);
+        if (videoList == null) {
+            return;
+        }
+        Intent service = new Intent(this, DownloaderService.class);
+        service.putExtra(DownloaderService.KEY_VIDEO_LIST, videoList);
+        startService(service);
+    }
+
+    // If the download task has been executed before
+    // this class of instantiation,
+    // the UI should be updated immediately
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_video_s);
+        initializeUI();
+        startProcessing();
         if (getIntent().getBooleanExtra(KEY_UPDATE, false)) {
             VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }
     }
 
-
     @Override
     protected void onDestroy() {
+        // Log\.e\([^\n]+\);\n
         for (int i = 0; i < mLifeCycles.size(); i++) {
             mLifeCycles.get(i).onDestroy();
         }
@@ -101,13 +110,11 @@ public class DownloaderActivity extends Activity implements RequestEventListener
         super.onDestroy();
     }
 
-
     @Override
     protected void onPause() {
         DownloadManager.getInstance().removeVideoTaskListener(mVideoAdapter);
         super.onPause();
     }
-
 
     @Override
     protected void onResume() {
@@ -115,13 +122,10 @@ public class DownloaderActivity extends Activity implements RequestEventListener
         DownloadManager.getInstance().addVideoTaskListener(mVideoAdapter);
     }
 
-
     @Override
     public void onRequestEvent(Request Request, int event) {
         if (event == RequestEvent.REQUEST_QUEUED) {
             VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }
     }
-
-
 }

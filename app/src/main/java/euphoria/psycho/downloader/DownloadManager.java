@@ -63,7 +63,7 @@ public class DownloadManager implements VideoTaskListener {
     }
 
     @Override
-    public void synchronizeTask(DownloadTask videoTask) {
+    public void synchronizeTask(DownloaderTask videoTask) {
         mDatabase.updateDownloadTask(videoTask);
         mVideoTaskListeners.forEach(videoTaskListener -> videoTaskListener.synchronizeTask(videoTask));
         if (videoTask.Status < 0 || videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
@@ -72,7 +72,7 @@ public class DownloadManager implements VideoTaskListener {
     }
 
     @Override
-    public void taskProgress(DownloadTask videoTask) {
+    public void taskProgress(DownloaderTask videoTask) {
         mVideoTaskListeners.forEach(videoTaskListener -> videoTaskListener.taskProgress(videoTask));
     }
 

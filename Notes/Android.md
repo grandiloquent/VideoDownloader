@@ -27,3 +27,8 @@ adb shell pm list packages -f
 |名称|快捷键|
 |---|---|
 |Introduce Constant...|Ctrl+Alt+C|
+
+```
+^(?:[\t ]*(?:\r?\n|\r)){2,}
+Log\.e\([^\n]+\);\n
+```

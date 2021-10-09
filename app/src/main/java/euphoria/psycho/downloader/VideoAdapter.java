@@ -20,14 +20,14 @@ import euphoria.psycho.share.Logger;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     private final DownloaderActivity mVideoActivity;
-    private final List<DownloadTask> mVideoTasks = new ArrayList<>();
+    private final List<DownloaderTask> mVideoTasks = new ArrayList<>();
     private final List<ViewHolder> mViewHolders = new ArrayList<>();
 
     public VideoAdapter(DownloaderActivity videoActivity) {
         mVideoActivity = videoActivity;
     }
 
-    public void update(List<DownloadTask> videoTasks) {
+    public void update(List<DownloaderTask> videoTasks) {
         Logger.e(String.format("update, %s", videoTasks.size()));
         mVideoTasks.clear();
         mVideoTasks.addAll(videoTasks);
@@ -43,7 +43,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         viewHolder.button = v.findViewById(R.id.button);
     }
 
-    private static void renderCompletedStatus(Context context, ViewHolder viewHolder, DownloadTask videoTask) {
+    private static void renderCompletedStatus(Context context, ViewHolder viewHolder, DownloaderTask videoTask) {
         viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
         viewHolder.progressBar.setProgress(100);
         viewHolder.subtitle.setText(context.getString(R.string.merge_complete));
@@ -61,7 +61,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         });
     }
 
-    private static void renderVideoTask(Context context, ViewHolder viewHolder, DownloadTask videoTask) {
+    private static void renderVideoTask(Context context, ViewHolder viewHolder, DownloaderTask videoTask) {
         switch (videoTask.Status) {
             case euphoria.psycho.tasks.TaskStatus.PARSE_VIDEOS: {
                 break;
@@ -70,10 +70,10 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
                 break;
             }
             case euphoria.psycho.tasks.TaskStatus.DOWNLOAD_VIDEOS: {
-                viewHolder.subtitle.setText(String.format("%s/%s",
-                        videoTask.DownloadedFiles,
-                        videoTask.TotalFiles));
-                viewHolder.progressBar.setProgress((int) ((videoTask.DownloadedFiles * 1.0 / videoTask.TotalFiles) * 100));
+//                viewHolder.subtitle.setText(String.format("%s/%s",
+//                        videoTask.DownloadedFiles,
+//                        videoTask.TotalFiles));
+              //  viewHolder.progressBar.setProgress((int) ((videoTask.DownloadedFiles * 1.0 / videoTask.TotalFiles) * 100));
                 break;
             }
             case euphoria.psycho.tasks.TaskStatus.PARSE_CONTENT_LENGTH: {
@@ -122,7 +122,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         }
     }
 
-    private static void resetViewHolderUI(Context context, ViewHolder viewHolder, DownloadTask videoTask) {
+    private static void resetViewHolderUI(Context context, ViewHolder viewHolder, DownloaderTask videoTask) {
         viewHolder.tag = videoTask.FileName;
         viewHolder.title.setText(videoTask.FileName);
         viewHolder.subtitle.setText(R.string.waiting);
@@ -138,7 +138,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     @Override
-    public DownloadTask getItem(int position) {
+    public DownloaderTask getItem(int position) {
         return mVideoTasks.get(position);
     }
 
@@ -160,17 +160,17 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        DownloadTask videoTask = getItem(position);
+        DownloaderTask videoTask = getItem(position);
         resetViewHolderUI(parent.getContext(), viewHolder, videoTask);
         renderVideoTask(parent.getContext(), viewHolder, videoTask);
-        if (videoTask.TotalFiles > 0 && videoTask.DownloadedFiles == videoTask.TotalFiles) {
-            renderCompletedStatus(parent.getContext(), viewHolder, videoTask);
-        }
+//        if (videoTask.TotalFiles > 0 && videoTask.DownloadedFiles == videoTask.TotalFiles) {
+//            renderCompletedStatus(parent.getContext(), viewHolder, videoTask);
+//        }
         return convertView;
     }
 
     @Override
-    public void synchronizeTask(DownloadTask videoTask) {
+    public void synchronizeTask(DownloaderTask videoTask) {
         for (ViewHolder viewHolder : mViewHolders) {
             if (videoTask.FileName.equals(viewHolder.tag)) {
                 renderVideoTask(mVideoActivity, viewHolder, videoTask);
@@ -180,7 +180,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
     }
 
     @Override
-    public void taskProgress(DownloadTask videoTask) {
+    public void taskProgress(DownloaderTask videoTask) {
     }
 
 

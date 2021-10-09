@@ -43,7 +43,7 @@ public class VideoHelper {
     @RequiresApi(api = VERSION_CODES.O)
     public static void createNotificationChannel(Context context, NotificationManager manager) {
         final NotificationChannel notificationChannel = new NotificationChannel(
-                VideoService.DOWNLOAD_CHANNEL,
+                DownloaderService.DOWNLOAD_CHANNEL,
                 context.getString(R.string.channel_download_videos),
                 NotificationManager.IMPORTANCE_LOW);
         manager.createNotificationChannel(notificationChannel);
@@ -63,7 +63,7 @@ public class VideoHelper {
         Builder builder;
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             builder = new Builder(context,
-                    VideoService.DOWNLOAD_CHANNEL);
+                    DownloaderService.DOWNLOAD_CHANNEL);
         } else {
             builder = new Builder(context);
         }
@@ -116,7 +116,7 @@ public class VideoHelper {
         return v;
     }
 
-    public static void renderPauseButton(Context context, ViewHolder viewHolder, DownloadTask videoTask) {
+    public static void renderPauseButton(Context context, ViewHolder viewHolder, DownloaderTask videoTask) {
         viewHolder.button.setImageResource(R.drawable.ic_action_pause);
         viewHolder.button.setOnClickListener(v -> {
             if (!videoTask.IsPaused) {
@@ -124,7 +124,6 @@ public class VideoHelper {
             } else {
                 videoTask.IsPaused = false;
                 DownloadManager.getInstance().getQueue().removeVideoTask(videoTask);
-                videoTask.DownloadedFiles = 0;
                 Request request = new Request(context, videoTask, DownloadManager.getInstance(), DownloadManager.getInstance().getHandler());
                 request.setRequestQueue(DownloadManager.getInstance().getQueue());
                 DownloadManager.getInstance().getQueue().add(request);

@@ -4,32 +4,25 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.os.Environment;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
 import java.util.List;
 
 import androidx.annotation.Nullable;
+import euphoria.psycho.downloader.RequestQueue.RequestEvent;
+import euphoria.psycho.downloader.RequestQueue.RequestEventListener;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
-import euphoria.psycho.tasks.Request;
-import euphoria.psycho.tasks.RequestQueue;
-import euphoria.psycho.tasks.RequestQueue.RequestEvent;
-import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
-import euphoria.psycho.tasks.TaskStatus;
-import euphoria.psycho.tasks.VideoActivity;
-import euphoria.psycho.tasks.VideoHelper;
-import euphoria.psycho.tasks.VideoManager;
-import euphoria.psycho.tasks.VideoTask;
+import euphoria.psycho.share.KeyShare;
 
-import static euphoria.psycho.tasks.VideoHelper.showNotification;
+import static euphoria.psycho.downloader.VideoHelper.showNotification;
 
-
-public class VideoService extends Service implements RequestEventListener {
+public class DownloaderService extends Service implements RequestEventListener {
 
     public static final String CHECK_UNFINISHED_VIDEO_TASKS = "CheckUnfinishedVideoTasks";
     public static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
@@ -40,31 +33,31 @@ public class VideoService extends Service implements RequestEventListener {
     private File mVideoDirectory;
 
     public void checkUncompletedVideoTasks() {
+        Log.e("B5aOx2", "checkUncompletedVideoTasks");
         // Query all tasks that have not been completed
-        List<VideoTask> videoTasks = euphoria.psycho.tasks.VideoManager
+        List<DownloaderTask> videoTasks = DownloadManager
                 .newInstance(this)
                 .getDatabase()
-                .getPendingVideoTasks();
+                .getPendingDownloadTasks();
         if (videoTasks.size() == 0) {
             stopSelf();
             return;
         }
-        for (VideoTask videoTask : videoTasks) {
-            videoTask.DownloadedFiles = 0;
+        for (DownloaderTask videoTask : videoTasks) {
             submitTask(videoTask);
         }
     }
 
-    private VideoTask createTask(String uri, String fileName, String content) {
-        VideoTask videoTask = new VideoTask();
+    private DownloaderTask createTask(String uri, String fileName, String content) {
+        Log.e("B5aOx2", "createTask");
+        DownloaderTask videoTask = new DownloaderTask();
         videoTask.Uri = uri;
         videoTask.FileName = fileName;
         videoTask.Directory = new File(mVideoDirectory, fileName).getAbsolutePath();
-        videoTask.Content = content;
-        long result = euphoria.psycho.tasks.VideoManager
+        long result = DownloadManager
                 .getInstance()
                 .getDatabase()
-                .insertVideoTask(videoTask);
+                .insertDownloadTask(videoTask);
         if (result == -1) {
             return null;
         }
@@ -73,60 +66,59 @@ public class VideoService extends Service implements RequestEventListener {
     }
 
     private void submitRequest(String uri) {
+        Log.e("B5aOx2", "submitRequest");
         new Thread(() -> {
-            // Calculate the hash value of the m3u8 content
-            // as the file name and unique Id,
-            // try to avoid downloading the video repeatedly
-            String[] infos = euphoria.psycho.tasks.VideoHelper.getInfos(uri);
-            if (infos == null) {
-                toastTaskFailed(getString(R.string.failed_to_get_video_list));
-                return;
-            }
             // Check whether the task has been added to the task queue
-            if (euphoria.psycho.tasks.VideoHelper.checkTask(this, mQueue, infos[1])) {
+            if (VideoHelper.checkTask(this, mQueue,
+                    KeyShare.md5(uri))) {
                 return;
             }
             // Query task from the database
-            VideoTask videoTask = euphoria.psycho.tasks.VideoManager.getInstance().getDatabase().getVideoTask(infos[1]);
-            if (videoTask == null) {
-                videoTask = createTask(uri, infos[1], infos[0]);
-                if (videoTask == null) {
-                    toastTaskFailed(getString(R.string.failed_to_create_task));
-                    return;
-                }
-            } else {
-                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
-                    toastTaskFinished();
-                    return;
-                }
-                videoTask.DownloadedFiles = 0;
-            }
-            submitTask(videoTask);
-
+//            DownloadTask videoTask = DownloadManager.getInstance()
+//                    .getDatabase()
+//                    .getDownloadTask(infos[1]);
+//            if (videoTask == null) {
+//                videoTask = createTask(uri, infos[1], infos[0]);
+//                if (videoTask == null) {
+//                    toastTaskFailed(getString(R.string.failed_to_create_task));
+//                    return;
+//                }
+//            } else {
+//                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
+//                    toastTaskFinished();
+//                    return;
+//                }
+//                videoTask.DownloadedFiles = 0;
+//            }
+            // submitTask(videoTask);
         }).start();
     }
 
-    private void submitTask(VideoTask videoTask) {
-        euphoria.psycho.tasks.VideoManager.post(() -> {
-            euphoria.psycho.tasks.Request request = new euphoria.psycho.tasks.Request(VideoService.this, videoTask, euphoria.psycho.tasks.VideoManager.getInstance(), euphoria.psycho.tasks.VideoManager.getInstance().getHandler());
+    private void submitTask(DownloaderTask videoTask) {
+        Log.e("B5aOx2", "submitTask");
+        DownloadManager.post(() -> {
+            Request request = new Request(DownloaderService.this, videoTask, DownloadManager.getInstance(), euphoria.psycho.tasks.VideoManager.getInstance().getHandler());
             request.setRequestQueue(mQueue);
             mQueue.add(request);
         });
     }
 
     private void toastTaskFailed(String message) {
+        Log.e("B5aOx2", "toastTaskFailed");
         euphoria.psycho.tasks.VideoManager.post(() -> {
-            Toast.makeText(VideoService.this, message, Toast.LENGTH_SHORT).show();
+            Toast.makeText(DownloaderService.this, message, Toast.LENGTH_SHORT).show();
         });
     }
 
     private void toastTaskFinished() {
-        euphoria.psycho.tasks.VideoManager.post(() -> {
-            Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_SHORT).show();
+        Log.e("B5aOx2", "toastTaskFinished");
+        DownloadManager.post(() -> {
+            Toast.makeText(DownloaderService.this, "视频已下载", Toast.LENGTH_SHORT).show();
         });
     }
 
     private void tryStop() {
+        Log.e("B5aOx2", "tryStop");
         if (VERSION.SDK_INT >= VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE);
         } else {
@@ -136,7 +128,7 @@ public class VideoService extends Service implements RequestEventListener {
         // Send a task finished broadcast
         // to the activity for display the download progress
         // if it is already opened it should close
-        sendBroadcast(new Intent(VideoActivity.ACTION_FINISH));
+        sendBroadcast(new Intent(DownloaderActivity.ACTION_FINISH));
         // Try to open the video list
         // because the new version of the Android system
         // may restrict the app to open activity from the service
@@ -146,18 +138,29 @@ public class VideoService extends Service implements RequestEventListener {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.e("B5aOx2", "onBind");
         return null;
+    }
+
+    public static File createVideoDownloadDirectory() {
+        Log.e("B5aOx2", "createVideoDownloadDirectory");
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Videos");
+        if (!dir.isDirectory()) {
+            dir.mkdirs();
+        }
+        return dir;
     }
 
     @Override
     public void onCreate() {
+        Log.e("B5aOx2", "onCreate");
         super.onCreate();
-        mVideoDirectory = euphoria.psycho.tasks.VideoHelper.setVideoDownloadDirectory(this);
+        mVideoDirectory = createVideoDownloadDirectory();
         mNotificationManager = ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE));
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            euphoria.psycho.tasks.VideoHelper.createNotificationChannel(this, mNotificationManager);
+            VideoHelper.createNotificationChannel(this, mNotificationManager);
         }
-        mQueue = VideoManager.newInstance(this).getQueue();
+        mQueue = DownloadManager.newInstance(this).getQueue();
         mQueue.addRequestEventListener(this);
         startForeground(android.R.drawable.stat_sys_download,
                 VideoHelper.getBuilder(this)
@@ -167,12 +170,14 @@ public class VideoService extends Service implements RequestEventListener {
 
     @Override
     public void onDestroy() {
+        Log.e("B5aOx2", "onDestroy");
         mQueue.removeRequestEventListener(this);
         super.onDestroy();
     }
 
     @Override
     public void onRequestEvent(Request Request, int event) {
+        Log.e("B5aOx2", "onRequestEvent");
         if (event == RequestEvent.REQUEST_QUEUED) {
             int[] counts = mQueue.count();
             showNotification(this, mNotificationManager, counts);
@@ -187,8 +192,11 @@ public class VideoService extends Service implements RequestEventListener {
         }
     }
 
+    // If the video address array is not received,
+    // try to continue the last unfinished download tasks
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e("B5aOx2", "onStartCommand");
         if (intent == null) {
             return START_NOT_STICKY;
         }
@@ -198,15 +206,10 @@ public class VideoService extends Service implements RequestEventListener {
                 submitRequest(s);
             }
             return START_NOT_STICKY;
+        } else {
+            checkUncompletedVideoTasks();
         }
-        // Get the video download address from the intent
-        Uri uri = intent.getData();
-        if (uri == null) {
-            if (intent.getAction() != null && intent.getAction().equals(CHECK_UNFINISHED_VIDEO_TASKS))
-                checkUncompletedVideoTasks();
-            return START_NOT_STICKY;
-        }
-        submitRequest(uri.toString());
         return super.onStartCommand(intent, flags, startId);
     }
+
 }

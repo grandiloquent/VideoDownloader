@@ -5,9 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
+import android.util.Log;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,35 +16,25 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
 
     public static final int DATABASE_VERSION = 1;
     public static final String TABLE = "tasks";
-    private static final String ID = "id";
-    private static final String URI = "uri";
-    private static final String DIRECTORY = "directory";
-    private static final String FILE_NAME = "file_name";
-    private static final String CONTENT = "content";
-    private static final String STATUS = "status";
-    private static final String DOWNLOADED_FILES = "downloaded_files";
-    private static final String TOTAL_FILES = "total_files";
-    private static final String DOWNLOADED_SIZE = "downloaded_size";
-    private static final String TOTAL_SIZE = "total_size";
     private static final String CREATE_AT = "create_at";
+    private static final String DIRECTORY = "directory";
+    private static final String DOWNLOADED_SIZE = "downloaded_size";
+    private static final String FILE_NAME = "file_name";
+    private static final String ID = "id";
+    private static final String STATUS = "status";
+    private static final String TOTAL_SIZE = "total_size";
     private static final String UPDATE_AT = "update_at";
+    private static final String URI = "uri";
+
 
     public DownloadTaskDatabase(@Nullable Context context, @Nullable String name) {
         super(context, name, null, DATABASE_VERSION);
     }
 
-    public static DownloadTaskDatabase getInstance(Context context) {
-        File dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        File database = new File(dir,
-                "tasks.db");
-        // adb pull /storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download/tasks.db
-        return new DownloadTaskDatabase(context, database.getAbsolutePath());
-    }
-
-    public DownloadTask getDownloadTask(String fileName) {
+    public DownloaderTask getDownloadTask(String fileName) {
         Cursor cursor = getReadableDatabase().rawQuery("select * from " + TABLE + " where file_name = ? limit 1",
                 new String[]{fileName});
-        DownloadTask videoTask = null;
+        DownloaderTask videoTask = null;
         if (cursor.moveToNext()) {
             videoTask = createDownloadTaskFromCursor(cursor);
         }
@@ -53,10 +42,15 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
         return videoTask;
     }
 
-    public List<DownloadTask> getPendingDownloadTasks() {
+    public static DownloadTaskDatabase getInstance(Context context) {
+        // /data/user/0/euphoria.psycho.explorer/databases/goods
+        return new DownloadTaskDatabase(context, "tasks.db");
+    }
+
+    public List<DownloaderTask> getPendingDownloadTasks() {
         Cursor cursor = getReadableDatabase().rawQuery("select * from " + TABLE + " where status != 7 and status >-1 ",
                 null);
-        List<DownloadTask> videoTasks = new ArrayList<>();
+        List<DownloaderTask> videoTasks = new ArrayList<>();
         while (cursor.moveToNext()) {
             videoTasks.add(createDownloadTaskFromCursor(cursor));
         }
@@ -64,33 +58,12 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
         return videoTasks;
     }
 
-    private static DownloadTask createDownloadTaskFromCursor(Cursor cursor) {
-        DownloadTask videoTask = new DownloadTask();
-        videoTask.Id = cursor.getLong(0);
-        videoTask.Uri = cursor.getString(1);
-        videoTask.Directory = cursor.getString(2);
-        videoTask.FileName = cursor.getString(3);
-        videoTask.Content = cursor.getString(4);
-        videoTask.Status = cursor.getInt(5);
-        videoTask.DownloadedFiles = cursor.getInt(6);
-        videoTask.TotalFiles = cursor.getInt(7);
-        videoTask.DownloadedSize = cursor.getLong(8);
-        videoTask.TotalSize = cursor.getLong(9);
-        videoTask.CreateAt = cursor.getLong(10);
-        videoTask.UpdateAt = cursor.getLong(11);
-        return videoTask;
-    }
-
-
-    public long insertDownloadTask(DownloadTask videoTask) {
+    public long insertDownloadTask(DownloaderTask videoTask) {
         ContentValues contentValues = new ContentValues();
         contentValues.put("uri", videoTask.Uri);
         contentValues.put("directory", videoTask.Directory);
         contentValues.put("file_name", videoTask.FileName);
-        contentValues.put("content", videoTask.Content);
         contentValues.put("status", videoTask.Status);
-        contentValues.put("downloaded_files", videoTask.DownloadedFiles);
-        contentValues.put("total_files", videoTask.TotalFiles);
         contentValues.put("downloaded_size", videoTask.DownloadedSize);
         contentValues.put("total_size", videoTask.TotalSize);
         contentValues.put("create_at", System.currentTimeMillis());
@@ -98,7 +71,7 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
         return getWritableDatabase().insert(TABLE, null, contentValues);
     }
 
-    public int updateDownloadTask(DownloadTask videoTask) {
+    public int updateDownloadTask(DownloaderTask videoTask) {
         ContentValues contentValues = new ContentValues();
         if (videoTask.Uri != null) {
             contentValues.put("uri", videoTask.Uri);
@@ -109,17 +82,8 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
         if (videoTask.FileName != null) {
             contentValues.put("file_name", videoTask.FileName);
         }
-        if (videoTask.Content != null) {
-            contentValues.put("content", videoTask.Content);
-        }
         if (videoTask.Status != 0) {
             contentValues.put("status", videoTask.Status);
-        }
-        if (videoTask.DownloadedFiles != 0) {
-            contentValues.put("downloaded_files", videoTask.DownloadedFiles);
-        }
-        if (videoTask.TotalFiles != 0) {
-            contentValues.put("total_files", videoTask.TotalFiles);
         }
         if (videoTask.DownloadedSize != 0) {
             contentValues.put("downloaded_size", videoTask.DownloadedSize);
@@ -133,6 +97,20 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
         return getWritableDatabase().update(TABLE, contentValues, "id=?", new String[]{
                 Long.toString(videoTask.Id)
         });
+    }
+
+    private static DownloaderTask createDownloadTaskFromCursor(Cursor cursor) {
+        DownloaderTask videoTask = new DownloaderTask();
+        videoTask.Id = cursor.getLong(0);
+        videoTask.Uri = cursor.getString(1);
+        videoTask.Directory = cursor.getString(2);
+        videoTask.FileName = cursor.getString(3);
+        videoTask.Status = cursor.getInt(5);
+        videoTask.DownloadedSize = cursor.getLong(8);
+        videoTask.TotalSize = cursor.getLong(9);
+        videoTask.CreateAt = cursor.getLong(10);
+        videoTask.UpdateAt = cursor.getLong(11);
+        return videoTask;
     }
 
     @Override
@@ -153,16 +131,14 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
                 URI + " TEXT NOT NULL UNIQUE," +
                 DIRECTORY + " TEXT," +
                 FILE_NAME + " TEXT NOT NULL UNIQUE," +
-                CONTENT + " TEXT NOT NULL," +
                 STATUS + " INTEGER," +
-                DOWNLOADED_FILES + " INTEGER," +
-                TOTAL_FILES + " INTEGER," +
                 DOWNLOADED_SIZE + " INTEGER," +
                 TOTAL_SIZE + " INTEGER," +
                 CREATE_AT + " INTEGER," +
                 UPDATE_AT + " INTEGER" +
                 ")";
         db.execSQL(sb);
+        Log.e("B5aOx2", String.format("onCreate, %s", db.getPath()));
     }
 
     @Override

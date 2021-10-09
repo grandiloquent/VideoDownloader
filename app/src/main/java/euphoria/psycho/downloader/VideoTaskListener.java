@@ -3,9 +3,9 @@ package euphoria.psycho.downloader;
 
 
 public interface VideoTaskListener {
-    void synchronizeTask(DownloadTask videoTask);
+    void synchronizeTask(DownloaderTask videoTask);
 
-    void taskProgress(DownloadTask videoTask);
+    void taskProgress(DownloaderTask videoTask);
 
 }
 

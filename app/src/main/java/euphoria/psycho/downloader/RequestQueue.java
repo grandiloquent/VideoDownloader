@@ -121,7 +121,7 @@ public class RequestQueue {
         return new int[]{total, running};
     }
 
-    void removeVideoTask(DownloadTask videoTask) {
+    void removeVideoTask(DownloaderTask videoTask) {
         synchronized (mCurrentRequests) {
           Request src = null;
             for (Request request : mCurrentRequests) {
@@ -136,8 +136,8 @@ public class RequestQueue {
         }
     }
 
-    List<DownloadTask> getVideoTasks() {
-        List<DownloadTask> videoTasks = new ArrayList<>();
+    List<DownloaderTask> getVideoTasks() {
+        List<DownloaderTask> videoTasks = new ArrayList<>();
         synchronized (mCurrentRequests) {
             for (Request request : mCurrentRequests) {
                 videoTasks.add(request.getVideoTask());

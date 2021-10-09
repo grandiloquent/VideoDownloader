@@ -21,7 +21,6 @@ import java.util.List;
 
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.StringShare;
-import euphoria.psycho.tasks.VideoTask;
 import euphoria.psycho.utils.BlobCache;
 import euphoria.psycho.utils.M3u8Utils;
 
@@ -34,13 +33,13 @@ public class Request implements Comparable<Request> {
     private final Handler mHandler;
     private final VideoTaskListener mListener;
     private final List<File> mVideoFiles = new ArrayList<>();
-    private final DownloadTask mVideoTask;
+    private final DownloaderTask mVideoTask;
     private BlobCache mBlobCache;
     private List<String> mVideos;
     private Integer mSequence;
     private RequestQueue mRequestQueue;
 
-    public Request(Context context, DownloadTask videoTask, VideoTaskListener listener, Handler handler) {
+    public Request(Context context, DownloaderTask videoTask, VideoTaskListener listener, Handler handler) {
         mVideoTask = videoTask;
         mListener = listener;
         mHandler = handler;
@@ -105,37 +104,32 @@ public class Request implements Comparable<Request> {
 
     public void start() {
         emitSynchronizeTask(TaskStatus.START);
-        if (mVideoTask.Content == null) {
-            try {
-                mVideoTask.Content = M3u8Utils.getString(mVideoTask.Uri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        String m3u8String = mVideoTask.Content;
-        if (m3u8String == null || m3u8String.length() == 0) {
-            try {
-                m3u8String = M3u8Utils.getString(mVideoTask.Uri);
-                mVideoTask.Content = m3u8String;
-            } catch (IOException e) {
-                emitSynchronizeTask(TaskStatus.ERROR_FETCH_M3U8);
-                return;
-            }
+//        if (mVideoTask.Content == null) {
+//            try {
+//                mVideoTask.Content = M3u8Utils.getString(mVideoTask.Uri);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        String m3u8String = mVideoTask.Content;
+//        if (m3u8String == null || m3u8String.length() == 0) {
+//            try {
+//                m3u8String = M3u8Utils.getString(mVideoTask.Uri);
+//                mVideoTask.Content = m3u8String;
+//            } catch (IOException e) {
+//                emitSynchronizeTask(TaskStatus.ERROR_FETCH_M3U8);
+//                return;
+//            }
+//
+//        }
 
-        }
-        if (m3u8String == null || m3u8String.length() == 0) {
-            emitSynchronizeTask(TaskStatus.ERROR_MISSING_M3U8);
-            return;
-        }
         File directory = createVideoDirectory();
         // if \(!*?([a-zA-Z0-9]+)\(\w*?\)\)(?= return;)
         if (directory == null) return;
         if (!createLogFile(directory)) {
             return;
         }
-        if (!parseVideos(m3u8String)) {
-            return;
-        }
+
         if (!downloadVideos()) {
             return;
         }
@@ -197,7 +191,6 @@ public class Request implements Comparable<Request> {
             final String fileName = FileShare.getFileNameFromUri(video);
             File videoFile = new File(mVideoTask.Directory, fileName);
             mVideoFiles.add(videoFile);
-            mVideoTask.DownloadedFiles++;
             emitTaskProgress();
             emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEOS);
             try {
@@ -273,7 +266,6 @@ public class Request implements Comparable<Request> {
             }
         }
         if (mVideos.size() > 0) {
-            mVideoTask.TotalFiles = mVideos.size();
             emitSynchronizeTask(TaskStatus.PARSE_VIDEOS);
             return true;
         }
@@ -333,7 +325,7 @@ public class Request implements Comparable<Request> {
         // VideoManager.getInstance().removeTask(mVideoTask);
     }
 
-    public DownloadTask getVideoTask() {
+    public DownloaderTask getVideoTask() {
         return mVideoTask;
     }
 }
