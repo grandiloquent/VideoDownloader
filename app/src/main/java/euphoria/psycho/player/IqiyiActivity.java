@@ -19,7 +19,6 @@ import android.media.TimedText;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,6 +26,7 @@ import android.view.WindowManager;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
+import java.util.HashMap;
 
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DateTimeShare;
@@ -69,13 +69,13 @@ public class IqiyiActivity extends BaseVideoActivity implements
         }
     };
     private final Runnable mHideAction = this::hide;
-    private Bookmarker mBookmarker;
     private int mNavigationBarHeight;
     private int mNavigationBarWidth;
     private boolean mScrubbing;
     private GestureDetector mVideoTouchHelper;
     private int mCurrentPlaybackIndex;
     private String[] mPlayList;
+    private final HashMap<String, Integer> mHashMap = new HashMap<>();
 
     private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
         final DownloadManager.Request request;
@@ -125,15 +125,24 @@ public class IqiyiActivity extends BaseVideoActivity implements
     }
 
     private void initializePlayer() {
+        mExoDelete.setVisibility(View.GONE);
         hideController();
         if (!loadPlayList())
             return;
         mPlayer.setOnPreparedListener(this);
         mPlayer.setOnCompletionListener(this);
-        Log.e("B5aOx2", String.format("initializePlayer, %s", ""));
         mPlayer.setOnErrorListener(this);
         mPlayer.setOnInfoListener(this);
         mPlayer.setOnBufferingUpdateListener(this);
+    }
+
+    private boolean loadPlayList() {
+        mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
+        if (mPlayList != null) {
+            playPlayList(mCurrentPlaybackIndex);
+            return true;
+        }
+        return false;
     }
 
     private void playPlayList(int index) {
@@ -143,20 +152,9 @@ public class IqiyiActivity extends BaseVideoActivity implements
         mPlayer.setVideoPath(mPlayList[index]);
     }
 
-    private boolean loadPlayList() {
-        mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
-        if (mPlayList != null) {
-            updateUI();
-            playPlayList(mCurrentPlaybackIndex);
-            return true;
-        }
-        return false;
-    }
-
-
     private int setProgress() {
         int position = mPlayer.getCurrentPosition();
-        mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mPlayer.getDuration()));
+        mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter,mDuration));
         mExoPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
         mExoProgress.setPosition(position);
         return position;
@@ -172,10 +170,10 @@ public class IqiyiActivity extends BaseVideoActivity implements
             switchPlayState(mPlayer, mExoPlay);
         });
         mExoPrev.setOnClickListener(v -> {
-            mCurrentPlaybackIndex = playPreviousVideo(mCurrentPlaybackIndex, mPlayer);
+            mCurrentPlaybackIndex = previous(mCurrentPlaybackIndex);
         });
         mExoNext.setOnClickListener(v -> {
-            mCurrentPlaybackIndex = playNextVideo(mCurrentPlaybackIndex, mPlayer);
+            mCurrentPlaybackIndex = next(mCurrentPlaybackIndex);
         });
         mExoRew.setOnClickListener(v -> {
             rotateScreen(this);
@@ -199,9 +197,6 @@ public class IqiyiActivity extends BaseVideoActivity implements
         hideController();
     }
 
-    private void updateUI() {
-        mExoDelete.setVisibility(View.GONE);
-    }
 
     @Override
     protected void onDestroy() {
@@ -240,7 +235,6 @@ public class IqiyiActivity extends BaseVideoActivity implements
         Point point = getNavigationBarSize(this);
         mNavigationBarHeight = getNavigationBarHeight(this);
         mNavigationBarWidth = point.x;
-        mBookmarker = new Bookmarker(this);
         setupView();
         mVideoTouchHelper = new GestureDetector(this, this);
         mVideoTouchHelper.setContextClickListener(e -> false);
@@ -254,7 +248,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
     @Override
     public void onCompletion(MediaPlayer mp) {
         mExoPlay.setImageResource(R.drawable.exo_controls_play);
-        mCurrentPlaybackIndex = playNextVideo(mCurrentPlaybackIndex, mPlayer);
+        mCurrentPlaybackIndex = next(mCurrentPlaybackIndex);
     }
 
     @Override
@@ -283,10 +277,13 @@ public class IqiyiActivity extends BaseVideoActivity implements
     public void onLongPress(MotionEvent e) {
     }
 
+    private int mDuration;
+
     @Override
     public void onPrepared(MediaPlayer mp) {
-        Logger.e(String.format("onPrepared, %s", ""));
-        mExoProgress.setDuration(mp.getDuration());
+        mHashMap.put(mPlayList[mCurrentPlaybackIndex], mp.getDuration());
+        mDuration = mHashMap.values().stream().mapToInt(integer -> integer).sum();
+        mExoProgress.setDuration(mDuration);
         mHandler.post(mProgressChecker);
         mPlayer.start();
         mExoPlay.setImageResource(R.drawable.exo_controls_pause);
@@ -362,17 +359,16 @@ public class IqiyiActivity extends BaseVideoActivity implements
         runOnUiThread(() -> mPlayer.setVideoPath(uri));
     }
 
-    int playNextVideo(int currentPlaybackIndex, TextureVideoView textureVideoView) {
+    int next(int currentPlaybackIndex) {
         int nextPlaybackIndex = mPlayList.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
         playPlayList(nextPlaybackIndex);
         return nextPlaybackIndex;
     }
 
-    int playPreviousVideo(int currentPlaybackIndex, TextureVideoView textureVideoView) {
+    int previous(int currentPlaybackIndex) {
         int nextPlaybackIndex = currentPlaybackIndex - 1 > -1 ? currentPlaybackIndex - 1 : 0;
         playPlayList(nextPlaybackIndex);
         return nextPlaybackIndex;
-
     }
 
 }

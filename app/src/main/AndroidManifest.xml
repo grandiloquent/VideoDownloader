@@ -123,7 +123,9 @@
         <activity
             android:name="euphoria.psycho.tasks.VideoActivity"
             android:label="@string/download_video" />
-        <activity android:name="euphoria.psycho.player.IqiyiActivity" />
+        <activity
+            android:name="euphoria.psycho.player.IqiyiActivity"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
         <service android:name="euphoria.psycho.tasks.VideoService" />
     </application>
