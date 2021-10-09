@@ -96,7 +96,7 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
         int statusCode = connection.getResponseCode();
         boolean result = false;
         if (statusCode >= 200 && statusCode < 400) {
-            if (mVideoTask.TotalSize == 0) {
+            if (mVideoTask.TotalSize > 0) {
                 mVideoTask.TotalSize = Long.parseLong(connection.getHeaderField("Content-Length"));
                 emitSynchronizeTask(TaskStatus.DOWNLOADING);
             }
