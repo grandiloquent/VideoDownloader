@@ -24,7 +24,7 @@ public class DownloaderActivity extends Activity implements RequestEventListener
     public static final String KEY_UPDATE = "update";
     private final List<LifeCycle> mLifeCycles = new ArrayList<>();
     private ListView mListView;
-    private VideoAdapter mVideoAdapter;
+    private DownloaderAdapter mVideoAdapter;
     private View mProgressBar;
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -61,7 +61,7 @@ public class DownloaderActivity extends Activity implements RequestEventListener
     private void initializeUI() {
         mProgressBar = findViewById(R.id.progress_bar);
         mListView = findViewById(R.id.list_view);
-        mVideoAdapter = new VideoAdapter(this);
+        mVideoAdapter = new DownloaderAdapter(this);
         mListView.setAdapter(mVideoAdapter);
     }
 

@@ -18,7 +18,6 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.utils.M3u8Utils;
 
 public class DownloaderHelper {
@@ -86,7 +85,6 @@ public class DownloaderHelper {
         try {
             m3u8String = M3u8Utils.getString(uri);
         } catch (Exception ignored) {
-            Logger.e(String.format("getInfos,%s %s", uri, ignored.getMessage()));
         }
         if (m3u8String == null) {
             return null;
@@ -136,7 +134,6 @@ public class DownloaderHelper {
                 //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
                 context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         //Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-
         if (!directory.exists()) {
             boolean result = directory.mkdirs();
             if (!result) return null;
@@ -166,9 +163,7 @@ public class DownloaderHelper {
 
     public static String statusToString(int status) {
         switch (status) {
-            case TaskStatus.PARSE_VIDEOS: {
-                return "Parse Videos";
-            }
+
             case TaskStatus.CREATE_VIDEO_DIRECTORY: {
                 return "Create Video Directory";
             }
@@ -180,9 +175,6 @@ public class DownloaderHelper {
             }
             case TaskStatus.DOWNLOAD_VIDEO_FINISHED: {
                 return "Download Video Finished";
-            }
-            case TaskStatus.MERGE_VIDEO: {
-                return "Merge Video";
             }
             case TaskStatus.MERGE_VIDEO_FINISHED: {
                 return "Merge Video Finished";
@@ -198,9 +190,6 @@ public class DownloaderHelper {
             }
             case TaskStatus.ERROR_CREATE_LOG_FILE: {
                 return "Error Create Log File";
-            }
-            case TaskStatus.ERROR_READ_M3U8: {
-                return "Error Read M3u8";
             }
             case TaskStatus.ERROR_DOWNLOAD_FILE: {
                 return "Error Download File";
@@ -220,8 +209,7 @@ public class DownloaderHelper {
     }
 
 
-    public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {
-        Logger.e(String.format("updateList, %s", ""));
+    public static void updateList(View progressBar, View listView, DownloaderAdapter videoAdapter) {
         progressBar.setVisibility(View.GONE);
         listView.setVisibility(View.VISIBLE);
         videoAdapter.update(DownloaderManager.getInstance().getQueue().getVideoTasks());
