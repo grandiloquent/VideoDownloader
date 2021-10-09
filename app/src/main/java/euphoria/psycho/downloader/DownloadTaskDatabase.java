@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,6 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
     private static final String TOTAL_SIZE = "total_size";
     private static final String UPDATE_AT = "update_at";
     private static final String URI = "uri";
-
 
     public DownloadTaskDatabase(@Nullable Context context, @Nullable String name) {
         super(context, name, null, DATABASE_VERSION);
@@ -105,11 +103,11 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
         videoTask.Uri = cursor.getString(1);
         videoTask.Directory = cursor.getString(2);
         videoTask.FileName = cursor.getString(3);
-        videoTask.Status = cursor.getInt(5);
-        videoTask.DownloadedSize = cursor.getLong(8);
-        videoTask.TotalSize = cursor.getLong(9);
-        videoTask.CreateAt = cursor.getLong(10);
-        videoTask.UpdateAt = cursor.getLong(11);
+        videoTask.Status = cursor.getInt(4);
+        videoTask.DownloadedSize = cursor.getLong(5);
+        videoTask.TotalSize = cursor.getLong(6);
+        videoTask.CreateAt = cursor.getLong(7);
+        videoTask.UpdateAt = cursor.getLong(8);
         return videoTask;
     }
 
@@ -138,7 +136,7 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
                 UPDATE_AT + " INTEGER" +
                 ")";
         db.execSQL(sb);
-        Log.e("B5aOx2", String.format("onCreate, %s", db.getPath()));
+
     }
 
     @Override

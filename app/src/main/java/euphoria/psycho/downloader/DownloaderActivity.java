@@ -32,7 +32,7 @@ public class DownloaderActivity extends Activity implements RequestEventListener
             if (intent.getAction().equals(ACTION_REFRESH)) {
                 mProgressBar.setVisibility(View.GONE);
                 mListView.setVisibility(View.VISIBLE);
-                mVideoAdapter.update(DownloadManager.getInstance().getQueue().getCurrentRequests()
+                mVideoAdapter.update(DownloaderManager.getInstance().getQueue().getCurrentRequests()
                         .stream()
                         .map(Request::getVideoTask)
                         .collect(Collectors.toList()));
@@ -69,20 +69,10 @@ public class DownloaderActivity extends Activity implements RequestEventListener
     // Register a broadcast receiver
     // Add this instance as a request handler to the download message queue
     private void startProcessing() {
-        startService();
-        registerBroadcastReceiver(this, mBroadcastReceiver);
-        DownloadManager.newInstance(this).getQueue().addRequestEventListener(this);
-    }
-
-    // Start the service by providing an array of video addresses
-    private void startService() {
-        String[] videoList = getIntent().getStringArrayExtra(DownloaderService.KEY_VIDEO_LIST);
-        if (videoList == null) {
-            return;
-        }
         Intent service = new Intent(this, DownloaderService.class);
-        service.putExtra(DownloaderService.KEY_VIDEO_LIST, videoList);
         startService(service);
+        registerBroadcastReceiver(this, mBroadcastReceiver);
+        DownloaderManager.newInstance(this).getQueue().addRequestEventListener(this);
     }
 
     // If the download task has been executed before
@@ -95,7 +85,7 @@ public class DownloaderActivity extends Activity implements RequestEventListener
         initializeUI();
         startProcessing();
         if (getIntent().getBooleanExtra(KEY_UPDATE, false)) {
-            VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
+            DownloaderHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }
     }
 
@@ -106,26 +96,26 @@ public class DownloaderActivity extends Activity implements RequestEventListener
             mLifeCycles.get(i).onDestroy();
         }
         unregisterReceiver(mBroadcastReceiver);
-        DownloadManager.getInstance().getQueue().removeRequestEventListener(this);
+        DownloaderManager.getInstance().getQueue().removeRequestEventListener(this);
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
-        DownloadManager.getInstance().removeVideoTaskListener(mVideoAdapter);
+        DownloaderManager.getInstance().removeVideoTaskListener(mVideoAdapter);
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        DownloadManager.getInstance().addVideoTaskListener(mVideoAdapter);
+        DownloaderManager.getInstance().addVideoTaskListener(mVideoAdapter);
     }
 
     @Override
     public void onRequestEvent(Request Request, int event) {
         if (event == RequestEvent.REQUEST_QUEUED) {
-            VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
+            DownloaderHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }
     }
 }

@@ -22,7 +22,6 @@ import java.util.List;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.utils.BlobCache;
-import euphoria.psycho.utils.M3u8Utils;
 
 
 public class Request implements Comparable<Request> {
@@ -90,6 +89,10 @@ public class Request implements Comparable<Request> {
     public final Request setSequence(int sequence) {
         mSequence = sequence;
         return this;
+    }
+
+    public DownloaderTask getVideoTask() {
+        return mVideoTask;
     }
 
     public void sendEvent(int event) {
@@ -219,7 +222,6 @@ public class Request implements Comparable<Request> {
         });
     }
 
-
     private long getBookmark(String uri) {
         try {
             byte[] data = mBlobCache.lookup(uri.hashCode());
@@ -323,9 +325,5 @@ public class Request implements Comparable<Request> {
             mRequestQueue.finish(this);
         }
         // VideoManager.getInstance().removeTask(mVideoTask);
-    }
-
-    public DownloaderTask getVideoTask() {
-        return mVideoTask;
     }
 }

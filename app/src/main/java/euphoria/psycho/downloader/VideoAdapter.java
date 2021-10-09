@@ -129,7 +129,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         viewHolder.progressBar.setProgress(0);
         viewHolder.layout.setOnClickListener(null);
         viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
-        VideoHelper.renderPauseButton(context, viewHolder, videoTask);
+        DownloaderHelper.renderPauseButton(context, viewHolder, videoTask);
     }
 
     @Override

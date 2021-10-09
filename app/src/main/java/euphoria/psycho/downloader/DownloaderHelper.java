@@ -21,7 +21,7 @@ import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.utils.M3u8Utils;
 
-public class VideoHelper {
+public class DownloaderHelper {
 
     private static final String TAG = "VideoHelper";
 
@@ -123,10 +123,10 @@ public class VideoHelper {
                 videoTask.IsPaused = true;
             } else {
                 videoTask.IsPaused = false;
-                DownloadManager.getInstance().getQueue().removeVideoTask(videoTask);
-                Request request = new Request(context, videoTask, DownloadManager.getInstance(), DownloadManager.getInstance().getHandler());
-                request.setRequestQueue(DownloadManager.getInstance().getQueue());
-                DownloadManager.getInstance().getQueue().add(request);
+                DownloaderManager.getInstance().getQueue().removeVideoTask(videoTask);
+                Request request = new Request(context, videoTask, DownloaderManager.getInstance(), DownloaderManager.getInstance().getHandler());
+                request.setRequestQueue(DownloaderManager.getInstance().getQueue());
+                DownloaderManager.getInstance().getQueue().add(request);
             }
         });
     }
@@ -145,7 +145,7 @@ public class VideoHelper {
     }
 
     public static void showNotification(Context context, NotificationManager manager, int[] counts) {
-        Builder builder = VideoHelper.getBuilder(context);
+        Builder builder = DownloaderHelper.getBuilder(context);
         builder.setContentText(String.format("正在下载 %s/%s 个视频",
                 counts[0] - counts[1] + 1,
                 counts[0]));
@@ -224,6 +224,6 @@ public class VideoHelper {
         Logger.e(String.format("updateList, %s", ""));
         progressBar.setVisibility(View.GONE);
         listView.setVisibility(View.VISIBLE);
-        videoAdapter.update(DownloadManager.getInstance().getQueue().getVideoTasks());
+        videoAdapter.update(DownloaderManager.getInstance().getQueue().getVideoTasks());
     }
 }

@@ -129,5 +129,6 @@
         <activity android:name="euphoria.psycho.downloader.DownloaderActivity" />
 
         <service android:name="euphoria.psycho.tasks.VideoService" />
+        <service android:name="euphoria.psycho.downloader.DownloaderService" />
     </application>
 </manifest>

@@ -9,15 +9,15 @@ import java.util.List;
 
 import euphoria.psycho.explorer.App;
 
-public class DownloadManager implements VideoTaskListener {
+public class DownloaderManager implements VideoTaskListener {
 
-    private static DownloadManager sVideoManager;
+    private static DownloaderManager sVideoManager;
     private final DownloadTaskDatabase mDatabase;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private RequestQueue mQueue;
     private final List<VideoTaskListener> mVideoTaskListeners = new ArrayList<>();
 
-    public DownloadManager(Context context) {
+    public DownloaderManager(Context context) {
         mDatabase = DownloadTaskDatabase.getInstance(context);
     }
 
@@ -34,9 +34,9 @@ public class DownloadManager implements VideoTaskListener {
         return mHandler;
     }
 
-    public static DownloadManager getInstance() {
+    public static DownloaderManager getInstance() {
         if (sVideoManager == null) {
-            sVideoManager = new DownloadManager(App.getContext());
+            sVideoManager = new DownloaderManager(App.getContext());
         }
         return sVideoManager;
     }
@@ -50,9 +50,9 @@ public class DownloadManager implements VideoTaskListener {
     }
 
 
-    public static DownloadManager newInstance(Context context) {
+    public static DownloaderManager newInstance(Context context) {
         if (sVideoManager == null) {
-            sVideoManager = new DownloadManager(context);
+            sVideoManager = new DownloaderManager(context);
         }
         return sVideoManager;
     }
