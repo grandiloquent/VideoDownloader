@@ -2,6 +2,7 @@ package euphoria.psycho.downloader;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
@@ -13,7 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.StringShare;
 
 public class DownloaderRequest implements Comparable<DownloaderRequest> {
 
@@ -89,9 +89,14 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
                 mVideoTask.DownloadedSize = videoFile.length();
                 emitSynchronizeTask(TaskStatus.RANGE);
             }
+        } else {
+            mVideoTask.DownloadedSize = 0;
         }
         HttpURLConnection connection = (HttpURLConnection) new URL(mVideoTask.Uri).openConnection();
         int statusCode = connection.getResponseCode();
+        if (mVideoTask.DownloadedSize > 0) {
+            connection.addRequestProperty("Range", "bytes=" + mVideoTask.DownloadedSize + "-");
+        }
         boolean result = false;
         if (statusCode >= 200 && statusCode < 400) {
             mVideoTask.TotalSize = Long.parseLong(connection.getHeaderField("Content-Length"));
@@ -141,13 +146,40 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
             }
             try {
                 out.write(buffer, 0, len);
-                //mVideoTask.DownloadedSize += len;
-                //updateProgress(fileName);
+                mVideoTask.DownloadedSize += len;
+                updateProgress();
             } catch (IOException e) {
                 throw new Error(e);
             }
         }
         return true;
+
+    }
+
+    private long mSpeed;
+    private long mSpeedSampleStart;
+    private long mSpeedSampleBytes;
+
+    private void updateProgress() {
+        final long now = SystemClock.elapsedRealtime();
+        final long currentBytes = mVideoTask.DownloadedSize;
+        final long sampleDelta = now - mSpeedSampleStart;
+        if (sampleDelta > 500) {
+            final long sampleSpeed = ((currentBytes - mSpeedSampleBytes) * 1000)
+                    / sampleDelta;
+            if (mSpeed == 0) {
+                mSpeed = sampleSpeed;
+            } else {
+                mSpeed = ((mSpeed * 3) + sampleSpeed) / 4;
+            }
+            // Only notify once we have a full sample window
+            if (mSpeedSampleStart != 0) {
+                mVideoTask.Speed = mSpeed;
+                emitTaskProgress();
+            }
+            mSpeedSampleStart = now;
+            mSpeedSampleBytes = currentBytes;
+        }
 
     }
 

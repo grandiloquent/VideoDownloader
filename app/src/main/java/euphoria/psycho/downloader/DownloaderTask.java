@@ -17,6 +17,7 @@ public class DownloaderTask {
     public long UpdateAt;
     public DownloaderRequest Request;
     public boolean IsPaused;
+    public long Speed;
 
     @Override
     public boolean equals(Object o) {

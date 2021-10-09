@@ -32,3 +32,5 @@ adb shell pm list packages -f
 ^(?:[\t ]*(?:\r?\n|\r)){2,}
 Log\.e\([^\n]+\);\n
 ```
+
+- https://android.googlesource.com/platform/packages/providers/DownloadProvider/+/master/src/com/android/providers/downloads/DownloadThread.java
