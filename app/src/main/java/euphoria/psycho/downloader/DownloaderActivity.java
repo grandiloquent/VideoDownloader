@@ -1,4 +1,4 @@
-package euphoria.psycho.tasks;
+package euphoria.psycho.downloader;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -15,13 +15,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import androidx.annotation.Nullable;
+import euphoria.psycho.downloader.RequestQueue.RequestEvent;
+import euphoria.psycho.downloader.RequestQueue.RequestEventListener;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.tasks.RequestQueue.RequestEvent;
-import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
-public class VideoActivity extends Activity implements RequestEventListener {
-    public static final String ACTION_FINISH = "euphoria.psycho.tasks.FINISH";
-    public static final String ACTION_REFRESH = "euphoria.psycho.tasks.REFRESH";
+public class DownloaderActivity extends Activity implements RequestEventListener {
+    public static final String ACTION_FINISH = "FINISH";
+    public static final String ACTION_REFRESH = "REFRESH";
     public static final String KEY_UPDATE = "update";
     private final List<LifeCycle> mLifeCycles = new ArrayList<>();
     private ListView mListView;
@@ -33,7 +33,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
             if (intent.getAction().equals(ACTION_REFRESH)) {
                 mProgressBar.setVisibility(View.GONE);
                 mListView.setVisibility(View.VISIBLE);
-                mVideoAdapter.update(VideoManager.getInstance().getQueue().getCurrentRequests()
+                mVideoAdapter.update(DownloadManager.getInstance().getQueue().getCurrentRequests()
                         .stream()
                         .map(Request::getVideoTask)
                         .collect(Collectors.toList()));
@@ -84,7 +84,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
         mListView.setAdapter(mVideoAdapter);
         startService();
         registerBroadcastReceiver(this, mBroadcastReceiver);
-        VideoManager.newInstance(this).getQueue().addRequestEventListener(this);
+        DownloadManager.newInstance(this).getQueue().addRequestEventListener(this);
         if (getIntent().getBooleanExtra(KEY_UPDATE, false)) {
             VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }
@@ -97,14 +97,14 @@ public class VideoActivity extends Activity implements RequestEventListener {
             mLifeCycles.get(i).onDestroy();
         }
         unregisterReceiver(mBroadcastReceiver);
-        VideoManager.getInstance().getQueue().removeRequestEventListener(this);
+        DownloadManager.getInstance().getQueue().removeRequestEventListener(this);
         super.onDestroy();
     }
 
 
     @Override
     protected void onPause() {
-        VideoManager.getInstance().removeVideoTaskListener(mVideoAdapter);
+        DownloadManager.getInstance().removeVideoTaskListener(mVideoAdapter);
         super.onPause();
     }
 
@@ -112,7 +112,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
     @Override
     protected void onResume() {
         super.onResume();
-        VideoManager.getInstance().addVideoTaskListener(mVideoAdapter);
+        DownloadManager.getInstance().addVideoTaskListener(mVideoAdapter);
     }
 
 
