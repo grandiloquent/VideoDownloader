@@ -34,6 +34,7 @@ import euphoria.psycho.share.DateTimeShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.videos.Iqiyi;
 
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarHeight;
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarSize;
@@ -59,8 +60,10 @@ public class VideoActivity extends BaseVideoActivity implements
         OnTimedTextListener,
         OnTimedMetaDataAvailableListener,
         OnErrorListener,
-        OnInfoListener {
+        OnInfoListener,
+        Iqiyi.Callback {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
+    public static final String EXTRA_PLAYLSIT = "extra.PLAYLSIT";
     private final Handler mHandler = new Handler();
     private final StringBuilder mStringBuilder = new StringBuilder();
     private final Formatter mFormatter = new Formatter(mStringBuilder);
@@ -79,6 +82,46 @@ public class VideoActivity extends BaseVideoActivity implements
     private boolean mScrubbing;
     private GestureDetector mVideoTouchHelper;
     private int mCurrentPlaybackIndex;
+    private String[] mPlayList;
+
+    @Override
+    public void onVideoUri(String uri) {
+        runOnUiThread(() -> mPlayer.setVideoPath(uri));
+    }
+
+    private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
+        final DownloadManager.Request request;
+        Uri uri = Uri.parse(url);
+        request = new DownloadManager.Request(uri);
+        request.setMimeType(mimetype);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(
+                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        manager.enqueue(request);
+    }
+
+    private void downloadVideo() {
+        if (mPlayList != null) {
+            executeTask(mPlayList);
+        } else {
+            Uri videoUri = getIntent().getData();
+            if (videoUri.toString().contains("m3u8")) {
+                Intent intent = new Intent(VideoActivity.this, euphoria.psycho.tasks.VideoActivity.class);
+                intent.setData(videoUri);
+                VideoActivity.this.startActivity(intent);
+            } else {
+                WebViewShare.downloadFile(this, KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
+            }
+        }
+    }
+
+    private void executeTask(String[] videoUris) {
+        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        for (String uris : videoUris) {
+            downloadFile(manager, uris, KeyShare.md5(uris) + ".f4v", "video/x-f4v");
+        }
+    }
 
     private void hide() {
         if (mController.getVisibility() == View.VISIBLE) {
@@ -93,13 +136,25 @@ public class VideoActivity extends BaseVideoActivity implements
         mHandler.postDelayed(mHideAction, DEFAULT_SHOW_TIMEOUT_MS);
     }
 
-    public static final String EXTRA_PLAYLSIT = "extra.PLAYLSIT";
-    private String[] mPlayList;
+    private void initializePlayer() {
+        hideController();
+        if (!loadPlayList())
+            return;
+        mPlayer.setOnPreparedListener(this);
+        mPlayer.setOnCompletionListener(this);
+        Log.e("B5aOx2", String.format("initializePlayer, %s", ""));
+        mPlayer.setOnErrorListener(this);
+        mPlayer.setOnInfoListener(this);
+        mPlayer.setOnBufferingUpdateListener(this);
+    }
 
     private boolean loadPlayList() {
         mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
         if (mPlayList != null) {
             updateUI();
+            if (mPlayList[mCurrentPlaybackIndex].contains("http://data.video.iqiyi.com")) {
+                Iqiyi.getVideoAddress(mPlayList[mCurrentPlaybackIndex], this);
+            }
             mPlayer.setVideoPath(mPlayList[mCurrentPlaybackIndex]);
             return true;
         }
@@ -116,18 +171,6 @@ public class VideoActivity extends BaseVideoActivity implements
             mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
         }
         return true;
-    }
-
-    private void initializePlayer() {
-        hideController();
-        if (!loadPlayList())
-            return;
-        mPlayer.setOnPreparedListener(this);
-        mPlayer.setOnCompletionListener(this);
-        Log.e("B5aOx2", String.format("initializePlayer, %s", ""));
-        mPlayer.setOnErrorListener(this);
-        mPlayer.setOnInfoListener(this);
-        mPlayer.setOnBufferingUpdateListener(this);
     }
 
     private void savePosition() {
@@ -210,40 +253,6 @@ public class VideoActivity extends BaseVideoActivity implements
         });
     }
 
-    private void executeTask(String[] videoUris) {
-        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        for (String uris : videoUris) {
-            downloadFile(manager, uris, KeyShare.md5(uris) + ".f4v", "video/x-f4v");
-        }
-    }
-
-    private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
-        final DownloadManager.Request request;
-        Uri uri = Uri.parse(url);
-        request = new DownloadManager.Request(uri);
-        request.setMimeType(mimetype);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
-        request.allowScanningByMediaScanner();
-        request.setNotificationVisibility(
-                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        manager.enqueue(request);
-    }
-
-    private void downloadVideo() {
-        if (mPlayList != null) {
-            executeTask(mPlayList);
-        } else {
-            Uri videoUri = getIntent().getData();
-            if (videoUri.toString().contains("m3u8")) {
-                Intent intent = new Intent(VideoActivity.this, euphoria.psycho.tasks.VideoActivity.class);
-                intent.setData(videoUri);
-                VideoActivity.this.startActivity(intent);
-            } else {
-                WebViewShare.downloadFile(this, KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
-            }
-        }
-    }
-
     private void show() {
         if (mController.getVisibility() == View.VISIBLE) return;
         mController.setVisibility(View.VISIBLE);
@@ -322,19 +331,6 @@ public class VideoActivity extends BaseVideoActivity implements
         } else {
             mExoPlay.setImageResource(R.drawable.exo_controls_play);
         }
-    }
-
-    int playNextVideo(int currentPlaybackIndex, TextureVideoView textureVideoView) {
-        if (mFiles != null) {
-            int nextPlaybackIndex = mFiles.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
-            textureVideoView.setVideoPath(mFiles[nextPlaybackIndex].getAbsolutePath());
-            return nextPlaybackIndex;
-        } else if (mPlayList != null) {
-            int nextPlaybackIndex = mPlayList.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
-            textureVideoView.setVideoPath(mPlayList[nextPlaybackIndex]);
-            return nextPlaybackIndex;
-        }
-        return 0;
     }
 
     @Override
@@ -436,5 +432,18 @@ public class VideoActivity extends BaseVideoActivity implements
 
     @Override
     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+    }
+
+    int playNextVideo(int currentPlaybackIndex, TextureVideoView textureVideoView) {
+        if (mFiles != null) {
+            int nextPlaybackIndex = mFiles.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
+            textureVideoView.setVideoPath(mFiles[nextPlaybackIndex].getAbsolutePath());
+            return nextPlaybackIndex;
+        } else if (mPlayList != null) {
+            int nextPlaybackIndex = mPlayList.length > currentPlaybackIndex + 1 ? currentPlaybackIndex + 1 : 0;
+            textureVideoView.setVideoPath(mPlayList[nextPlaybackIndex]);
+            return nextPlaybackIndex;
+        }
+        return 0;
     }
 }

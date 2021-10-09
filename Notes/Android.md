@@ -23,3 +23,7 @@ adb shell pm list packages -f
 ## 更多
 
 - https://developer.android.com/studio/command-line/adb
+
+|名称|快捷键|
+|---|---|
+|Introduce Constant...|Ctrl+Alt+C|

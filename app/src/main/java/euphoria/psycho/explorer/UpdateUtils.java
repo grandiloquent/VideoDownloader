@@ -12,9 +12,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import euphoria.psycho.share.NetShare;
-import euphoria.psycho.share.PreferenceShare;
 
 public class UpdateUtils {
+
+    private static final String APK_URI = "https://lucidu.cn/api/obs/%E8%A7%86%E9%A2%91%E6%B5%8F%E8%A7%88%E5%99%A8.apk";
+    private static final String VERSION_URI = "http://47.106.105.122/api/video/apk";
 
     public static String getApplicationVersionName(Context context) {
         PackageInfo pInfo;
@@ -28,7 +30,7 @@ public class UpdateUtils {
 
     public static String getServerVersionName() {
         try {
-            HttpURLConnection c = (HttpURLConnection) new URL("http://47.106.105.122/api/video/apk").openConnection();
+            HttpURLConnection c = (HttpURLConnection) new URL(VERSION_URI).openConnection();
             int code = c.getResponseCode();
             if (code < 400 && code >= 200) {
                 String results = NetShare.readString(c);
@@ -51,17 +53,12 @@ public class UpdateUtils {
 
     public static void launchDownloadActivity(Context context) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("https://lucidu.cn/api/obs/%E8%A7%86%E9%A2%91%E6%B5%8F%E8%A7%88%E5%99%A8.apk"));
-        if (PreferenceShare.getPreferences().getBoolean("chrome", false)) {
-            intent.setPackage("com.android.chrome");
+        intent.setData(Uri.parse(APK_URI));
+        try {
+            intent.setPackage("com.android.browser");
             context.startActivity(intent);
-        } else {
-            try {
-                intent.setPackage("com.android.browser");
-                context.startActivity(intent);
-            } catch (Exception e) {
-                context.startActivity(Intent.createChooser(intent, "下载最新版本"));
-            }
+        } catch (Exception e) {
+            context.startActivity(Intent.createChooser(intent, "下载最新版本"));
         }
     }
 }
