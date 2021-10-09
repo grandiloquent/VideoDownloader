@@ -1,7 +1,6 @@
 package euphoria.psycho.player;
 
-import android.app.DownloadManager;
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Point;
 import android.media.MediaPlayer;
@@ -16,23 +15,29 @@ import android.media.MediaPlayer.OnTimedTextListener;
 import android.media.MediaPlayer.OnVideoSizeChangedListener;
 import android.media.TimedMetaData;
 import android.media.TimedText;
-import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
+import android.os.Process;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import euphoria.psycho.downloader.DownloadTaskDatabase;
+import euphoria.psycho.downloader.DownloaderActivity;
+import euphoria.psycho.downloader.DownloaderService;
+import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DateTimeShare;
 import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.share.Logger;
-import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.videos.Iqiyi;
 
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarHeight;
@@ -41,7 +46,6 @@ import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
 import static euphoria.psycho.player.PlayerHelper.rotateScreen;
 import static euphoria.psycho.player.PlayerHelper.showSystemUI;
 import static euphoria.psycho.player.PlayerHelper.switchPlayState;
-import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
 public class IqiyiActivity extends BaseVideoActivity implements
         GestureDetector.OnGestureListener,
@@ -78,39 +82,6 @@ public class IqiyiActivity extends BaseVideoActivity implements
     };
     private final Runnable mHideAction = this::hide;
 
-    private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
-        final DownloadManager.Request request;
-        Uri uri = Uri.parse(url);
-        request = new DownloadManager.Request(uri);
-        request.setMimeType(mimetype);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
-        request.allowScanningByMediaScanner();
-        request.setNotificationVisibility(
-                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        manager.enqueue(request);
-    }
-
-    private void downloadVideo() {
-        if (mPlayList != null) {
-            executeTask(mPlayList);
-        } else {
-            Uri videoUri = getIntent().getData();
-            if (videoUri.toString().contains("m3u8")) {
-                Intent intent = new Intent(IqiyiActivity.this, euphoria.psycho.tasks.VideoActivity.class);
-                intent.setData(videoUri);
-                IqiyiActivity.this.startActivity(intent);
-            } else {
-                WebViewShare.downloadFile(this, KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
-            }
-        }
-    }
-
-    private void executeTask(String[] videoUris) {
-        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        for (String uris : videoUris) {
-            downloadFile(manager, uris, KeyShare.md5(uris) + ".f4v", "video/x-f4v");
-        }
-    }
 
     private void hide() {
         if (mController.getVisibility() == View.VISIBLE) {
@@ -183,7 +154,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
             mPlayer.pause();
         }
         mFileDownload.setOnClickListener(v -> {
-            this.downloadVideo();
+            this.downloadVideos();
         });
     }
 
@@ -258,7 +229,6 @@ public class IqiyiActivity extends BaseVideoActivity implements
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        Logger.e(String.format("onError, %s %s", what, extra));
         return false;
     }
 
@@ -269,7 +239,6 @@ public class IqiyiActivity extends BaseVideoActivity implements
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-        Logger.e(String.format("onInfo, %s %s", what, extra));
         return false;
     }
 
@@ -369,4 +338,39 @@ public class IqiyiActivity extends BaseVideoActivity implements
         return nextPlaybackIndex;
     }
 
+    private void downloadVideos() {
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage("正在下载中...");
+        dialog.show();
+        new Thread(() -> {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            AtomicInteger atomicInteger = new AtomicInteger();
+            Arrays.stream(mPlayList).forEach(p -> {
+                final FutureTask<Object> ft = new FutureTask<Object>(() -> {
+                }, new Object());
+                DownloadTaskDatabase downloadTaskDatabase = DownloadTaskDatabase.getInstance(this);
+                File dir = DownloaderService.createVideoDownloadDirectory(this);
+                Iqiyi.getVideoAddress(p, uri -> {
+                    DownloaderTask downloaderTask = new DownloaderTask();
+                    downloaderTask.Uri = uri;
+                    downloaderTask.Directory = dir.getAbsolutePath();
+                    downloaderTask.FileName = String.format("%02d-%s.mp4", atomicInteger.incrementAndGet(), KeyShare.md5(uri));
+                    downloadTaskDatabase.insertDownloadTask(downloaderTask);
+                    ft.run();
+                });
+                try {
+                    ft.get();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            runOnUiThread(() -> {
+                dialog.dismiss();
+                Intent activity = new Intent(this, DownloaderActivity.class);
+                startActivity(activity);
+            });
+        }).start();
+    }
 }

@@ -18,17 +18,17 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.FileShare;
 
 public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener {
-    private final DownloaderActivity mVideoActivity;
-    private final List<DownloaderTask> mVideoTasks = new ArrayList<>();
+    private final DownloaderActivity mDownloaderActivity;
+    private final List<DownloaderTask> mDownloaderTasks = new ArrayList<>();
     private final List<ViewHolder> mViewHolders = new ArrayList<>();
 
     public DownloaderAdapter(DownloaderActivity videoActivity) {
-        mVideoActivity = videoActivity;
+        mDownloaderActivity = videoActivity;
     }
 
     public void update(List<DownloaderTask> videoTasks) {
-        mVideoTasks.clear();
-        mVideoTasks.addAll(videoTasks);
+        mDownloaderTasks.clear();
+        mDownloaderTasks.addAll(videoTasks);
         notifyDataSetChanged();
     }
 
@@ -106,12 +106,12 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
 
     @Override
     public int getCount() {
-        return mVideoTasks.size();
+        return mDownloaderTasks.size();
     }
 
     @Override
     public DownloaderTask getItem(int position) {
-        return mVideoTasks.get(position);
+        return mDownloaderTasks.get(position);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
     public void synchronizeTask(DownloaderTask videoTask) {
         for (ViewHolder viewHolder : mViewHolders) {
             if (videoTask.FileName.equals(viewHolder.tag)) {
-                renderVideoTask(mVideoActivity, viewHolder, videoTask);
+                renderVideoTask(mDownloaderActivity, viewHolder, videoTask);
                 return;
             }
         }
@@ -152,7 +152,7 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
     public void taskProgress(DownloaderTask videoTask) {
         for (ViewHolder viewHolder : mViewHolders) {
             if (videoTask.FileName.equals(viewHolder.tag)) {
-                renderVideoTask(mVideoActivity, viewHolder, videoTask);
+                renderVideoTask(mDownloaderActivity, viewHolder, videoTask);
                 return;
             }
         }
