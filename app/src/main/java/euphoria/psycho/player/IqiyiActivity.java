@@ -59,8 +59,16 @@ public class IqiyiActivity extends BaseVideoActivity implements
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
     public static final String EXTRA_PLAYLSIT = "extra.PLAYLSIT";
     private final Handler mHandler = new Handler();
+    private final HashMap<String, Integer> mHashMap = new HashMap<>();
     private final StringBuilder mStringBuilder = new StringBuilder();
     private final Formatter mFormatter = new Formatter(mStringBuilder);
+    private int mNavigationBarHeight;
+    private int mNavigationBarWidth;
+    private boolean mScrubbing;
+    private GestureDetector mVideoTouchHelper;
+    private int mCurrentPlaybackIndex;
+    private String[] mPlayList;
+    private int mDuration;
     private final Runnable mProgressChecker = new Runnable() {
         @Override
         public void run() {
@@ -69,13 +77,6 @@ public class IqiyiActivity extends BaseVideoActivity implements
         }
     };
     private final Runnable mHideAction = this::hide;
-    private int mNavigationBarHeight;
-    private int mNavigationBarWidth;
-    private boolean mScrubbing;
-    private GestureDetector mVideoTouchHelper;
-    private int mCurrentPlaybackIndex;
-    private String[] mPlayList;
-    private final HashMap<String, Integer> mHashMap = new HashMap<>();
 
     private void downloadFile(DownloadManager manager, String url, String filename, String mimetype) {
         final DownloadManager.Request request;
@@ -154,7 +155,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
 
     private int setProgress() {
         int position = mPlayer.getCurrentPosition();
-        mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter,mDuration));
+        mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mDuration));
         mExoPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
         mExoProgress.setPosition(position);
         return position;
@@ -196,7 +197,6 @@ public class IqiyiActivity extends BaseVideoActivity implements
         mHandler.post(mProgressChecker);
         hideController();
     }
-
 
     @Override
     protected void onDestroy() {
@@ -276,8 +276,6 @@ public class IqiyiActivity extends BaseVideoActivity implements
     @Override
     public void onLongPress(MotionEvent e) {
     }
-
-    private int mDuration;
 
     @Override
     public void onPrepared(MediaPlayer mp) {
