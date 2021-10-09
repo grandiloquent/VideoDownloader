@@ -53,7 +53,7 @@ public class Iqiyi extends BaseExtractor<String[]> {
 
     @Override
     protected void processVideo(String[] videoUris) {
-        Intent intent = new Intent(mMainActivity, euphoria.psycho.player.VideoActivity.class);
+        Intent intent = new Intent(mMainActivity, euphoria.psycho.player.IqiyiActivity.class);
         intent.putExtra(VideoActivity.EXTRA_PLAYLSIT, videoUris);
         mMainActivity.startActivity(intent);
     }
