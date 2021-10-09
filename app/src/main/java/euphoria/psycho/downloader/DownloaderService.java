@@ -72,8 +72,8 @@ public class DownloaderService extends Service implements RequestEventListener {
         return null;
     }
 
-    public static File createVideoDownloadDirectory() {
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Videos");
+    public static File createVideoDownloadDirectory(Context context) {
+        File dir = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Videos");
         if (!dir.isDirectory()) {
             dir.mkdirs();
         }

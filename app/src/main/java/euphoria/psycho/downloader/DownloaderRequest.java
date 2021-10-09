@@ -3,12 +3,12 @@ package euphoria.psycho.downloader;
 import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -67,6 +67,7 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
         try {
             downloadFile(new File(mVideoTask.Directory, mVideoTask.FileName));
         } catch (Exception e) {
+            Log.e("B5aOx2", String.format("start, %s", e.getMessage()));
             emitSynchronizeTask(TaskStatus.ERROR_UNKONW);
         }
     }
@@ -95,10 +96,15 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
         int statusCode = connection.getResponseCode();
         boolean result = false;
         if (statusCode >= 200 && statusCode < 400) {
-            mVideoTask.TotalSize = Long.parseLong(connection.getHeaderField("Content-Length"));
-            emitSynchronizeTask(TaskStatus.DOWNLOADING);
+            if (mVideoTask.TotalSize == 0) {
+                mVideoTask.TotalSize = Long.parseLong(connection.getHeaderField("Content-Length"));
+                emitSynchronizeTask(TaskStatus.DOWNLOADING);
+            }
             InputStream is = connection.getInputStream();
-            FileOutputStream out = new FileOutputStream(videoFile);
+            RandomAccessFile out = new RandomAccessFile(videoFile, "rw");
+            if (mVideoTask.DownloadedSize > 0) {
+                out.seek(mVideoTask.DownloadedSize);
+            }
             result = transferData(is, out);
             FileShare.closeSilently(is);
             FileShare.closeSilently(out);
@@ -121,7 +127,7 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
         });
     }
 
-    private boolean transferData(InputStream in, OutputStream out) {
+    private boolean transferData(InputStream in, RandomAccessFile out) {
         final byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
             if (mVideoTask.IsPaused) {

@@ -9,7 +9,10 @@ import android.os.Process;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderActivity;
+import euphoria.psycho.downloader.DownloaderService;
+import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.AcFun;
 import euphoria.psycho.videos.Ck52;
@@ -92,12 +95,12 @@ public class MainActivity extends Activity implements ClientInterface {
 //            }
 //        }).start();
         checkUpdate();
-//        DownloaderTask downloaderTask = new DownloaderTask();
-//        downloaderTask.Directory = DownloaderService.createVideoDownloadDirectory().getAbsolutePath();
-//        downloaderTask.FileName = "1.mp4";
-//        downloaderTask.Uri = "https://apd-vlive.apdcdn.tc.qq.com/vipzj.video.tc.qq.com/s0030zieohi.mp4?vkey=95EDF0145862FF228082EEFE1F8AA7152395DFD9C4DD6B4AAAB643C5FFED6A94164EC3B4DD75589AE60CC27DD01B73CB3852D09697701F0BD58A058096441E03063221A03F8B0A76F7B62FD432751A36E9F2D5DE82C21F765FF75B32CC586725D5674958FC3B11BC6A535F7AAB8F504B840C3251EB607113&level=0&fmt=hd&platform=10201";
-//        DownloadTaskDatabase.getInstance(this)
-//                .insertDownloadTask(downloaderTask);
+        DownloaderTask downloaderTask = new DownloaderTask();
+        downloaderTask.Directory = DownloaderService.createVideoDownloadDirectory(this).getAbsolutePath();
+        downloaderTask.FileName = "1.mp4";
+        downloaderTask.Uri = "https://apd-vlive.apdcdn.tc.qq.com/vipzj.video.tc.qq.com/s0030zieohi.mp4?vkey=95EDF0145862FF228082EEFE1F8AA7152395DFD9C4DD6B4AAAB643C5FFED6A94164EC3B4DD75589AE60CC27DD01B73CB3852D09697701F0BD58A058096441E03063221A03F8B0A76F7B62FD432751A36E9F2D5DE82C21F765FF75B32CC586725D5674958FC3B11BC6A535F7AAB8F504B840C3251EB607113&level=0&fmt=hd&platform=10201";
+        DownloadTaskDatabase.getInstance(this)
+                .insertDownloadTask(downloaderTask);
         Intent activity = new Intent(this, DownloaderActivity.class);
         startActivity(activity);
 

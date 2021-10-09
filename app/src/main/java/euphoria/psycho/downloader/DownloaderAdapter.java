@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
+import euphoria.psycho.share.FileShare;
 
 public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener {
     private final DownloaderActivity mVideoActivity;
@@ -27,7 +27,6 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
     }
 
     public void update(List<DownloaderTask> videoTasks) {
-        Logger.e(String.format("update, %s", videoTasks.size()));
         mVideoTasks.clear();
         mVideoTasks.addAll(videoTasks);
         notifyDataSetChanged();
@@ -73,6 +72,12 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
                 break;
             }
             case TaskStatus.DOWNLOADING: {
+//                String percentText =
+//                        NumberFormat.getPercentInstance().format((double)
+//                                videoTask.DownloadedSize / videoTask.TotalSize);
+                final int percent = (int) ((videoTask.DownloadedSize * 100) / videoTask.TotalSize);
+                viewHolder.subtitle.setText(String.format("%s/s %s/%s", FileShare.formatFileSize(videoTask.Speed),FileShare.formatFileSize(videoTask.DownloadedSize),FileShare.formatFileSize(videoTask.TotalSize)));
+                viewHolder.progressBar.setProgress(percent);
                 break;
             }
             case TaskStatus.PAUSED: {
@@ -119,7 +124,7 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
         ViewHolder viewHolder;
         if (convertView == null) {
             convertView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.video_item, parent, false);
+                    .inflate(R.layout.download_item, parent, false);
             viewHolder = new ViewHolder();
             bindViewHolder(viewHolder, convertView);
             mViewHolders.add(viewHolder);
