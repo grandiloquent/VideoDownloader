@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import euphoria.psycho.explorer.HttpUtils;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
-import euphoria.psycho.player.VideoActivity;
+import euphoria.psycho.player.IqiyiActivity;
 
 public class Iqiyi extends BaseExtractor<String[]> {
     public static Pattern MATCH_IQIYI = Pattern.compile("\\.iqiyi\\.com/v_");
@@ -53,8 +53,8 @@ public class Iqiyi extends BaseExtractor<String[]> {
 
     @Override
     protected void processVideo(String[] videoUris) {
-        Intent intent = new Intent(mMainActivity, euphoria.psycho.player.IqiyiActivity.class);
-        intent.putExtra(VideoActivity.EXTRA_PLAYLSIT, videoUris);
+        Intent intent = new Intent(mMainActivity, IqiyiActivity.class);
+        intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, videoUris);
         mMainActivity.startActivity(intent);
     }
 

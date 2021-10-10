@@ -55,9 +55,8 @@ if (window.location.hostname.indexOf("pornone.com") !== -1) {
 }
 
 if (window.location.hostname.indexOf("qq.com") !== -1) {
-
-const atAppBanner = document.querySelector('.at-app-banner');
-if(atAppBanner){
-atAppBanner.remove();
-}
+    const atAppBanner = document.querySelector('.at-app-banner');
+    if (atAppBanner) {
+        atAppBanner.style.display="none";
+    }
 }

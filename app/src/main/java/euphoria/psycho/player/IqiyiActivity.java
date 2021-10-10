@@ -61,6 +61,8 @@ public class IqiyiActivity extends BaseVideoActivity implements
         Iqiyi.Callback {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
     public static final String EXTRA_PLAYLSIT = "extra.PLAYLSIT";
+    public static final String EXTRA_TYPE = "extra.TYPE";
+
     private final Handler mHandler = new Handler();
     private final HashMap<String, Integer> mHashMap = new HashMap<>();
     private final StringBuilder mStringBuilder = new StringBuilder();
@@ -72,6 +74,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
     private int mCurrentPlaybackIndex;
     private String[] mPlayList;
     private int mDuration;
+    private boolean mIsTencent;
     private final Runnable mProgressChecker = new Runnable() {
         @Override
         public void run() {
@@ -119,8 +122,9 @@ public class IqiyiActivity extends BaseVideoActivity implements
     private void playPlayList(int index) {
         if (mPlayList[index].contains("http://data.video.iqiyi.com")) {
             Iqiyi.getVideoAddress(mPlayList[index], this);
+        } else {
+            mPlayer.setVideoPath(mPlayList[index]);
         }
-        mPlayer.setVideoPath(mPlayList[index]);
     }
 
     private int setProgress() {

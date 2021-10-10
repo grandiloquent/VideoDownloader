@@ -29,6 +29,7 @@ import euphoria.psycho.videos.MgTv;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
+import euphoria.psycho.videos.QQ;
 import euphoria.psycho.videos.TikTok;
 import euphoria.psycho.videos.Twitter;
 import euphoria.psycho.videos.XVideos;
@@ -92,6 +93,9 @@ public class ListenerDelegate {
             if (TikTok.handle(uri, mMainActivity)) {
                 return;
             }
+            if (QQ.handle(uri, mMainActivity)) {
+                return;
+            }
             if (uri.equals("https://91porn.com/index.php") || uri.startsWith("https://91porn.com/v.php")) {
                 new Porn91(uri, mMainActivity).fetchVideoList(uri);
                 return;
@@ -104,7 +108,6 @@ public class ListenerDelegate {
     }
 
     private void onDownloadFile(View view) {
-        Log.e("B5aOx2", String.format("onDownloadFile, %s", mMainActivity.getWebView().getUrl()));
         String url = mMainActivity.getWebView().getUrl();
         if (Porn91.handle(url, mMainActivity)) {
             return;
@@ -130,6 +133,9 @@ public class ListenerDelegate {
             return;
         }
         if (PornOne.handle(url, mMainActivity)) {
+            return;
+        }
+        if (QQ.handle(url, mMainActivity)) {
             return;
         }
         if (Twitter.handle(url, mMainActivity)) {
