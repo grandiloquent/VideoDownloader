@@ -14,7 +14,7 @@ import euphoria.psycho.share.StringShare;
 import static euphoria.psycho.videos.VideosHelper.getString;
 
 public class QQ extends BaseExtractor<String> {
-    private static Pattern MATCH_QQ = Pattern.compile("qq\\.com");
+    private static final Pattern MATCH_QQ = Pattern.compile("qq\\.com");
     public static final String PLAYER_VERSION = "3.2.19.333";
 
     protected QQ(String inputUri, MainActivity mainActivity) {
@@ -154,7 +154,6 @@ public class QQ extends BaseExtractor<String> {
             }
 
         } catch (Exception ignored) {
-            Logger.d(String.format("parseJSON: %s", ignored));
         }
         return 0;
     }
