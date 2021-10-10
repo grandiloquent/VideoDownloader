@@ -3,7 +3,6 @@ package euphoria.psycho.explorer;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -29,7 +28,7 @@ import euphoria.psycho.videos.MgTv;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
-import euphoria.psycho.videos.QQ;
+import euphoria.psycho.videos.Tencent;
 import euphoria.psycho.videos.TikTok;
 import euphoria.psycho.videos.Twitter;
 import euphoria.psycho.videos.XVideos;
@@ -93,7 +92,7 @@ public class ListenerDelegate {
             if (TikTok.handle(uri, mMainActivity)) {
                 return;
             }
-            if (QQ.handle(uri, mMainActivity)) {
+            if (Tencent.handle(uri, mMainActivity)) {
                 return;
             }
             if (uri.equals("https://91porn.com/index.php") || uri.startsWith("https://91porn.com/v.php")) {
@@ -135,7 +134,7 @@ public class ListenerDelegate {
         if (PornOne.handle(url, mMainActivity)) {
             return;
         }
-        if (QQ.handle(url, mMainActivity)) {
+        if (Tencent.handle(url, mMainActivity)) {
             return;
         }
         if (Twitter.handle(url, mMainActivity)) {

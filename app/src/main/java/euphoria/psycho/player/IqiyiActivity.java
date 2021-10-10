@@ -103,6 +103,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
         hideController();
         if (!loadPlayList())
             return;
+        mIsTencent = getIntent().getBooleanExtra(EXTRA_TYPE, false);
         mPlayer.setOnPreparedListener(this);
         mPlayer.setOnCompletionListener(this);
         mPlayer.setOnErrorListener(this);
@@ -251,8 +252,9 @@ public class IqiyiActivity extends BaseVideoActivity implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mHashMap.put(mPlayList[mCurrentPlaybackIndex], mp.getDuration());
-        mDuration = mHashMap.values().stream().mapToInt(integer -> integer).sum();
+        if (!mIsTencent)
+            mHashMap.put(mPlayList[mCurrentPlaybackIndex], mp.getDuration());
+        mDuration = mIsTencent ? mp.getDuration() : mHashMap.values().stream().mapToInt(integer -> integer).sum();
         mExoProgress.setDuration(mDuration);
         mHandler.post(mProgressChecker);
         mPlayer.start();

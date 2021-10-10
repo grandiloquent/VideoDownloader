@@ -7,18 +7,17 @@ import java.util.regex.Pattern;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
 import euphoria.psycho.player.IqiyiActivity;
-import euphoria.psycho.player.VideoActivity;
 
-public class QQ extends BaseExtractor<String[]> {
+public class Tencent extends BaseExtractor<String[]> {
     private static final Pattern MATCH_QQ = Pattern.compile("qq\\.com");
 
-    protected QQ(String inputUri, MainActivity mainActivity) {
+    protected Tencent(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {
         if (MATCH_QQ.matcher(uri).find()) {
-            new QQ(uri, mainActivity).parsingVideo();
+            new Tencent(uri, mainActivity).parsingVideo();
             return true;
         }
         return false;
@@ -34,7 +33,8 @@ public class QQ extends BaseExtractor<String[]> {
     @Override
     protected void processVideo(String[] videoUris) {
         Intent intent = new Intent(mMainActivity, IqiyiActivity.class);
-        intent.putExtra(VideoActivity.EXTRA_PLAYLSIT, videoUris);
+        intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, videoUris);
+        intent.putExtra(IqiyiActivity.EXTRA_TYPE, true);
         mMainActivity.startActivity(intent);
     }
 }
