@@ -158,7 +158,7 @@ public class Porn91 extends BaseExtractor<String> {
             try {
                 video.put("title", videoTitle);
                 video.put("thumbnail", videoThumb);
-                video.put("url", videoUrl);
+                video.put("url", videoUrl.replaceAll("&(page|viewtype)=.+",""));
                 video.put("type", 1);
                 int duration = 0;
                 try {

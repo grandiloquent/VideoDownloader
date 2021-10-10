@@ -17,7 +17,6 @@ import android.media.TimedMetaData;
 import android.media.TimedText;
 import android.os.Handler;
 import android.os.Process;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -340,7 +339,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
 
     private void downloadVideos() {
         ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("正在下载中...");
+        dialog.setMessage("正在下载...");
         dialog.show();
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
