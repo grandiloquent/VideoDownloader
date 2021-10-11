@@ -1,19 +1,28 @@
 # 视频浏览器
 
-一个解析视频地址的浏览器
+一个可以解析和下载各大平台视频的Android手机软件。
+
+**支持下载秒m3u8视频。**
 
 **视频保存目录**：
 
-*/storage/emulated/0/Download*
 
 <img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%">
 
-## 下载
+## 使用方法
+
+* 打开视频页面点击视频，在不影响体验的状态下，将自动解析播放
+* 打开视频所在页面，点击顶部下载按钮进行解析
+* 视频存放目录：*/storage/emulated/0/Download* 和 */storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download*
+
+*由于Android新版本更严格的储存策略，可以通过数据线连续电脑访问/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download目录下的视频文件*
+
+## 程序下载
 
 * [示例](https://github.com/grandiloquent/VideoBrowser/releases)
 * [国内](https://lucidu.cn/article/jqdkgl)
 
-## 支持的视频网站
+## 支持的视频平台
 
 * [x] 快手
 * [x] 抖音
@@ -53,4 +62,5 @@
 
 ## 问题
 
-* 如果某些页面的视频无法下载，请点击顶部工具栏的刷新按钮刷新页面
+* 如果某些页面的视频无法下载，请使用菜单刷新页面
+* 如果某些视频提示无法解析，请再次尝试，或者通过[此链接反馈](http://lucidu.cn/feedback)。

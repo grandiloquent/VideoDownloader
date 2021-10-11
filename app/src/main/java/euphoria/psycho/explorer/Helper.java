@@ -48,10 +48,12 @@ public class Helper {
     }
 
     static void checkChrome(Context context) {
-        if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
-                PackageShare.isAppInstalled(context, "com.android.chrome")) {
-            PreferenceShare.getEditor().putBoolean("chrome", true).apply();
-        }
+        new Thread(() -> {
+            if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
+                    PackageShare.isAppInstalled(context, "com.android.chrome")) {
+                PreferenceShare.getEditor().putBoolean("chrome", true).apply();
+            }
+        }).start();
     }
 
     static boolean checkPermissions(Activity activity) {

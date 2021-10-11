@@ -26,7 +26,7 @@ public class Tencent extends BaseExtractor<String[]> {
 
     @Override
     protected String[] fetchVideoUri(String uri) {
-        return Native.fetchQQ(uri);
+        return Native.fetchTencent(uri);
     }
 
 
