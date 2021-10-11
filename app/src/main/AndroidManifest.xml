@@ -127,6 +127,9 @@
             android:name="euphoria.psycho.player.IqiyiActivity"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
         <activity android:name="euphoria.psycho.downloader.DownloaderActivity" />
+        <activity
+            android:name="euphoria.psycho.player.BilibiliActivity"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
         <service android:name="euphoria.psycho.tasks.VideoService" />
         <service android:name="euphoria.psycho.downloader.DownloaderService" />

@@ -25,7 +25,7 @@ public class Native {
     public native static String[] fetchIqiyi(String url);
 
     public native static String fetchPornOne(String url);
-    public native static String fetchBilibili(String url);
+    public native static String[] fetchBilibili(String url);
 
 
 }
