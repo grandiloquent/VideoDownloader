@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.player.VideoActivity;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
@@ -128,7 +129,7 @@ public class VideosHelper {
     }
 
     public static void invokeVideoPlayer(Context context, Uri videoUri) {
-        Intent intent = new Intent(context, euphoria.psycho.player.VideoActivity.class);
+        Intent intent = new Intent(context, VideoActivity.class);
         intent.setData(videoUri);
         context.startActivity(intent);
     }

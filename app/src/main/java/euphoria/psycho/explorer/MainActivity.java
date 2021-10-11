@@ -87,8 +87,8 @@ public class MainActivity extends Activity implements ClientInterface {
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
-//                String[] uri = Native.fetchQQ("https://m.v.qq.com/x/m/play?cid=znda81ms78okdwd&vid=&ptag=v_qq_com%23v.index.adaptor%233");
-//                Log.e("B5aOx2", String.format("run, %s", uri[0]));
+//                String uri = Native.fetchBilibili("https://www.bilibili.com/video/BV14U4y1w7fn");
+//                Log.e("B5aOx2", String.format("run, %s", uri));
 //            }
 //        }).start();
         checkUpdate();

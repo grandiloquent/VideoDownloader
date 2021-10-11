@@ -28,6 +28,7 @@ import android.view.WindowManager;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
+import java.util.HashMap;
 
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DateTimeShare;
@@ -163,7 +164,15 @@ public class VideoActivity extends BaseVideoActivity implements
         mFiles = getVideos(videoPath);
         if (mFiles == null) {
             updateUI();
-            mPlayer.setVideoURI(getIntent().getData());
+            if (getIntent().getBooleanExtra("HEADERS", false)) {
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Referer", "https://www.bilibili.com/");
+                headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36");
+                mPlayer.setVideoURI(getIntent().getData(), headers);
+            } else {
+                mPlayer.setVideoURI(getIntent().getData());
+            }
+
         } else {
             mCurrentPlaybackIndex = lookupCurrentVideo(videoPath, mFiles);
             mPlayer.setVideoPath(mFiles[mCurrentPlaybackIndex].getAbsolutePath());
