@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import com.cocosw.bottomsheet.BottomSheet;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -40,11 +38,6 @@ public class ListenerDelegate {
 
     public ListenerDelegate(MainActivity mainActivity) {
         mMainActivity = mainActivity;
-//        mMainActivity.findViewById(R.id.refresh_button).setOnClickListener(this::onRefresh);
-//        mMainActivity.findViewById(R.id.copy_button).setOnClickListener(this::onCopy);
-//        mMainActivity.findViewById(R.id.favorite_border).setOnClickListener(this::onFavorite);
-//        mMainActivity.findViewById(R.id.bookmark2_button).setOnClickListener(this::onShowBookmark);
-//        mMainActivity.findViewById(R.id.help_outline).setOnClickListener(this::onHelp);
         mainActivity.findViewById(R.id.file_download).setOnClickListener(this::onDownloadFile);
         mMainActivity.findViewById(R.id.add_link).setOnClickListener(this::onAddLink);
         mainActivity.findViewById(R.id.more_vert).setOnClickListener(this::onMore);
@@ -148,16 +141,16 @@ public class ListenerDelegate {
             return;
         }
         if (mMainActivity.getVideoUrl() != null) {
-            try {
-                mMainActivity.getWebView().loadUrl("https://hxz315.com?v=" + URLEncoder.encode(mMainActivity.getVideoUrl(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            mMainActivity.getWebView().loadUrl(mMainActivity.getVideoUrl());
         }
     }
 
     private void onHelp() {
         mMainActivity.getWebView().loadUrl(HELP_URL);
+
+       /* mMainActivity.getWebView().saveWebArchive(
+                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),"1.mhtml").getAbsolutePath());
+*/
     }
 
     private ArrayAdapter<Bookmark> makeBookmarkAdapter() {

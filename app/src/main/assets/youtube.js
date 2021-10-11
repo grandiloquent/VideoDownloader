@@ -60,3 +60,7 @@ if (window.location.hostname.indexOf("qq.com") !== -1) {
         atAppBanner.style.display="none";
     }
 }
+if (window.location.hostname.indexOf("bilibili.com") !== -1) {
+const launchAppBtns = document.querySelectorAll('.launch-app-btn');
+launchAppBtns.forEach(launchAppBtn=>launchAppBtn.remove());
+}

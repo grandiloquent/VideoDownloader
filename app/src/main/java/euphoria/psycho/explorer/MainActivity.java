@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
-import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.AcFun;
 import euphoria.psycho.videos.Ck52;
@@ -92,7 +90,6 @@ public class MainActivity extends Activity implements ClientInterface {
 //            }
 //        }).start();
         checkUpdate();
-        Log.e("B5aOx2", String.format("initialize, %s", DownloaderService.createVideoDownloadDirectory(this)));
     }
 
     @Override
