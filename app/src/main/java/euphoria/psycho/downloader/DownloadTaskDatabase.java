@@ -46,7 +46,7 @@ public class DownloadTaskDatabase extends SQLiteOpenHelper {
     }
 
     public List<DownloaderTask> getPendingDownloadTasks() {
-        Cursor cursor = getReadableDatabase().rawQuery("select * from " + TABLE + " where status != 7 and status >-1 ",
+        Cursor cursor = getReadableDatabase().rawQuery("select * from " + TABLE + " where status != 7 and status != -9",
                 null);
         List<DownloaderTask> videoTasks = new ArrayList<>();
         while (cursor.moveToNext()) {
