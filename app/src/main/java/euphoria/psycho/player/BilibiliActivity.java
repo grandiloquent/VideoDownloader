@@ -305,6 +305,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
         int positionMs = delta + mPlayer.getCurrentPosition();
         if (positionMs > 0) {
             mPlayer.seekTo(positionMs);
+            mAudio.seekTo(positionMs);
         }
         return true;
     }
@@ -325,6 +326,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
     public void onScrubStop(TimeBar timeBar, long position, boolean canceled) {
         mScrubbing = false;
         mPlayer.seekTo((int) position);
+        mAudio.seekTo((int) position);
         mHandler.post(mProgressChecker);
         hideController();
     }
