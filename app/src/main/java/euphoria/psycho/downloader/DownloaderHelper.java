@@ -194,9 +194,7 @@ public class DownloaderHelper {
             case TaskStatus.ERROR_DOWNLOAD_FILE: {
                 return "Error Download File";
             }
-            case TaskStatus.ERROR_MERGE_VIDEO_FAILED: {
-                return "Error Merge Video Failed";
-            }
+
             case TaskStatus.ERROR_DELETE_FILE_FAILED: {
                 return "Error Delete File Failed";
             }
