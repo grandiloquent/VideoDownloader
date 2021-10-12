@@ -1,6 +1,6 @@
 package euphoria.psycho.player;
 
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.media.MediaPlayer;
@@ -10,8 +10,8 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
-import android.os.Process;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,15 +19,11 @@ import android.view.WindowManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderActivity;
-import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DateTimeShare;
@@ -57,12 +53,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
     private final HashMap<String, Integer> mHashMap = new HashMap<>();
     private final StringBuilder mStringBuilder = new StringBuilder();
     private final Formatter mFormatter = new Formatter(mStringBuilder);
-    private int mNavigationBarHeight;
-    private int mNavigationBarWidth;
-    private boolean mScrubbing;
-    private GestureDetector mVideoTouchHelper;
-    private int mCurrentPlaybackIndex;
-    private String[] mPlayList;
     private final Runnable mProgressChecker = new Runnable() {
         @Override
         public void run() {
@@ -71,6 +61,12 @@ public class BilibiliActivity extends BaseVideoActivity implements
         }
     };
     private final Runnable mHideAction = this::hide;
+    private int mNavigationBarHeight;
+    private int mNavigationBarWidth;
+    private boolean mScrubbing;
+    private GestureDetector mVideoTouchHelper;
+    private int mCurrentPlaybackIndex;
+    private String[] mPlayList;
     private boolean mAudioPrepared;
     private MediaPlayer mAudio;
     private boolean mVideoPrepared;
@@ -90,8 +86,39 @@ public class BilibiliActivity extends BaseVideoActivity implements
         }
     };
 
-    private void play() {
-        mHandler.postDelayed(mPlay, 50);
+    public static void startDownloadActivity(Context context) {
+        Intent starter = new Intent(context, DownloaderActivity.class);
+        context.startActivity(starter);
+    }
+
+    private String createDownloadDirectory() {
+        File dir = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Bilibili");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir.getAbsolutePath();
+    }
+
+    private void downloadVideo(View v) {
+        String dir = createDownloadDirectory();
+        DownloaderTask videoTask = new DownloaderTask();
+        videoTask.Directory = dir;
+        videoTask.FileName = KeyShare.md5(mPlayList[0]) + ".mp4";
+        videoTask.Uri = mPlayList[0];
+        DownloaderTask audioTask = new DownloaderTask();
+        audioTask.Directory = dir;
+        audioTask.FileName = KeyShare.md5(mPlayList[1]) + ".mp3";
+        audioTask.Uri = mPlayList[1];
+        DownloadTaskDatabase.getInstance(this).insertDownloadTask(videoTask);
+        DownloadTaskDatabase.getInstance(this).insertDownloadTask(audioTask);
+        startDownloadActivity(this);
+    }
+
+    private HashMap<String, String> getRequestHeaders() {
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Referer", "https://www.bilibili.com/");
+        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36");
+        return headers;
     }
 
     private void hide() {
@@ -106,21 +133,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
     private void hideController() {
         mHandler.postDelayed(mHideAction, DEFAULT_SHOW_TIMEOUT_MS);
     }
-
-    private void initializePlayer() {
-        mExoDelete.setVisibility(View.GONE);
-        hideController();
-        if (!loadPlayList())
-            return;
-        mPlayer.setOnPreparedListener(this);
-        mPlayer.setOnCompletionListener(this);
-        mPlayer.setOnErrorListener((mp, what, extra) -> false);
-        mPlayer.setOnInfoListener(this);
-        mPlayer.setOnBufferingUpdateListener(this);
-        initializeAudioPlayer();
-        play();
-    }
-
 
     private void initializeAudioPlayer() {
         if (mPlayList.length < 2) {
@@ -138,6 +150,20 @@ public class BilibiliActivity extends BaseVideoActivity implements
         mAudio = mediaPlayer;
     }
 
+    private void initializePlayer() {
+        mExoDelete.setVisibility(View.GONE);
+        hideController();
+        if (!loadPlayList())
+            return;
+        mPlayer.setOnPreparedListener(this);
+        mPlayer.setOnCompletionListener(this);
+        mPlayer.setOnErrorListener((mp, what, extra) -> false);
+        mPlayer.setOnInfoListener(this);
+        mPlayer.setOnBufferingUpdateListener(this);
+        initializeAudioPlayer();
+        play();
+    }
+
     private boolean loadPlayList() {
         mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
         if (mPlayList != null) {
@@ -147,17 +173,14 @@ public class BilibiliActivity extends BaseVideoActivity implements
         return false;
     }
 
+    private void play() {
+        mHandler.postDelayed(mPlay, 50);
+    }
+
     private void playPlayList(int index) {
         HashMap<String, String> headers = getRequestHeaders();
         mPlayer.setVideoURI(Uri.parse(mPlayList[index]), headers);
 
-    }
-
-    private HashMap<String, String> getRequestHeaders() {
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Referer", "https://www.bilibili.com/");
-        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36");
-        return headers;
     }
 
     private int setProgress() {
@@ -169,6 +192,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
     }
 
     private void setupView() {
+        mFileDownload.setVisibility(View.VISIBLE);
         mRootView.setOnTouchListener((v, event) -> {
             mVideoTouchHelper.onTouchEvent(event);
             return true;
@@ -180,20 +204,18 @@ public class BilibiliActivity extends BaseVideoActivity implements
         mExoPrev.setOnClickListener(v -> {
             mCurrentPlaybackIndex = previous(mCurrentPlaybackIndex);
         });
-        mExoPrev.setVisibility(View.INVISIBLE);
+        mExoPrev.setVisibility(View.GONE);
         mExoNext.setOnClickListener(v -> {
             mCurrentPlaybackIndex = next(mCurrentPlaybackIndex);
         });
-        mExoNext.setVisibility(View.INVISIBLE);
+        mExoNext.setVisibility(View.GONE);
         mExoRew.setOnClickListener(v -> {
             rotateScreen(this);
         });
         if (mPlayer.isPlaying()) {
             mPlayer.pause();
         }
-        mFileDownload.setOnClickListener(v -> {
-            this.downloadVideos();
-        });
+        mFileDownload.setOnClickListener(this::downloadVideo);
     }
 
     private void show() {
@@ -240,7 +262,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
         super.onStop();
     }
 
-
     @Override
     void initialize() {
         super.initialize();
@@ -269,7 +290,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
         return false;
     }
 
-
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         return false;
@@ -288,7 +308,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
     public void onPrepared(MediaPlayer mp) {
         mVideoPrepared = true;
     }
-
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
@@ -345,7 +364,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
         return true;
     }
 
-
     @Override
     public void onVideoUri(String uri) {
         runOnUiThread(() -> mPlayer.setVideoPath(uri));
@@ -363,37 +381,5 @@ public class BilibiliActivity extends BaseVideoActivity implements
         return nextPlaybackIndex;
     }
 
-    private void downloadVideos() {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("正在下载...");
-        dialog.show();
-        new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            AtomicInteger atomicInteger = new AtomicInteger();
-            Arrays.stream(mPlayList).forEach(p -> {
-                final FutureTask<Object> ft = new FutureTask<Object>(() -> {
-                }, new Object());
-                DownloadTaskDatabase downloadTaskDatabase = DownloadTaskDatabase.getInstance(this);
-                File dir = DownloaderService.createVideoDownloadDirectory(this);
-                Iqiyi.getVideoAddress(p, uri -> {
-                    DownloaderTask downloaderTask = new DownloaderTask();
-                    downloaderTask.Uri = uri;
-                    downloaderTask.Directory = dir.getAbsolutePath();
-                    downloaderTask.FileName = String.format("%02d-%s.mp4", atomicInteger.incrementAndGet(), KeyShare.md5(uri));
-                    downloadTaskDatabase.insertDownloadTask(downloaderTask);
-                    ft.run();
-                });
-                try {
-                    ft.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-            runOnUiThread(() -> {
-                dialog.dismiss();
-                Intent activity = new Intent(this, DownloaderActivity.class);
-                startActivity(activity);
-            });
-        }).start();
-    }
+
 }

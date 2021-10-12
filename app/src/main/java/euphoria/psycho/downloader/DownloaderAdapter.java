@@ -105,7 +105,7 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
         viewHolder.subtitle.setText(R.string.waiting);
         viewHolder.progressBar.setProgress(0);
         viewHolder.layout.setOnClickListener(null);
-        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
+        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download_light);
         DownloaderHelper.renderPauseButton(context, viewHolder, videoTask);
     }
 

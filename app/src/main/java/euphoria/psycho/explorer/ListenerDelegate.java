@@ -3,7 +3,6 @@ package euphoria.psycho.explorer;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import com.cocosw.bottomsheet.BottomSheet;
 
-import java.io.File;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -149,10 +147,9 @@ public class ListenerDelegate {
 
     private void onHelp() {
         mMainActivity.getWebView().loadUrl(HELP_URL);
-
-     mMainActivity.getWebView().saveWebArchive(
-                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),"1.mhtml").getAbsolutePath());
-
+       /* mMainActivity.getWebView().saveWebArchive(
+                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "1.mhtml").getAbsolutePath());
+*/
     }
 
     private ArrayAdapter<Bookmark> makeBookmarkAdapter() {
