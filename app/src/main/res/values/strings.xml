@@ -26,4 +26,5 @@
     <string name="clear">清空数据库</string>
     <string name="save">保存页面</string>
     <string name="settings">设置</string>
+    <string name="download_complete">下载完成</string>
 </resources>

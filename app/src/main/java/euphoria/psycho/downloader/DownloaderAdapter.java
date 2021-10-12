@@ -49,9 +49,9 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
     private static void renderCompletedStatus(Context context, ViewHolder viewHolder, DownloaderTask videoTask) {
         viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
         viewHolder.progressBar.setProgress(100);
-        viewHolder.subtitle.setText(context.getString(R.string.merge_complete));
+        viewHolder.subtitle.setText(context.getString(R.string.download_complete));
         File videoFile = new File(
-                videoTask.Directory + ".mp4"
+                videoTask.Directory, videoTask.FileName
         );
         Glide.with(context)
                 .load(videoFile)
