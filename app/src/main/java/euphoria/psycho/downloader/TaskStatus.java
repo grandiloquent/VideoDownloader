@@ -25,12 +25,14 @@ public interface TaskStatus {
     //  emitSynchronizeTask(TaskStatus.PARSE_CONTENT_LENGTH);
     int ERROR_DOWNLOAD_FILE = -4;
     //  emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
-    int ERROR_MERGE_VIDEO_FAILED = -5;
+    int ERROR_READ_STREAM = -5;
 
     int ERROR_DELETE_FILE_FAILED = -6;
 
     int ERROR_STATUS_CODE = -7;
-    int ERROR_MISSING_M3U8 = -8;
+    int ERROR_WRITE_STREAM = -8;
 
-    int ERROR_FETCH_M3U8 = -9;
+    int ERROR_FATAL = -9;
+
+
 }

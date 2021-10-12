@@ -29,7 +29,7 @@ public class DownloaderService extends Service implements RequestEventListener {
 
     private void submitTask(DownloaderTask videoTask) {
         DownloaderManager.post(() -> {
-            DownloaderRequest request = new DownloaderRequest(DownloaderService.this,
+            DownloaderRequest request = new DownloaderRequest(
                     videoTask,
                     DownloaderManager.getInstance(),
                     DownloaderManager.getInstance().getHandler());

@@ -65,7 +65,7 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
                 renderCompletedStatus(context, viewHolder, videoTask);
                 break;
             }
-            case TaskStatus.ERROR_STATUS_CODE: {
+            case TaskStatus.ERROR_FATAL: {
                 break;
             }
             case TaskStatus.ERROR_UNKONW: {
@@ -76,7 +76,7 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
 //                        NumberFormat.getPercentInstance().format((double)
 //                                videoTask.DownloadedSize / videoTask.TotalSize);
                 final int percent = (int) ((videoTask.DownloadedSize * 100) / videoTask.TotalSize);
-                viewHolder.subtitle.setText(String.format("%s/s %s/%s", FileShare.formatFileSize(videoTask.Speed),FileShare.formatFileSize(videoTask.DownloadedSize),FileShare.formatFileSize(videoTask.TotalSize)));
+                viewHolder.subtitle.setText(String.format("%s/s %s/%s", FileShare.formatFileSize(videoTask.Speed), FileShare.formatFileSize(videoTask.DownloadedSize), FileShare.formatFileSize(videoTask.TotalSize)));
                 viewHolder.progressBar.setProgress(percent);
                 break;
             }

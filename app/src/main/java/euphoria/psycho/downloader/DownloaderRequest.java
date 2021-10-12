@@ -1,6 +1,5 @@
 package euphoria.psycho.downloader;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
@@ -14,10 +13,12 @@ import java.net.URL;
 
 import euphoria.psycho.share.FileShare;
 
+// The class that actually performs the download task
+// Pass the status of the execution to other logic
+// layers through the event handler
 public class DownloaderRequest implements Comparable<DownloaderRequest> {
 
     public static final int BUFFER_SIZE = 8192;
-    private final Context mContext;
     private final Handler mHandler;
     private final VideoTaskListener mListener;
     private final DownloaderTask mVideoTask;
@@ -27,11 +28,10 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
     private long mSpeedSampleStart;
     private long mSpeedSampleBytes;
 
-    public DownloaderRequest(Context context, DownloaderTask videoTask, VideoTaskListener listener, Handler handler) {
+    public DownloaderRequest(DownloaderTask videoTask, VideoTaskListener listener, Handler handler) {
         mVideoTask = videoTask;
         mListener = listener;
         mHandler = handler;
-        mContext = context;
         mVideoTask.Request = this;
     }
 
@@ -51,6 +51,8 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
         return this;
     }
 
+    // Send the status of task to the task queue
+    // to provide information for effective task management
     public void sendEvent(int event) {
         if (mRequestQueue != null) {
             mRequestQueue.sendRequestEvent(this, event);
@@ -62,7 +64,6 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
     }
 
     public void start() {
-        // TaskStatus\.([A-Z-]+)
         emitSynchronizeTask(TaskStatus.START);
         try {
             downloadFile(new File(mVideoTask.Directory, mVideoTask.FileName));
@@ -72,16 +73,16 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
         }
     }
 
-    private boolean downloadFile(File videoFile) throws Exception {
+    private void downloadFile(File videoFile) throws Exception {
         if (mVideoTask.IsPaused) {
             emitSynchronizeTask(TaskStatus.PAUSED);
-            return false;
+            return;
         }
         if (videoFile.exists()) {
             long size = mVideoTask.TotalSize;
             if (videoFile.length() == size) {
                 emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
-                return true;
+                return;
             } else {
                 mVideoTask.DownloadedSize = videoFile.length();
                 emitSynchronizeTask(TaskStatus.RANGE);
@@ -94,24 +95,21 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
             connection.addRequestProperty("Range", "bytes=" + mVideoTask.DownloadedSize + "-");
         }
         int statusCode = connection.getResponseCode();
-        boolean result = false;
         if (statusCode >= 200 && statusCode < 400) {
             if (mVideoTask.TotalSize == 0) {
                 mVideoTask.TotalSize = Long.parseLong(connection.getHeaderField("Content-Length"));
             }
-            emitSynchronizeTask(TaskStatus.DOWNLOADING);
             InputStream is = connection.getInputStream();
             RandomAccessFile out = new RandomAccessFile(videoFile, "rw");
             if (mVideoTask.DownloadedSize > 0) {
                 out.seek(mVideoTask.DownloadedSize);
             }
-            result = transferData(is, out);
+            transferData(is, out);
             FileShare.closeSilently(is);
             FileShare.closeSilently(out);
         } else {
-            emitSynchronizeTask(TaskStatus.ERROR_STATUS_CODE);
+            emitSynchronizeTask(TaskStatus.ERROR_FATAL);
         }
-        return result;
     }
 
     private void emitSynchronizeTask(int status) {
@@ -127,17 +125,19 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
         });
     }
 
-    private boolean transferData(InputStream in, RandomAccessFile out) {
+    private void transferData(InputStream in, RandomAccessFile out) {
+        emitSynchronizeTask(TaskStatus.DOWNLOADING);
         final byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
             if (mVideoTask.IsPaused) {
                 emitSynchronizeTask(TaskStatus.PAUSED);
-                return false;
+                return;
             }
             int len;
             try {
                 len = in.read(buffer);
             } catch (IOException e) {
+                emitSynchronizeTask(TaskStatus.ERROR_READ_STREAM);
                 throw new Error("Failed reading response: " + e, e);
             }
             if (len == -1) {
@@ -148,10 +148,10 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
                 mVideoTask.DownloadedSize += len;
                 updateProgress();
             } catch (IOException e) {
+                emitSynchronizeTask(TaskStatus.ERROR_WRITE_STREAM);
                 throw new Error(e);
             }
         }
-        return true;
 
     }
 

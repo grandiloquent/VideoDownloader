@@ -122,7 +122,7 @@ public class DownloaderHelper {
             } else {
                 videoTask.IsPaused = false;
                 DownloaderManager.getInstance().getQueue().removeVideoTask(videoTask);
-                DownloaderRequest request = new DownloaderRequest(context, videoTask, DownloaderManager.getInstance(), DownloaderManager.getInstance().getHandler());
+                DownloaderRequest request = new DownloaderRequest(videoTask, DownloaderManager.getInstance(), DownloaderManager.getInstance().getHandler());
                 request.setRequestQueue(DownloaderManager.getInstance().getQueue());
                 DownloaderManager.getInstance().getQueue().add(request);
             }
