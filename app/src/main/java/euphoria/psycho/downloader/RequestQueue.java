@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-
-
 public class RequestQueue {
 
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
@@ -145,8 +143,6 @@ public class RequestQueue {
         }
         return videoTasks;
     }
-
-
     boolean taskExists(String fileName) {
         synchronized (mCurrentRequests) {
             for (DownloaderRequest request : mCurrentRequests) {

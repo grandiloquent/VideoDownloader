@@ -102,13 +102,14 @@ public class BilibiliActivity extends BaseVideoActivity implements
 
     private void downloadVideo(View v) {
         String dir = createDownloadDirectory();
+        String fileName = KeyShare.md5(mPlayList[0]);
         DownloaderTask videoTask = new DownloaderTask();
         videoTask.Directory = dir;
-        videoTask.FileName = KeyShare.md5(mPlayList[0]) + ".mp4";
+        videoTask.FileName = fileName + ".mp4";
         videoTask.Uri = mPlayList[0];
         DownloaderTask audioTask = new DownloaderTask();
         audioTask.Directory = dir;
-        audioTask.FileName = KeyShare.md5(mPlayList[1]) + ".mp3";
+        audioTask.FileName = fileName + ".mp3";
         audioTask.Uri = mPlayList[1];
         DownloadTaskDatabase.getInstance(this).insertDownloadTask(videoTask);
         DownloadTaskDatabase.getInstance(this).insertDownloadTask(audioTask);

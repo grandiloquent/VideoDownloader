@@ -111,6 +111,7 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
             transferData(is, out);
             FileShare.closeSilently(is);
             FileShare.closeSilently(out);
+            emitSynchronizeTask(TaskStatus.DOWNLOAD_VIDEO_FINISHED);
         } else {
             emitSynchronizeTask(TaskStatus.ERROR_FATAL);
         }
