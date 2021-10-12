@@ -17,6 +17,11 @@ import java.util.List;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.FileShare;
 
+// We cache all UIs,
+// and correctly present the task status
+// by comparing the task passed
+// in by the callback function
+// with the tasks which insert before
 public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener {
     private final DownloaderActivity mDownloaderActivity;
     private final List<DownloaderTask> mDownloaderTasks = new ArrayList<>();
@@ -100,6 +105,7 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
         viewHolder.subtitle.setText(R.string.waiting);
         viewHolder.progressBar.setProgress(0);
         viewHolder.layout.setOnClickListener(null);
+        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
         DownloaderHelper.renderPauseButton(context, viewHolder, videoTask);
     }
 
@@ -131,9 +137,10 @@ public class DownloaderAdapter extends BaseAdapter implements VideoTaskListener 
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
-
         DownloaderTask videoTask = getItem(position);
+        // The UI may present the status of other tasks.
+        // In order to accurately display the task status,
+        // restore the UI to the default state
         resetViewHolderUI(parent.getContext(), viewHolder, videoTask);
         renderVideoTask(parent.getContext(), viewHolder, videoTask);
         return convertView;
