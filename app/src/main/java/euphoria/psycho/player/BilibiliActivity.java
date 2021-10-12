@@ -6,15 +6,9 @@ import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
-import android.media.MediaPlayer.OnTimedMetaDataAvailableListener;
-import android.media.MediaPlayer.OnTimedTextListener;
-import android.media.MediaPlayer.OnVideoSizeChangedListener;
-import android.media.TimedMetaData;
-import android.media.TimedText;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Process;
@@ -24,10 +18,10 @@ import android.view.View;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,10 +48,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
         OnCompletionListener,
         OnBufferingUpdateListener,
         OnSeekCompleteListener,
-        OnVideoSizeChangedListener,
-        OnTimedTextListener,
-        OnTimedMetaDataAvailableListener,
-        OnErrorListener,
         OnInfoListener,
         Iqiyi.Callback {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
@@ -73,8 +63,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
     private GestureDetector mVideoTouchHelper;
     private int mCurrentPlaybackIndex;
     private String[] mPlayList;
-    private int mDuration;
-    private boolean mIsTencent;
     private final Runnable mProgressChecker = new Runnable() {
         @Override
         public void run() {
@@ -83,7 +71,28 @@ public class BilibiliActivity extends BaseVideoActivity implements
         }
     };
     private final Runnable mHideAction = this::hide;
+    private boolean mAudioPrepared;
+    private MediaPlayer mAudio;
+    private boolean mVideoPrepared;
+    private Runnable mPlay = new Runnable() {
+        @Override
+        public void run() {
+            if (mVideoPrepared && mAudioPrepared) {
+                mExoProgress.setDuration(mPlayer.getDuration());
+                mHandler.post(mProgressChecker);
+                mExoPlay.setImageResource(R.drawable.exo_controls_pause);
+                mPlayer.start();
+                mAudio.start();
+                mHandler.removeCallbacks(mPlay);
+            } else {
+                mHandler.postDelayed(mPlay, 50);
+            }
+        }
+    };
 
+    private void play() {
+        mHandler.postDelayed(mPlay, 50);
+    }
 
     private void hide() {
         if (mController.getVisibility() == View.VISIBLE) {
@@ -105,9 +114,28 @@ public class BilibiliActivity extends BaseVideoActivity implements
             return;
         mPlayer.setOnPreparedListener(this);
         mPlayer.setOnCompletionListener(this);
-        mPlayer.setOnErrorListener(this);
+        mPlayer.setOnErrorListener((mp, what, extra) -> false);
         mPlayer.setOnInfoListener(this);
         mPlayer.setOnBufferingUpdateListener(this);
+        initializeAudioPlayer();
+        play();
+    }
+
+
+    private void initializeAudioPlayer() {
+        if (mPlayList.length < 2) {
+            return;
+        }
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(this, Uri.parse(mPlayList[1]), getRequestHeaders());
+        } catch (IOException ignored) {
+        }
+        mediaPlayer.prepareAsync();
+        mediaPlayer.setOnPreparedListener(mp -> {
+            mAudioPrepared = true;
+        });
+        mAudio = mediaPlayer;
     }
 
     private boolean loadPlayList() {
@@ -120,16 +148,21 @@ public class BilibiliActivity extends BaseVideoActivity implements
     }
 
     private void playPlayList(int index) {
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Referer", "https://www.bilibili.com/");
-        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36");
+        HashMap<String, String> headers = getRequestHeaders();
         mPlayer.setVideoURI(Uri.parse(mPlayList[index]), headers);
 
     }
 
+    private HashMap<String, String> getRequestHeaders() {
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Referer", "https://www.bilibili.com/");
+        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36");
+        return headers;
+    }
+
     private int setProgress() {
         int position = mPlayer.getCurrentPosition();
-        mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mDuration));
+        mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mPlayer.getDuration()));
         mExoPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
         mExoProgress.setPosition(position);
         return position;
@@ -147,9 +180,11 @@ public class BilibiliActivity extends BaseVideoActivity implements
         mExoPrev.setOnClickListener(v -> {
             mCurrentPlaybackIndex = previous(mCurrentPlaybackIndex);
         });
+        mExoPrev.setVisibility(View.INVISIBLE);
         mExoNext.setOnClickListener(v -> {
             mCurrentPlaybackIndex = next(mCurrentPlaybackIndex);
         });
+        mExoNext.setVisibility(View.INVISIBLE);
         mExoRew.setOnClickListener(v -> {
             rotateScreen(this);
         });
@@ -198,9 +233,13 @@ public class BilibiliActivity extends BaseVideoActivity implements
 
     @Override
     protected void onStop() {
+        if (mAudio != null) {
+            mAudio.stop();
+            mAudio.release();
+        }
         super.onStop();
-
     }
+
 
     @Override
     void initialize() {
@@ -230,10 +269,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
         return false;
     }
 
-    @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
-        return false;
-    }
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -251,14 +286,9 @@ public class BilibiliActivity extends BaseVideoActivity implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        if (!mIsTencent)
-            mHashMap.put(mPlayList[mCurrentPlaybackIndex], mp.getDuration());
-        mDuration = mIsTencent ? mp.getDuration() : mHashMap.values().stream().mapToInt(integer -> integer).sum();
-        mExoProgress.setDuration(mDuration);
-        mHandler.post(mProgressChecker);
-        mPlayer.start();
-        mExoPlay.setImageResource(R.drawable.exo_controls_pause);
+        mVideoPrepared = true;
     }
+
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
@@ -313,17 +343,6 @@ public class BilibiliActivity extends BaseVideoActivity implements
         return true;
     }
 
-    @Override
-    public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data) {
-    }
-
-    @Override
-    public void onTimedText(MediaPlayer mp, TimedText text) {
-    }
-
-    @Override
-    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-    }
 
     @Override
     public void onVideoUri(String uri) {
@@ -364,9 +383,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
                 });
                 try {
                     ft.get();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });

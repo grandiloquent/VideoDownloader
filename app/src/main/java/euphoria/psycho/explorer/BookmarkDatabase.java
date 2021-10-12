@@ -38,8 +38,8 @@ public class BookmarkDatabase extends SQLiteOpenHelper {
                 CREATE_AT + " INTEGER," +
                 UPDATE_AT + " INTEGER" +
                 ")");
-        insert("YouTube", "https://m.youtube.com", db);
-        insert("搜索视频", "http://47.106.105.122/", db);
+//        insert("YouTube", "https://m.youtube.com", db);
+//        insert("搜索视频", "http://47.106.105.122/", db);
     }
 
     @Override
