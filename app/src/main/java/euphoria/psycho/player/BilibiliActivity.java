@@ -92,7 +92,8 @@ public class BilibiliActivity extends BaseVideoActivity implements
     }
 
     private String createDownloadDirectory() {
-        File dir = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Bilibili");
+        // File dir = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Bilibili");
+        File dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         if (!dir.exists()) {
             dir.mkdirs();
         }

@@ -91,6 +91,10 @@ public class DownloaderRequest implements Comparable<DownloaderRequest> {
             mVideoTask.DownloadedSize = 0;
         }
         HttpURLConnection connection = (HttpURLConnection) new URL(mVideoTask.Uri).openConnection();
+        if (mVideoTask.Uri.contains("bilivideo")) {
+            connection.setRequestProperty("Referer", "https://www.bilibili.com/");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36");
+        }
         if (mVideoTask.DownloadedSize > 0) {
             connection.addRequestProperty("Range", "bytes=" + mVideoTask.DownloadedSize + "-");
         }
