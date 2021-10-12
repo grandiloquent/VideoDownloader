@@ -7,7 +7,7 @@
 **视频保存目录**：
 
 
-<img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%">
+<img src="images/3.gif" width="33.3%"><img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%">
 
 ## 使用方法
 
