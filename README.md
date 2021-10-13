@@ -2,25 +2,7 @@
 
 一个可以解析和下载各大平台视频的Android手机软件。
 
-**支持下载秒m3u8视频。**
-
-**视频保存目录**：
-
-
 <img src="images/3.gif" width="33.3%"><img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%">
-
-## 使用方法
-
-* 打开视频页面点击视频，在不影响体验的状态下，将自动解析播放
-* 打开视频所在页面，点击顶部下载按钮进行解析
-* 视频存放目录：*/storage/emulated/0/Download* 和 */storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download*
-
-*由于Android新版本更严格的储存策略，可以通过数据线连续电脑访问/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download目录下的视频文件*
-
-## 程序下载
-
-* [示例](https://github.com/grandiloquent/VideoBrowser/releases)
-* [国内](https://lucidu.cn/article/jqdkgl)
 
 ## 支持的视频平台
 
@@ -40,6 +22,25 @@
 * [x] [PornOne](https://pornone.com/)
 * [x] http://57ck.cc/
 * [x] [搜索视频](http://47.106.105.122)
+
+## 腾讯视频会员
+
+下载安装 **腾讯会议** 手机软件，通过福利入口绑定邮箱可领取　**7天腾讯视频会议**
+
+使用浏览器登陆腾讯视频后，`F12`键 > 控制台 > 粘贴代码 `document.cookie` 回车执行 > 复制单引号中间的字符串 > 粘贴到该软件即可下载腾讯会员视频
+
+## 使用方法
+
+* 打开视频页面点击视频，在不影响体验的状态下，将自动解析播放
+* 打开视频所在页面，点击顶部下载按钮进行解析
+* 视频存放目录：*/storage/emulated/0/Download* 和 */storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download*
+
+*由于Android新版本更严格的储存策略，可以通过数据线连续电脑访问/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download目录下的视频文件*
+
+## 程序下载
+
+* [示例](https://github.com/grandiloquent/VideoBrowser/releases)
+* [国内](https://lucidu.cn/article/jqdkgl)
 
 ## 引用
 

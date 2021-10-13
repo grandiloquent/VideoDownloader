@@ -57,10 +57,26 @@ if (window.location.hostname.indexOf("pornone.com") !== -1) {
 if (window.location.hostname.indexOf("qq.com") !== -1) {
     const atAppBanner = document.querySelector('.at-app-banner');
     if (atAppBanner) {
-        atAppBanner.style.display="none";
+        atAppBanner.style.display = "none";
     }
 }
 if (window.location.hostname.indexOf("bilibili.com") !== -1) {
-const launchAppBtns = document.querySelectorAll('.launch-app-btn');
-launchAppBtns.forEach(launchAppBtn=>launchAppBtn.remove());
+    const launchAppBtns = document.querySelectorAll('.launch-app-btn');
+    launchAppBtns.forEach(launchAppBtn => launchAppBtn.remove());
+}
+if (window.location.hostname.indexOf("acfun.cn") !== -1) {
+    const headerIco = document.querySelector('.header-ico');
+    if (headerIco) {
+        headerIco.remove();
+    }
+
+    const openAppBtns = document.querySelectorAll('.open-app-btn');
+    openAppBtns.forEach(openAppBtn => {
+        openAppBtn.remove();
+    });
+
+    const commonProfitFixeds = document.querySelectorAll('.common_profit_fixed');
+    commonProfitFixeds.forEach(commonProfitFixed => {
+        commonProfitFixed.remove();
+    });
 }

@@ -70,7 +70,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
     private boolean mAudioPrepared;
     private MediaPlayer mAudio;
     private boolean mVideoPrepared;
-    private Runnable mPlay = new Runnable() {
+    private final Runnable mPlay = new Runnable() {
         @Override
         public void run() {
             if (mVideoPrepared && mAudioPrepared) {
