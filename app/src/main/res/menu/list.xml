@@ -24,4 +24,8 @@
         android:id="@+id/help_outline"
         android:icon="@drawable/ic_action_help_outline"
         android:title="@string/help_outline" />
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:title="设置" />
 </menu>

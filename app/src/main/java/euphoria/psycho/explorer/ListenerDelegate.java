@@ -1,6 +1,7 @@
 package euphoria.psycho.explorer;
 
 import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.view.View;
@@ -61,8 +62,15 @@ public class ListenerDelegate {
                         onPlaylist();
                     } else if (R.id.help_outline == which) {
                         onHelp();
+                    } else {
+                        start(mMainActivity);
                     }
                 }).show();
+    }
+
+    public static void start(Context context) {
+        Intent starter = new Intent(context, SettingsActivity.class);
+        context.startActivity(starter);
     }
 
     private void onPlaylist() {
@@ -147,9 +155,9 @@ public class ListenerDelegate {
 
     private void onHelp() {
         mMainActivity.getWebView().loadUrl(HELP_URL);
-       /* mMainActivity.getWebView().saveWebArchive(
-                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "1.mhtml").getAbsolutePath());
-*/
+//        mMainActivity.getWebView().saveWebArchive(
+//                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "1.mhtml").getAbsolutePath());
+//
     }
 
     private ArrayAdapter<Bookmark> makeBookmarkAdapter() {

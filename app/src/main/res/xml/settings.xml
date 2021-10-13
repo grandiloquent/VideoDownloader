@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:dialogTitle="设置腾讯视频会员信息"
+        android:inputType="text"
+        android:key="key_tencent"
+        android:summary="设置用于下载腾讯会员视频的Cookie"
+        android:title="设置腾讯视频会员信息" />
+</PreferenceScreen>
