@@ -49,6 +49,8 @@
 * https://github.com/google/volley
 * https://github.com/Tencent/rapidjson
 * https://github.com/yhirose/cpp-httplib
+* https://github.com/openssl/openssl
+* https://github.com/google/brotli
 
 ## How to download TikTok videos?
 
