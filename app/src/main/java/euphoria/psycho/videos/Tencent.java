@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
+import euphoria.psycho.explorer.SettingsFragment;
 import euphoria.psycho.player.IqiyiActivity;
 import euphoria.psycho.share.PreferenceShare;
 
@@ -28,7 +29,7 @@ public class Tencent extends BaseExtractor<String[]> {
     @Override
     protected String[] fetchVideoUri(String uri) {
         return Native.fetchTencent(uri,
-                PreferenceShare.getPreferences().getString("key_tencent", null));
+                PreferenceShare.getPreferences().getString(SettingsFragment.KEY_TENCENT, null));
     }
 
 

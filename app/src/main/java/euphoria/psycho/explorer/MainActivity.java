@@ -81,6 +81,15 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
         checkUpdate();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                Native.fetch91Porn("https://91porn.com/view_video.php?viewkey=440ec2b94868de08235d&page=&viewtype=&category=");
+
+            }
+        }).start();
     }
 
     void insertDownloaderTaskForTesting(String fileName, String uri) {
