@@ -28,6 +28,7 @@ import android.view.WindowManager;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
+import java.util.HashMap;
 
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.DateTimeShare;
@@ -63,6 +64,7 @@ public class VideoActivity extends BaseVideoActivity implements
         Iqiyi.Callback {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
     public static final String EXTRA_PLAYLSIT = "extra.PLAYLSIT";
+    public static final String EXTRA_HEADER = "extra.HEADER";
     private final Handler mHandler = new Handler();
     private final StringBuilder mStringBuilder = new StringBuilder();
     private final Formatter mFormatter = new Formatter(mStringBuilder);
@@ -146,7 +148,14 @@ public class VideoActivity extends BaseVideoActivity implements
         mFiles = getVideos(videoPath);
         if (mFiles == null) {
             updateUI();
-            mPlayer.setVideoURI(getIntent().getData());
+            if (getIntent().getIntExtra(EXTRA_HEADER, 0) == 1) {
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Referer", "https://www.mgtv.com/");
+                headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36");
+                mPlayer.setVideoURI(getIntent().getData(), headers);
+            } else {
+                mPlayer.setVideoURI(getIntent().getData());
+            }
 
 
         } else {

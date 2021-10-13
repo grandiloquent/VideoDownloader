@@ -1,20 +1,14 @@
 package euphoria.psycho.videos;
 
+import android.content.Intent;
 import android.net.Uri;
-import android.util.Base64;
+import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
-import euphoria.psycho.share.Logger;
-
-import static euphoria.psycho.videos.VideosHelper.getString;
-import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
+import euphoria.psycho.player.VideoActivity;
 
 public class MgTv extends BaseExtractor<String> {
     private static Pattern MATCH_MGTV = Pattern.compile("mgtv\\.com/[a-z]/\\d+/(\\d+)\\.html");
@@ -38,6 +32,13 @@ public class MgTv extends BaseExtractor<String> {
 
     @Override
     protected void processVideo(String videoUri) {
-        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
+        if (videoUri.length() == 0) {
+            Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Intent intent = new Intent(mMainActivity, VideoActivity.class);
+        intent.setData(Uri.parse(videoUri));
+        intent.putExtra(VideoActivity.EXTRA_HEADER, 1);
+        mMainActivity.startActivity(intent);
     }
 }

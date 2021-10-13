@@ -2,6 +2,7 @@ package euphoria.psycho.videos;
 
 import android.content.Intent;
 import android.os.Process;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,6 +54,10 @@ public class Iqiyi extends BaseExtractor<String[]> {
 
     @Override
     protected void processVideo(String[] videoUris) {
+        if (videoUris == null || videoUris.length == 0) {
+            Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+            return;
+        }
         Intent intent = new Intent(mMainActivity, IqiyiActivity.class);
         intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, videoUris);
         mMainActivity.startActivity(intent);

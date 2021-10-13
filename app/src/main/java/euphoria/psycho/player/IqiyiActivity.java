@@ -21,6 +21,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.Arrays;
@@ -328,7 +329,14 @@ public class IqiyiActivity extends BaseVideoActivity implements
 
     @Override
     public void onVideoUri(String uri) {
-        runOnUiThread(() -> mPlayer.setVideoPath(uri));
+        runOnUiThread(() -> {
+            if (uri != null) {
+                mPlayer.setVideoPath(uri);
+            } else {
+                Toast.makeText(IqiyiActivity.this, "无法解析视频", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
     }
 
     int next(int currentPlaybackIndex) {
