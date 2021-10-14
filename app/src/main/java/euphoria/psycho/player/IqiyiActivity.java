@@ -15,8 +15,10 @@ import android.media.MediaPlayer.OnTimedTextListener;
 import android.media.MediaPlayer.OnVideoSizeChangedListener;
 import android.media.TimedMetaData;
 import android.media.TimedText;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Process;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -125,7 +127,11 @@ public class IqiyiActivity extends BaseVideoActivity implements
         if (mPlayList[index].contains("http://data.video.iqiyi.com")) {
             Iqiyi.getVideoAddress(mPlayList[index], this);
         } else {
-            mPlayer.setVideoPath(mPlayList[index]);
+            Log.e("B5aOx2", String.format("playPlayList, %s", mPlayList[index]));
+            HashMap<String, String> headers = new HashMap<>();
+            headers.put("Referer", "https://v.qq.com/");
+            headers.put("User-Agent","Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Mobile Safari/537.36");
+            mPlayer.setVideoURI(Uri.parse(mPlayList[index]), headers);
         }
     }
 
