@@ -18,6 +18,7 @@ import android.media.TimedText;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Process;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,9 +37,13 @@ import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderActivity;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
+import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.explorer.SettingsFragment;
 import euphoria.psycho.share.DateTimeShare;
 import euphoria.psycho.share.KeyShare;
+import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.videos.Iqiyi;
 
 import static euphoria.psycho.player.PlayerHelper.getNavigationBarHeight;
@@ -118,6 +123,9 @@ public class TencentActivity extends BaseVideoActivity implements
         if (mPlayList.length == 1) {
             mExoNext.setVisibility(View.GONE);
             mExoPrev.setVisibility(View.GONE);
+        } else {
+            mVideoFormat = getIntent().getIntExtra(EXTRA_VIDEO_FORMAT, 0);
+            mVideoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
         }
         if (mPlayList != null) {
             playPlayList(mCurrentPlaybackIndex);
@@ -134,15 +142,22 @@ public class TencentActivity extends BaseVideoActivity implements
             mPlayer.setVideoURI(Uri.parse(mPlayList[index]), headers);
         else {
             ProgressDialog dialog = new ProgressDialog(this);
-            dialog.setMessage("正在下载中...");
+            dialog.setMessage("正在加载...");
             dialog.show();
             new Thread(() -> {
+                String uri = mPlayList[index];
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                    }
+                String key = Native.fetchTencentKey(
+                        StringShare.substringAfterLast(StringShare.substringBeforeLast(uri, "?"), "/"),
+                        mVideoId,
+                        mVideoFormat,
+                        PreferenceShare.getPreferences().getString(SettingsFragment.KEY_TENCENT, null)
+                );
+                runOnUiThread(() -> {
+                    dialog.dismiss();
+                    mPlayer.setVideoURI(Uri.parse(
+                            StringShare.substringBeforeLast(uri, "?") + "?vkey=" + key
+                    ), headers);
                 });
             }).start();
         }

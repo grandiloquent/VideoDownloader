@@ -42,9 +42,9 @@ public class Tencent extends BaseExtractor<String[]> {
         else {
             intent.putExtra(TencentActivity.EXTRA_PLAYLSIT,
                     Arrays.copyOf(videoUris, videoUris.length - 2));
-
+            intent.putExtra(TencentActivity.EXTRA_VIDEO_ID, videoUris[videoUris.length - 2]);
+            intent.putExtra(TencentActivity.EXTRA_VIDEO_FORMAT, Integer.parseInt(videoUris[videoUris.length - 1]));
         }
-        intent.putExtra(TencentActivity.EXTRA_TYPE, true);
         mMainActivity.startActivity(intent);
     }
 }

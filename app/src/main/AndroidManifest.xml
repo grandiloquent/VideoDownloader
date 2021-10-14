@@ -122,14 +122,20 @@
             android:label="@string/download_video" />
         <activity
             android:name="euphoria.psycho.player.IqiyiActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
-        <activity android:name="euphoria.psycho.downloader.DownloaderActivity"
+        <activity
+            android:name="euphoria.psycho.downloader.DownloaderActivity"
             android:label="@string/download_video" />
         <activity
             android:name="euphoria.psycho.player.BilibiliActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
         <activity android:name=".SettingsActivity" />
-        <activity android:name="euphoria.psycho.player.TencentActivity" />
+        <activity
+            android:name="euphoria.psycho.player.TencentActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
         <service android:name="euphoria.psycho.tasks.VideoService" />
         <service android:name="euphoria.psycho.downloader.DownloaderService" />
