@@ -31,6 +31,7 @@ import euphoria.psycho.videos.Tencent;
 import euphoria.psycho.videos.TikTok;
 import euphoria.psycho.videos.Twitter;
 import euphoria.psycho.videos.XVideos;
+import euphoria.psycho.videos.XiGua;
 import euphoria.psycho.videos.YouTube;
 
 public class ListenerDelegate {
@@ -96,6 +97,9 @@ public class ListenerDelegate {
             if (Tencent.handle(uri, mMainActivity)) {
                 return;
             }
+            if (XiGua.handle(uri, mMainActivity)) {
+                return;
+            }
             if (uri.equals("https://91porn.com/index.php") || uri.startsWith("https://91porn.com/v.php")) {
                 new Porn91(uri, mMainActivity).fetchVideoList(uri);
                 return;
@@ -139,6 +143,9 @@ public class ListenerDelegate {
             return;
         }
         if (Twitter.handle(url, mMainActivity)) {
+            return;
+        }
+        if (XiGua.handle(url, mMainActivity)) {
             return;
         }
         if (Ck52.handle(url, mMainActivity)) {
