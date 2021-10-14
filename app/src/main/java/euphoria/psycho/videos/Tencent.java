@@ -2,12 +2,13 @@ package euphoria.psycho.videos;
 
 import android.content.Intent;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.SettingsFragment;
-import euphoria.psycho.player.IqiyiActivity;
+import euphoria.psycho.player.TencentActivity;
 import euphoria.psycho.share.PreferenceShare;
 
 public class Tencent extends BaseExtractor<String[]> {
@@ -35,9 +36,15 @@ public class Tencent extends BaseExtractor<String[]> {
 
     @Override
     protected void processVideo(String[] videoUris) {
-        Intent intent = new Intent(mMainActivity, IqiyiActivity.class);
-        intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, videoUris);
-        intent.putExtra(IqiyiActivity.EXTRA_TYPE, true);
+        Intent intent = new Intent(mMainActivity, TencentActivity.class);
+        if (videoUris.length == 1)
+            intent.putExtra(TencentActivity.EXTRA_PLAYLSIT, videoUris);
+        else {
+            intent.putExtra(TencentActivity.EXTRA_PLAYLSIT,
+                    Arrays.copyOf(videoUris, videoUris.length - 2));
+
+        }
+        intent.putExtra(TencentActivity.EXTRA_TYPE, true);
         mMainActivity.startActivity(intent);
     }
 }

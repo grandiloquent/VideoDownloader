@@ -24,6 +24,8 @@ public class Native {
 
     public native static String[] fetchTencent(String url, String cookie);
 
+    public native static String fetchTencentKey(String url, String vid, int format, String cookie);
+
     public native static String[] fetchIqiyi(String url);
 
     public native static String fetchPornOne(String url);
