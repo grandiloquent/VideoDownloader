@@ -2,7 +2,7 @@
 
 一个可以解析和下载各大平台视频的Android手机软件。
 
-<img src="images/3.gif" width="33.3%"><img src="images/1.gif" width="33.3%"><img src="images/2.gif" width="33.3%">
+<img src="images/3.gif" width="33.3%"><img src="images/1.gif" width="33.3%">
 
 ## 支持的视频平台
 
