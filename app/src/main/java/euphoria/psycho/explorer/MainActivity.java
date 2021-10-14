@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements ClientInterface {
 //        ).apply();
 //        PreferenceShare.getPreferences().edit().remove(
 //                SettingsFragment.KEY_TENCENT
-//        ).apply();
+//        ).apply(); 
     }
 
     void insertDownloaderTaskForTesting(String fileName, String uri) {

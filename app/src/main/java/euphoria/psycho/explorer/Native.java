@@ -20,6 +20,8 @@ public class Native {
 
     public native static String fetchMangoTV(String url);
 
+    public native static String fetchXiGua(String url);
+
     public native static String[] fetchTencent(String url, String cookie);
 
     public native static String[] fetchIqiyi(String url);
