@@ -12,8 +12,6 @@ import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.videos.AcFun;
-import euphoria.psycho.videos.Bilibili;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -167,9 +165,9 @@ public class MainActivity extends Activity implements ClientInterface {
         if (YouTube.handle(uri, this)) {
             return true;
         }
-        if (AcFun.handle(uri, this)) {
-            return true;
-        }
+//        if (AcFun.handle(uri, this)) {
+//            return true;
+//        }
         if (PornHub.handle(uri, this)) {
             return true;
         }

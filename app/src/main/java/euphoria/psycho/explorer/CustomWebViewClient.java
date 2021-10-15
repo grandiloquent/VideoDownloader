@@ -83,7 +83,6 @@ public class CustomWebViewClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         String url = request.getUrl().toString();
-        Log.e("B5aOx2", String.format("shouldOverrideUrlLoading, %s", url));
         if (mClientInterface.shouldOverrideUrlLoading(url)) {
             return true;
         } else if ((url.startsWith("https://") || url.startsWith("http://"))) {
