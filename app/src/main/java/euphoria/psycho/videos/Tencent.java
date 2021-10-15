@@ -37,14 +37,10 @@ public class Tencent extends BaseExtractor<String[]> {
     @Override
     protected void processVideo(String[] videoUris) {
         Intent intent = new Intent(mMainActivity, TencentActivity.class);
-        if (videoUris.length == 1)
-            intent.putExtra(TencentActivity.EXTRA_PLAYLSIT, videoUris);
-        else {
-            intent.putExtra(TencentActivity.EXTRA_PLAYLSIT,
-                    Arrays.copyOf(videoUris, videoUris.length - 2));
-            intent.putExtra(TencentActivity.EXTRA_VIDEO_ID, videoUris[videoUris.length - 2]);
-            intent.putExtra(TencentActivity.EXTRA_VIDEO_FORMAT, Integer.parseInt(videoUris[videoUris.length - 1]));
-        }
+        intent.putExtra(TencentActivity.EXTRA_PLAYLSIT,
+                Arrays.copyOf(videoUris, videoUris.length - 3));
+        intent.putExtra(TencentActivity.EXTRA_VIDEO_ID, videoUris[videoUris.length - 2]);
+        intent.putExtra(TencentActivity.EXTRA_VIDEO_FORMAT, Integer.parseInt(videoUris[videoUris.length - 1]));
         mMainActivity.startActivity(intent);
     }
 }
