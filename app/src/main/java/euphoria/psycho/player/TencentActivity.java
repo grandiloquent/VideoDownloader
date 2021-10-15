@@ -157,10 +157,9 @@ public class TencentActivity extends BaseVideoActivity implements
         if (mPlayList.length == 1) {
             mExoNext.setVisibility(View.GONE);
             mExoPrev.setVisibility(View.GONE);
-        } else {
-            mVideoFormat = getIntent().getIntExtra(EXTRA_VIDEO_FORMAT, 0);
-            mVideoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
         }
+        mVideoFormat = getIntent().getIntExtra(EXTRA_VIDEO_FORMAT, 0);
+        mVideoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
         if (mPlayList != null) {
             playPlayList(mCurrentPlaybackIndex);
             return true;

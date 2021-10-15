@@ -13,11 +13,11 @@ import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.AcFun;
+import euphoria.psycho.videos.Bilibili;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
-import euphoria.psycho.videos.Tencent;
 import euphoria.psycho.videos.XiGua;
 import euphoria.psycho.videos.YouTube;
 
@@ -95,7 +95,7 @@ public class MainActivity extends Activity implements ClientInterface {
 //        PreferenceShare.getPreferences().edit().remove(
 //                SettingsFragment.KEY_TENCENT
 //        ).apply();
-        Tencent.handle("https://m.v.qq.com/x/m/play?cid=gounil1l2zq5thv", this);
+        //Tencent.handle("https://m.v.qq.com/x/m/play?cid=gounil1l2zq5thv", this);
     }
 
     void insertDownloaderTaskForTesting(String fileName, String uri) {
@@ -177,6 +177,9 @@ public class MainActivity extends Activity implements ClientInterface {
             return true;
         }
         if (XiGua.handle(uri, this)) {
+            return true;
+        }
+        if (Bilibili.handle(uri, this)) {
             return true;
         }
         return Ck52.handle(uri, this);
