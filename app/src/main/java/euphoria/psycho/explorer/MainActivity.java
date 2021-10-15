@@ -179,9 +179,7 @@ public class MainActivity extends Activity implements ClientInterface {
         if (XiGua.handle(uri, this)) {
             return true;
         }
-        if (Bilibili.handle(uri, this)) {
-            return true;
-        }
+
         return Ck52.handle(uri, this);
     }
 }
