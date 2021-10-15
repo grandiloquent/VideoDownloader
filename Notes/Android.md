@@ -12,6 +12,9 @@ adb connect 192.168.0.109:5000
 ```
 adb shell cmd package list packages
 adb shell pm list packages -f
+
+adb shell pm path com.android.chrome
+adb pull /path/to/apk chrome.apk
 ```
 
 ## Logcat
@@ -32,5 +35,8 @@ adb shell pm list packages -f
 ^(?:[\t ]*(?:\r?\n|\r)){2,}
 Log\.e\([^\n]+\);\n
 ```
+
+- https://github.com/espressif/arduino-esp32
+- https://github.com/skylot/jadx
 
 - https://android.googlesource.com/platform/packages/providers/DownloadProvider/+/master/src/com/android/providers/downloads/DownloadThread.java

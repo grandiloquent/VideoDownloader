@@ -169,7 +169,8 @@ public class TencentActivity extends BaseVideoActivity implements
 
 
     private String getAuthorizationKey(String uri) {
-        String fileName = StringShare.substringAfterLast(StringShare.substringBeforeLast(uri, "?"), "/");
+        String url = StringShare.substringBeforeLast(uri, "?");
+        String fileName = StringShare.substringAfterLast(url, "/");
         String cookie = PreferenceShare.getPreferences().getString(SettingsFragment.KEY_TENCENT, null);
         String key = Native.fetchTencentKey(
                 fileName,
@@ -177,7 +178,7 @@ public class TencentActivity extends BaseVideoActivity implements
                 mVideoFormat,
                 cookie
         );
-        return "?vkey=" + key;
+        return url + "?vkey=" + key;
     }
 
 
@@ -194,6 +195,7 @@ public class TencentActivity extends BaseVideoActivity implements
             String key = getAuthorizationKey(uri);
             runOnUiThread(() -> {
                 dialog.dismiss();
+                Log.e("B5aOx2", String.format("playPlayList, %s", key));
                 mPlayer.setVideoURI(Uri.parse(key), headers);
             });
         }).start();

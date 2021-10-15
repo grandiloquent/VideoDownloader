@@ -165,9 +165,6 @@ public class MainActivity extends Activity implements ClientInterface {
         if (YouTube.handle(uri, this)) {
             return true;
         }
-//        if (AcFun.handle(uri, this)) {
-//            return true;
-//        }
         if (PornHub.handle(uri, this)) {
             return true;
         }
