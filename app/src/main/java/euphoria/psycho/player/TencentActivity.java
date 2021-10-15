@@ -167,6 +167,20 @@ public class TencentActivity extends BaseVideoActivity implements
         return false;
     }
 
+
+    private String getAuthorizationKey(String uri) {
+        String fileName = StringShare.substringAfterLast(StringShare.substringBeforeLast(uri, "?"), "/");
+        String cookie = PreferenceShare.getPreferences().getString(SettingsFragment.KEY_TENCENT, null);
+        String key = Native.fetchTencentKey(
+                fileName,
+                mVideoId,
+                mVideoFormat,
+                cookie
+        );
+        return "?vkey=" + key;
+    }
+
+
     private void playPlayList(int index) {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Referer", "https://v.qq.com/");
@@ -177,17 +191,10 @@ public class TencentActivity extends BaseVideoActivity implements
         new Thread(() -> {
             String uri = mPlayList[index];
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String key = Native.fetchTencentKey(
-                    StringShare.substringAfterLast(StringShare.substringBeforeLast(uri, "?"), "/"),
-                    mVideoId,
-                    mVideoFormat,
-                    PreferenceShare.getPreferences().getString(SettingsFragment.KEY_TENCENT, null)
-            );
+            String key = getAuthorizationKey(uri);
             runOnUiThread(() -> {
                 dialog.dismiss();
-                mPlayer.setVideoURI(Uri.parse(
-                        StringShare.substringBeforeLast(uri, "?") + "?vkey=" + key
-                ), headers);
+                mPlayer.setVideoURI(Uri.parse(key), headers);
             });
         }).start();
     }
@@ -465,7 +472,7 @@ public class TencentActivity extends BaseVideoActivity implements
                 File dir = DownloaderService.createVideoDownloadDirectory(this);
                 Iqiyi.getVideoAddress(p, uri -> {
                     DownloaderTask downloaderTask = new DownloaderTask();
-                    downloaderTask.Uri = uri;
+                    downloaderTask.Uri = getAuthorizationKey(uri);
                     downloaderTask.Directory = dir.getAbsolutePath();
                     downloaderTask.FileName = String.format("%02d-%s.mp4", atomicInteger.incrementAndGet(), KeyShare.md5(uri));
                     downloadTaskDatabase.insertDownloadTask(downloaderTask);
