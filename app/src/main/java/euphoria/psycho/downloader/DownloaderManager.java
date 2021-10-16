@@ -20,8 +20,6 @@ public class DownloaderManager implements VideoTaskListener {
     public DownloaderManager(Context context) {
         mDatabase = DownloadTaskDatabase.getInstance(context);
     }
-
-
     public void addVideoTaskListener(VideoTaskListener taskListener) {
         mVideoTaskListeners.add(taskListener);
     }
@@ -48,16 +46,12 @@ public class DownloaderManager implements VideoTaskListener {
         }
         return mQueue;
     }
-
-
     public static DownloaderManager newInstance(Context context) {
         if (sVideoManager == null) {
             sVideoManager = new DownloaderManager(context);
         }
         return sVideoManager;
     }
-
-
     public void removeVideoTaskListener(VideoTaskListener videoTaskListener) {
         mVideoTaskListeners.remove(videoTaskListener);
     }
@@ -79,6 +73,4 @@ public class DownloaderManager implements VideoTaskListener {
     public static void post(Runnable runnable) {
         getInstance().getHandler().post(runnable);
     }
-
-
 }

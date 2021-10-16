@@ -12,6 +12,7 @@ import android.widget.Toast;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
 import euphoria.psycho.player.VideoActivity;
+import euphoria.psycho.share.StringShare;
 
 public class JavaScriptInterface {
     private MainActivity mMainActivity;
@@ -19,38 +20,36 @@ public class JavaScriptInterface {
     public JavaScriptInterface(MainActivity activity) {
         mMainActivity = activity;
     }
+
     @JavascriptInterface
     public void handleRequest(String uri) {
         ProgressDialog dialog = new ProgressDialog(mMainActivity);
-        dialog.setMessage("正在下载中...");
+        dialog.setMessage("解析中...");
         dialog.show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                String videoUri = null;
-                if (uri.contains("91porn.com")) {
-                    videoUri = Native.fetch91Porn(uri);
-                } else if (uri.contains("xvideos.com")) {
-                    videoUri = Native.fetchXVideos(uri);
-                } else {
-                    videoUri = Native.fetch91Porn(uri);
-                }
-                String finalVideoUri = videoUri;
-                mMainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                        if (finalVideoUri == null) {
-                            Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        Intent intent = new Intent(mMainActivity, VideoActivity.class);
-                        intent.setData(Uri.parse(finalVideoUri));
-                        mMainActivity.startActivity(intent);
-                    }
-                });
+        new Thread(() -> {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            String videoUri = null;
+            if (uri.contains("91porn.com")) {
+                videoUri = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"));
+            } else if (uri.contains("xvideos.com")) {
+                videoUri = Native.fetchXVideos(uri);
+            } else {
+                videoUri = Native.fetch57Ck(uri);
             }
+            String finalVideoUri = videoUri;
+            mMainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.dismiss();
+                    if (finalVideoUri == null || finalVideoUri.length() == 0) {
+                        Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    Intent intent = new Intent(mMainActivity, VideoActivity.class);
+                    intent.setData(Uri.parse(finalVideoUri));
+                    mMainActivity.startActivity(intent);
+                }
+            });
         }).start();
     }
 
