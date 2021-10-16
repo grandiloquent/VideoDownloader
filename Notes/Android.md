@@ -34,6 +34,7 @@ adb pull /path/to/apk chrome.apk
 ```
 ^(?:[\t ]*(?:\r?\n|\r)){2,}
 Log\.e\([^\n]+\);\n
+^(?!.*(wificond|SELinux|crashpad|QSAnimator|DisplayFeatureHal|libglean_ffi|BatteryStatsService)).*$
 ```
 
 - https://github.com/espressif/arduino-esp32

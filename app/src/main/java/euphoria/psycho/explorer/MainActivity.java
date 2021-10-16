@@ -11,6 +11,7 @@ import android.widget.Toast;
 import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
+import euphoria.psycho.downloader.JavaScriptInterface;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
@@ -73,6 +74,8 @@ public class MainActivity extends Activity implements ClientInterface {
         // for better UX
         checkChrome(this);
         mWebView = findViewById(R.id.web);
+        JavaScriptInterface javaScriptInterface = new JavaScriptInterface(this);
+        mWebView.addJavascriptInterface(javaScriptInterface, "JInterface");
         // Bind all event handlers
         new ListenerDelegate(this);
         mBookmarkDatabase = new BookmarkDatabase(this);
@@ -84,7 +87,8 @@ public class MainActivity extends Activity implements ClientInterface {
         //
 //        new Thread(() -> {
 //            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-//            Native.fetchXiGua("https://m.ixigua.com/video/6843778003705528839");
+//            String value = Native.fetchWeather("湖南省", "益阳市", "桃江县");
+//            getSystemService(ClipboardManager.class).setPrimaryClip(ClipData.newPlainText(null, value));
 //        }).start();
 //        PreferenceShare.getPreferences().edit().putString(
 //                SettingsFragment.KEY_TENCENT,
@@ -174,7 +178,6 @@ public class MainActivity extends Activity implements ClientInterface {
         if (XiGua.handle(uri, this)) {
             return true;
         }
-
         return Ck52.handle(uri, this);
     }
 }
