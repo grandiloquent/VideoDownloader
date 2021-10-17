@@ -1,4 +1,4 @@
-package euphoria.psycho.downloader;
+package euphoria.psycho.explorer;
 
 import android.app.ProgressDialog;
 import android.content.ClipData;
@@ -9,8 +9,6 @@ import android.os.Process;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import euphoria.psycho.explorer.MainActivity;
-import euphoria.psycho.explorer.Native;
 import euphoria.psycho.player.VideoActivity;
 import euphoria.psycho.share.StringShare;
 
@@ -24,11 +22,11 @@ public class JavaScriptInterface {
     @JavascriptInterface
     public void handleRequest(String uri) {
         ProgressDialog dialog = new ProgressDialog(mMainActivity);
-        dialog.setMessage("解析中...");
+        dialog.setMessage("解析...");
         dialog.show();
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String videoUri = null;
+            String videoUri;
             if (uri.contains("91porn.com")) {
                 videoUri = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"));
             } else if (uri.contains("xvideos.com")) {

@@ -5,13 +5,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
+import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
 import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
-import euphoria.psycho.downloader.JavaScriptInterface;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
@@ -53,7 +53,7 @@ public class MainActivity extends Activity implements ClientInterface {
             if (versionName == null) {
                 return;
             }
-            String serverVersionName = UpdateUtils.getServerVersionName();
+            String serverVersionName = Native.fetchApplicationVersion();
             if (serverVersionName == null) {
                 return;
             }
@@ -84,11 +84,10 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
         checkUpdate();
-        //
 //        new Thread(() -> {
 //            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-//            String value = Native.fetchWeather("湖南省", "益阳市", "桃江县");
-//            getSystemService(ClipboardManager.class).setPrimaryClip(ClipData.newPlainText(null, value));
+//            String value = Native.fetchApplicationVersion();
+//            Log.e("B5aOx2", String.format("initialize, %s", value));
 //        }).start();
 //        PreferenceShare.getPreferences().edit().putString(
 //                SettingsFragment.KEY_TENCENT,
@@ -98,14 +97,6 @@ public class MainActivity extends Activity implements ClientInterface {
 //                SettingsFragment.KEY_TENCENT
 //        ).apply();
         //Tencent.handle("https://m.v.qq.com/x/m/play?cid=gounil1l2zq5thv", this);
-    }
-
-    void insertDownloaderTaskForTesting(String fileName, String uri) {
-        DownloaderTask task = new DownloaderTask();
-        task.Directory = DownloaderService.createVideoDownloadDirectory(this).getAbsolutePath();
-        task.FileName = fileName;
-        task.Uri = uri;
-        DownloadTaskDatabase.getInstance(this).insertDownloadTask(task);
     }
 
     @Override
@@ -179,5 +170,13 @@ public class MainActivity extends Activity implements ClientInterface {
             return true;
         }
         return Ck52.handle(uri, this);
+    }
+
+    void insertDownloaderTaskForTesting(String fileName, String uri) {
+        DownloaderTask task = new DownloaderTask();
+        task.Directory = DownloaderService.createVideoDownloadDirectory(this).getAbsolutePath();
+        task.FileName = fileName;
+        task.Uri = uri;
+        DownloadTaskDatabase.getInstance(this).insertDownloadTask(task);
     }
 }

@@ -34,4 +34,7 @@ public class Native {
 
     public native static String fetchWeather(String province, String city, String county);
 
+    public native static String fetchApplicationVersion();
+
+
 }
