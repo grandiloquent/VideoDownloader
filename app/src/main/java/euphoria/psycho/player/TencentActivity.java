@@ -95,7 +95,7 @@ public class TencentActivity extends BaseVideoActivity implements
 
     private void downloadVideos() {
         ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("ÕýÔÚÏÂÔØ...");
+        dialog.setMessage("下载...");
         dialog.show();
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -496,7 +496,7 @@ public class TencentActivity extends BaseVideoActivity implements
             if (uri != null) {
                 mPlayer.setVideoPath(uri);
             } else {
-                Toast.makeText(TencentActivity.this, "ÎÞ·¨½âÎöÊÓÆµ", Toast.LENGTH_LONG).show();
+                Toast.makeText(TencentActivity.this, R.string.unable_to_extract_video, Toast.LENGTH_LONG).show();
                 finish();
             }
         });
