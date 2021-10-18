@@ -12,10 +12,9 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
 
 import static euphoria.psycho.player.PlayerHelper.hasNavBar;
-
+// 
 public abstract class BaseVideoActivity extends AppCompatActivity {
     LinearLayout mController;
     TextView mExoDuration;
@@ -23,7 +22,7 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     ImageButton mExoPlay;
     TextView mExoPosition;
     ImageButton mExoPrev;
-    DefaultTimeBar mExoProgress;
+    DefaultTimeBar mProgress;
     ImageButton mExoRew;
     boolean mIsHasBar = false;
     SharedPreferences mPreferences;
@@ -36,7 +35,6 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Logger.e(String.format("onCreate, %s", ""));
         initialize();
     }
 
@@ -52,7 +50,7 @@ public abstract class BaseVideoActivity extends AppCompatActivity {
         mExoPlay = findViewById(R.id.exo_play);
         mExoNext = findViewById(R.id.exo_next);
         mExoPosition = findViewById(R.id.exo_position);
-        mExoProgress = findViewById(R.id.exo_progress);
+        mProgress = findViewById(R.id.exo_progress);
         mExoDuration = findViewById(R.id.exo_duration);
         mPlayer = findViewById(R.id.texture_video_view);
         mProgressBar = findViewById(R.id.progress_bar);

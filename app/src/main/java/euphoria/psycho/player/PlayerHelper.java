@@ -184,7 +184,6 @@ public class PlayerHelper {
     }
 
 
-
     static void rotateScreen(AppCompatActivity activity) {
         int orientation = calculateScreenOrientation(activity);
         if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
@@ -195,6 +194,7 @@ public class PlayerHelper {
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
     }
+
 
     static void showSystemUI(AppCompatActivity activity, boolean toggleActionBarVisibility) {
         if (toggleActionBarVisibility) {

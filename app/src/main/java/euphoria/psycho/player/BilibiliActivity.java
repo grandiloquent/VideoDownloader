@@ -74,7 +74,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
         @Override
         public void run() {
             if (mVideoPrepared && mAudioPrepared) {
-                mExoProgress.setDuration(mPlayer.getDuration());
+                mProgress.setDuration(mPlayer.getDuration());
                 mHandler.post(mProgressChecker);
                 mExoPlay.setImageResource(R.drawable.exo_controls_pause);
                 mPlayer.start();
@@ -189,7 +189,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
         int position = mPlayer.getCurrentPosition();
         mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mPlayer.getDuration()));
         mExoPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
-        mExoProgress.setPosition(position);
+        mProgress.setPosition(position);
         return position;
     }
 
@@ -199,7 +199,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
             mVideoTouchHelper.onTouchEvent(event);
             return true;
         });
-        mExoProgress.addListener(this);
+        mProgress.addListener(this);
         mExoPlay.setOnClickListener(v -> {
             switchPlayState(mPlayer, mExoPlay);
         });
@@ -278,7 +278,7 @@ public class BilibiliActivity extends BaseVideoActivity implements
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        mExoProgress.setBufferedPosition((long) (mPlayer.getDuration() * (1f * percent / 100)));
+        mProgress.setBufferedPosition((long) (mPlayer.getDuration() * (1f * percent / 100)));
     }
 
     @Override

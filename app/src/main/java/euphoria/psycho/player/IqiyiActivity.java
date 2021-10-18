@@ -139,7 +139,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
         int position = mPlayer.getCurrentPosition();
         mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mDuration));
         mExoPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
-        mExoProgress.setPosition(position);
+        mProgress.setPosition(position);
         return position;
     }
 
@@ -148,7 +148,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
             mVideoTouchHelper.onTouchEvent(event);
             return true;
         });
-        mExoProgress.addListener(this);
+        mProgress.addListener(this);
         mExoPlay.setOnClickListener(v -> {
             switchPlayState(mPlayer, mExoPlay);
         });
@@ -224,7 +224,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        mExoProgress.setBufferedPosition((long) (mPlayer.getDuration() * (1f * percent / 100)));
+        mProgress.setBufferedPosition((long) (mPlayer.getDuration() * (1f * percent / 100)));
     }
 
     @Override
@@ -262,7 +262,7 @@ public class IqiyiActivity extends BaseVideoActivity implements
         if (!mIsTencent)
             mHashMap.put(mPlayList[mCurrentPlaybackIndex], mp.getDuration());
         mDuration = mIsTencent ? mp.getDuration() : mHashMap.values().stream().mapToInt(integer -> integer).sum();
-        mExoProgress.setDuration(mDuration);
+        mProgress.setDuration(mDuration);
         mHandler.post(mProgressChecker);
         mPlayer.start();
         mExoPlay.setImageResource(R.drawable.exo_controls_pause);

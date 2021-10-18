@@ -28,4 +28,6 @@
     <string name="waiting">等待中</string>
     <string name="settings">设置</string>
     <string name="whether_to_use_the_browser_to_open_the_video_link">是否使用浏览器打开视频链接</string>
+    <string name="unable_to_extract_video">无法解析视频</string>
+
 </resources>

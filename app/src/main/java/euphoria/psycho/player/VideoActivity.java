@@ -191,7 +191,7 @@ public class VideoActivity extends BaseVideoActivity implements
         int position = mPlayer.getCurrentPosition();
         mExoDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mPlayer.getDuration()));
         mExoPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
-        mExoProgress.setPosition(position);
+        mProgress.setPosition(position);
         return position;
     }
 
@@ -200,7 +200,7 @@ public class VideoActivity extends BaseVideoActivity implements
             mVideoTouchHelper.onTouchEvent(event);
             return true;
         });
-        mExoProgress.addListener(this);
+        mProgress.addListener(this);
         mExoPlay.setOnClickListener(v -> {
             switchPlayState(mPlayer, mExoPlay);
         });
@@ -312,7 +312,7 @@ public class VideoActivity extends BaseVideoActivity implements
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        mExoProgress.setBufferedPosition((long) (mPlayer.getDuration() * (1f * percent / 100)));
+        mProgress.setBufferedPosition((long) (mPlayer.getDuration() * (1f * percent / 100)));
     }
 
     @Override
@@ -353,7 +353,7 @@ public class VideoActivity extends BaseVideoActivity implements
     @Override
     public void onPrepared(MediaPlayer mp) {
         Logger.e(String.format("onPrepared, %s", ""));
-        mExoProgress.setDuration(mp.getDuration());
+        mProgress.setDuration(mp.getDuration());
         mHandler.post(mProgressChecker);
         mPlayer.start();
         seekToLastedState();
