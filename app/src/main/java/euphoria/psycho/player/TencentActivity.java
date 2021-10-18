@@ -144,11 +144,16 @@ public class TencentActivity extends BaseVideoActivity implements
                 extraString = "MEDIA_ERROR_TIMED_OUT";
             }
         }
-        new AlertDialog.Builder(this)
-                .setTitle("错误")
-                .setMessage(String.format("%s %s", whatString, extraString))
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
-                .show();
+        if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
+            mCurrentPosition = mPlayer.getCurrentPosition();
+            playPlayList(mCurrentPlaybackIndex);
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("错误")
+                    .setMessage(String.format("%s %s", whatString, extraString))
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
+                    .show();
+        }
         return true;
     }
 
@@ -311,43 +316,43 @@ public class TencentActivity extends BaseVideoActivity implements
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-        String whatString = Integer.toString(what);
-        switch (what) {
-            case MediaPlayer.MEDIA_INFO_UNKNOWN: {
-                whatString = "MEDIA_INFO_UNKNOWN";
-            }
-            case MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING: {
-                whatString = "MEDIA_INFO_VIDEO_TRACK_LAGGING";
-            }
-            case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START: {
-                whatString = "MEDIA_INFO_VIDEO_RENDERING_START";
-            }
-            case MediaPlayer.MEDIA_INFO_BUFFERING_START: {
-                whatString = "MEDIA_INFO_BUFFERING_START";
-            }
-            case MediaPlayer.MEDIA_INFO_BUFFERING_END: {
-                whatString = "MEDIA_INFO_BUFFERING_END";
-            }
-            case 703: {
-                whatString = "MEDIA_INFO_NETWORK_BANDWIDTH";
-            }
-            case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING: {
-                whatString = "MEDIA_INFO_BAD_INTERLEAVING";
-            }
-            case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE: {
-                whatString = "MEDIA_INFO_NOT_SEEKABLE";
-            }
-            case MediaPlayer.MEDIA_INFO_METADATA_UPDATE: {
-                whatString = "MEDIA_INFO_METADATA_UPDATE";
-            }
-            case MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE: {
-                whatString = "MEDIA_INFO_UNSUPPORTED_SUBTITLE";
-            }
-            case MediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT: {
-                whatString = "MEDIA_INFO_SUBTITLE_TIMED_OUT";
-            }
-        }
-        Log.e("B5aOx2", String.format("onInfo, %s \n extra = %d", whatString, extra));
+//        String whatString = Integer.toString(what);
+//        switch (what) {
+//            case MediaPlayer.MEDIA_INFO_UNKNOWN: {
+//                whatString = "MEDIA_INFO_UNKNOWN";
+//            }
+//            case MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING: {
+//                whatString = "MEDIA_INFO_VIDEO_TRACK_LAGGING";
+//            }
+//            case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START: {
+//                whatString = "MEDIA_INFO_VIDEO_RENDERING_START";
+//            }
+//            case MediaPlayer.MEDIA_INFO_BUFFERING_START: {
+//                whatString = "MEDIA_INFO_BUFFERING_START";
+//            }
+//            case MediaPlayer.MEDIA_INFO_BUFFERING_END: {
+//                whatString = "MEDIA_INFO_BUFFERING_END";
+//            }
+//            case 703: {
+//                whatString = "MEDIA_INFO_NETWORK_BANDWIDTH";
+//            }
+//            case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING: {
+//                whatString = "MEDIA_INFO_BAD_INTERLEAVING";
+//            }
+//            case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE: {
+//                whatString = "MEDIA_INFO_NOT_SEEKABLE";
+//            }
+//            case MediaPlayer.MEDIA_INFO_METADATA_UPDATE: {
+//                whatString = "MEDIA_INFO_METADATA_UPDATE";
+//            }
+//            case MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE: {
+//                whatString = "MEDIA_INFO_UNSUPPORTED_SUBTITLE";
+//            }
+//            case MediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT: {
+//                whatString = "MEDIA_INFO_SUBTITLE_TIMED_OUT";
+//            }
+//        }
+//        Log.e("B5aOx2", String.format("onInfo, %s \n extra = %d", whatString, extra));
         if (extra > 0) {
             mCurrentPosition = mPlayer.getCurrentPosition();
             playPlayList(mCurrentPlaybackIndex);
