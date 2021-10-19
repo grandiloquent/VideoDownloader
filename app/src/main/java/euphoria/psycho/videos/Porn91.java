@@ -1,7 +1,6 @@
 package euphoria.psycho.videos;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -34,7 +33,6 @@ import euphoria.psycho.tasks.VideoService;
 
 import static euphoria.psycho.videos.VideosHelper.getLocationAddCookie;
 import static euphoria.psycho.videos.VideosHelper.getString;
-import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class Porn91 extends BaseExtractor<String> {
 
@@ -86,14 +84,15 @@ public class Porn91 extends BaseExtractor<String> {
         return Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"));
     }
 
-
     @Override
     protected void processVideo(String videoUri) {
         if (videoUri.length() == 0) {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
-        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
+        mMainActivity.setVideoList(new String[]{videoUri});
+        mMainActivity.getWebView().loadUrl("file:///android_asset/index.html");
+        // invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 
     public static void fetchVideos(String url, int max) {
@@ -158,7 +157,7 @@ public class Porn91 extends BaseExtractor<String> {
             try {
                 video.put("title", videoTitle);
                 video.put("thumbnail", videoThumb);
-                video.put("url", videoUrl.replaceAll("&(page|viewtype)=.+",""));
+                video.put("url", videoUrl.replaceAll("&(page|viewtype)=.+", ""));
                 video.put("type", 1);
                 int duration = 0;
                 try {

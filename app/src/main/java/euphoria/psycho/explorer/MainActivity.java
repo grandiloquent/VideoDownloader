@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
-import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -145,6 +144,17 @@ public class MainActivity extends Activity implements ClientInterface {
             }
         }
         initialize();
+    }
+
+    @Override
+    public String[] getVideoList() {
+        return mVideoList;
+    }
+
+    private String[] mVideoList;
+
+    public void setVideoList(String[] videoList) {
+        mVideoList = videoList;
     }
 
     @Override

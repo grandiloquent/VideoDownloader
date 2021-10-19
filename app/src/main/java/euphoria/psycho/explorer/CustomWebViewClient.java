@@ -1,12 +1,15 @@
 package euphoria.psycho.explorer;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -59,6 +62,22 @@ public class CustomWebViewClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
         view.evaluateJavascript(mJavaScript, null);
+        if (url.equals("file:///android_asset/index.html")) {
+            if (mClientInterface.getVideoList() == null) {
+                return;
+            }
+            JSONObject obj = new JSONObject();
+            try {
+                JSONArray jsonArray = new JSONArray();
+                for (String s : mClientInterface.getVideoList()) {
+                    jsonArray.put(s);
+                }
+                obj.put("videos", jsonArray);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            view.evaluateJavascript("start('" + obj.toString() + "')", null);
+        }
     }
 
     @Override

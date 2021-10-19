@@ -83,26 +83,8 @@ public class TencentActivity extends PlayerActivity implements
         );
         return url + "?vkey=" + key;
     }
-    private void initializePlayer() {
-        if (!loadPlayList())
-            return;
 
-    }
 
-    private boolean loadPlayList() {
-        mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
-        if (mPlayList.length == 1) {
-            mExoNext.setVisibility(View.GONE);
-            mExoPrev.setVisibility(View.GONE);
-        }
-        mVideoFormat = getIntent().getIntExtra(EXTRA_VIDEO_FORMAT, 0);
-        mVideoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
-        if (mPlayList != null) {
-            playPlayList(mCurrentPlaybackIndex);
-            return true;
-        }
-        return false;
-    }
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +96,16 @@ public class TencentActivity extends PlayerActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        initializePlayer();
+        mPlayList = getIntent().getStringArrayExtra(EXTRA_PLAYLSIT);
+        if (mPlayList.length == 1) {
+            mExoNext.setVisibility(View.GONE);
+            mExoPrev.setVisibility(View.GONE);
+        }
+        mVideoFormat = getIntent().getIntExtra(EXTRA_VIDEO_FORMAT, 0);
+        mVideoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
+        if (mPlayList != null) {
+            playPlayList(mCurrentPlaybackIndex);
+        }
     }
 
     @Override
@@ -220,17 +211,12 @@ public class TencentActivity extends PlayerActivity implements
         return false;
     }
 
-    // If the player has loaded enough data
-    // we immediately start playing the video
-    // and if the user temporarily switches to another program
-    // we will cache the playback position
-    // and when the player is opened again
-    // we will try to jump to the previous playback position
     @Override
     public void onPrepared(MediaPlayer mp) {
         super.onPrepared(mp);
         mProgress.setDuration(mp.getDuration());
     }
+
     @Override
     public void onVideoUri(String uri) {
         runOnUiThread(() -> {

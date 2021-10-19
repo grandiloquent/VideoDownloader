@@ -1,7 +1,7 @@
 package euphoria.psycho.videos;
 
-import android.content.Intent;
 import android.os.Process;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import euphoria.psycho.explorer.HttpUtils;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
-import euphoria.psycho.player.IqiyiActivity;
 
 public class Iqiyi extends BaseExtractor<String[]> {
     public static Pattern MATCH_IQIYI = Pattern.compile("\\.iqiyi\\.com/v_");
@@ -54,13 +53,18 @@ public class Iqiyi extends BaseExtractor<String[]> {
 
     @Override
     protected void processVideo(String[] videoUris) {
+        Log.e("B5aOx2", String.format("processVideo, %s", videoUris[0]));
         if (videoUris == null || videoUris.length == 0) {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
-        Intent intent = new Intent(mMainActivity, IqiyiActivity.class);
-        intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, videoUris);
-        mMainActivity.startActivity(intent);
+//        Intent intent = new Intent(mMainActivity, IqiyiActivity.class);
+//        intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, videoUris);
+//        mMainActivity.startActivity(intent);
+
+        mMainActivity.setVideoList(videoUris);
+        mMainActivity.getWebView().loadUrl("file:///android_asset/index.html");
+
     }
 
     public interface Callback {

@@ -1,5 +1,6 @@
 package euphoria.psycho.explorer;
 
+import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 
@@ -10,7 +11,7 @@ public class CustomWebChromeClient extends WebChromeClient {
 
     @Override
     public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-        //Log.e("TAG/", "Debug: onConsoleMessage, \n" + consoleMessage.message());
+        Log.e("B5aOx2", String.format("onConsoleMessage, %s", consoleMessage.message()));
         return super.onConsoleMessage(consoleMessage);
     }
 }
