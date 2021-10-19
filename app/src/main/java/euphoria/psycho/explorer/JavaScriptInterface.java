@@ -3,13 +3,10 @@ package euphoria.psycho.explorer;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Process;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import euphoria.psycho.player.VideoActivity;
 import euphoria.psycho.share.StringShare;
 
 public class JavaScriptInterface {
@@ -43,9 +40,8 @@ public class JavaScriptInterface {
                         Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                         return;
                     }
-                    Intent intent = new Intent(mMainActivity, VideoActivity.class);
-                    intent.setData(Uri.parse(finalVideoUri));
-                    mMainActivity.startActivity(intent);
+                    mMainActivity.setVideoList(new String[]{finalVideoUri});
+                    mMainActivity.getWebView().loadUrl("file:///android_asset/index.html");
                 }
             });
         }).start();
