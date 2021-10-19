@@ -81,7 +81,7 @@ public class Helper {
         });
         WebViewShare.setWebView(webView, Helper.createCacheDirectory(context).getAbsolutePath());
         webView.setWebViewClient(new CustomWebViewClient(context));
-        webView.setWebChromeClient(new CustomWebChromeClient());
+        webView.setWebChromeClient(new CustomWebChromeClient(context));
         webView.setDownloadListener(Helper.getDownloadListener(context));
         WebViewShare.supportCookie(webView);
     }

@@ -48,6 +48,20 @@ playerControlPlayPauseIcon.addEventListener('click', ev => {
 })
 
 
+
+const iconButton = document.querySelector('.icon-button');
+iconButton.addEventListener('click', async ev => {
+    ev.stopPropagation();
+    try {
+        await video.requestFullscreen();//webkitRequestFullscreen();
+        // if (screen.orientation.lock)
+        //     screen.orientation.lock("landscape");
+    } catch (e) {
+        console.log(e);
+    }
+})
+
+
 video.addEventListener('abort', ev => {
     console.log('abort');
 });
