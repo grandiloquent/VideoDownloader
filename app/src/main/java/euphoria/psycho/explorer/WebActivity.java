@@ -115,14 +115,12 @@ public class WebActivity extends Activity {
 
             }
         });
-
         mWebView.loadUrl("http://47.106.105.122/video.html");
     }
 
     private class JavaInterface {
         @JavascriptInterface
         public void parse(String uri) {
-            Log.e("B5aOx2", String.format("parse, %s", uri));
             new Thread(() -> {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 String videoUri;

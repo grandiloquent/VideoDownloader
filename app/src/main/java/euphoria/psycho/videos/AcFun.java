@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.net.Uri;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;

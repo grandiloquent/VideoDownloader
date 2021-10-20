@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.net.Uri;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
@@ -29,6 +30,7 @@ public class PornOne extends BaseExtractor<String> {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
+        Log.e("B5aOx2", String.format("processVideo, %s", videoUri));
         invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 

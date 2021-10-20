@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.content.Intent;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
