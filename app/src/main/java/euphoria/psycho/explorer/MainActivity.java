@@ -20,7 +20,6 @@ import euphoria.psycho.videos.XiGua;
 import euphoria.psycho.videos.YouTube;
 
 import static euphoria.psycho.explorer.Helper.KEY_LAST_ACCESSED;
-import static euphoria.psycho.explorer.Helper.checkChrome;
 import static euphoria.psycho.explorer.Helper.checkPermissions;
 import static euphoria.psycho.explorer.Helper.checkUnfinishedVideoTasks;
 import static euphoria.psycho.explorer.Helper.configureWebView;
@@ -68,10 +67,6 @@ public class MainActivity extends Activity implements ClientInterface {
     private void initialize() {
         setContentView(R.layout.activity_main);
         PreferenceShare.initialize(this);
-        // check whether the chrome is installed
-        // if is such we should like to use the chrome to play the video
-        // for better UX
-        checkChrome(this);
         mWebView = findViewById(R.id.web);
         JavaScriptInterface javaScriptInterface = new JavaScriptInterface(this);
         mWebView.addJavascriptInterface(javaScriptInterface, "JInterface");

@@ -158,18 +158,13 @@ video.addEventListener('waiting', ev => {
 
 const contextRenderer = document.querySelector('.context-renderer');
 
-function applyVideos() {
+async function applyVideos() {
     async function getRandomVideos() {
         const response = await fetch("http://47.106.105.122/api/video/random");
         if (!response.ok) throw new Error(response.statusText);
         return await response.json();
     }
 
-    const imageObserver = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting) {
-            entries[0].target.src = entries[0].target.dataset.src;
-        }
-    });
 
     new IntersectionObserver(entries => {
         if (entries[0].isIntersecting) {
@@ -178,6 +173,22 @@ function applyVideos() {
     });
 
     async function loadVideos() {
+        const imageObserver = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                entries[0].target.src = entries[0].target.dataset.src;
+                imageObserver.observe(entries[0].target);
+            }
+        });
+
+        async function getBaseUri() {
+            const response = await fetch("http://47.106.105.122/api/video/57ck");
+            if (!response.ok) throw new Error(response.statusText);
+            return await response.text();
+        }
+
+        let baseUri = await getBaseUri();
+        console.log(baseUri);
+
         const videos = await getRandomVideos();
         const documentFragment = document.createDocumentFragment();
 
@@ -201,7 +212,7 @@ function applyVideos() {
             videoThumbnailOverlayBottomGroup.setAttribute('class', 'video-thumbnail-overlay-bottom-group');
             const ytmThumbnailOverlayTimeStatusRenderer = document.createElement('DIV');
             ytmThumbnailOverlayTimeStatusRenderer.setAttribute('class', 'ytm-thumbnail-overlay-time-status-renderer');
-            ytmThumbnailOverlayTimeStatusRenderer.appendChild(document.createTextNode('13:00'));
+            ytmThumbnailOverlayTimeStatusRenderer.appendChild(document.createTextNode(formatDuration(v.duration)));
             videoThumbnailOverlayBottomGroup.appendChild(ytmThumbnailOverlayTimeStatusRenderer);
             videoThumbnailContainerLarge.appendChild(videoThumbnailOverlayBottomGroup);
             a.appendChild(videoThumbnailContainerLarge);
@@ -246,12 +257,25 @@ function applyVideos() {
             largeMediaItemInfo.appendChild(largeMediaItemMenu);
             details.appendChild(largeMediaItemInfo);
             ytmLargeMediaItem.appendChild(details);
+
+            ytmLargeMediaItem.addEventListener('click', ev => {
+                const href = ytmLargeMediaItem.getAttribute('data-href');
+                const id = ytmLargeMediaItem.getAttribute('data-id');
+                fetch(`http://47.106.105.122/api/video/record?id=${id}`).then(res => res.text()).then(res => {
+                    console.log(res);
+                })
+                if (href.startsWith("http://") || href.startsWith("https://"))
+                    window.JInterface.parse(href);
+                else
+                    window.JInterface.parse(baseUri + href);
+            });
+
             documentFragment.appendChild(ytmLargeMediaItem);
         });
         contextRenderer.appendChild(documentFragment);
     }
 
-    loadVideos();
+    await loadVideos();
 }
 
 applyVideos();

@@ -49,9 +49,5 @@ public class CustomWebChromeClient extends WebChromeClient {
 
     }
 
-    @Override
-    public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) {
-        super.onShowCustomView(view, requestedOrientation, callback);
-        Log.e("B5aOx2", String.format("onShowCustomView, %s", ""));
-    }
+
 }

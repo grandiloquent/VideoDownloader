@@ -26,6 +26,7 @@ function calculateProgressPercent(video) {
 function start(obj) {
     const videos = JSON.parse(obj).videos;
     video.src = videos[0];
+    video.play();
 }
 
 const timeFirst = document.querySelector('.time-first');
@@ -38,7 +39,7 @@ const video = document.querySelector('.html5-main-video');
 video.volume = 0;
 
 const ytpButton = document.querySelector('.ytp-button');
-ytpButton.addEventListener('click',  ev => {
+ytpButton.addEventListener('click', ev => {
     ev.stopPropagation();
     video.play();
     ytpButton.style.display = 'none';
