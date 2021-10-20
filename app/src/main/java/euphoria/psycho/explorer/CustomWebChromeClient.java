@@ -25,6 +25,15 @@ public class CustomWebChromeClient extends WebChromeClient {
         return super.onConsoleMessage(consoleMessage);
     }
 
+    public void onHideCustomView() {
+        ((FrameLayout) mMainActivity.getWindow().getDecorView()).removeView(this.mCustomView);
+        this.mCustomView = null;
+        mMainActivity.getWindow().getDecorView().setSystemUiVisibility(this.mOriginalSystemUiVisibility);
+        mMainActivity.setRequestedOrientation(this.mOriginalOrientation);
+        this.mCustomViewCallback.onCustomViewHidden();
+        this.mCustomViewCallback = null;
+    }
+
     @Override
     public void onShowCustomView(View paramView, CustomViewCallback paramCustomViewCallback) {
         if (this.mCustomView != null) {
