@@ -1,7 +1,9 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
 import android.util.Log;
@@ -21,8 +23,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
+
 import androidx.annotation.Nullable;
+import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.StringShare;
+import euphoria.psycho.share.WebViewShare;
+
+import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
 public class WebActivity extends Activity {
     private WebView mWebView;
@@ -43,15 +51,11 @@ public class WebActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
         mWebView = findViewById(R.id.web);
+        mWebView.clearCache(true);
         JavaInterface javaInterface = new JavaInterface();
         mWebView.addJavascriptInterface(javaInterface, "JInterface");
         WebSettings settings = mWebView.getSettings();
         settings.setJavaScriptEnabled(true);
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        settings.setAppCacheEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setDatabaseEnabled(true);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -119,6 +123,17 @@ public class WebActivity extends Activity {
     }
 
     private class JavaInterface {
+        @JavascriptInterface
+        public void download(String videoUri) {
+            if (videoUri.contains("m3u8")) {
+                Intent intent = new Intent(WebActivity.this, euphoria.psycho.tasks.VideoActivity.class);
+                intent.setData(Uri.parse(videoUri));
+                WebActivity.this.startActivity(intent);
+            } else {
+                WebViewShare.downloadFile(WebActivity.this, KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
+            }
+        }
+
         @JavascriptInterface
         public void parse(String uri) {
             new Thread(() -> {

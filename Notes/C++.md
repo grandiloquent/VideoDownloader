@@ -21,4 +21,6 @@
 
 - https://github.com/OpenAtomFoundation/TencentOS-tiny/blob/master/components/connectivity/qcloud-iot-hub-sdk/3rdparty/platform/os/linux/HAL_TCP_linux.c
 - https://github.com/OpenAtomFoundation/TencentOS-tiny/blob/master/components/connectivity/iotkit-embedded-3.0.1/3rdparty/wrappers/os/ubuntu/HAL_UDP_linux.c
+- https://github.com/OpenAtomFoundation/TencentOS-tiny/blob/master/components/connectivity/qcloud-iot-hub-sdk/3rdparty/platform/os/windows/HAL_TCP_win.c
+
 - https://github.com/espressif/arduino-esp32

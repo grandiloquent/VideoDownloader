@@ -78,6 +78,14 @@ public class StringShare {
         return sb.toString();
     }
 
+    public static boolean matchAny(String[] patterns, String value) {
+        for (String s : patterns) {
+            Pattern pattern = Pattern.compile(s);
+            if (pattern.matcher(value).find()) return true;
+        }
+        return false;
+    }
+
     public static String padStart(String s, int length, char padChar) {
         if (length < 0)
             throw new IllegalArgumentException(String.format("Desired length %d is less than zero.", length));
