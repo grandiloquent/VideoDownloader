@@ -91,7 +91,7 @@ public class Porn91 extends BaseExtractor<String> {
             return;
         }
         mMainActivity.setVideoList(new String[]{videoUri});
-        mMainActivity.getWebView().loadUrl("file:///android_asset/index.html");
+        mMainActivity.getWebView().loadUrl("http://47.106.105.122/video.html");
         // invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 

@@ -50,6 +50,9 @@ public class WebActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
+
+        // Set up the WebView control
+
         mWebView = findViewById(R.id.web);
         mWebView.clearCache(true);
         JavaInterface javaInterface = new JavaInterface();

@@ -56,8 +56,10 @@ public class XVideos extends BaseExtractor<String> {
         String htmlCode = getString(url, new String[][]{
                 {"User-Agent", NetShare.PC_USER_AGENT}
         });
+        if (htmlCode == null) {
+            return;
+        }
         JSONArray results = new JSONArray();
-        String videoUrl = url;
         String videoTitle = StringShare.substring(htmlCode, "html5player.setVideoTitle('", "');");
         String videoThumb = StringShare.substring(htmlCode, "html5player.setThumbUrl('", "');");
         String videoDuration = StringShare.substring(htmlCode, "<meta property=\"og:duration\" content=\"", "\"");
@@ -65,15 +67,16 @@ public class XVideos extends BaseExtractor<String> {
         try {
             video.put("title", videoTitle);
             video.put("thumbnail", videoThumb);
-            video.put("url", videoUrl);
+            video.put("url", url);
             int duration = 0;
             try {
-                duration = Integer.parseInt(videoDuration);
+                if (videoDuration != null) {
+                    duration = Integer.parseInt(videoDuration);
+                }
             } catch (Exception ignored) {
             }
             video.put("duration", duration);
         } catch (JSONException ignored) {
-            Log.e("B5aOx2", String.format("fetchVideos, %s", ignored));
         }
         results.put(video);
         try {
