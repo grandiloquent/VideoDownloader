@@ -9,7 +9,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0.8"
+        versionName "1.0.9"
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_STL=c++_shared'
@@ -46,6 +46,7 @@ dependencies {
     implementation('com.github.evgenyneu:js-evaluator-for-android:v4.0.0') {
         exclude module: 'appcompat-v7'
     }
+    implementation 'com.google.android.exoplayer:exoplayer:2.15.1'
 //    implementation platform('com.google.firebase:firebase-bom:28.4.0')
 //    implementation 'com.google.firebase:firebase-crashlytics'
 //    implementation 'com.google.firebase:firebase-analytics'
