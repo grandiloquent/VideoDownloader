@@ -3,7 +3,6 @@ package euphoria.psycho.player;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -11,30 +10,25 @@ import android.widget.Toast;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
-import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
-import com.google.android.exoplayer2.database.DatabaseProvider;
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitializationException;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil.DecoderQueryException;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.StyledPlayerControlView;
-import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.cache.Cache;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
 import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
@@ -46,12 +40,16 @@ import java.io.File;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.videos.Iqiyi;
+
+import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
 public class IqiyiActivity extends Activity implements
         Iqiyi.Callback, StyledPlayerControlView.VisibilityListener {
@@ -63,19 +61,8 @@ public class IqiyiActivity extends Activity implements
     private static final String KEY_POSITION = "position";
     private static final String KEY_TRACK_SELECTOR_PARAMETERS = "track_selector_parameters";
     private static final String KEY_WINDOW = "window";
-    private static final String USER_AGENT =
-            "ExoPlayerDemo/"
-                    + ExoPlayerLibraryInfo.VERSION
-                    + " (Linux; Android "
-                    + Build.VERSION.RELEASE
-                    + ") "
-                    + ExoPlayerLibraryInfo.VERSION_SLASHY;
-    private static DataSource.Factory dataSourceFactory;
-    private static DatabaseProvider databaseProvider;
-    private static Cache downloadCache;
-    private static File downloadDirectory;
-    private static HttpDataSource.Factory httpDataSourceFactory;
-    protected StyledPlayerView playerView;
+
+    protected SimplePlayerView playerView;
     private DefaultTrackSelector.Parameters trackSelectorParameters;
     private boolean startAutoPlay;
     private int startWindow;
@@ -98,28 +85,9 @@ public class IqiyiActivity extends Activity implements
                 .setExtensionRendererMode(extensionRendererMode);
     }
 
-    public static synchronized DataSource.Factory getDataSourceFactory(Context context) {
-        if (dataSourceFactory == null) {
-            context = context.getApplicationContext();
-            DefaultDataSourceFactory upstreamFactory =
-                    new DefaultDataSourceFactory(context, getHttpDataSourceFactory(context));
-            dataSourceFactory = buildReadOnlyCacheDataSource(upstreamFactory, getDownloadCache(context));
-        }
-        return dataSourceFactory;
-    }
 
-    public static synchronized HttpDataSource.Factory getHttpDataSourceFactory(Context context) {
-        if (httpDataSourceFactory == null) {
-            if (httpDataSourceFactory == null) {
-                // We don't want to use Cronet, or we failed to instantiate a CronetEngine.
-                CookieManager cookieManager = new CookieManager();
-                cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
-                CookieHandler.setDefault(cookieManager);
-                httpDataSourceFactory = new DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT);
-            }
-        }
-        return httpDataSourceFactory;
-    }
+
+
 
     protected void clearStartPosition() {
         startAutoPlay = true;
@@ -128,15 +96,32 @@ public class IqiyiActivity extends Activity implements
     }
 
     protected boolean initializePlayer() {
+        Intent intent = getIntent();
+        List<MediaItem> mediaItems = new ArrayList<>();
+        String[] strings = intent.getStringArrayExtra(EXTRA_PLAYLSIT);
+        // int i = strings.length - 1; i > -1; i-- strings[i]
+        for (String s:strings) {
+            mediaItems.add(MediaItem.fromUri(s));
+        }
         if (player == null) {
-            Intent intent = getIntent();
-            Iqiyi.getVideoAddress(intent.getStringArrayExtra(EXTRA_PLAYLSIT)[0], this);
+            //Iqiyi.getVideoAddress(intent.getStringArrayExtra(EXTRA_PLAYLSIT)[0], this);
             boolean preferExtensionDecoders = true;
             RenderersFactory renderersFactory =
                     buildRenderersFactory(/* context= */ this, preferExtensionDecoders);
+            CookieManager cookieManager = new CookieManager();
+            cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
+            CookieHandler.setDefault(cookieManager);
+           ;
+            DefaultDataSourceFactory upstreamFactory =
+                    new DefaultDataSourceFactory(this,  new DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT));
+            File downloadContentDirectory =
+                    new File(getExternalFilesDir(/* type= */ null), DOWNLOAD_CONTENT_DIRECTORY);
+
             MediaSourceFactory mediaSourceFactory =
-                    new DefaultMediaSourceFactory(dataSourceFactory)
-                            .setAdViewProvider(playerView);
+                    new DefaultMediaSourceFactory( buildReadOnlyCacheDataSource(upstreamFactory,
+                            new SimpleCache(
+                                    downloadContentDirectory, new NoOpCacheEvictor(), new ExoDatabaseProvider(this))
+                            ));
             trackSelector = new DefaultTrackSelector(/* context= */ this);
             trackSelector.setParameters(trackSelectorParameters);
             lastSeenTrackGroupArray = null;
@@ -156,7 +141,8 @@ public class IqiyiActivity extends Activity implements
         if (haveStartPosition) {
             player.seekTo(startWindow, startPosition);
         }
-        //player.setMediaItems(mediaItems, /* resetPosition= */ !haveStartPosition);
+        player.setMediaItems(mediaItems, /* resetPosition= */ !haveStartPosition);
+        player.prepare();
         updateButtonVisibility();
         return true;
     }
@@ -182,33 +168,10 @@ public class IqiyiActivity extends Activity implements
     }
 
 
-    private static synchronized DatabaseProvider getDatabaseProvider(Context context) {
-        if (databaseProvider == null) {
-            databaseProvider = new ExoDatabaseProvider(context);
-        }
-        return databaseProvider;
-    }
 
-    private static synchronized Cache getDownloadCache(Context context) {
-        if (downloadCache == null) {
-            File downloadContentDirectory =
-                    new File(getDownloadDirectory(context), DOWNLOAD_CONTENT_DIRECTORY);
-            downloadCache =
-                    new SimpleCache(
-                            downloadContentDirectory, new NoOpCacheEvictor(), getDatabaseProvider(context));
-        }
-        return downloadCache;
-    }
 
-    private static synchronized File getDownloadDirectory(Context context) {
-        if (downloadDirectory == null) {
-            downloadDirectory = context.getExternalFilesDir(/* type= */ null);
-            if (downloadDirectory == null) {
-                downloadDirectory = context.getFilesDir();
-            }
-        }
-        return downloadDirectory;
-    }
+
+
 
     @Nullable
     private static Map<String, String> getDrmRequestHeaders(MediaItem item) {
@@ -247,7 +210,7 @@ public class IqiyiActivity extends Activity implements
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dataSourceFactory = getDataSourceFactory(this);
+
         setContentView(R.layout.player_activity);
         playerView = findViewById(R.id.player_view);
         playerView.setControllerVisibilityListener(this);
@@ -319,8 +282,9 @@ public class IqiyiActivity extends Activity implements
         runOnUiThread(() -> {
             if (uri != null) {
                 Log.e("B5aOx2", String.format("onVideoUri, %s", uri));
-                player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(MediaItem.fromUri(uri)));
+//                player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory)
+//                        .createMediaSource(MediaItem.fromUri(uri)));
+                player.setMediaItem(MediaItem.fromUri(uri));
                 player.prepare();
             } else {
                 Toast.makeText(IqiyiActivity.this, "无法解析视频", Toast.LENGTH_LONG).show();

@@ -91,6 +91,13 @@ public class MainActivity extends Activity implements ClientInterface {
 //                SettingsFragment.KEY_TENCENT
 //        ).apply();
         //Tencent.handle("https://m.v.qq.com/x/m/play?cid=gounil1l2zq5thv", this);
+
+//        Intent intent = new Intent(this, IqiyiActivity.class);
+//        intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, new String[]{
+//                "https://video-hw.xvideos-cdn.com/videos_new/3gp/8/9/d/xvideos.com_89d502a98c25c4c5a4c971eeb7e6fae2.mp4?e=1635107846&ri=1024&rs=85&h=b847150be273133ebb701d5ebbe72782"
+//        });
+//        startActivity(intent);
+
     }
 
     @Override

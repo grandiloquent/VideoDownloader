@@ -2,7 +2,6 @@ package euphoria.psycho.videos;
 
 import android.content.Intent;
 import android.os.Process;
-import android.util.Log;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -62,6 +61,9 @@ public class Iqiyi extends BaseExtractor<String[]> {
         Intent intent = new Intent(mMainActivity, IqiyiActivity.class);
         intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, videoUris);
         mMainActivity.startActivity(intent);
+
+        // https://video-hw.xvideos-cdn.com/videos_new/3gp/8/9/d/xvideos.com_89d502a98c25c4c5a4c971eeb7e6fae2.mp4?e=1635107846&ri=1024&rs=85&h=b847150be273133ebb701d5ebbe72782
+
     }
 
     public interface Callback {
