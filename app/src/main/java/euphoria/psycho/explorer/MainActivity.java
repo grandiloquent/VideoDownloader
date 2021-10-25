@@ -2,6 +2,7 @@ package euphoria.psycho.explorer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
@@ -11,6 +12,7 @@ import android.widget.Toast;
 import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
+import euphoria.psycho.player.IqiyiActivity;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
@@ -92,11 +94,11 @@ public class MainActivity extends Activity implements ClientInterface {
 //        ).apply();
         //Tencent.handle("https://m.v.qq.com/x/m/play?cid=gounil1l2zq5thv", this);
 
-//        Intent intent = new Intent(this, IqiyiActivity.class);
-//        intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, new String[]{
-//                "https://video-hw.xvideos-cdn.com/videos_new/3gp/8/9/d/xvideos.com_89d502a98c25c4c5a4c971eeb7e6fae2.mp4?e=1635107846&ri=1024&rs=85&h=b847150be273133ebb701d5ebbe72782"
-//        });
-//        startActivity(intent);
+        Intent intent = new Intent(this, IqiyiActivity.class);
+        intent.putExtra(IqiyiActivity.EXTRA_PLAYLSIT, new String[]{
+                "https://video-hw.xvideos-cdn.com/videos/mp4/c/6/a/xvideos.com_c6a12bad2451a8cdd8034642e5a471af.mp4?e=1635142237&ri=1024&rs=85&h=1834de29cfc6df37148aa72bcd946686"
+        });
+        startActivity(intent);
 
     }
 

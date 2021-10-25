@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
@@ -25,7 +24,6 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.StyledPlayerControlView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
@@ -52,7 +50,7 @@ import euphoria.psycho.videos.Iqiyi;
 import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
 public class IqiyiActivity extends Activity implements
-        Iqiyi.Callback, StyledPlayerControlView.VisibilityListener {
+        Iqiyi.Callback, SimplePlayerControlView.VisibilityListener {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
     public static final String EXTRA_PLAYLSIT = "extra.PLAYLSIT";
     public static final String EXTRA_TYPE = "extra.TYPE";
@@ -67,27 +65,19 @@ public class IqiyiActivity extends Activity implements
     private boolean startAutoPlay;
     private int startWindow;
     private long startPosition;
-    protected @Nullable
-    SimpleExoPlayer player;
+    protected SimpleExoPlayer player;
     private DefaultTrackSelector trackSelector;
     private TrackGroupArray lastSeenTrackGroupArray;
 
     public static RenderersFactory buildRenderersFactory(
             Context context, boolean preferExtensionRenderer) {
-        @DefaultRenderersFactory.ExtensionRendererMode
         int extensionRendererMode =
-                true
-                        ? (preferExtensionRenderer
+                (preferExtensionRenderer
                         ? DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER
-                        : DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-                        : DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
+                        : DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON);
         return new DefaultRenderersFactory(context.getApplicationContext())
                 .setExtensionRendererMode(extensionRendererMode);
     }
-
-
-
-
 
     protected void clearStartPosition() {
         startAutoPlay = true;
@@ -100,7 +90,7 @@ public class IqiyiActivity extends Activity implements
         List<MediaItem> mediaItems = new ArrayList<>();
         String[] strings = intent.getStringArrayExtra(EXTRA_PLAYLSIT);
         // int i = strings.length - 1; i > -1; i-- strings[i]
-        for (String s:strings) {
+        for (String s : strings) {
             mediaItems.add(MediaItem.fromUri(s));
         }
         if (player == null) {
@@ -111,17 +101,16 @@ public class IqiyiActivity extends Activity implements
             CookieManager cookieManager = new CookieManager();
             cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
             CookieHandler.setDefault(cookieManager);
-           ;
+            ;
             DefaultDataSourceFactory upstreamFactory =
-                    new DefaultDataSourceFactory(this,  new DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT));
+                    new DefaultDataSourceFactory(this, new DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT));
             File downloadContentDirectory =
                     new File(getExternalFilesDir(/* type= */ null), DOWNLOAD_CONTENT_DIRECTORY);
-
             MediaSourceFactory mediaSourceFactory =
-                    new DefaultMediaSourceFactory( buildReadOnlyCacheDataSource(upstreamFactory,
+                    new DefaultMediaSourceFactory(buildReadOnlyCacheDataSource(upstreamFactory,
                             new SimpleCache(
                                     downloadContentDirectory, new NoOpCacheEvictor(), new ExoDatabaseProvider(this))
-                            ));
+                    ));
             trackSelector = new DefaultTrackSelector(/* context= */ this);
             trackSelector.setParameters(trackSelectorParameters);
             lastSeenTrackGroupArray = null;
@@ -143,7 +132,6 @@ public class IqiyiActivity extends Activity implements
         }
         player.setMediaItems(mediaItems, /* resetPosition= */ !haveStartPosition);
         player.prepare();
-        updateButtonVisibility();
         return true;
     }
 
@@ -167,12 +155,6 @@ public class IqiyiActivity extends Activity implements
                 .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR);
     }
 
-
-
-
-
-
-
     @Nullable
     private static Map<String, String> getDrmRequestHeaders(MediaItem item) {
         MediaItem.DrmConfiguration drmConfiguration = item.playbackProperties.drmConfiguration;
@@ -190,8 +172,7 @@ public class IqiyiActivity extends Activity implements
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
-    private void updateButtonVisibility() {
-    }
+
 
     private void updateStartPosition() {
         if (player != null) {
@@ -210,7 +191,6 @@ public class IqiyiActivity extends Activity implements
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.player_activity);
         playerView = findViewById(R.id.player_view);
         playerView.setControllerVisibilityListener(this);
@@ -281,9 +261,6 @@ public class IqiyiActivity extends Activity implements
     public void onVideoUri(String uri) {
         runOnUiThread(() -> {
             if (uri != null) {
-                Log.e("B5aOx2", String.format("onVideoUri, %s", uri));
-//                player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory)
-//                        .createMediaSource(MediaItem.fromUri(uri)));
                 player.setMediaItem(MediaItem.fromUri(uri));
                 player.prepare();
             } else {
@@ -304,7 +281,6 @@ public class IqiyiActivity extends Activity implements
             if (playbackState == Player.STATE_ENDED) {
                 showControls();
             }
-            updateButtonVisibility();
         }
 
         @Override
@@ -313,7 +289,6 @@ public class IqiyiActivity extends Activity implements
                 player.seekToDefaultPosition();
                 player.prepare();
             } else {
-                updateButtonVisibility();
                 showControls();
             }
         }
@@ -322,7 +297,6 @@ public class IqiyiActivity extends Activity implements
         @SuppressWarnings("ReferenceEquality")
         public void onTracksChanged(
                 @NonNull TrackGroupArray trackGroups, @NonNull TrackSelectionArray trackSelections) {
-            updateButtonVisibility();
             if (trackGroups != lastSeenTrackGroupArray) {
                 MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
                 if (mappedTrackInfo != null) {
@@ -369,7 +343,6 @@ public class IqiyiActivity extends Activity implements
                                     decoderInitializationException.codecInfo.name);
                 }
             }
-            Log.e("B5aOx2", String.format("getErrorMessage, %s", errorString));
             return Pair.create(0, errorString);
         }
     }
