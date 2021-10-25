@@ -132,11 +132,6 @@ public class SimplePlayerControlView extends FrameLayout {
 
     private final TextView rewindButtonTextView;
 
-    private final ImageView shuffleButton;
-    private final Drawable shuffleOffButtonDrawable;
-    private final String shuffleOffContentDescription;
-    private final Drawable shuffleOnButtonDrawable;
-    private final String shuffleOnContentDescription;
     private final Drawable subtitleOffButtonDrawable;
     private final String subtitleOffContentDescription;
     private final Drawable subtitleOnButtonDrawable;
@@ -347,13 +342,9 @@ public class SimplePlayerControlView extends FrameLayout {
         if (fastForwardButton != null) {
             fastForwardButton.setOnClickListener(componentListener);
         }
-        repeatToggleButton = findViewById(com.google.android.exoplayer2.ui.R.id.exo_repeat_toggle);
+        repeatToggleButton = findViewById(R.id.exo_repeat_toggle);
         if (repeatToggleButton != null) {
             repeatToggleButton.setOnClickListener(componentListener);
-        }
-        shuffleButton = findViewById(com.google.android.exoplayer2.ui.R.id.exo_shuffle);
-        if (shuffleButton != null) {
-            shuffleButton.setOnClickListener(componentListener);
         }
         resources = context.getResources();
         buttonAlphaEnabled =
@@ -406,8 +397,6 @@ public class SimplePlayerControlView extends FrameLayout {
         repeatOffButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_repeat_off);
         repeatOneButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_repeat_one);
         repeatAllButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_repeat_all);
-        shuffleOnButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_shuffle_on);
-        shuffleOffButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_shuffle_off);
         fullScreenExitContentDescription =
                 resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_fullscreen_exit_description);
         fullScreenEnterContentDescription =
@@ -418,19 +407,15 @@ public class SimplePlayerControlView extends FrameLayout {
                 resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_repeat_one_description);
         repeatAllButtonContentDescription =
                 resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_repeat_all_description);
-        shuffleOnContentDescription = resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_shuffle_on_description);
-        shuffleOffContentDescription =
-                resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_shuffle_off_description);
         ViewGroup bottomBar = findViewById(com.google.android.exoplayer2.ui.R.id.exo_bottom_bar);
         controlViewLayoutManager.setShowButton(bottomBar, true);
         controlViewLayoutManager.setShowButton(fastForwardButton, showFastForwardButton);
         controlViewLayoutManager.setShowButton(rewindButton, showRewindButton);
         controlViewLayoutManager.setShowButton(previousButton, showPreviousButton);
         controlViewLayoutManager.setShowButton(nextButton, showNextButton);
-        controlViewLayoutManager.setShowButton(shuffleButton, showShuffleButton);
         controlViewLayoutManager.setShowButton(subtitleButton, showSubtitleButton);
         controlViewLayoutManager.setShowButton(
-                repeatToggleButton, repeatToggleModes != RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE);
+                repeatToggleButton, true);
         addOnLayoutChangeListener(this::onLayoutChange);
     }
 
@@ -514,34 +499,7 @@ public class SimplePlayerControlView extends FrameLayout {
         return repeatToggleModes;
     }
 
-    public void setRepeatToggleModes(int repeatToggleModes) {
-        this.repeatToggleModes = repeatToggleModes;
-        if (player != null) {
-            int currentMode = player.getRepeatMode();
-            if (repeatToggleModes == RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE
-                    && currentMode != Player.REPEAT_MODE_OFF) {
-                controlDispatcher.dispatchSetRepeatMode(player, Player.REPEAT_MODE_OFF);
-            } else if (repeatToggleModes == RepeatModeUtil.REPEAT_TOGGLE_MODE_ONE
-                    && currentMode == Player.REPEAT_MODE_ALL) {
-                controlDispatcher.dispatchSetRepeatMode(player, Player.REPEAT_MODE_ONE);
-            } else if (repeatToggleModes == RepeatModeUtil.REPEAT_TOGGLE_MODE_ALL
-                    && currentMode == Player.REPEAT_MODE_ONE) {
-                controlDispatcher.dispatchSetRepeatMode(player, Player.REPEAT_MODE_ALL);
-            }
-        }
-        controlViewLayoutManager.setShowButton(
-                repeatToggleButton, repeatToggleModes != RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE);
-        updateRepeatModeButton();
-    }
 
-    public boolean getShowShuffleButton() {
-        return controlViewLayoutManager.getShowButton(shuffleButton);
-    }
-
-    public void setShowShuffleButton(boolean showShuffleButton) {
-        controlViewLayoutManager.setShowButton(shuffleButton, showShuffleButton);
-        updateShuffleButton();
-    }
 
     public boolean getShowSubtitleButton() {
         return controlViewLayoutManager.getShowButton(subtitleButton);
@@ -1009,39 +967,6 @@ public class SimplePlayerControlView extends FrameLayout {
         }
     }
 
-    private void updateRepeatModeButton() {
-        if (!isVisible() || !isAttachedToWindow || repeatToggleButton == null) {
-            return;
-        }
-        if (repeatToggleModes == RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE) {
-            updateButton(false, repeatToggleButton);
-            return;
-        }
-        Player player = this.player;
-        if (player == null) {
-            updateButton(false, repeatToggleButton);
-            repeatToggleButton.setImageDrawable(repeatOffButtonDrawable);
-            repeatToggleButton.setContentDescription(repeatOffButtonContentDescription);
-            return;
-        }
-        updateButton(true, repeatToggleButton);
-        switch (player.getRepeatMode()) {
-            case Player.REPEAT_MODE_OFF:
-                repeatToggleButton.setImageDrawable(repeatOffButtonDrawable);
-                repeatToggleButton.setContentDescription(repeatOffButtonContentDescription);
-                break;
-            case Player.REPEAT_MODE_ONE:
-                repeatToggleButton.setImageDrawable(repeatOneButtonDrawable);
-                repeatToggleButton.setContentDescription(repeatOneButtonContentDescription);
-                break;
-            case Player.REPEAT_MODE_ALL:
-                repeatToggleButton.setImageDrawable(repeatAllButtonDrawable);
-                repeatToggleButton.setContentDescription(repeatAllButtonContentDescription);
-                break;
-            default:
-
-        }
-    }
 
     private void updateRewindButton() {
         long rewindMs =
@@ -1069,28 +994,6 @@ public class SimplePlayerControlView extends FrameLayout {
         int totalHeight = settingsView.getMeasuredHeight();
         int height = Math.min(maxHeight, totalHeight);
         settingsWindow.setHeight(height);
-    }
-
-    private void updateShuffleButton() {
-        if (!isVisible() || !isAttachedToWindow || shuffleButton == null) {
-            return;
-        }
-        Player player = this.player;
-        if (!controlViewLayoutManager.getShowButton(shuffleButton)) {
-            updateButton(false, shuffleButton);
-        } else if (player == null) {
-            updateButton(false, shuffleButton);
-            shuffleButton.setImageDrawable(shuffleOffButtonDrawable);
-            shuffleButton.setContentDescription(shuffleOffContentDescription);
-        } else {
-            updateButton(true, shuffleButton);
-            shuffleButton.setImageDrawable(
-                    player.getShuffleModeEnabled() ? shuffleOnButtonDrawable : shuffleOffButtonDrawable);
-            shuffleButton.setContentDescription(
-                    player.getShuffleModeEnabled()
-                            ? shuffleOnContentDescription
-                            : shuffleOffContentDescription);
-        }
     }
 
     private void updateTimeline() {
@@ -1166,20 +1069,20 @@ public class SimplePlayerControlView extends FrameLayout {
     }
 
     public interface VisibilityListener {
+
         void onVisibilityChange(int visibility);
     }
 
     public interface ProgressUpdateListener {
+
         void onProgressUpdate(long position, long bufferedPosition);
     }
 
     public interface OnFullScreenModeChangedListener {
-
         void onFullScreenModeChanged(boolean isFullScreen);
     }
 
     private static final class TrackInfo {
-
         public final int groupIndex;
         public final int rendererIndex;
         public final boolean selected;
@@ -1197,7 +1100,6 @@ public class SimplePlayerControlView extends FrameLayout {
     }
 
     private static class SubSettingViewHolder extends RecyclerView.ViewHolder {
-
         public final View checkView;
         public final TextView textView;
 
@@ -1216,6 +1118,7 @@ public class SimplePlayerControlView extends FrameLayout {
             com.google.android.exoplayer2.ui.TimeBar.OnScrubListener,
             OnClickListener,
             PopupWindow.OnDismissListener {
+
         public void onClick(View view) {
             Player player = SimplePlayerControlView.this.player;
             if (player == null) {
@@ -1237,8 +1140,6 @@ public class SimplePlayerControlView extends FrameLayout {
             } else if (repeatToggleButton == view) {
                 controlDispatcher.dispatchSetRepeatMode(
                         player, RepeatModeUtil.getNextRepeatMode(player.getRepeatMode(), repeatToggleModes));
-            } else if (shuffleButton == view) {
-                controlDispatcher.dispatchSetShuffleModeEnabled(player, !player.getShuffleModeEnabled());
             } else if (settingsButton == view) {
                 controlViewLayoutManager.removeHideCallbacks();
                 displaySettingsWindow(settingsAdapter);
@@ -1268,12 +1169,9 @@ public class SimplePlayerControlView extends FrameLayout {
                     EVENT_PLAYBACK_STATE_CHANGED, EVENT_PLAY_WHEN_READY_CHANGED, EVENT_IS_PLAYING_CHANGED)) {
                 updateProgress();
             }
-            if (events.contains(EVENT_REPEAT_MODE_CHANGED)) {
-                updateRepeatModeButton();
-            }
-            if (events.contains(EVENT_SHUFFLE_MODE_ENABLED_CHANGED)) {
-                updateShuffleButton();
-            }
+//            if (events.contains(EVENT_REPEAT_MODE_CHANGED)) {
+//                updateRepeatModeButton();
+//            }
             if (events.containsAny(
                     EVENT_REPEAT_MODE_CHANGED,
                     EVENT_SHUFFLE_MODE_ENABLED_CHANGED,
@@ -1319,7 +1217,6 @@ public class SimplePlayerControlView extends FrameLayout {
     }
 
     private class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolder> {
-
         private final Drawable[] iconIds;
         private final String[] mainTexts;
         private final String[] subTexts;
@@ -1365,7 +1262,6 @@ public class SimplePlayerControlView extends FrameLayout {
     }
 
     private final class SettingViewHolder extends RecyclerView.ViewHolder {
-
         private final ImageView iconView;
         private final TextView mainTextView;
         private final TextView subTextView;
@@ -1383,7 +1279,6 @@ public class SimplePlayerControlView extends FrameLayout {
     }
 
     private final class PlaybackSpeedAdapter extends RecyclerView.Adapter<SubSettingViewHolder> {
-
         private final String[] playbackSpeedTexts;
         private final int[] playbackSpeedsMultBy100;
         private int selectedIndex;
@@ -1440,7 +1335,6 @@ public class SimplePlayerControlView extends FrameLayout {
     }
 
     private final class TextTrackSelectionAdapter extends TrackSelectionAdapter {
-
         public void init(
                 List<Integer> rendererIndices,
                 List<TrackInfo> trackInfos,
@@ -1503,6 +1397,7 @@ public class SimplePlayerControlView extends FrameLayout {
     }
 
     private final class AudioTrackSelectionAdapter extends TrackSelectionAdapter {
+
         public void init(
                 List<Integer> rendererIndices,
                 List<TrackInfo> trackInfos,
@@ -1576,7 +1471,6 @@ public class SimplePlayerControlView extends FrameLayout {
     }
 
     private abstract class TrackSelectionAdapter extends RecyclerView.Adapter<SubSettingViewHolder> {
-
         protected List<Integer> rendererIndices;
         protected List<TrackInfo> tracks;
         protected
@@ -1667,8 +1561,6 @@ public class SimplePlayerControlView extends FrameLayout {
     void updateAll() {
         updatePlayPauseButton();
         updateNavigation();
-        updateRepeatModeButton();
-        updateShuffleButton();
         updateTrackLists();
         updatePlaybackSpeedList();
         updateTimeline();
@@ -1679,4 +1571,5 @@ public class SimplePlayerControlView extends FrameLayout {
             playPauseButton.requestFocus();
         }
     }
+
 }

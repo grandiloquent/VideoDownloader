@@ -6,6 +6,7 @@ import android.graphics.RectF;
 import android.opengl.GLSurfaceView;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -71,6 +72,7 @@ public class SimplePlayerView extends FrameLayout {
     private boolean controllerHideOnTouch;
     private int textureViewRotation;
     private boolean isTouching;
+
     public SimplePlayerView(Context context) {
         this(context, null);
     }
@@ -132,7 +134,6 @@ public class SimplePlayerView extends FrameLayout {
             this.controller = new SimplePlayerControlView(context, null, 0, attrs);
             controller.setId(com.google.android.exoplayer2.ui.R.id.exo_controller);
             controller.setLayoutParams(controllerPlaceholder.getLayoutParams());
-            controller.setShowShuffleButton(false);
             controller.setOnFullScreenModeChangedListener(new SimplePlayerControlView.OnFullScreenModeChangedListener() {
 
                 public void onFullScreenModeChanged(boolean isFullScreen) {
@@ -355,10 +356,6 @@ public class SimplePlayerView extends FrameLayout {
         }
     }
 
-    public void setRepeatToggleModes(int repeatToggleModes) {
-        Assertions.checkStateNotNull(controller);
-        controller.setRepeatToggleModes(repeatToggleModes);
-    }
 
     public void setShowBuffering(int showBuffering) {
         if (this.showBuffering != showBuffering) {
@@ -392,10 +389,6 @@ public class SimplePlayerView extends FrameLayout {
         controller.setShowRewindButton(showRewindButton);
     }
 
-    public void setShowShuffleButton(boolean showShuffleButton) {
-        Assertions.checkStateNotNull(controller);
-        controller.setShowShuffleButton(showShuffleButton);
-    }
 
     public void setShowSubtitleButton(boolean showSubtitleButton) {
         Assertions.checkStateNotNull(controller);
@@ -403,6 +396,7 @@ public class SimplePlayerView extends FrameLayout {
     }
 
     public void showController() {
+        Log.e("B5aOx2", String.format("showController, %s", shouldShowControllerIndefinitely()));
         showController(shouldShowControllerIndefinitely());
     }
 
@@ -464,9 +458,6 @@ public class SimplePlayerView extends FrameLayout {
                 || keyCode == KeyEvent.KEYCODE_DPAD_CENTER;
     }
 
-    private boolean isPlayingAd() {
-        return player != null && player.isPlayingAd() && player.getPlayWhenReady();
-    }
 
     private void maybeShowController(boolean isForced) {
         if (useController()) {
@@ -488,7 +479,7 @@ public class SimplePlayerView extends FrameLayout {
                 && !player.getCurrentTimeline().isEmpty()
                 && (playbackState == Player.STATE_IDLE
                 || playbackState == Player.STATE_ENDED
-                || player.getPlayWhenReady());
+                || !player.getPlayWhenReady());
     }
 
     private void showController(boolean showIndefinitely) {

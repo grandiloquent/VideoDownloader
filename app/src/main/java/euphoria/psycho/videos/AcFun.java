@@ -1,16 +1,14 @@
 package euphoria.psycho.videos;
 
-import android.net.Uri;
-import android.util.Log;
+import android.content.Intent;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
+import euphoria.psycho.player.IqiyiActivity;
 import euphoria.psycho.share.StringShare;
-
-import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class AcFun extends BaseExtractor<String> {
 
@@ -47,7 +45,11 @@ public class AcFun extends BaseExtractor<String> {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
-        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
+        Intent intent = new Intent(mMainActivity, IqiyiActivity.class);
+        intent.putExtra(IqiyiActivity.KEY_PLAYLIST, new String[]{
+                videoUri
+        });
+        mMainActivity.startActivity(intent);
     }
 
 }
