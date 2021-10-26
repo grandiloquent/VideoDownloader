@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000"
+    android:keepScreenOn="true">
+
+    <TextureView
+        android:id="@+id/texture_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+    <FrameLayout
+        android:id="@+id/exo_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="10dp"
+        android:background="#b0000000">
+
+        <LinearLayout
+            android:id="@id/exo_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layoutDirection="ltr"
+            android:paddingStart="10dp"
+            android:paddingLeft="10dp"
+            android:paddingEnd="10dp"
+            android:paddingRight="10dp">
+
+            <TextView
+                android:id="@+id/position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:text="@string/exo_controls_time_placeholder"
+                android:textColor="@color/exo_white"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:text="·"
+                android:textColor="@color/exo_white_opacity_70"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:text="@string/exo_controls_time_placeholder"
+                android:textColor="@color/exo_white_opacity_70"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <euphoria.psycho.SimpleTimeBar
+        android:id="@+id/timebar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="52dp" />
+
+    <LinearLayout
+        android:id="@+id/exo_center_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:clipToPadding="false"
+        android:gravity="center"
+        android:padding="@dimen/exo_styled_controls_padding">
+
+        <ImageButton
+            android:id="@id/exo_prev"
+            android:layout_width="@dimen/exo_icon_size"
+            android:layout_height="@dimen/exo_icon_size"
+            android:layout_marginLeft="@dimen/exo_icon_horizontal_margin"
+            android:layout_marginRight="@dimen/exo_icon_horizontal_margin"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="@dimen/exo_icon_padding"
+            android:scaleType="fitXY"
+            android:src="@drawable/exo_styled_controls_previous" />
+
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:layout_marginLeft="@dimen/exo_icon_horizontal_margin"
+            android:layout_marginRight="@dimen/exo_icon_horizontal_margin"
+            android:addStatesFromChildren="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:scaleType="fitXY">
+            <!-- View's don't have foreground until API 23 so we have to nest in a parent. -->
+            <Button
+                android:id="@+id/exo_rew_with_amount"
+                android:layout_width="@dimen/exo_icon_size"
+                android:layout_height="@dimen/exo_icon_size"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:background="@drawable/exo_styled_controls_rewind"
+                android:backgroundTint="@android:color/white"
+                android:foreground="@drawable/exo_styled_controls_rewind"
+                android:gravity="center|bottom"
+                android:insetBottom="0dp"
+                android:paddingBottom="@dimen/exo_icon_padding_bottom"
+                android:scaleType="fitXY"
+                android:textAppearance="@style/ExoStyledControls.ButtonText" />
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@id/exo_play_pause"
+            android:layout_width="@dimen/exo_icon_size"
+            android:layout_height="@dimen/exo_icon_size"
+            android:layout_marginLeft="@dimen/exo_icon_horizontal_margin"
+            android:layout_marginRight="@dimen/exo_icon_horizontal_margin"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="@dimen/exo_icon_padding"
+            android:scaleType="fitXY"
+            android:src="@drawable/exo_styled_controls_play" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:layout_marginLeft="@dimen/exo_icon_horizontal_margin"
+            android:layout_marginRight="@dimen/exo_icon_horizontal_margin"
+            android:addStatesFromChildren="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:scaleType="fitXY">
+            <!-- View's don't have foreground until API 23 so we have to nest in a parent. -->
+            <Button
+                android:id="@+id/exo_ffwd_with_amount"
+                android:layout_width="@dimen/exo_icon_size"
+                android:layout_height="@dimen/exo_icon_size"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:background="@drawable/exo_styled_controls_fastforward"
+                android:backgroundTint="@android:color/white"
+                android:foreground="@drawable/exo_styled_controls_fastforward"
+                android:gravity="center|bottom"
+                android:insetBottom="0dp"
+                android:paddingBottom="@dimen/exo_icon_padding_bottom"
+                android:scaleType="fitXY"
+                android:textAppearance="@style/ExoStyledControls.ButtonText" />
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@id/exo_next"
+            android:layout_width="@dimen/exo_icon_size"
+            android:layout_height="@dimen/exo_icon_size"
+            android:layout_marginLeft="@dimen/exo_icon_horizontal_margin"
+            android:layout_marginRight="@dimen/exo_icon_horizontal_margin"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="@dimen/exo_icon_padding"
+            android:scaleType="fitXY"
+            android:src="@drawable/exo_styled_controls_next" />
+    </LinearLayout>
+</FrameLayout>

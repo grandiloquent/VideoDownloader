@@ -98,6 +98,8 @@ public class MainActivity extends Activity implements ClientInterface {
 //        });
 //        startActivity(intent);
 
+      // tryPlayVideo(this);
+// 改进用户体验
     }
 
     @Override

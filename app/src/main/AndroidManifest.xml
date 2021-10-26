@@ -137,6 +137,9 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
         <activity android:name=".WebActivity" />
+        <activity
+            android:name="euphoria.psycho.PlayerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
 
         <service android:name="euphoria.psycho.tasks.VideoService" />
         <service android:name="euphoria.psycho.downloader.DownloaderService" />

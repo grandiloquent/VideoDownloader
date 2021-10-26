@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import euphoria.psycho.player.VideoActivity;
+import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
@@ -104,9 +104,9 @@ public class Helper {
                     .getString(KEY_LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
     }
-
+//
     static void tryPlayVideo(Context context) {
-        Intent intent = new Intent(context, VideoActivity.class);
+        Intent intent = new Intent(context, PlayerActivity.class);
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             try {
                 intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download"))

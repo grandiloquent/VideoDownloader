@@ -19,7 +19,6 @@ import android.media.TimedText;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -133,7 +132,6 @@ public class VideoActivity extends BaseVideoActivity implements
             return;
         mPlayer.setOnPreparedListener(this);
         mPlayer.setOnCompletionListener(this);
-        Log.e("B5aOx2", String.format("initializePlayer, %s", ""));
         mPlayer.setOnErrorListener(this);
         mPlayer.setOnInfoListener(this);
         mPlayer.setOnBufferingUpdateListener(this);

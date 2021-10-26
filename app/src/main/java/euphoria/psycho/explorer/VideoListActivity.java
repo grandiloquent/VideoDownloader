@@ -94,6 +94,7 @@ public class VideoListActivity extends Activity {
         });
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,9 +107,7 @@ public class VideoListActivity extends Activity {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_share) {
-            actionShare(item);
-        } else if (item.getItemId() == R.id.action_delete) {
+        if (item.getItemId() == R.id.action_delete) {
             actionDelete(item);
         }
         return super.onContextItemSelected(item);
