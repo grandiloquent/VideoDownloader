@@ -1,7 +1,10 @@
 package euphoria.psycho;
 
-import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.SurfaceTexture;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
@@ -23,6 +26,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -57,6 +61,84 @@ public class PlayerActivity extends Activity {
     private SimpleTimeBar mTimeBar;
     private Handler mHandler = new Handler();
     private TextView mPosition;
+    private ImageButton mActionFullscreen;
+    private ImageButton mActionFileDownload;
+    private Button mExoFfwdWithAmount;
+    private Button mExoRewWithAmount;
+
+    static int calculateScreenOrientation(Activity activity) {
+        int displayRotation = getDisplayRotation(activity);
+        boolean standard = displayRotation < 180;
+        if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (standard)
+                return ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+            else return ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+        } else {
+            if (displayRotation == 90 || displayRotation == 270) {
+                standard = !standard;
+            }
+            return standard ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+        }
+    }
+
+    static int getDisplayRotation(Activity activity) {
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                return 0;
+            case Surface.ROTATION_90:
+                return 90;
+            case Surface.ROTATION_180:
+                return 180;
+            case Surface.ROTATION_270:
+                return 270;
+        }
+        return 0;
+    }
+
+    static int getNavigationBarHeight(Context context) {
+        Resources res = context.getResources();
+        int resourceId = res.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return res.getDimensionPixelSize(resourceId);
+        }
+        return 0;
+    }
+
+    static void hideSystemUI(Activity activity, boolean toggleActionBarVisibility) {
+        if (toggleActionBarVisibility && activity.getActionBar() != null) {
+            activity.getActionBar().hide();
+        }
+        activity.getWindow().getDecorView()
+                .setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                                View.SYSTEM_UI_FLAG_LOW_PROFILE |
+                                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                                View.SYSTEM_UI_FLAG_IMMERSIVE);
+    }
+
+    static void rotateScreen(Activity activity) {
+        int orientation = calculateScreenOrientation(activity);
+        if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+    }
+
+    static void showSystemUI(Activity activity, boolean toggleActionBarVisibility) {
+        if (toggleActionBarVisibility) {
+            android.app.ActionBar actionBar = activity.getActionBar();
+            if (actionBar != null)
+                actionBar.show();
+        }
+        activity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
 
     private void clearSurface() {
         if (mSurface == null) {
@@ -120,6 +202,41 @@ public class PlayerActivity extends Activity {
         }
     }
 
+    private void onActionFileDownload(View view) {
+    }
+
+    private void onActionFullscreen(View view) {
+        int orientation = calculateScreenOrientation(this);
+        if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            int videoWidth = mMediaPlayer.getVideoWidth();
+            int videoHeight = mMediaPlayer.getVideoHeight();
+            double ratio = mRoot.getMeasuredWidth() / (videoHeight * 1.0);
+            int width = (int) (ratio * videoWidth);
+            int left = (mRoot.getMeasuredHeight() - width) >> 1;
+            FrameLayout.LayoutParams layoutParams = new LayoutParams(width, getResources().getDisplayMetrics().widthPixels);
+            layoutParams.leftMargin = left;
+//        Log.e("B5aOx2", String.format("onActionFullscreen, mMediaPlayer.getVideoWidth() = %s;\n mMediaPlayer.getVideoHeight() = %s;\n getResources().getDisplayMetrics().widthPixels = %s;\n getResources().getDisplayMetrics().heightPixels = %s;\n mRoot.getMeasuredWidth() = %s;\n mRoot.getMeasuredHeight() = %s;\n ratio = %s\n left = %s",
+//                mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight(), getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels, mRoot.getMeasuredWidth(), mRoot.getMeasuredHeight(), ratio, left
+//        ));
+            mTextureView.setLayoutParams(layoutParams);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            int videoWidth = mMediaPlayer.getVideoWidth();
+            int videoHeight = mMediaPlayer.getVideoHeight();
+            double ratio = mRoot.getMeasuredHeight() / (videoWidth * 1.0);
+            int height = (int) (ratio * videoHeight);
+            int top = (mRoot.getMeasuredWidth() - height) >> 1;
+            FrameLayout.LayoutParams layoutParams = new LayoutParams(mRoot.getMeasuredHeight(), height);
+            layoutParams.topMargin = top;
+            mTextureView.setLayoutParams(layoutParams);
+            Log.e("B5aOx2", String.format("onActionFullscreen, mMediaPlayer.getVideoWidth() = %s;\n mMediaPlayer.getVideoHeight() = %s;\n getResources().getDisplayMetrics().widthPixels = %s;\n getResources().getDisplayMetrics().heightPixels = %s;\n mRoot.getMeasuredWidth() = %s;\n mRoot.getMeasuredHeight() = %s;\n ratio = %s\n left = %s",
+                    mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight(), getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels, mRoot.getMeasuredWidth(), mRoot.getMeasuredHeight(), ratio, top
+            ));
+        }
+
+    }
+
     private void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
         Log.e("B5aOx2", "onBufferingUpdate");
 
@@ -159,10 +276,6 @@ public class PlayerActivity extends Activity {
         mTimeBar.setDuration(mediaPlayer.getDuration());
         mMediaPlayer.start();
         updateProgress();
-    }
-
-    private static ObjectAnimator ofTranslationY(float startValue, float endValue, View target) {
-        return ObjectAnimator.ofFloat(target, "translationY", startValue, endValue);
     }
 
     private void onSeekComplete(MediaPlayer mediaPlayer) {
@@ -209,9 +322,46 @@ public class PlayerActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+        mRoot = findViewById(R.id.root);
+        mRoot.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LOW_PROFILE |
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_IMMERSIVE);
+        View decorView = getWindow().getDecorView();
+        decorView.setOnSystemUiVisibilityChangeListener
+                (new View.OnSystemUiVisibilityChangeListener() {
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        // Note that system bars will only be "visible" if none of the
+                        // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                            // TODO: The system bars are visible. Make any desired
+                            // adjustments to your UI, such as showing the action bar or
+                            // other navigational controls.
+                            mHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mRoot.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                                            View.SYSTEM_UI_FLAG_LOW_PROFILE |
+                                            View.SYSTEM_UI_FLAG_FULLSCREEN |
+                                            View.SYSTEM_UI_FLAG_IMMERSIVE);
+                                }
+                            }, 5000);
+                        } else {
+                            // TODO: The system bars are NOT visible. Make any desired
+                            // adjustments to your UI, such as hiding the action bar or
+                            // other navigational controls.
+                        }
+                    }
+                });
         mTextureView = findViewById(R.id.texture_view);
         mPosition = findViewById(R.id.position);
-        mRoot = findViewById(R.id.root);
         mExoBottomBar = findViewById(R.id.exo_bottom_bar);
         mDuration = findViewById(R.id.duration);
         mTextureView.setSurfaceTextureListener(new SurfaceTextureListener() {
@@ -238,16 +388,15 @@ public class PlayerActivity extends Activity {
         mTimeBar = findViewById(R.id.timebar);
         mTimeBar.addListener(new OnScrubListener() {
             @Override
-            public void onScrubStart(TimeBar timeBar, long position) {
-                mHandler.removeCallbacks(null);
-                mPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
-            }
-
-            @Override
             public void onScrubMove(TimeBar timeBar, long position) {
                 mPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
             }
 
+            @Override
+            public void onScrubStart(TimeBar timeBar, long position) {
+                mHandler.removeCallbacks(null);
+                mPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
+            }
 
             @Override
             public void onScrubStop(TimeBar timeBar, long position, boolean canceled) {
@@ -280,12 +429,13 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.seekTo(dif);
             updateProgress();
         });
+        mActionFileDownload = findViewById(R.id.action_file_download);
+        mActionFileDownload.setOnClickListener(this::onActionFileDownload);
+        mActionFileDownload.setAlpha(75);
+        mActionFullscreen = findViewById(R.id.action_fullscreen);
+        mActionFullscreen.setOnClickListener(this::onActionFullscreen);
 
     }
-
-    private Button mExoFfwdWithAmount;
-
-    private Button mExoRewWithAmount;
 
     @Override
     protected void onStart() {
@@ -306,3 +456,4 @@ public class PlayerActivity extends Activity {
         clearSurface();
     }
 }
+ 

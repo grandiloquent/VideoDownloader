@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000"
+
     android:keepScreenOn="true">
 
     <TextureView
@@ -70,6 +71,31 @@
                 android:textColor="@color/exo_white_opacity_70"
                 android:textSize="14sp"
                 android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@id/exo_basic_controls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/action_file_download"
+                android:layout_width="@dimen/exo_media_button_width"
+                android:layout_height="@dimen/exo_media_button_height"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_action_file_download" />
+
+
+            <ImageButton
+                android:id="@+id/action_fullscreen"
+                android:layout_width="@dimen/exo_media_button_width"
+                android:layout_height="@dimen/exo_media_button_height"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/exo_styled_controls_fullscreen_enter" />
+
 
         </LinearLayout>
     </FrameLayout>

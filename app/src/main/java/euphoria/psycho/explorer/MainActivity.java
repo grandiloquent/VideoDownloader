@@ -24,6 +24,7 @@ import static euphoria.psycho.explorer.Helper.checkPermissions;
 import static euphoria.psycho.explorer.Helper.checkUnfinishedVideoTasks;
 import static euphoria.psycho.explorer.Helper.configureWebView;
 import static euphoria.psycho.explorer.Helper.loadStartPage;
+import static euphoria.psycho.explorer.Helper.tryPlayVideo;
 
 public class MainActivity extends Activity implements ClientInterface {
 
@@ -78,28 +79,9 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
         checkUpdate();
-//        new Thread(() -> {
-//            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-//            String value = Native.fetchApplicationVersion();
-//            Log.e("B5aOx2", String.format("initialize, %s", value));
-//        }).start();
-//        PreferenceShare.getPreferences().edit().putString(
-//                SettingsFragment.KEY_TENCENT,
-//                "'tvfe_boss_uuid=491677ac313abfdb; video_guid=af96989d4497c4ba; pgv_pvid=9865587890; ts_uid=2412710660; bucket_id=9231002; login_remember=wx; video_omgid=; video_bucketid=4; vversion_name=8.2.95; video_platform=2; pgv_info=ssid=s6869248740; main_login=wx; vuserid=1428406875; openid=oXw7q0NaEfg_OxPKO1_QUWZxTSbc; appid=wxa75efa648b60994b; refresh_token=50_lxKKNEgXg4W8nYse305fyF9CfF8aigRSMp9WgAC2YrLTw7An9r3QTAD_j6RpbchkCGOvncjk5dlgQqu1admbFQpfZQd6Fz52k_MTjduDKyM; last_refresh_vuserid=1428406875; last_refresh_time=1634150632918; access_token=50_lxKKNEgXg4W8nYse305fyMoNiNM8DtAD0M9e75KlRfq0ctMWlCetIi-P5HNrHpb-9iM7ikmQb4Q6FePGnDKOtA; wx_nick=%E5%92%B8%E8%8F%9C; wx_head=http://thirdwx.qlogo.cn/mmopen/vi_32/PiajxSqBRaEJExiarEsa4tDDDxISFtZ4UuNziacY1x4qUaGUL8GhiatnbwIETRcD0LQ7iaibh6Quj4iazoHRww9XscDQQ/132; vusession=usZ7QNlPK6kvI3eyqkf7Pg..; ptag=|顶部导航区:主导航_LOGO; ad_play_index=56; ts_last=v.qq.com/; qv_als=uUEvA6WURJLI9UacA11634169231GJigLw=="
-//        ).apply();
-//        PreferenceShare.getPreferences().edit().remove(
-//                SettingsFragment.KEY_TENCENT
-//        ).apply();
-        //Tencent.handle("https://m.v.qq.com/x/m/play?cid=gounil1l2zq5thv", this);
 
-//        Intent intent = new Intent(this, IqiyiActivity.class);
-//        intent.putExtra(IqiyiActivity.KEY_PLAYLIST, new String[]{
-//                "https://video-hw.xvideos-cdn.com/videos/mp4/c/6/a/xvideos.com_c6a12bad2451a8cdd8034642e5a471af.mp4?e=1635142237&ri=1024&rs=85&h=1834de29cfc6df37148aa72bcd946686"
-//        });
-//        startActivity(intent);
+        tryPlayVideo(this);
 
-      // tryPlayVideo(this);
-// 改进用户体验
     }
 
     @Override
