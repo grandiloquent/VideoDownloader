@@ -20,10 +20,10 @@ import java.util.Map.Entry;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.player.VideoActivity;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
+import euphoria.psycho.tasks.VideoActivity;
 
 public class VideosHelper {
     public static String USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";

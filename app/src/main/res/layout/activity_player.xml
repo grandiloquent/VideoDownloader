@@ -156,7 +156,7 @@
         </FrameLayout>
 
         <ImageButton
-            android:id="@id/exo_play_pause"
+            android:id="@+id/play_pause"
             android:layout_width="@dimen/exo_icon_size"
             android:layout_height="@dimen/exo_icon_size"
             android:layout_marginLeft="@dimen/exo_icon_horizontal_margin"

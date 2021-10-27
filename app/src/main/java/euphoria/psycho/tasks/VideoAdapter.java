@@ -1,8 +1,6 @@
 package euphoria.psycho.tasks;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.Logger;
 
@@ -54,9 +53,9 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
                 .fitCenter()
                 .into(viewHolder.thumbnail);
         viewHolder.layout.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), euphoria.psycho.player.VideoActivity.class);
-            intent.setData(Uri.fromFile(videoFile));
-            v.getContext().startActivity(intent);
+            PlayerActivity.launchActivity(v.getContext(),
+                    videoFile
+            );
         });
     }
 

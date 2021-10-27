@@ -8,15 +8,9 @@ import android.content.res.Configuration;
 import android.graphics.SurfaceTexture;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.DrmInfo;
-import android.media.MediaTimestamp;
-import android.media.SubtitleData;
 import android.media.TimedMetaData;
-import android.media.TimedText;
 import android.net.Uri;
 import android.opengl.GLES20;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -37,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -58,20 +53,20 @@ import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.WebViewShare;
 
 import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
-
+ 
 public class PlayerActivity extends Activity {
 
     public static final int DEFAULT_HIDE_TIME_DELAY = 5000;
     public static final String KEY_M3U8 = "m3u8";
+    public static final String KEY_REQUEST_HEADERS = "requestHeaders";
     public static final String KEY_VIDEO_FILE = "VideoFile";
     public static final String KEY_WEB_VIDEO = "WebVideo";
     private final Handler mHandler = new Handler();
     private final StringBuilder mStringBuilder = new StringBuilder();
     private final Formatter mFormatter = new Formatter(mStringBuilder);
-    TextureView mTextureView;
-    MediaPlayer mMediaPlayer;
-    Surface mSurface;
-    SurfaceTexture mSurfaceTexture;
+    private TextureView mTextureView;
+    private MediaPlayer mMediaPlayer;
+    private Surface mSurface;
     private FrameLayout mRoot;
     private boolean mLayout = false;
     private FrameLayout mBottomBar;
@@ -82,6 +77,7 @@ public class PlayerActivity extends Activity {
     private final Runnable mHideAction = this::hiddenControls;
     private List<String> mPlayList;
     private int mPlayIndex;
+    private ImageButton mPlayPause;
 
     public static void launchActivity(Context context, File videoFile) {
         Intent intent = new Intent(context, PlayerActivity.class);
@@ -93,7 +89,7 @@ public class PlayerActivity extends Activity {
         Intent intent = new Intent(context, PlayerActivity.class);
         intent.putExtra(KEY_WEB_VIDEO, webVideo);
         if (isM3u8) {
-            intent.putExtra(KEY_WEB_VIDEO, isM3u8);
+            intent.putExtra(KEY_M3U8, isM3u8);
         }
         context.startActivity(intent);
     }
@@ -213,12 +209,6 @@ public class PlayerActivity extends Activity {
     private void initializePlayer() {
         mMediaPlayer = new MediaPlayer();
         try {
-            if (VERSION.SDK_INT >= VERSION_CODES.P) {
-                mMediaPlayer.setOnMediaTimeDiscontinuityListener(this::onMediaTimeDiscontinuity);
-                mMediaPlayer.setOnSubtitleDataListener(this::onSubtitleData);
-                mMediaPlayer.setOnDrmInfoListener(this::onDrmInfo);
-                mMediaPlayer.setOnDrmPreparedListener(this::onDrmPrepared);
-            }
             mMediaPlayer.setOnBufferingUpdateListener(this::onBufferingUpdate);
             mMediaPlayer.setOnCompletionListener(this::onCompletion);
             mMediaPlayer.setOnErrorListener(this::onError);
@@ -226,7 +216,6 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.setOnPreparedListener(this::onPrepared);
             mMediaPlayer.setOnSeekCompleteListener(this::onSeekComplete);
             mMediaPlayer.setOnTimedMetaDataAvailableListener(this::onTimedMetaDataAvailable);
-            mMediaPlayer.setOnTimedTextListener(this::onTimedText);
             mMediaPlayer.setOnVideoSizeChangedListener(this::onVideoSizeChanged);
             mMediaPlayer.setSurface(mSurface);
             play();
@@ -287,16 +276,6 @@ public class PlayerActivity extends Activity {
 
     }
 
-    private void onDrmInfo(MediaPlayer mediaPlayer, DrmInfo drmInfo) {
-        Log.e("B5aOx2", "onDrmInfo");
-
-    }
-
-    private void onDrmPrepared(MediaPlayer mediaPlayer, int i) {
-        Log.e("B5aOx2", "onDrmPrepared");
-
-    }
-
     private boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
         Log.e("B5aOx2", "onError");
         return true;
@@ -307,11 +286,9 @@ public class PlayerActivity extends Activity {
         return true;
     }
 
-    private void onMediaTimeDiscontinuity(MediaPlayer mediaPlayer, MediaTimestamp mediaTimestamp) {
-    }
-
     private void onNext(View view) {
         if (mPlayList.size() < 2) return;
+        mLayout = false;
         if (mPlayIndex + 1 < mPlayList.size()) {
             mPlayIndex++;
         } else {
@@ -325,17 +302,29 @@ public class PlayerActivity extends Activity {
         }
     }
 
+    private void onPlayPause(View view) {
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+            mPlayPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.exo_ic_play_circle_filled));
+        } else {
+            mMediaPlayer.start();
+            mPlayPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.exo_ic_pause_circle_filled));
+        }
+    }
+
     private void onPrepared(MediaPlayer mediaPlayer) {
         Log.e("B5aOx2", "onPrepared");
         mDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mediaPlayer.getDuration()));
         mTimeBar.setDuration(mediaPlayer.getDuration());
         mMediaPlayer.start();
+        mPlayPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.exo_ic_pause_circle_filled));
         updateProgress();
         hiddenControls();
     }
 
     private void onPrev(View view) {
         if (mPlayList.size() < 2) return;
+        mLayout = false;
         if (mPlayIndex - 1 > -1) {
             mPlayIndex--;
         } else {
@@ -359,18 +348,8 @@ public class PlayerActivity extends Activity {
 
     }
 
-    private void onSubtitleData(MediaPlayer mediaPlayer, SubtitleData subtitleData) {
-        Log.e("B5aOx2", "onSubtitleData");
-
-    }
-
     private void onTimedMetaDataAvailable(MediaPlayer mediaPlayer, TimedMetaData timedMetaData) {
         Log.e("B5aOx2", "onTimedMetaDataAvailable");
-
-    }
-
-    private void onTimedText(MediaPlayer mediaPlayer, TimedText timedText) {
-        Log.e("B5aOx2", "onTimedText");
 
     }
 
@@ -386,8 +365,17 @@ public class PlayerActivity extends Activity {
     }
 
     private void play() throws IOException {
-        mMediaPlayer.setDataSource(mPlayList.get(mPlayIndex));
-        mMediaPlayer.prepareAsync();
+        if (getIntent().getIntExtra(KEY_REQUEST_HEADERS, 0) == 1) {
+            HashMap<String, String> headers = new HashMap<>();
+            headers.put("Referer", "https://www.mgtv.com/");
+            headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36");
+            mMediaPlayer.setDataSource(this, Uri.parse(mPlayList.get(mPlayIndex)), headers);
+            mMediaPlayer.prepareAsync();
+        } else {
+            mMediaPlayer.setDataSource(mPlayList.get(mPlayIndex));
+            mMediaPlayer.prepareAsync();
+        }
+
     }
 
     private void scheduleHideControls() {
@@ -441,7 +429,6 @@ public class PlayerActivity extends Activity {
         mTextureView.setSurfaceTextureListener(new SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surface, int width, int height) {
-                mSurfaceTexture = surface;
                 mSurface = new Surface(surface);
                 initializePlayer();
             }
@@ -479,7 +466,6 @@ public class PlayerActivity extends Activity {
                 scheduleHideControls();
             }
 
-
         });
         Button rewWithAmount = findViewById(R.id.exo_rew_with_amount);
         Typeface typeface = ResourcesCompat.getFont(this, com.google.android.exoplayer2.ui.R.font.roboto_medium_numbers);
@@ -506,6 +492,8 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.seekTo(dif);
             updateProgress();
         });
+        mPlayPause = findViewById(R.id.play_pause);
+        mPlayPause.setOnClickListener(this::onPlayPause);
         ImageButton actionFileDownload = findViewById(R.id.action_file_download);
         ImageButton actionFullscreen = findViewById(R.id.action_fullscreen);
         actionFullscreen.setOnClickListener(this::onActionFullscreen);
