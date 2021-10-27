@@ -13,6 +13,7 @@ import android.media.MediaTimestamp;
 import android.media.SubtitleData;
 import android.media.TimedMetaData;
 import android.media.TimedText;
+import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -61,32 +62,41 @@ import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 public class PlayerActivity extends Activity {
 
     public static final int DEFAULT_HIDE_TIME_DELAY = 5000;
+    public static final String KEY_M3U8 = "m3u8";
     public static final String KEY_VIDEO_FILE = "VideoFile";
     public static final String KEY_WEB_VIDEO = "WebVideo";
-    public static final String KEY_M3U8 = "m3u8";
+    private final Handler mHandler = new Handler();
+    private final StringBuilder mStringBuilder = new StringBuilder();
+    private final Formatter mFormatter = new Formatter(mStringBuilder);
     TextureView mTextureView;
     MediaPlayer mMediaPlayer;
     Surface mSurface;
     SurfaceTexture mSurfaceTexture;
     private FrameLayout mRoot;
     private boolean mLayout = false;
-    private StringBuilder mStringBuilder = new StringBuilder();
-    private Formatter mFormatter = new Formatter(mStringBuilder);
     private FrameLayout mBottomBar;
     private TextView mDuration;
     private SimpleTimeBar mTimeBar;
-    private Handler mHandler = new Handler();
     private TextView mPosition;
-    private ImageButton mActionFullscreen;
-    private ImageButton mActionFileDownload;
-    private Button mFfwdWithAmount;
-    private Button mRewWithAmount;
     private LinearLayout mCenterControls;
-    private ImageButton mNext;
-    private ImageButton mPrev;
-    private Runnable mHideAction = this::hiddenControls;
+    private final Runnable mHideAction = this::hiddenControls;
     private List<String> mPlayList;
     private int mPlayIndex;
+
+    public static void launchActivity(Context context, File videoFile) {
+        Intent intent = new Intent(context, PlayerActivity.class);
+        intent.putExtra(KEY_VIDEO_FILE, videoFile.getAbsolutePath());
+        context.startActivity(intent);
+    }
+
+    public static void launchActivity(Context context, String webVideo, boolean isM3u8) {
+        Intent intent = new Intent(context, PlayerActivity.class);
+        intent.putExtra(KEY_WEB_VIDEO, webVideo);
+        if (isM3u8) {
+            intent.putExtra(KEY_WEB_VIDEO, isM3u8);
+        }
+        context.startActivity(intent);
+    }
 
     static int calculateScreenOrientation(Activity activity) {
         int displayRotation = getDisplayRotation(activity);
@@ -225,11 +235,6 @@ public class PlayerActivity extends Activity {
         }
     }
 
-    private void play() throws IOException {
-        mMediaPlayer.setDataSource(mPlayList.get(mPlayIndex));
-        mMediaPlayer.prepareAsync();
-    }
-
     private void onActionFileDownload(View view) {
         boolean isM3u8 = getIntent().getBooleanExtra(KEY_M3U8, false);
         if (!isM3u8) {
@@ -237,6 +242,10 @@ public class PlayerActivity extends Activity {
                     KeyShare.toHex(mPlayList.get(mPlayIndex).getBytes(StandardCharsets.UTF_8))
                             + ".mp4"
                     , mPlayList.get(mPlayIndex), USER_AGENT);
+        } else {
+            Intent intent = new Intent(this, euphoria.psycho.tasks.VideoActivity.class);
+            intent.setData(Uri.parse(mPlayList.get(mPlayIndex)));
+            startActivity(intent);
         }
     }
 
@@ -270,8 +279,7 @@ public class PlayerActivity extends Activity {
     }
 
     private void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
-        Log.e("B5aOx2", "onBufferingUpdate");
-
+        mTimeBar.setBufferedPosition(i);
     }
 
     private void onCompletion(MediaPlayer mediaPlayer) {
@@ -377,6 +385,11 @@ public class PlayerActivity extends Activity {
         mTextureView.setLayoutParams(layoutParams);
     }
 
+    private void play() throws IOException {
+        mMediaPlayer.setDataSource(mPlayList.get(mPlayIndex));
+        mMediaPlayer.prepareAsync();
+    }
+
     private void scheduleHideControls() {
         mHandler.removeCallbacks(mHideAction);
         mHandler.postDelayed(mHideAction, DEFAULT_HIDE_TIME_DELAY);
@@ -386,6 +399,7 @@ public class PlayerActivity extends Activity {
         mTimeBar.setVisibility(View.VISIBLE);
         mBottomBar.setVisibility(View.VISIBLE);
         mCenterControls.setVisibility(View.VISIBLE);
+        updateProgress();
     }
 
     private void updateProgress() {
@@ -467,11 +481,11 @@ public class PlayerActivity extends Activity {
 
 
         });
-        mRewWithAmount = findViewById(R.id.exo_rew_with_amount);
+        Button rewWithAmount = findViewById(R.id.exo_rew_with_amount);
         Typeface typeface = ResourcesCompat.getFont(this, com.google.android.exoplayer2.ui.R.font.roboto_medium_numbers);
-        mRewWithAmount.setTypeface(typeface);
-        mRewWithAmount.setText("5");
-        mRewWithAmount.setOnClickListener(v -> {
+        rewWithAmount.setTypeface(typeface);
+        rewWithAmount.setText("5");
+        rewWithAmount.setOnClickListener(v -> {
             mHandler.removeCallbacks(null);
             int dif = mMediaPlayer.getCurrentPosition() - 5000;
             if (dif < 0) {
@@ -480,10 +494,10 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.seekTo(dif);
             updateProgress();
         });
-        mFfwdWithAmount = findViewById(R.id.exo_ffwd_with_amount);
-        mFfwdWithAmount.setTypeface(typeface);
-        mFfwdWithAmount.setText("15");
-        mFfwdWithAmount.setOnClickListener(v -> {
+        Button ffwdWithAmount = findViewById(R.id.exo_ffwd_with_amount);
+        ffwdWithAmount.setTypeface(typeface);
+        ffwdWithAmount.setText("15");
+        ffwdWithAmount.setOnClickListener(v -> {
             mHandler.removeCallbacks(null);
             int dif = mMediaPlayer.getCurrentPosition() + 15000;
             if (dif > mMediaPlayer.getDuration()) {
@@ -492,33 +506,33 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.seekTo(dif);
             updateProgress();
         });
-        mActionFileDownload = findViewById(R.id.action_file_download);
-        mActionFullscreen = findViewById(R.id.action_fullscreen);
-        mActionFullscreen.setOnClickListener(this::onActionFullscreen);
+        ImageButton actionFileDownload = findViewById(R.id.action_file_download);
+        ImageButton actionFullscreen = findViewById(R.id.action_fullscreen);
+        actionFullscreen.setOnClickListener(this::onActionFullscreen);
         mRoot.setOnClickListener(this::onRoot);
-        mPrev = findViewById(R.id.prev);
-        mNext = findViewById(R.id.next);
+        ImageButton prev = findViewById(R.id.prev);
+        ImageButton next = findViewById(R.id.next);
         String videoFile = getIntent().getStringExtra(KEY_VIDEO_FILE);
         if (videoFile != null) {
-            mActionFileDownload.setAlpha(75);
+            actionFileDownload.setAlpha(75);
             mPlayList = Arrays.stream(getVideos(videoFile)).map(File::getAbsolutePath)
                     .collect(Collectors.toList());
             if (mPlayList.size() < 2) {
-                mPrev.setAlpha(75);
-                mNext.setAlpha(75);
+                prev.setAlpha(75);
+                next.setAlpha(75);
                 mPlayIndex = 0;
             } else {
-                mPrev.setOnClickListener(this::onPrev);
-                mNext.setOnClickListener(this::onNext);
+                prev.setOnClickListener(this::onPrev);
+                next.setOnClickListener(this::onNext);
                 mPlayIndex = mPlayList.indexOf(videoFile);
             }
             return;
         }
         String webVideo = getIntent().getStringExtra(KEY_WEB_VIDEO);
         if (webVideo != null) {
-            mPrev.setAlpha(75);
-            mNext.setAlpha(75);
-            mActionFileDownload.setOnClickListener(this::onActionFileDownload);
+            prev.setAlpha(75);
+            next.setAlpha(75);
+            actionFileDownload.setOnClickListener(this::onActionFileDownload);
             mPlayList = new ArrayList<>();
             mPlayList.add(webVideo);
             mPlayIndex = 0;
@@ -542,20 +556,5 @@ public class PlayerActivity extends Activity {
             mMediaPlayer = null;
         }
         clearSurface();
-    }
-
-    public static void launchActivity(Context context, File videoFile) {
-        Intent intent = new Intent(context, PlayerActivity.class);
-        intent.putExtra(KEY_VIDEO_FILE, videoFile.getAbsolutePath());
-        context.startActivity(intent);
-    }
-
-    public static void launchActivity(Context context, String webVideo, boolean isM3u8) {
-        Intent intent = new Intent(context, PlayerActivity.class);
-        intent.putExtra(KEY_WEB_VIDEO, webVideo);
-        if (isM3u8) {
-            intent.putExtra(KEY_WEB_VIDEO, isM3u8);
-        }
-        context.startActivity(intent);
     }
 }
