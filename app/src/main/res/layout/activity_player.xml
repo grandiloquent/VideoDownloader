@@ -135,8 +135,6 @@
             android:layout_margin="0dp"
             android:layout_marginLeft="@dimen/exo_icon_horizontal_margin"
             android:layout_marginRight="@dimen/exo_icon_horizontal_margin"
-            android:addStatesFromChildren="true"
-            android:background="?android:attr/selectableItemBackground"
             android:scaleType="fitXY">
             <!-- View's don't have foreground until API 23 so we have to nest in a parent. -->
             <Button
@@ -172,8 +170,6 @@
             android:layout_margin="0dp"
             android:layout_marginLeft="@dimen/exo_icon_horizontal_margin"
             android:layout_marginRight="@dimen/exo_icon_horizontal_margin"
-            android:addStatesFromChildren="true"
-            android:background="?android:attr/selectableItemBackground"
             android:scaleType="fitXY">
             <!-- View's don't have foreground until API 23 so we have to nest in a parent. -->
             <Button

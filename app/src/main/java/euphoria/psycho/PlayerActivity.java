@@ -53,7 +53,7 @@ import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.WebViewShare;
 
 import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
- 
+
 public class PlayerActivity extends Activity {
 
     public static final int DEFAULT_HIDE_TIME_DELAY = 5000;
@@ -277,7 +277,7 @@ public class PlayerActivity extends Activity {
     }
 
     private boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
-        Log.e("B5aOx2", "onError");
+        Log.e("B5aOx2", "onError " + i);
         return true;
     }
 
@@ -372,6 +372,7 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.setDataSource(this, Uri.parse(mPlayList.get(mPlayIndex)), headers);
             mMediaPlayer.prepareAsync();
         } else {
+            Log.e("B5aOx2", String.format("play, %s", mPlayList.get(mPlayIndex)));
             mMediaPlayer.setDataSource(mPlayList.get(mPlayIndex));
             mMediaPlayer.prepareAsync();
         }
@@ -472,24 +473,25 @@ public class PlayerActivity extends Activity {
         rewWithAmount.setTypeface(typeface);
         rewWithAmount.setText("5");
         rewWithAmount.setOnClickListener(v -> {
-            mHandler.removeCallbacks(null);
             int dif = mMediaPlayer.getCurrentPosition() - 5000;
             if (dif < 0) {
                 dif = 0;
             }
             mMediaPlayer.seekTo(dif);
+            scheduleHideControls();
             updateProgress();
         });
+        
         Button ffwdWithAmount = findViewById(R.id.exo_ffwd_with_amount);
         ffwdWithAmount.setTypeface(typeface);
         ffwdWithAmount.setText("15");
         ffwdWithAmount.setOnClickListener(v -> {
-            mHandler.removeCallbacks(null);
             int dif = mMediaPlayer.getCurrentPosition() + 15000;
             if (dif > mMediaPlayer.getDuration()) {
                 dif = mMediaPlayer.getDuration();
             }
             mMediaPlayer.seekTo(dif);
+            scheduleHideControls();
             updateProgress();
         });
         mPlayPause = findViewById(R.id.play_pause);

@@ -1,7 +1,6 @@
 package euphoria.psycho.videos;
 
-import android.net.Uri;
-import android.util.Log;
+import android.content.Intent;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -17,11 +16,11 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
+import euphoria.psycho.explorer.WebActivity;
 import euphoria.psycho.share.NetShare;
 import euphoria.psycho.share.StringShare;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
-import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class XVideos extends BaseExtractor<String> {
 
@@ -49,7 +48,9 @@ public class XVideos extends BaseExtractor<String> {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
-        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
+        Intent starter = new Intent(mMainActivity, WebActivity.class);
+        starter.putExtra("extra.URI", videoUri);
+        mMainActivity.startActivity(starter);
     }
 
     public static void fetchVideos(String url) {

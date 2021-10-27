@@ -1,14 +1,13 @@
 package euphoria.psycho.videos;
 
-import android.net.Uri;
+import android.content.Intent;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
-
-import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
+import euphoria.psycho.explorer.WebActivity;
 
 public class Ck52 extends BaseExtractor<String> {
     private static final Pattern MATCH_52CK = Pattern.compile("/vodplay/[\\d-]+\\.html");
@@ -28,7 +27,9 @@ public class Ck52 extends BaseExtractor<String> {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
-        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
+        Intent starter = new Intent(mMainActivity, WebActivity.class);
+        starter.putExtra("extra.URI", videoUri);
+        mMainActivity.startActivity(starter);
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {

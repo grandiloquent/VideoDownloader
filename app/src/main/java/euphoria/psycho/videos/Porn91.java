@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
+import euphoria.psycho.explorer.WebActivity;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.tasks.VideoActivity;
 import euphoria.psycho.tasks.VideoService;
@@ -73,8 +74,9 @@ public class Porn91 extends BaseExtractor<String> {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
-        mMainActivity.setVideoList(new String[]{videoUri});
-        mMainActivity.getWebView().loadUrl("http://47.106.105.122/video.html");
+        Intent starter = new Intent(mMainActivity, WebActivity.class);
+        starter.putExtra("extra.URI", videoUri);
+        mMainActivity.startActivity(starter);
         // invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
     }
 

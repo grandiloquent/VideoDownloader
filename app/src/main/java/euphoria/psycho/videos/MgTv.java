@@ -1,7 +1,6 @@
 package euphoria.psycho.videos;
 
 import android.content.Intent;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
@@ -40,7 +39,6 @@ public class MgTv extends BaseExtractor<String> {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
-        Log.e("B5aOx2", String.format("processVideo, %s", videoUri));
         Intent intent = new Intent(mMainActivity, PlayerActivity.class);
         intent.putExtra(KEY_WEB_VIDEO, videoUri);
         intent.putExtra(KEY_M3U8, true);

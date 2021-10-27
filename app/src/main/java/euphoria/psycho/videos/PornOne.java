@@ -1,16 +1,14 @@
 package euphoria.psycho.videos;
 
-import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
 
+import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
 import euphoria.psycho.share.StringShare;
-
-import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class PornOne extends BaseExtractor<String> {
     private static final Pattern MATCH_PORNONE = Pattern.compile("pornone\\.com/.+/.+/\\d{5,}");
@@ -30,8 +28,7 @@ public class PornOne extends BaseExtractor<String> {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
-        Log.e("B5aOx2", String.format("processVideo, %s", videoUri));
-        invokeVideoPlayer(mMainActivity, Uri.parse(videoUri));
+        PlayerActivity.launchActivity(mMainActivity, videoUri, false);
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {
