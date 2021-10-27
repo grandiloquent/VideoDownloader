@@ -1,10 +1,8 @@
 package euphoria.psycho;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.SurfaceTexture;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
@@ -27,6 +25,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -65,6 +64,7 @@ public class PlayerActivity extends Activity {
     private ImageButton mActionFileDownload;
     private Button mExoFfwdWithAmount;
     private Button mExoRewWithAmount;
+    private LinearLayout mExoCenterControls;
 
     static int calculateScreenOrientation(Activity activity) {
         int displayRotation = getDisplayRotation(activity);
@@ -94,50 +94,6 @@ public class PlayerActivity extends Activity {
                 return 270;
         }
         return 0;
-    }
-
-    static int getNavigationBarHeight(Context context) {
-        Resources res = context.getResources();
-        int resourceId = res.getIdentifier("navigation_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            return res.getDimensionPixelSize(resourceId);
-        }
-        return 0;
-    }
-
-    static void hideSystemUI(Activity activity, boolean toggleActionBarVisibility) {
-        if (toggleActionBarVisibility && activity.getActionBar() != null) {
-            activity.getActionBar().hide();
-        }
-        activity.getWindow().getDecorView()
-                .setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                                View.SYSTEM_UI_FLAG_LOW_PROFILE |
-                                View.SYSTEM_UI_FLAG_FULLSCREEN |
-                                View.SYSTEM_UI_FLAG_IMMERSIVE);
-    }
-
-    static void rotateScreen(Activity activity) {
-        int orientation = calculateScreenOrientation(activity);
-        if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        }
-    }
-
-    static void showSystemUI(Activity activity, boolean toggleActionBarVisibility) {
-        if (toggleActionBarVisibility) {
-            android.app.ActionBar actionBar = activity.getActionBar();
-            if (actionBar != null)
-                actionBar.show();
-        }
-        activity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
     private void clearSurface() {
@@ -174,6 +130,27 @@ public class PlayerActivity extends Activity {
         egl.eglMakeCurrent(display, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
         egl.eglDestroyContext(display, context);
         egl.eglTerminate(display);
+    }
+
+    private void hiddenControls() {
+        mTimeBar.setVisibility(View.GONE);
+        mExoBottomBar.setVisibility(View.GONE);
+        mExoCenterControls.setVisibility(View.GONE);
+    }
+
+    private void hideSystemUI() {
+        mRoot.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LOW_PROFILE |
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_IMMERSIVE);
+    }
+
+    private void hideUI() {
+        mHandler.postDelayed(this::hiddenControls, 5000);
+        hideSystemUI();
     }
 
     private void initializePlayer() {
@@ -276,6 +253,12 @@ public class PlayerActivity extends Activity {
         mTimeBar.setDuration(mediaPlayer.getDuration());
         mMediaPlayer.start();
         updateProgress();
+        hiddenControls();
+    }
+
+    private void onRoot(View view) {
+        showControls();
+        mHandler.postDelayed(this::hiddenControls, 5000);
     }
 
     private void onSeekComplete(MediaPlayer mediaPlayer) {
@@ -309,6 +292,12 @@ public class PlayerActivity extends Activity {
         mTextureView.setLayoutParams(layoutParams);
     }
 
+    private void showControls() {
+        mTimeBar.setVisibility(View.VISIBLE);
+        mExoBottomBar.setVisibility(View.VISIBLE);
+        mExoCenterControls.setVisibility(View.VISIBLE);
+    }
+
     private void updateProgress() {
         if (mMediaPlayer == null) {
             return;
@@ -323,13 +312,7 @@ public class PlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         mRoot = findViewById(R.id.root);
-        mRoot.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                View.SYSTEM_UI_FLAG_LOW_PROFILE |
-                View.SYSTEM_UI_FLAG_FULLSCREEN |
-                View.SYSTEM_UI_FLAG_IMMERSIVE);
+        hideSystemUI();
         View decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener
                 (new View.OnSystemUiVisibilityChangeListener() {
@@ -341,18 +324,7 @@ public class PlayerActivity extends Activity {
                             // TODO: The system bars are visible. Make any desired
                             // adjustments to your UI, such as showing the action bar or
                             // other navigational controls.
-                            mHandler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mRoot.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                                            View.SYSTEM_UI_FLAG_LOW_PROFILE |
-                                            View.SYSTEM_UI_FLAG_FULLSCREEN |
-                                            View.SYSTEM_UI_FLAG_IMMERSIVE);
-                                }
-                            }, 5000);
+                            mHandler.postDelayed(() -> hideSystemUI(), 5000);
                         } else {
                             // TODO: The system bars are NOT visible. Make any desired
                             // adjustments to your UI, such as hiding the action bar or
@@ -360,6 +332,7 @@ public class PlayerActivity extends Activity {
                         }
                     }
                 });
+        mExoCenterControls = findViewById(R.id.exo_center_controls);
         mTextureView = findViewById(R.id.texture_view);
         mPosition = findViewById(R.id.position);
         mExoBottomBar = findViewById(R.id.exo_bottom_bar);
@@ -390,6 +363,7 @@ public class PlayerActivity extends Activity {
             @Override
             public void onScrubMove(TimeBar timeBar, long position) {
                 mPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
+                mHandler.removeCallbacks(null);
             }
 
             @Override
@@ -402,7 +376,10 @@ public class PlayerActivity extends Activity {
             public void onScrubStop(TimeBar timeBar, long position, boolean canceled) {
                 mMediaPlayer.seekTo((int) position);
                 updateProgress();
+                hideUI();
             }
+
+
         });
         mExoRewWithAmount = findViewById(R.id.exo_rew_with_amount);
         Typeface typeface = ResourcesCompat.getFont(this, com.google.android.exoplayer2.ui.R.font.roboto_medium_numbers);
@@ -434,6 +411,7 @@ public class PlayerActivity extends Activity {
         mActionFileDownload.setAlpha(75);
         mActionFullscreen = findViewById(R.id.action_fullscreen);
         mActionFullscreen.setOnClickListener(this::onActionFullscreen);
+        mRoot.setOnClickListener(this::onRoot);
 
     }
 
