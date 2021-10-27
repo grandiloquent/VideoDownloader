@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements ClientInterface {
         // the permissions required  to run the app
         if (checkPermissions(this)) return;
         initialize();
-        String uri = "https://cdn.workgreat14.live//m3u8/546626/546626.m3u8?st=Sku-4jCDmnTVrclVlMUZzw&e=1635380024";
+        String uri = "https://ccn.killcovid2021.com//m3u8/546884/546884.m3u8?st=T7LDgnAP3QAaqxEpC_LBaw&e=1635383289";
         Intent intent = new Intent(this, HLSDownloadActivity.class);
         intent.setData(Uri.parse(uri));
         startActivity(intent);

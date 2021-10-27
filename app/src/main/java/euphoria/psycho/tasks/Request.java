@@ -241,7 +241,7 @@ public class Request implements Comparable<Request> {
     private boolean mergeVideo() {
         emitSynchronizeTask(TaskStatus.MERGE_VIDEO);
         try {
-            String outputPath = HLSUtils.createDownloadVideoFile(mVideoTask)
+            String outputPath = HLSUtils.createVideoFile(mVideoTask)
                     .getAbsolutePath();
             try (FileChannel fc = new FileOutputStream(outputPath).getChannel()) {
                 for (File video : mVideoFiles) {

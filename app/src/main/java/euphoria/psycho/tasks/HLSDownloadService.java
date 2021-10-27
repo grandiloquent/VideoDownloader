@@ -52,7 +52,7 @@ public class HLSDownloadService extends Service implements RequestEventListener 
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
         videoTask.FileName = fileName;
-        videoTask.Directory = HLSUtils.createVideoDownloadDirectory(this, fileName);
+        videoTask.Directory = HLSUtils.createVideoDirectory(this, fileName);
         videoTask.Content = content;
         long result = VideoManager
                 .getInstance()
@@ -89,7 +89,10 @@ public class HLSDownloadService extends Service implements RequestEventListener 
                 }
             } else {
                 if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED &&
-                        HLSUtils.createDownloadVideoFile(videoTask).exists()) {
+                        HLSUtils.createVideoFile(videoTask).exists()) {
+                    if (mQueue.count().getRunningTasks() == 0) {
+                        tryStop();
+                    }
                     toastTaskFinished();
                     return;
                 }
@@ -167,12 +170,11 @@ public class HLSDownloadService extends Service implements RequestEventListener 
     @Override
     public void onRequestEvent(Request Request, int event) {
         if (event == RequestEvent.REQUEST_QUEUED) {
-            int[] counts = mQueue.count();
-            showNotification(this, mNotificationManager, counts);
+            showNotification(this, mNotificationManager, mQueue.count());
         } else if (event == RequestEvent.REQUEST_FINISHED) {
-            int[] counts = mQueue.count();
-            if (counts[1] > 0) {
-                showNotification(this, mNotificationManager, counts);
+            RequestQueueStatus status = mQueue.count();
+            if (status.getRunningTasks() > 0) {
+                showNotification(this, mNotificationManager, status);
                 return;
             }
             tryStop();

@@ -110,11 +110,11 @@ public class VideoHelper {
         });
     }
 
-    public static void showNotification(Context context, NotificationManager manager, int[] counts) {
+    public static void showNotification(Context context, NotificationManager manager, RequestQueueStatus status) {
         Builder builder = VideoHelper.getBuilder(context);
         builder.setContentText(String.format("正在下载 %s/%s 个视频",
-                counts[0] - counts[1] + 1,
-                counts[0]));
+                status.getTotalTasks() - status.getRunningTasks() + 1,
+                status.getTotalTasks()));
         manager.notify(android.R.drawable.stat_sys_download, builder.build());
     }
 

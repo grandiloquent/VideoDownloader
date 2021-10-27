@@ -106,7 +106,7 @@ public class RequestQueue {
         }
     }
 
-    int[] count() {
+    RequestQueueStatus count() {
         int running = 0;
         int total = 0;
         synchronized (mCurrentRequests) {
@@ -117,7 +117,7 @@ public class RequestQueue {
                 }
             }
         }
-        return new int[]{total, running};
+        return new RequestQueueStatus(total, running);
     }
 
     // Because when comparing and deleting download tasks,

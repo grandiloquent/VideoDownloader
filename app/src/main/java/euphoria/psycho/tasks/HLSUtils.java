@@ -16,18 +16,17 @@ import euphoria.psycho.share.NetShare;
 
 public class HLSUtils {
 
-    public static File createDownloadVideoFile(VideoTask videoTask) {
-        return new File(videoTask.Directory,
-                videoTask.FileName + ".mp4");
-    }
-
-    public static String createVideoDownloadDirectory(Context context, String fileName) {
+    public static String createVideoDirectory(Context context, String fileName) {
         File directory = new File(getVideoDirectory(context), fileName);
         if (!directory.exists()) {
             boolean result = directory.mkdirs();
             if (!result) return null;
         }
         return directory.getAbsolutePath();
+    }
+
+    public static File createVideoFile(VideoTask videoTask) {
+        return new File(videoTask.Directory + ".mp4");
     }
 
     public static HLSInfo getHLSInfo(String uri) {
@@ -73,7 +72,7 @@ public class HLSUtils {
         }
     }
 
-    public static File getVideoDirectory(Context context) {
+    private static File getVideoDirectory(Context context) {
         File directory =
                 //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
                 context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
