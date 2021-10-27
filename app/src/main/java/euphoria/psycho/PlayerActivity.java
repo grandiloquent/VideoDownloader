@@ -51,6 +51,7 @@ import euphoria.psycho.player.TimeBar.OnScrubListener;
 import euphoria.psycho.share.DateTimeShare;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.tasks.HLSDownloadActivity;
 
 import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
@@ -232,7 +233,7 @@ public class PlayerActivity extends Activity {
                             + ".mp4"
                     , mPlayList.get(mPlayIndex), USER_AGENT);
         } else {
-            Intent intent = new Intent(this, euphoria.psycho.tasks.VideoActivity.class);
+            Intent intent = new Intent(this, HLSDownloadActivity.class);
             intent.setData(Uri.parse(mPlayList.get(mPlayIndex)));
             startActivity(intent);
         }
@@ -481,7 +482,7 @@ public class PlayerActivity extends Activity {
             scheduleHideControls();
             updateProgress();
         });
-        
+
         Button ffwdWithAmount = findViewById(R.id.exo_ffwd_with_amount);
         ffwdWithAmount.setTypeface(typeface);
         ffwdWithAmount.setText("15");

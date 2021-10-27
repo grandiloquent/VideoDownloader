@@ -24,7 +24,7 @@ import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
-import euphoria.psycho.tasks.VideoService;
+import euphoria.psycho.tasks.HLSDownloadService;
 
 public class Helper {
     static final String KEY_LAST_ACCESSED = "lastAccessed";
@@ -68,8 +68,8 @@ public class Helper {
     }
 
     static void checkUnfinishedVideoTasks(Context context) {
-        Intent service = new Intent(context, VideoService.class);
-        service.setAction(VideoService.CHECK_UNFINISHED_VIDEO_TASKS);
+        Intent service = new Intent(context, HLSDownloadService.class);
+        service.setAction(HLSDownloadService.CHECK_UNFINISHED_VIDEO_TASKS);
         context.startService(service);
     }
 

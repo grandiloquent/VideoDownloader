@@ -2,7 +2,9 @@ package euphoria.psycho.explorer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
 import android.webkit.WebView;
@@ -12,6 +14,7 @@ import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.tasks.HLSDownloadActivity;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -78,9 +81,7 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
         checkUpdate();
-
         //tryPlayVideo(this);
-
     }
 
     @Override
@@ -90,6 +91,10 @@ public class MainActivity extends Activity implements ClientInterface {
         // the permissions required  to run the app
         if (checkPermissions(this)) return;
         initialize();
+        String uri = "https://cdn.workgreat14.live//m3u8/546626/546626.m3u8?st=Sku-4jCDmnTVrclVlMUZzw&e=1635380024";
+        Intent intent = new Intent(this, HLSDownloadActivity.class);
+        intent.setData(Uri.parse(uri));
+        startActivity(intent);
     }
 
     @Override

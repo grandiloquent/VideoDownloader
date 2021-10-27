@@ -69,7 +69,7 @@
             android:name=".VideoListActivity"
             android:label="@string/video_list_name" />
         <activity
-            android:name="euphoria.psycho.tasks.VideoActivity"
+            android:name="euphoria.psycho.tasks.HLSDownloadActivity"
             android:label="@string/download_video" />
         <activity
             android:name="euphoria.psycho.player.IqiyiActivity"
@@ -92,7 +92,7 @@
             android:name="euphoria.psycho.PlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
 
-        <service android:name="euphoria.psycho.tasks.VideoService" />
+        <service android:name="euphoria.psycho.tasks.HLSDownloadService" />
         <service android:name="euphoria.psycho.downloader.DownloaderService" />
     </application>
 </manifest>

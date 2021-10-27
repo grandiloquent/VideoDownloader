@@ -19,7 +19,7 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
-public class VideoActivity extends Activity implements RequestEventListener {
+public class HLSDownloadActivity extends Activity implements RequestEventListener {
     public static final String ACTION_FINISH = "euphoria.psycho.tasks.FINISH";
     public static final String ACTION_REFRESH = "euphoria.psycho.tasks.REFRESH";
     public static final String KEY_UPDATE = "update";
@@ -27,6 +27,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
     private ListView mListView;
     private VideoAdapter mVideoAdapter;
     private View mProgressBar;
+
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -44,12 +45,12 @@ public class VideoActivity extends Activity implements RequestEventListener {
     };
 
     public void addLifeCycle(LifeCycle lifeCycle) {
-        mLifeCycles.add(lifeCycle);
+                mLifeCycles.add(lifeCycle);
     }
 
 
     public static void registerBroadcastReceiver(Context context, BroadcastReceiver receiver) {
-        IntentFilter filter = new IntentFilter();
+                IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_REFRESH);
         filter.addAction(ACTION_FINISH);
         context.registerReceiver(receiver, filter);
@@ -57,18 +58,18 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
 
     public void removeLifeCycle(LifeCycle lifeCycle) {
-        mLifeCycles.remove(lifeCycle);
+                mLifeCycles.remove(lifeCycle);
     }
 
 
     private void startService() {
-        String[] videoList = getIntent().getStringArrayExtra(VideoService.KEY_VIDEO_LIST);
+                String[] videoList = getIntent().getStringArrayExtra(HLSDownloadService.KEY_VIDEO_LIST);
         Uri videoUri = getIntent().getData();
         if (videoList == null && videoUri == null) {
             return;
         }
-        Intent service = new Intent(this, VideoService.class);
-        service.putExtra(VideoService.KEY_VIDEO_LIST, videoList);
+        Intent service = new Intent(this, HLSDownloadService.class);
+        service.putExtra(HLSDownloadService.KEY_VIDEO_LIST, videoList);
         service.setData(videoUri);
         startService(service);
     }
@@ -76,7 +77,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+                super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_s);
         mProgressBar = findViewById(R.id.progress_bar);
         mListView = findViewById(R.id.list_view);
@@ -93,7 +94,7 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     protected void onDestroy() {
-        for (int i = 0; i < mLifeCycles.size(); i++) {
+                for (int i = 0; i < mLifeCycles.size(); i++) {
             mLifeCycles.get(i).onDestroy();
         }
         unregisterReceiver(mBroadcastReceiver);
@@ -104,24 +105,23 @@ public class VideoActivity extends Activity implements RequestEventListener {
 
     @Override
     protected void onPause() {
-        VideoManager.getInstance().removeVideoTaskListener(mVideoAdapter);
+                VideoManager.getInstance().removeVideoTaskListener(mVideoAdapter);
         super.onPause();
     }
 
 
     @Override
     protected void onResume() {
-        super.onResume();
+                super.onResume();
         VideoManager.getInstance().addVideoTaskListener(mVideoAdapter);
     }
 
 
     @Override
     public void onRequestEvent(Request Request, int event) {
-        if (event == RequestEvent.REQUEST_QUEUED) {
+                if (event == RequestEvent.REQUEST_QUEUED) {
             VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }
     }
-
 
 }

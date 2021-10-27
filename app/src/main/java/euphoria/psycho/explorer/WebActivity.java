@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.tasks.HLSDownloadActivity;
 
 import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
@@ -129,7 +130,7 @@ public class WebActivity extends Activity {
         @JavascriptInterface
         public void download(String videoUri) {
             if (videoUri.contains("m3u8")) {
-                Intent intent = new Intent(WebActivity.this, euphoria.psycho.tasks.VideoActivity.class);
+                Intent intent = new Intent(WebActivity.this, HLSDownloadActivity.class);
                 intent.setData(Uri.parse(videoUri));
                 WebActivity.this.startActivity(intent);
             } else {

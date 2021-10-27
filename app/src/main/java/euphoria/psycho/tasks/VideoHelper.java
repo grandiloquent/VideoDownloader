@@ -34,7 +34,7 @@ public class VideoHelper {
 
     public static boolean checkTask(Context context, RequestQueue q, String fileName) {
         if (q.taskExists(fileName)) {
-            context.sendBroadcast(new Intent(VideoActivity.ACTION_REFRESH));
+            context.sendBroadcast(new Intent(HLSDownloadActivity.ACTION_REFRESH));
             return true;
         }
         return false;
@@ -44,7 +44,7 @@ public class VideoHelper {
     @RequiresApi(api = VERSION_CODES.O)
     public static void createNotificationChannel(Context context, NotificationManager manager) {
         final NotificationChannel notificationChannel = new NotificationChannel(
-                VideoService.DOWNLOAD_CHANNEL,
+                HLSDownloadService.DOWNLOAD_CHANNEL,
                 context.getString(R.string.channel_download_videos),
                 NotificationManager.IMPORTANCE_LOW);
         manager.createNotificationChannel(notificationChannel);
@@ -64,7 +64,7 @@ public class VideoHelper {
         Builder builder;
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             builder = new Builder(context,
-                    VideoService.DOWNLOAD_CHANNEL);
+                    HLSDownloadService.DOWNLOAD_CHANNEL);
         } else {
             builder = new Builder(context);
         }
@@ -81,7 +81,8 @@ public class VideoHelper {
         return builder;
     }
 
-    public static String[] getInfos(String uri) {
+
+    public static HLSInfo getInfos(String uri) {
         String m3u8String = null;
         String fileName = null;
         try {
@@ -100,7 +101,7 @@ public class VideoHelper {
         if (fileName == null) {
             return null;
         }
-        return new String[]{m3u8String, fileName};
+        return new HLSInfo(fileName, m3u8String);
     }
 
     public static long getRunningTasksSize(RequestQueue queue) {
@@ -111,9 +112,9 @@ public class VideoHelper {
     }
 
     public static Intent getVideoActivityIntent(Context context) {
-        Intent v = new Intent(context, VideoActivity.class);
+        Intent v = new Intent(context, HLSDownloadActivity.class);
         v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        v.putExtra(VideoActivity.KEY_UPDATE, true);
+        v.putExtra(HLSDownloadActivity.KEY_UPDATE, true);
         return v;
     }
 
@@ -138,7 +139,6 @@ public class VideoHelper {
                 //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
                 context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         //Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-
         if (!directory.exists()) {
             boolean result = directory.mkdirs();
             if (!result) return null;
@@ -155,7 +155,7 @@ public class VideoHelper {
     }
 
     public static void startVideoActivity(Context context) {
-        Intent v = new Intent(context, VideoActivity.class);
+        Intent v = new Intent(context, HLSDownloadActivity.class);
         v.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(v);
     }

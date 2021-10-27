@@ -17,11 +17,11 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.Logger;
 
 public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
-    private final VideoActivity mVideoActivity;
+    private final HLSDownloadActivity mVideoActivity;
     private final List<VideoTask> mVideoTasks = new ArrayList<>();
     private final List<ViewHolder> mViewHolders = new ArrayList<>();
 
-    public VideoAdapter(VideoActivity videoActivity) {
+    public VideoAdapter(HLSDownloadActivity videoActivity) {
         mVideoActivity = videoActivity;
     }
 

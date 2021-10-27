@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -15,14 +16,13 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.tasks.RequestQueue.RequestEvent;
 import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
 import static euphoria.psycho.tasks.VideoHelper.showNotification;
 
 
-public class VideoService extends Service implements RequestEventListener {
+public class HLSDownloadService extends Service implements RequestEventListener {
 
     public static final String CHECK_UNFINISHED_VIDEO_TASKS = "CheckUnfinishedVideoTasks";
     public static final String DOWNLOAD_CHANNEL = "DOWNLOAD";
@@ -70,25 +70,26 @@ public class VideoService extends Service implements RequestEventListener {
             // Calculate the hash value of the m3u8 content
             // as the file name and unique Id,
             // try to avoid downloading the video repeatedly
-            String[] infos = VideoHelper.getInfos(uri);
-            if (infos == null) {
+            HLSInfo hlsInfo = VideoHelper.getInfos(uri);
+            if (hlsInfo == null) {
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
             // Check whether the task has been added to the task queue
-            if (VideoHelper.checkTask(this, mQueue, infos[1])) {
+            if (VideoHelper.checkTask(this, mQueue, hlsInfo.getFileName())) {
                 return;
             }
             // Query task from the database
-            VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(infos[1]);
+            VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(hlsInfo.getFileName());
+            Log.e("B5aOx2", String.format("submitRequest, %s %s", videoTask == null,hlsInfo.getFileName()));
             if (videoTask == null) {
-                videoTask = createTask(uri, infos[1], infos[0]);
+                videoTask = createTask(uri, hlsInfo.getFileName(), hlsInfo.getContent());
                 if (videoTask == null) {
                     toastTaskFailed(getString(R.string.failed_to_create_task));
                     return;
                 }
             } else {
-                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED) {
+                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED && new File(videoTask.Directory, videoTask.FileName).exists()) {
                     toastTaskFinished();
                     return;
                 }
@@ -101,7 +102,7 @@ public class VideoService extends Service implements RequestEventListener {
 
     private void submitTask(VideoTask videoTask) {
         VideoManager.post(() -> {
-            Request request = new Request(VideoService.this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+            Request request = new Request(HLSDownloadService.this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
             request.setRequestQueue(mQueue);
             mQueue.add(request);
         });
@@ -109,13 +110,13 @@ public class VideoService extends Service implements RequestEventListener {
 
     private void toastTaskFailed(String message) {
         VideoManager.post(() -> {
-            Toast.makeText(VideoService.this, message, Toast.LENGTH_SHORT).show();
+            Toast.makeText(HLSDownloadService.this, message, Toast.LENGTH_SHORT).show();
         });
     }
 
     private void toastTaskFinished() {
         VideoManager.post(() -> {
-            Toast.makeText(VideoService.this, "视频已下载", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HLSDownloadService.this, "视频已下载", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -129,7 +130,7 @@ public class VideoService extends Service implements RequestEventListener {
         // Send a task finished broadcast
         // to the activity for display the download progress
         // if it is already opened it should close
-        sendBroadcast(new Intent(VideoActivity.ACTION_FINISH));
+        sendBroadcast(new Intent(HLSDownloadActivity.ACTION_FINISH));
         // Try to open the video list
         // because the new version of the Android system
         // may restrict the app to open activity from the service

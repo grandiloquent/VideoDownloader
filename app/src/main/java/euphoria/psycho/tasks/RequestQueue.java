@@ -83,19 +83,19 @@ public class RequestQueue {
          * All the work associated with the request is finished and request is removed from all the
          * queues.
          */
-        public static final int REQUEST_FINISHED = 5;
+        int REQUEST_FINISHED = 5;
         /**
          * The network dispatch finished for the request and response (if any) is delivered.
          */
-        public static final int REQUEST_NETWORK_DISPATCH_FINISHED = 4;
+        int REQUEST_NETWORK_DISPATCH_FINISHED = 4;
         /**
          * Network dispatch started for the request.
          */
-        public static final int REQUEST_NETWORK_DISPATCH_STARTED = 3;
+        int REQUEST_NETWORK_DISPATCH_STARTED = 3;
         /**
          * The request was added to the queue.
          */
-        public static final int REQUEST_QUEUED = 0;
+        int REQUEST_QUEUED = 0;
     }
 
     void sendRequestEvent(Request request, @RequestEvent int event) {
@@ -120,6 +120,9 @@ public class RequestQueue {
         return new int[]{total, running};
     }
 
+    // Because when comparing and deleting download tasks,
+    // other threads may insert new download tasks at the same time,
+    // so we should synchronize operations
     void removeVideoTask(VideoTask videoTask) {
         synchronized (mCurrentRequests) {
             Request src = null;

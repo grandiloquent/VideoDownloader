@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.utils.BlobCache;
 import euphoria.psycho.utils.M3u8Utils;
@@ -238,7 +237,7 @@ public class Request implements Comparable<Request> {
         }
         return 0;
     }
-
+    //
     private boolean mergeVideo() {
         emitSynchronizeTask(TaskStatus.MERGE_VIDEO);
         try {

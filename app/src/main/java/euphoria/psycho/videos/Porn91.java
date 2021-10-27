@@ -13,8 +13,8 @@ import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.WebActivity;
 import euphoria.psycho.share.StringShare;
-import euphoria.psycho.tasks.VideoActivity;
-import euphoria.psycho.tasks.VideoService;
+import euphoria.psycho.tasks.HLSDownloadActivity;
+import euphoria.psycho.tasks.HLSDownloadService;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
 
@@ -56,8 +56,8 @@ public class Porn91 extends BaseExtractor<String> {
 
     static void startVideoService(MainActivity mainActivity, List<String> videoList) {
         mainActivity.runOnUiThread(() -> {
-            Intent service = new Intent(mainActivity, VideoActivity.class);
-            service.putExtra(VideoService.KEY_VIDEO_LIST, videoList.toArray(new String[0]));
+            Intent service = new Intent(mainActivity, HLSDownloadActivity.class);
+            service.putExtra(HLSDownloadService.KEY_VIDEO_LIST, videoList.toArray(new String[0]));
             mainActivity.startActivity(service);
         });
     }
