@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -48,11 +47,12 @@ public class HLSDownloadService extends Service implements RequestEventListener 
         }
     }
 
+    //
     private VideoTask createTask(String uri, String fileName, String content) {
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
         videoTask.FileName = fileName;
-        videoTask.Directory = new File(mVideoDirectory, fileName).getAbsolutePath();
+        videoTask.Directory = HLSUtils.createVideoDownloadDirectory(this, fileName);
         videoTask.Content = content;
         long result = VideoManager
                 .getInstance()
@@ -70,7 +70,7 @@ public class HLSDownloadService extends Service implements RequestEventListener 
             // Calculate the hash value of the m3u8 content
             // as the file name and unique Id,
             // try to avoid downloading the video repeatedly
-            HLSInfo hlsInfo = VideoHelper.getInfos(uri);
+            HLSInfo hlsInfo = HLSUtils.getHLSInfo(uri);
             if (hlsInfo == null) {
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
@@ -81,7 +81,6 @@ public class HLSDownloadService extends Service implements RequestEventListener 
             }
             // Query task from the database
             VideoTask videoTask = VideoManager.getInstance().getDatabase().getVideoTask(hlsInfo.getFileName());
-            Log.e("B5aOx2", String.format("submitRequest, %s %s", videoTask == null,hlsInfo.getFileName()));
             if (videoTask == null) {
                 videoTask = createTask(uri, hlsInfo.getFileName(), hlsInfo.getContent());
                 if (videoTask == null) {
@@ -89,7 +88,8 @@ public class HLSDownloadService extends Service implements RequestEventListener 
                     return;
                 }
             } else {
-                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED && new File(videoTask.Directory, videoTask.FileName).exists()) {
+                if (videoTask.Status == TaskStatus.MERGE_VIDEO_FINISHED &&
+                        HLSUtils.createDownloadVideoFile(videoTask).exists()) {
                     toastTaskFinished();
                     return;
                 }
@@ -146,7 +146,6 @@ public class HLSDownloadService extends Service implements RequestEventListener 
     @Override
     public void onCreate() {
         super.onCreate();
-        mVideoDirectory = VideoHelper.setVideoDownloadDirectory(this);
         mNotificationManager = ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE));
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             VideoHelper.createNotificationChannel(this, mNotificationManager);

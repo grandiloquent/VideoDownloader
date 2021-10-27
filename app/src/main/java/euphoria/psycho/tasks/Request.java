@@ -22,7 +22,6 @@ import java.util.List;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.utils.BlobCache;
-import euphoria.psycho.utils.M3u8Utils;
 
 public class Request implements Comparable<Request> {
 
@@ -105,7 +104,7 @@ public class Request implements Comparable<Request> {
         emitSynchronizeTask(TaskStatus.START);
         if (mVideoTask.Content == null) {
             try {
-                mVideoTask.Content = M3u8Utils.getString(mVideoTask.Uri);
+                mVideoTask.Content = HLSUtils.getString(mVideoTask.Uri);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -113,7 +112,7 @@ public class Request implements Comparable<Request> {
         String m3u8String = mVideoTask.Content;
         if (m3u8String == null || m3u8String.length() == 0) {
             try {
-                m3u8String = M3u8Utils.getString(mVideoTask.Uri);
+                m3u8String = HLSUtils.getString(mVideoTask.Uri);
                 mVideoTask.Content = m3u8String;
             } catch (IOException e) {
                 emitSynchronizeTask(TaskStatus.ERROR_FETCH_M3U8);
@@ -237,12 +236,12 @@ public class Request implements Comparable<Request> {
         }
         return 0;
     }
+
     //
     private boolean mergeVideo() {
         emitSynchronizeTask(TaskStatus.MERGE_VIDEO);
         try {
-            String outputPath = new File(mVideoTask.Directory,
-                    StringShare.substringAfterLast(mVideoTask.Directory, "/") + ".mp4")
+            String outputPath = HLSUtils.createDownloadVideoFile(mVideoTask)
                     .getAbsolutePath();
             try (FileChannel fc = new FileOutputStream(outputPath).getChannel()) {
                 for (File video : mVideoFiles) {

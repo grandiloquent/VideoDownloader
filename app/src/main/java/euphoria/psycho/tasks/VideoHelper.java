@@ -18,9 +18,7 @@ import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.Logger;
-import euphoria.psycho.utils.M3u8Utils;
 
 public class VideoHelper {
 
@@ -82,28 +80,6 @@ public class VideoHelper {
     }
 
 
-    public static HLSInfo getInfos(String uri) {
-        String m3u8String = null;
-        String fileName = null;
-        try {
-            m3u8String = M3u8Utils.getString(uri);
-        } catch (Exception ignored) {
-            Logger.e(String.format("getInfos,%s %s", uri, ignored.getMessage()));
-        }
-        if (m3u8String == null) {
-            return null;
-        }
-        try {
-            fileName = KeyShare.toHex(KeyShare.md5encode(m3u8String));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (fileName == null) {
-            return null;
-        }
-        return new HLSInfo(fileName, m3u8String);
-    }
-
     public static long getRunningTasksSize(RequestQueue queue) {
         return queue.getCurrentRequests()
                 .stream()
@@ -132,18 +108,6 @@ public class VideoHelper {
                 VideoManager.getInstance().getQueue().add(request);
             }
         });
-    }
-
-    public static File setVideoDownloadDirectory(Context context) {
-        File directory =
-                //FileShare.isHasSD() ? new File(FileShare.getExternalStoragePath(this), "Videos") :
-                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        //Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        if (!directory.exists()) {
-            boolean result = directory.mkdirs();
-            if (!result) return null;
-        }
-        return directory;
     }
 
     public static void showNotification(Context context, NotificationManager manager, int[] counts) {
