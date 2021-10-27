@@ -24,7 +24,6 @@ import static euphoria.psycho.explorer.Helper.checkPermissions;
 import static euphoria.psycho.explorer.Helper.checkUnfinishedVideoTasks;
 import static euphoria.psycho.explorer.Helper.configureWebView;
 import static euphoria.psycho.explorer.Helper.loadStartPage;
-import static euphoria.psycho.explorer.Helper.tryPlayVideo;
 
 public class MainActivity extends Activity implements ClientInterface {
 
@@ -80,7 +79,7 @@ public class MainActivity extends Activity implements ClientInterface {
         checkUnfinishedVideoTasks(this);
         checkUpdate();
 
-        tryPlayVideo(this);
+        //tryPlayVideo(this);
 
     }
 

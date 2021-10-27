@@ -1,6 +1,8 @@
 package euphoria.psycho;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.SurfaceTexture;
@@ -28,8 +30,15 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -44,27 +53,40 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.player.TimeBar;
 import euphoria.psycho.player.TimeBar.OnScrubListener;
 import euphoria.psycho.share.DateTimeShare;
+import euphoria.psycho.share.KeyShare;
+import euphoria.psycho.share.WebViewShare;
+
+import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
 public class PlayerActivity extends Activity {
 
+    public static final int DEFAULT_HIDE_TIME_DELAY = 5000;
+    public static final String KEY_VIDEO_FILE = "VideoFile";
+    public static final String KEY_WEB_VIDEO = "WebVideo";
+    public static final String KEY_M3U8 = "m3u8";
     TextureView mTextureView;
     MediaPlayer mMediaPlayer;
     Surface mSurface;
     SurfaceTexture mSurfaceTexture;
     private FrameLayout mRoot;
     private boolean mLayout = false;
-    StringBuilder mStringBuilder = new StringBuilder();
-    Formatter mFormatter = new Formatter(mStringBuilder);
-    private FrameLayout mExoBottomBar;
+    private StringBuilder mStringBuilder = new StringBuilder();
+    private Formatter mFormatter = new Formatter(mStringBuilder);
+    private FrameLayout mBottomBar;
     private TextView mDuration;
     private SimpleTimeBar mTimeBar;
     private Handler mHandler = new Handler();
     private TextView mPosition;
     private ImageButton mActionFullscreen;
     private ImageButton mActionFileDownload;
-    private Button mExoFfwdWithAmount;
-    private Button mExoRewWithAmount;
-    private LinearLayout mExoCenterControls;
+    private Button mFfwdWithAmount;
+    private Button mRewWithAmount;
+    private LinearLayout mCenterControls;
+    private ImageButton mNext;
+    private ImageButton mPrev;
+    private Runnable mHideAction = this::hiddenControls;
+    private List<String> mPlayList;
+    private int mPlayIndex;
 
     static int calculateScreenOrientation(Activity activity) {
         int displayRotation = getDisplayRotation(activity);
@@ -94,6 +116,36 @@ public class PlayerActivity extends Activity {
                 return 270;
         }
         return 0;
+    }
+
+    static File[] getVideos(String videoPath) {
+        if (videoPath == null) {
+            return null;
+        }
+        File dir = new File(videoPath).getParentFile();
+        if (dir == null) {
+            return null;
+        }
+        return listVideoFiles(dir.getAbsolutePath());
+    }
+
+    static File[] listVideoFiles(String dir) {
+        File directory = new File(dir);
+        Pattern pattern = Pattern.compile("\\.(?:mp4|vm|crdownload)$");
+        File[] files = directory.listFiles(file ->
+                file.isFile() && pattern.matcher(file.getName()).find());
+        if (files == null || files.length == 0) return null;
+        Arrays.sort(files, (o1, o2) -> {
+            final long result = o2.lastModified() - o1.lastModified();
+            if (result < 0) {
+                return -1;
+            } else if (result > 0) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        return files;
     }
 
     private void clearSurface() {
@@ -134,8 +186,8 @@ public class PlayerActivity extends Activity {
 
     private void hiddenControls() {
         mTimeBar.setVisibility(View.GONE);
-        mExoBottomBar.setVisibility(View.GONE);
-        mExoCenterControls.setVisibility(View.GONE);
+        mBottomBar.setVisibility(View.GONE);
+        mCenterControls.setVisibility(View.GONE);
     }
 
     private void hideSystemUI() {
@@ -146,11 +198,6 @@ public class PlayerActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LOW_PROFILE |
                 View.SYSTEM_UI_FLAG_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_IMMERSIVE);
-    }
-
-    private void hideUI() {
-        mHandler.postDelayed(this::hiddenControls, 5000);
-        hideSystemUI();
     }
 
     private void initializePlayer() {
@@ -171,15 +218,26 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.setOnTimedMetaDataAvailableListener(this::onTimedMetaDataAvailable);
             mMediaPlayer.setOnTimedTextListener(this::onTimedText);
             mMediaPlayer.setOnVideoSizeChangedListener(this::onVideoSizeChanged);
-            mMediaPlayer.setDataSource(this, getIntent().getData());
             mMediaPlayer.setSurface(mSurface);
-            mMediaPlayer.prepareAsync();
+            play();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private void play() throws IOException {
+        mMediaPlayer.setDataSource(mPlayList.get(mPlayIndex));
+        mMediaPlayer.prepareAsync();
+    }
+
     private void onActionFileDownload(View view) {
+        boolean isM3u8 = getIntent().getBooleanExtra(KEY_M3U8, false);
+        if (!isM3u8) {
+            WebViewShare.downloadFile(this,
+                    KeyShare.toHex(mPlayList.get(mPlayIndex).getBytes(StandardCharsets.UTF_8))
+                            + ".mp4"
+                    , mPlayList.get(mPlayIndex), USER_AGENT);
+        }
     }
 
     private void onActionFullscreen(View view) {
@@ -207,9 +265,6 @@ public class PlayerActivity extends Activity {
             FrameLayout.LayoutParams layoutParams = new LayoutParams(mRoot.getMeasuredHeight(), height);
             layoutParams.topMargin = top;
             mTextureView.setLayoutParams(layoutParams);
-            Log.e("B5aOx2", String.format("onActionFullscreen, mMediaPlayer.getVideoWidth() = %s;\n mMediaPlayer.getVideoHeight() = %s;\n getResources().getDisplayMetrics().widthPixels = %s;\n getResources().getDisplayMetrics().heightPixels = %s;\n mRoot.getMeasuredWidth() = %s;\n mRoot.getMeasuredHeight() = %s;\n ratio = %s\n left = %s",
-                    mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight(), getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels, mRoot.getMeasuredWidth(), mRoot.getMeasuredHeight(), ratio, top
-            ));
         }
 
     }
@@ -247,6 +302,21 @@ public class PlayerActivity extends Activity {
     private void onMediaTimeDiscontinuity(MediaPlayer mediaPlayer, MediaTimestamp mediaTimestamp) {
     }
 
+    private void onNext(View view) {
+        if (mPlayList.size() < 2) return;
+        if (mPlayIndex + 1 < mPlayList.size()) {
+            mPlayIndex++;
+        } else {
+            mPlayIndex = 0;
+        }
+        mMediaPlayer.reset();
+        try {
+            play();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void onPrepared(MediaPlayer mediaPlayer) {
         Log.e("B5aOx2", "onPrepared");
         mDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mediaPlayer.getDuration()));
@@ -256,9 +326,24 @@ public class PlayerActivity extends Activity {
         hiddenControls();
     }
 
+    private void onPrev(View view) {
+        if (mPlayList.size() < 2) return;
+        if (mPlayIndex - 1 > -1) {
+            mPlayIndex--;
+        } else {
+            mPlayIndex = 0;
+        }
+        mMediaPlayer.reset();
+        try {
+            play();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void onRoot(View view) {
         showControls();
-        mHandler.postDelayed(this::hiddenControls, 5000);
+        scheduleHideControls();
     }
 
     private void onSeekComplete(MediaPlayer mediaPlayer) {
@@ -292,14 +377,19 @@ public class PlayerActivity extends Activity {
         mTextureView.setLayoutParams(layoutParams);
     }
 
+    private void scheduleHideControls() {
+        mHandler.removeCallbacks(mHideAction);
+        mHandler.postDelayed(mHideAction, DEFAULT_HIDE_TIME_DELAY);
+    }
+
     private void showControls() {
         mTimeBar.setVisibility(View.VISIBLE);
-        mExoBottomBar.setVisibility(View.VISIBLE);
-        mExoCenterControls.setVisibility(View.VISIBLE);
+        mBottomBar.setVisibility(View.VISIBLE);
+        mCenterControls.setVisibility(View.VISIBLE);
     }
 
     private void updateProgress() {
-        if (mMediaPlayer == null) {
+        if (mMediaPlayer == null || mBottomBar.getVisibility() != View.VISIBLE) {
             return;
         }
         mTimeBar.setPosition(mMediaPlayer.getCurrentPosition());
@@ -315,27 +405,24 @@ public class PlayerActivity extends Activity {
         hideSystemUI();
         View decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener
-                (new View.OnSystemUiVisibilityChangeListener() {
-                    @Override
-                    public void onSystemUiVisibilityChange(int visibility) {
-                        // Note that system bars will only be "visible" if none of the
-                        // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
-                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                            // TODO: The system bars are visible. Make any desired
-                            // adjustments to your UI, such as showing the action bar or
-                            // other navigational controls.
-                            mHandler.postDelayed(() -> hideSystemUI(), 5000);
-                        } else {
-                            // TODO: The system bars are NOT visible. Make any desired
-                            // adjustments to your UI, such as hiding the action bar or
-                            // other navigational controls.
-                        }
+                (visibility -> {
+                    // Note that system bars will only be "visible" if none of the
+                    // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+                    if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                        // TODO: The system bars are visible. Make any desired
+                        // adjustments to your UI, such as showing the action bar or
+                        // other navigational controls.
+                        mHandler.postDelayed(this::hideSystemUI, DEFAULT_HIDE_TIME_DELAY);
+                    } else {
+                        // TODO: The system bars are NOT visible. Make any desired
+                        // adjustments to your UI, such as hiding the action bar or
+                        // other navigational controls.
                     }
                 });
-        mExoCenterControls = findViewById(R.id.exo_center_controls);
+        mCenterControls = findViewById(R.id.exo_center_controls);
         mTextureView = findViewById(R.id.texture_view);
         mPosition = findViewById(R.id.position);
-        mExoBottomBar = findViewById(R.id.exo_bottom_bar);
+        mBottomBar = findViewById(R.id.exo_bottom_bar);
         mDuration = findViewById(R.id.duration);
         mTextureView.setSurfaceTextureListener(new SurfaceTextureListener() {
             @Override
@@ -363,12 +450,11 @@ public class PlayerActivity extends Activity {
             @Override
             public void onScrubMove(TimeBar timeBar, long position) {
                 mPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
-                mHandler.removeCallbacks(null);
             }
 
             @Override
             public void onScrubStart(TimeBar timeBar, long position) {
-                mHandler.removeCallbacks(null);
+                mHandler.removeCallbacks(mHideAction);
                 mPosition.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, position));
             }
 
@@ -376,16 +462,16 @@ public class PlayerActivity extends Activity {
             public void onScrubStop(TimeBar timeBar, long position, boolean canceled) {
                 mMediaPlayer.seekTo((int) position);
                 updateProgress();
-                hideUI();
+                scheduleHideControls();
             }
 
 
         });
-        mExoRewWithAmount = findViewById(R.id.exo_rew_with_amount);
+        mRewWithAmount = findViewById(R.id.exo_rew_with_amount);
         Typeface typeface = ResourcesCompat.getFont(this, com.google.android.exoplayer2.ui.R.font.roboto_medium_numbers);
-        mExoRewWithAmount.setTypeface(typeface);
-        mExoRewWithAmount.setText("5");
-        mExoRewWithAmount.setOnClickListener(v -> {
+        mRewWithAmount.setTypeface(typeface);
+        mRewWithAmount.setText("5");
+        mRewWithAmount.setOnClickListener(v -> {
             mHandler.removeCallbacks(null);
             int dif = mMediaPlayer.getCurrentPosition() - 5000;
             if (dif < 0) {
@@ -394,10 +480,10 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.seekTo(dif);
             updateProgress();
         });
-        mExoFfwdWithAmount = findViewById(R.id.exo_ffwd_with_amount);
-        mExoFfwdWithAmount.setTypeface(typeface);
-        mExoFfwdWithAmount.setText("15");
-        mExoFfwdWithAmount.setOnClickListener(v -> {
+        mFfwdWithAmount = findViewById(R.id.exo_ffwd_with_amount);
+        mFfwdWithAmount.setTypeface(typeface);
+        mFfwdWithAmount.setText("15");
+        mFfwdWithAmount.setOnClickListener(v -> {
             mHandler.removeCallbacks(null);
             int dif = mMediaPlayer.getCurrentPosition() + 15000;
             if (dif > mMediaPlayer.getDuration()) {
@@ -407,12 +493,36 @@ public class PlayerActivity extends Activity {
             updateProgress();
         });
         mActionFileDownload = findViewById(R.id.action_file_download);
-        mActionFileDownload.setOnClickListener(this::onActionFileDownload);
-        mActionFileDownload.setAlpha(75);
         mActionFullscreen = findViewById(R.id.action_fullscreen);
         mActionFullscreen.setOnClickListener(this::onActionFullscreen);
         mRoot.setOnClickListener(this::onRoot);
-
+        mPrev = findViewById(R.id.prev);
+        mNext = findViewById(R.id.next);
+        String videoFile = getIntent().getStringExtra(KEY_VIDEO_FILE);
+        if (videoFile != null) {
+            mActionFileDownload.setAlpha(75);
+            mPlayList = Arrays.stream(getVideos(videoFile)).map(File::getAbsolutePath)
+                    .collect(Collectors.toList());
+            if (mPlayList.size() < 2) {
+                mPrev.setAlpha(75);
+                mNext.setAlpha(75);
+                mPlayIndex = 0;
+            } else {
+                mPrev.setOnClickListener(this::onPrev);
+                mNext.setOnClickListener(this::onNext);
+                mPlayIndex = mPlayList.indexOf(videoFile);
+            }
+            return;
+        }
+        String webVideo = getIntent().getStringExtra(KEY_WEB_VIDEO);
+        if (webVideo != null) {
+            mPrev.setAlpha(75);
+            mNext.setAlpha(75);
+            mActionFileDownload.setOnClickListener(this::onActionFileDownload);
+            mPlayList = new ArrayList<>();
+            mPlayList.add(webVideo);
+            mPlayIndex = 0;
+        }
     }
 
     @Override
@@ -433,5 +543,19 @@ public class PlayerActivity extends Activity {
         }
         clearSurface();
     }
+
+    public static void launchActivity(Context context, File videoFile) {
+        Intent intent = new Intent(context, PlayerActivity.class);
+        intent.putExtra(KEY_VIDEO_FILE, videoFile.getAbsolutePath());
+        context.startActivity(intent);
+    }
+
+    public static void launchActivity(Context context, String webVideo, boolean isM3u8) {
+        Intent intent = new Intent(context, PlayerActivity.class);
+        intent.putExtra(KEY_WEB_VIDEO, webVideo);
+        if (isM3u8) {
+            intent.putExtra(KEY_WEB_VIDEO, isM3u8);
+        }
+        context.startActivity(intent);
+    }
 }
- 

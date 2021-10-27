@@ -1,7 +1,6 @@
 package euphoria.psycho.videos;
 
 import android.app.AlertDialog;
-import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,11 +27,10 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import androidx.annotation.NonNull;
+import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.videos.Twitter.TwitterVideo;
-
-import static euphoria.psycho.videos.VideosHelper.invokeVideoPlayer;
 
 public class Twitter extends BaseExtractor<List<TwitterVideo>> {
     private static final Pattern MATCH_TWITTER = Pattern.compile("twitter\\.com/.+/status/(\\d+)");
@@ -142,7 +140,7 @@ public class Twitter extends BaseExtractor<List<TwitterVideo>> {
         }
         new AlertDialog.Builder(mMainActivity)
                 .setItems(names, (dialog, which) -> {
-                    invokeVideoPlayer(mMainActivity, Uri.parse(videoList.get(which).url));
+                    PlayerActivity.launchActivity(mMainActivity, videoList.get(which).url, false);
                 })
                 .show();
     }

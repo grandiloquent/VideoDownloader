@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.webkit.DownloadListener;
@@ -104,12 +103,13 @@ public class Helper {
                     .getString(KEY_LAST_ACCESSED, ListenerDelegate.HELP_URL));
         }
     }
-//
+
+    //
     static void tryPlayVideo(Context context) {
         Intent intent = new Intent(context, PlayerActivity.class);
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             try {
-                intent.setData(Uri.fromFile(Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download"))
+                intent.putExtra(PlayerActivity.KEY_VIDEO_FILE, Files.list(Paths.get("/storage/emulated/0/Android/data/euphoria.psycho.explorer/files/Download"))
                         .filter(path -> path.getFileName().toAbsolutePath().toString().endsWith(".mp4"))
                         .sorted((o1, o2) -> {
                             long result = 0;
@@ -125,7 +125,7 @@ public class Helper {
                                 return 0;
                             }
                         })
-                        .findFirst().get().toFile()));
+                        .findFirst().get().toFile().getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
