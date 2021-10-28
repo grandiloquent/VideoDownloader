@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,6 @@ public class VideoManager implements VideoTaskListener {
     public VideoManager(Context context) {
         mDatabase = VideoTaskDatabase.getInstance(context);
     }
-
 
     public void addVideoTaskListener(VideoTaskListener taskListener) {
         mVideoTaskListeners.add(taskListener);
@@ -50,14 +48,12 @@ public class VideoManager implements VideoTaskListener {
         return mQueue;
     }
 
-
     public static VideoManager newInstance(Context context) {
         if (sVideoManager == null) {
             sVideoManager = new VideoManager(context);
         }
         return sVideoManager;
     }
-
 
     public void removeVideoTaskListener(VideoTaskListener videoTaskListener) {
         mVideoTaskListeners.remove(videoTaskListener);
@@ -80,6 +76,4 @@ public class VideoManager implements VideoTaskListener {
     public static void post(Runnable runnable) {
         getInstance().getHandler().post(runnable);
     }
-
-
 }

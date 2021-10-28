@@ -14,7 +14,8 @@
 * [x] [B站](https://www.bilibili.com/)
 * [x] [芒果TV](https://mgtv.com/)
 * [x] [腾讯视频](https://v.qq.com/)
-* [ ] [西瓜视频](https://m.ixigua.com/)
+* [x] [西瓜视频](https://m.ixigua.com/)
+* [x] [中央卫视](https://tv.cctv.com/m/index.shtml)
 * [x] [Twitter](https://m.twitter.com)
 * [x] [YouTube](https://m.youtube.com)
 * [x] [91porn](https://91porn.com/index.php): 批量下载视频

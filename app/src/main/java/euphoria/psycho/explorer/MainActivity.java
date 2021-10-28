@@ -1,10 +1,12 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
+import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -79,6 +81,23 @@ public class MainActivity extends Activity implements ClientInterface {
         checkUnfinishedVideoTasks(this);
         checkUpdate();
         //tryPlayVideo(this);
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage("正在下载中...");
+        dialog.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                Log.e("B5aOx2", String.format("run, %s",
+                        Native.fetchCCTV("https://tv.cctv.com/v/v4/VIDE1355816655576315.html")));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.dismiss();
+                    }
+                });
+            }
+        }).start();
     }
 
     @Override

@@ -346,7 +346,6 @@ public class PlayerActivity extends Activity {
 
     private void onSeekComplete(MediaPlayer mediaPlayer) {
         Log.e("B5aOx2", "onSeekComplete");
-
     }
 
     private void onTimedMetaDataAvailable(MediaPlayer mediaPlayer, TimedMetaData timedMetaData) {
@@ -472,9 +471,9 @@ public class PlayerActivity extends Activity {
         Button rewWithAmount = findViewById(R.id.exo_rew_with_amount);
         Typeface typeface = ResourcesCompat.getFont(this, com.google.android.exoplayer2.ui.R.font.roboto_medium_numbers);
         rewWithAmount.setTypeface(typeface);
-        rewWithAmount.setText("5");
+        rewWithAmount.setText("10");
         rewWithAmount.setOnClickListener(v -> {
-            int dif = mMediaPlayer.getCurrentPosition() - 5000;
+            int dif = mMediaPlayer.getCurrentPosition() - 10000;
             if (dif < 0) {
                 dif = 0;
             }
@@ -482,12 +481,11 @@ public class PlayerActivity extends Activity {
             scheduleHideControls();
             updateProgress();
         });
-
         Button ffwdWithAmount = findViewById(R.id.exo_ffwd_with_amount);
         ffwdWithAmount.setTypeface(typeface);
-        ffwdWithAmount.setText("15");
+        ffwdWithAmount.setText("10");
         ffwdWithAmount.setOnClickListener(v -> {
-            int dif = mMediaPlayer.getCurrentPosition() + 15000;
+            int dif = mMediaPlayer.getCurrentPosition() + 10000;
             if (dif > mMediaPlayer.getDuration()) {
                 dif = mMediaPlayer.getDuration();
             }

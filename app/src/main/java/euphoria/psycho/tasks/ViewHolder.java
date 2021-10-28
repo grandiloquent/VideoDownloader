@@ -14,5 +14,4 @@ public class ViewHolder {
     public String tag;
     public ImageView thumbnail;
     public ImageButton button;
-
 }
