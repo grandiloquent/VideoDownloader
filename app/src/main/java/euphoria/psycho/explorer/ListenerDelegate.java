@@ -21,6 +21,7 @@ import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.videos.AcFun;
 import euphoria.psycho.videos.Bilibili;
+import euphoria.psycho.videos.CCTV;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.DouYin;
 import euphoria.psycho.videos.Iqiyi;
@@ -135,6 +136,9 @@ public class ListenerDelegate {
         if (MgTv.handle(url, mMainActivity)) {
             return;
         }
+        if (CCTV.handle(url, mMainActivity)) {
+            return;
+        }
         if (PornHub.handle(url, mMainActivity)) {
             return;
         }
@@ -213,7 +217,7 @@ public class ListenerDelegate {
             new Thread(() -> XVideos.fetchVideos(url)).start();
         }
 
-         
+
     }
 
     private void onShowBookmark() {
