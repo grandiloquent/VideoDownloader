@@ -6,7 +6,6 @@ import android.graphics.RectF;
 import android.opengl.GLSurfaceView;
 import android.os.Looper;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -356,6 +355,9 @@ public class SimplePlayerView extends FrameLayout {
         }
     }
 
+    public void setOnDownloadListener(OnClickListener clickListener) {
+        controller.getDownloadButton().setOnClickListener(clickListener);
+    }
 
     public void setShowBuffering(int showBuffering) {
         if (this.showBuffering != showBuffering) {
@@ -389,14 +391,7 @@ public class SimplePlayerView extends FrameLayout {
         controller.setShowRewindButton(showRewindButton);
     }
 
-
-    public void setShowSubtitleButton(boolean showSubtitleButton) {
-        Assertions.checkStateNotNull(controller);
-        controller.setShowSubtitleButton(showSubtitleButton);
-    }
-
     public void showController() {
-        Log.e("B5aOx2", String.format("showController, %s", shouldShowControllerIndefinitely()));
         showController(shouldShowControllerIndefinitely());
     }
 
@@ -457,7 +452,6 @@ public class SimplePlayerView extends FrameLayout {
                 || keyCode == KeyEvent.KEYCODE_DPAD_UP_LEFT
                 || keyCode == KeyEvent.KEYCODE_DPAD_CENTER;
     }
-
 
     private void maybeShowController(boolean isForced) {
         if (useController()) {

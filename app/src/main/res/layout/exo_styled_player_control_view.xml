@@ -58,11 +58,6 @@
                 android:src="@drawable/ic_action_file_download" />
 
             <ImageButton
-                android:id="@id/exo_subtitle"
-
-                style="@style/ExoStyledControls.Button.Bottom.CC" />
-
-            <ImageButton
                 android:id="@id/exo_settings"
                 android:layout_width="@dimen/exo_media_button_width"
                 android:layout_height="@dimen/exo_media_button_height"

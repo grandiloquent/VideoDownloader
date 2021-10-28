@@ -50,7 +50,8 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.player.SimplePlayerControlView.OnFullScreenModeChangedListener;
+import euphoria.psycho.share.KeyShare;
+import euphoria.psycho.share.WebViewShare;
 
 import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
@@ -280,19 +281,15 @@ public class IqiyiActivity extends Activity implements SimplePlayerControlView.V
         mPlayerView.setControllerVisibilityListener(this);
         mPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
         mPlayerView.requestFocus();
-        mPlayerView.setShowSubtitleButton(false);
-        mPlayerView.setControllerOnFullScreenModeChangedListener(new OnFullScreenModeChangedListener() {
-            @Override
-            public void onFullScreenModeChanged(boolean isFullScreen) {
-                if (isFullScreen) {
-                    hideSystemUI(IqiyiActivity.this, true);
-                    rotateScreen(IqiyiActivity.this);
-                    mPlayerView.setPadding(0, 0, 0, 0);
-                } else {
-                    showSystemUI(IqiyiActivity.this, true);
-                    rotateScreen(IqiyiActivity.this);
-                    mPlayerView.setPadding(0, 0, 0, getNavigationBarHeight(IqiyiActivity.this));
-                }
+        mPlayerView.setControllerOnFullScreenModeChangedListener(isFullScreen -> {
+            if (isFullScreen) {
+                hideSystemUI(IqiyiActivity.this, true);
+                rotateScreen(IqiyiActivity.this);
+                mPlayerView.setPadding(0, 0, 0, 0);
+            } else {
+                showSystemUI(IqiyiActivity.this, true);
+                rotateScreen(IqiyiActivity.this);
+                mPlayerView.setPadding(0, 0, 0, getNavigationBarHeight(IqiyiActivity.this));
             }
         });
         if (savedInstanceState != null) {
@@ -305,6 +302,16 @@ public class IqiyiActivity extends Activity implements SimplePlayerControlView.V
                     new DefaultTrackSelector.ParametersBuilder(/* context= */ this);
             trackSelectorParameters = builder.build();
             clearStartPosition();
+        }
+        mPlayerView.setOnDownloadListener(this::OnDownload);
+    }
+
+    private void OnDownload(View view) {
+        String[] strings = getIntent().getStringArrayExtra(KEY_PLAYLIST);
+        int i = 1;
+        for (String s : strings) {
+            WebViewShare.downloadFile(this,
+                    KeyShare.md5(s) + "-" + (i++) + ".f4v", s, USER_AGENT);
         }
     }
 

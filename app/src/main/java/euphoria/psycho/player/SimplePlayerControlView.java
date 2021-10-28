@@ -3,9 +3,7 @@ package euphoria.psycho.player;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -110,44 +108,21 @@ public class SimplePlayerControlView extends FrameLayout {
     private final Drawable fullScreenEnterDrawable;
     private final String fullScreenExitContentDescription;
     private final Drawable fullScreenExitDrawable;
-
+    private final ImageView mDownloadButton;
     private final View nextButton;
     private final Timeline.Period period;
-
     private final View playPauseButton;
-
     private final TextView positionView;
-
     private final View previousButton;
-    private final String repeatAllButtonContentDescription;
-    private final Drawable repeatAllButtonDrawable;
-    private final String repeatOffButtonContentDescription;
-    private final Drawable repeatOffButtonDrawable;
-    private final String repeatOneButtonContentDescription;
-    private final Drawable repeatOneButtonDrawable;
-
-    private final ImageView repeatToggleButton;
-
     private final View rewindButton;
-
     private final TextView rewindButtonTextView;
-
-    private final Drawable subtitleOffButtonDrawable;
-    private final String subtitleOffContentDescription;
-    private final Drawable subtitleOnButtonDrawable;
-    private final String subtitleOnContentDescription;
-
     private final com.google.android.exoplayer2.ui.TimeBar timeBar;
     private final Runnable updateProgressAction;
     private final CopyOnWriteArrayList<VisibilityListener> visibilityListeners;
-
     private final Timeline.Window window;
-
     private Player player;
     private ControlDispatcher controlDispatcher;
-
     private ProgressUpdateListener progressUpdateListener;
-
     private OnFullScreenModeChangedListener onFullScreenModeChangedListener;
     private boolean isFullScreen;
     private boolean isAttachedToWindow;
@@ -156,8 +131,6 @@ public class SimplePlayerControlView extends FrameLayout {
     private boolean scrubbing;
     private int showTimeoutMs;
     private int timeBarMinUpdateIntervalMs;
-    private
-    int repeatToggleModes;
     private long currentWindowOffset;
     private SimplePlayerControlViewLayoutManager controlViewLayoutManager;
     private Resources resources;
@@ -167,23 +140,14 @@ public class SimplePlayerControlView extends FrameLayout {
     private PopupWindow settingsWindow;
     private boolean needToHideBars;
     private int settingsWindowMargin;
-
     private DefaultTrackSelector trackSelector;
     private TrackSelectionAdapter textTrackSelectionAdapter;
     private TrackSelectionAdapter audioTrackSelectionAdapter;
-
     private TrackNameProvider trackNameProvider;
-
-    private ImageView subtitleButton;
-
     private ImageView fullScreenButton;
-
     private ImageView minimalFullScreenButton;
-
     private View settingsButton;
-
     private View playbackSpeedButton;
-
     private View audioTrackButton;
 
     public SimplePlayerControlView(Context context) {
@@ -206,59 +170,12 @@ public class SimplePlayerControlView extends FrameLayout {
         super(context, attrs, defStyleAttr);
         int controllerLayoutId = R.layout.exo_styled_player_control_view;
         showTimeoutMs = DEFAULT_SHOW_TIMEOUT_MS;
-        repeatToggleModes = DEFAULT_REPEAT_TOGGLE_MODES;
         timeBarMinUpdateIntervalMs = DEFAULT_TIME_BAR_MIN_UPDATE_INTERVAL_MS;
         boolean showRewindButton = true;
         boolean showFastForwardButton = true;
         boolean showPreviousButton = true;
         boolean showNextButton = true;
-        boolean showShuffleButton = false;
-        boolean showSubtitleButton = false;
         boolean animationEnabled = true;
-        boolean showVrButton = false;
-        if (playbackAttrs != null) {
-            TypedArray a =
-                    context
-                            .getTheme()
-                            .obtainStyledAttributes(
-                                    playbackAttrs,
-                                    com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView,
-                                    defStyleAttr,
-                                    0);
-            try {
-                controllerLayoutId =
-                        a.getResourceId(
-                                com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_controller_layout_id, controllerLayoutId);
-                showTimeoutMs = a.getInt(com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_show_timeout, showTimeoutMs);
-                repeatToggleModes = getRepeatToggleModes(a, repeatToggleModes);
-                showRewindButton =
-                        a.getBoolean(com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_show_rewind_button, showRewindButton);
-                showFastForwardButton =
-                        a.getBoolean(
-                                com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_show_fastforward_button, showFastForwardButton);
-                showPreviousButton =
-                        a.getBoolean(
-                                com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_show_previous_button, showPreviousButton);
-                showNextButton =
-                        a.getBoolean(com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_show_next_button, showNextButton);
-                showShuffleButton =
-                        a.getBoolean(
-                                com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_show_shuffle_button, showShuffleButton);
-                showSubtitleButton =
-                        a.getBoolean(
-                                com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_show_subtitle_button, showSubtitleButton);
-                showVrButton =
-                        a.getBoolean(com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_show_vr_button, showVrButton);
-                setTimeBarMinUpdateInterval(
-                        a.getInt(
-                                com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_time_bar_min_update_interval,
-                                timeBarMinUpdateIntervalMs));
-                animationEnabled =
-                        a.getBoolean(com.google.android.exoplayer2.ui.R.styleable.StyledPlayerControlView_animation_enabled, animationEnabled);
-            } finally {
-                a.recycle();
-            }
-        }
         LayoutInflater.from(context).inflate(controllerLayoutId, this);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         componentListener = new ComponentListener();
@@ -271,10 +188,6 @@ public class SimplePlayerControlView extends FrameLayout {
         updateProgressAction = this::updateProgress;
         durationView = findViewById(com.google.android.exoplayer2.ui.R.id.exo_duration);
         positionView = findViewById(com.google.android.exoplayer2.ui.R.id.exo_position);
-        subtitleButton = findViewById(com.google.android.exoplayer2.ui.R.id.exo_subtitle);
-        if (subtitleButton != null) {
-            subtitleButton.setOnClickListener(componentListener);
-        }
         fullScreenButton = findViewById(com.google.android.exoplayer2.ui.R.id.exo_fullscreen);
         initializeFullScreenButton(fullScreenButton, this::onFullScreenButtonClicked);
         minimalFullScreenButton = findViewById(com.google.android.exoplayer2.ui.R.id.exo_minimal_fullscreen);
@@ -342,10 +255,7 @@ public class SimplePlayerControlView extends FrameLayout {
         if (fastForwardButton != null) {
             fastForwardButton.setOnClickListener(componentListener);
         }
-        repeatToggleButton = findViewById(R.id.exo_repeat_toggle);
-        if (repeatToggleButton != null) {
-            repeatToggleButton.setOnClickListener(componentListener);
-        }
+        mDownloadButton = findViewById(R.id.exo_repeat_toggle);
         resources = context.getResources();
         buttonAlphaEnabled =
                 (float) resources.getInteger(com.google.android.exoplayer2.ui.R.integer.exo_media_button_opacity_percentage_enabled) / 100;
@@ -373,18 +283,9 @@ public class SimplePlayerControlView extends FrameLayout {
         settingsView.setLayoutManager(new LinearLayoutManager(getContext()));
         settingsWindow =
                 new PopupWindow(settingsView, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
-        if (Util.SDK_INT < 23) {
-            settingsWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
         settingsWindow.setOnDismissListener(componentListener);
         needToHideBars = true;
         trackNameProvider = new DefaultTrackNameProvider(getResources());
-        subtitleOnButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_subtitle_on);
-        subtitleOffButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_subtitle_off);
-        subtitleOnContentDescription =
-                resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_cc_enabled_description);
-        subtitleOffContentDescription =
-                resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_cc_disabled_description);
         textTrackSelectionAdapter = new TextTrackSelectionAdapter();
         audioTrackSelectionAdapter = new AudioTrackSelectionAdapter();
         playbackSpeedAdapter =
@@ -394,28 +295,18 @@ public class SimplePlayerControlView extends FrameLayout {
         fullScreenExitDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_fullscreen_exit);
         fullScreenEnterDrawable =
                 resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_fullscreen_enter);
-        repeatOffButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_repeat_off);
-        repeatOneButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_repeat_one);
-        repeatAllButtonDrawable = resources.getDrawable(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_repeat_all);
         fullScreenExitContentDescription =
                 resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_fullscreen_exit_description);
         fullScreenEnterContentDescription =
                 resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_fullscreen_enter_description);
-        repeatOffButtonContentDescription =
-                resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_repeat_off_description);
-        repeatOneButtonContentDescription =
-                resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_repeat_one_description);
-        repeatAllButtonContentDescription =
-                resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_repeat_all_description);
         ViewGroup bottomBar = findViewById(com.google.android.exoplayer2.ui.R.id.exo_bottom_bar);
         controlViewLayoutManager.setShowButton(bottomBar, true);
         controlViewLayoutManager.setShowButton(fastForwardButton, showFastForwardButton);
         controlViewLayoutManager.setShowButton(rewindButton, showRewindButton);
         controlViewLayoutManager.setShowButton(previousButton, showPreviousButton);
         controlViewLayoutManager.setShowButton(nextButton, showNextButton);
-        controlViewLayoutManager.setShowButton(subtitleButton, showSubtitleButton);
         controlViewLayoutManager.setShowButton(
-                repeatToggleButton, true);
+                mDownloadButton, true);
         addOnLayoutChangeListener(this::onLayoutChange);
     }
 
@@ -463,6 +354,10 @@ public class SimplePlayerControlView extends FrameLayout {
         return true;
     }
 
+    public ImageView getDownloadButton() {
+        return mDownloadButton;
+    }
+
     public Player getPlayer() {
         return player;
     }
@@ -493,20 +388,6 @@ public class SimplePlayerControlView extends FrameLayout {
             this.trackSelector = null;
         }
         updateAll();
-    }
-
-    public int getRepeatToggleModes() {
-        return repeatToggleModes;
-    }
-
-
-
-    public boolean getShowSubtitleButton() {
-        return controlViewLayoutManager.getShowButton(subtitleButton);
-    }
-
-    public void setShowSubtitleButton(boolean showSubtitleButton) {
-        controlViewLayoutManager.setShowButton(subtitleButton, showSubtitleButton);
     }
 
     public int getShowTimeoutMs() {
@@ -726,11 +607,7 @@ public class SimplePlayerControlView extends FrameLayout {
         for (int rendererIndex = 0;
              rendererIndex < mappedTrackInfo.getRendererCount();
              rendererIndex++) {
-            if (mappedTrackInfo.getRendererType(rendererIndex) == C.TRACK_TYPE_TEXT
-                    && controlViewLayoutManager.getShowButton(subtitleButton)) {
-                gatherTrackInfosForAdapter(mappedTrackInfo, rendererIndex, textTracks);
-                textRendererIndices.add(rendererIndex);
-            } else if (mappedTrackInfo.getRendererType(rendererIndex) == C.TRACK_TYPE_AUDIO) {
+            if (mappedTrackInfo.getRendererType(rendererIndex) == C.TRACK_TYPE_AUDIO) {
                 gatherTrackInfosForAdapter(mappedTrackInfo, rendererIndex, audioTracks);
                 audioRendererIndices.add(rendererIndex);
             }
@@ -967,7 +844,6 @@ public class SimplePlayerControlView extends FrameLayout {
         }
     }
 
-
     private void updateRewindButton() {
         long rewindMs =
                 controlDispatcher instanceof DefaultControlDispatcher && player != null
@@ -1038,7 +914,6 @@ public class SimplePlayerControlView extends FrameLayout {
 
     private void updateTrackLists() {
         initTrackSelectionAdapter();
-        updateButton(textTrackSelectionAdapter.getItemCount() > 0, subtitleButton);
     }
 
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -1137,9 +1012,6 @@ public class SimplePlayerControlView extends FrameLayout {
                 controlDispatcher.dispatchRewind(player);
             } else if (playPauseButton == view) {
                 dispatchPlayPause(player);
-            } else if (repeatToggleButton == view) {
-                controlDispatcher.dispatchSetRepeatMode(
-                        player, RepeatModeUtil.getNextRepeatMode(player.getRepeatMode(), repeatToggleModes));
             } else if (settingsButton == view) {
                 controlViewLayoutManager.removeHideCallbacks();
                 displaySettingsWindow(settingsAdapter);
@@ -1149,9 +1021,6 @@ public class SimplePlayerControlView extends FrameLayout {
             } else if (audioTrackButton == view) {
                 controlViewLayoutManager.removeHideCallbacks();
                 displaySettingsWindow(audioTrackSelectionAdapter);
-            } else if (subtitleButton == view) {
-                controlViewLayoutManager.removeHideCallbacks();
-                displaySettingsWindow(textTrackSelectionAdapter);
             }
         }
 
@@ -1339,19 +1208,6 @@ public class SimplePlayerControlView extends FrameLayout {
                 List<Integer> rendererIndices,
                 List<TrackInfo> trackInfos,
                 MappedTrackInfo mappedTrackInfo) {
-            boolean subtitleIsOn = false;
-            for (int i = 0; i < trackInfos.size(); i++) {
-                if (trackInfos.get(i).selected) {
-                    subtitleIsOn = true;
-                    break;
-                }
-            }
-            if (subtitleButton != null) {
-                subtitleButton.setImageDrawable(
-                        subtitleIsOn ? subtitleOnButtonDrawable : subtitleOffButtonDrawable);
-                subtitleButton.setContentDescription(
-                        subtitleIsOn ? subtitleOnContentDescription : subtitleOffContentDescription);
-            }
             this.rendererIndices = rendererIndices;
             this.tracks = trackInfos;
             this.mappedTrackInfo = mappedTrackInfo;
