@@ -10,7 +10,6 @@ import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import java.io.File;
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -20,7 +19,6 @@ import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
 import static euphoria.psycho.tasks.VideoHelper.showNotification;
 
-
 public class HLSDownloadService extends Service implements RequestEventListener {
 
     public static final String CHECK_UNFINISHED_VIDEO_TASKS = "CheckUnfinishedVideoTasks";
@@ -29,7 +27,6 @@ public class HLSDownloadService extends Service implements RequestEventListener 
     private RequestQueue mQueue;
     private NotificationManager mNotificationManager;
 
-    private File mVideoDirectory;
 
     public void checkUncompletedVideoTasks() {
         // Query all tasks that have not been completed
@@ -72,6 +69,9 @@ public class HLSDownloadService extends Service implements RequestEventListener 
             // try to avoid downloading the video repeatedly
             HLSInfo hlsInfo = HLSUtils.getHLSInfo(uri);
             if (hlsInfo == null) {
+                if (mQueue.count().getRunningTasks() == 0) {
+                    tryStop();
+                }
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
