@@ -20,7 +20,7 @@ import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
 import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.videos.AcFun;
-import euphoria.psycho.videos.Bilibili;
+import euphoria.psycho.bilibili.Bilibili;
 import euphoria.psycho.videos.CCTV;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.DouYin;

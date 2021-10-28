@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package euphoria.psycho.player;
+package euphoria.psycho;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

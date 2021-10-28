@@ -1,4 +1,4 @@
-package euphoria.psycho.player;
+package euphoria.psycho;
 
 import android.content.Context;
 import android.graphics.Matrix;

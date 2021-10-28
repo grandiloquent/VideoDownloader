@@ -1,4 +1,4 @@
-package euphoria.psycho.player;
+package euphoria.psycho;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
@@ -40,24 +39,18 @@ import com.google.android.exoplayer2.util.ErrorMessageProvider;
 import com.google.android.exoplayer2.util.EventLogger;
 
 import java.io.File;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import euphoria.psycho.SimplePlayerControlView;
-import euphoria.psycho.SimplePlayerView;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.WebViewShare;
 
-import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
+//
 
-public class IqiyiActivity extends Activity implements SimplePlayerControlView.VisibilityListener {
+public class BilibiliPlayerActivity extends Activity implements SimplePlayerControlView.VisibilityListener {
     public static final long DEFAULT_SHOW_TIMEOUT_MS = 5000L;
     public static final String EXTRA_TYPE = "extra.TYPE";
     public static final String KEY_PLAYLIST = "playlist";
@@ -78,15 +71,6 @@ public class IqiyiActivity extends Activity implements SimplePlayerControlView.V
     private TrackGroupArray mLastSeenTrackGroupArray;
     private SimpleCache mCache;
 
-    public static RenderersFactory buildRenderersFactory(
-            Context context, boolean preferExtensionRenderer) {
-        int extensionRendererMode =
-                (preferExtensionRenderer
-                        ? DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER
-                        : DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON);
-        return new DefaultRenderersFactory(context.getApplicationContext())
-                .setExtensionRendererMode(extensionRendererMode);
-    }
 
     protected void clearStartPosition() {
         mStartAutoPlay = true;
@@ -100,16 +84,14 @@ public class IqiyiActivity extends Activity implements SimplePlayerControlView.V
         String[] strings = intent.getStringArrayExtra(KEY_PLAYLIST);
         for (String s : strings) {
             mediaItems.add(MediaItem.fromUri(s));
+            MediaItem mediaItem = MediaItem.fromUri(s);
+            MediaItem.Builder builder = mediaItem.buildUpon();
         }
         if (mPlayer == null) {
-            //Iqiyi.getVideoAddress(intent.getStringArrayExtra(EXTRA_PLAYLSIT)[0], this);
             boolean preferExtensionDecoders = true;
             RenderersFactory renderersFactory =
-                    buildRenderersFactory(/* context= */ this, preferExtensionDecoders);
-            CookieManager cookieManager = new CookieManager();
-            cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
-            CookieHandler.setDefault(cookieManager);
-            Factory httpFactory = getHttpFactory(intent);
+                    PlayerUtils.buildRenderersFactory(/* context= */ this, preferExtensionDecoders);
+            Factory httpFactory = PlayerUtils.getHttpFactory(new String[]{"Referer", "https://www.bilibili.com/"});
             DefaultDataSourceFactory upstreamFactory =
                     new DefaultDataSourceFactory(this, httpFactory);
             File downloadContentDirectory =
@@ -238,20 +220,6 @@ public class IqiyiActivity extends Activity implements SimplePlayerControlView.V
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
-    private Factory getHttpFactory(Intent intent) {
-        Factory httpFactory = new Factory()
-                .setUserAgent(USER_AGENT);
-        String[] headers = intent.getStringArrayExtra(KEY_REQUEST_HEADERS);
-        if (headers != null) {
-            HashMap<String, String> hashMap = new HashMap<>();
-            for (int i = 0; i < headers.length; i++) {
-                if (i + 1 < headers.length)
-                    hashMap.put(headers[i++], headers[i]);
-            }
-            httpFactory.setDefaultRequestProperties(hashMap);
-        }
-        return httpFactory;
-    }
 
     private void showToast(int messageId) {
         showToast(getString(messageId));
@@ -285,13 +253,13 @@ public class IqiyiActivity extends Activity implements SimplePlayerControlView.V
         mPlayerView.requestFocus();
         mPlayerView.setControllerOnFullScreenModeChangedListener(isFullScreen -> {
             if (isFullScreen) {
-                hideSystemUI(IqiyiActivity.this, true);
-                rotateScreen(IqiyiActivity.this);
+                hideSystemUI(BilibiliPlayerActivity.this, true);
+                rotateScreen(BilibiliPlayerActivity.this);
                 mPlayerView.setPadding(0, 0, 0, 0);
             } else {
-                showSystemUI(IqiyiActivity.this, true);
-                rotateScreen(IqiyiActivity.this);
-                mPlayerView.setPadding(0, 0, 0, getNavigationBarHeight(IqiyiActivity.this));
+                showSystemUI(BilibiliPlayerActivity.this, true);
+                rotateScreen(BilibiliPlayerActivity.this);
+                mPlayerView.setPadding(0, 0, 0, getNavigationBarHeight(BilibiliPlayerActivity.this));
             }
         });
         if (savedInstanceState != null) {
@@ -313,7 +281,7 @@ public class IqiyiActivity extends Activity implements SimplePlayerControlView.V
         int i = 1;
         for (String s : strings) {
             WebViewShare.downloadFile(this,
-                    KeyShare.md5(s) + "-" + (i++) + ".f4v", s, USER_AGENT);
+                    KeyShare.md5(s) + "-" + (i++) + ".f4v", s, "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36");
         }
     }
 

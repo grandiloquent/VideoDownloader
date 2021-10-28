@@ -11,6 +11,10 @@ public abstract class BaseExtractor<T> {
     private final String mInputUri;
     protected final MainActivity mMainActivity;
 
+    public String getInputUri() {
+        return mInputUri;
+    }
+
     protected BaseExtractor(String inputUri, MainActivity mainActivity) {
         mInputUri = inputUri;
         mMainActivity = mainActivity;

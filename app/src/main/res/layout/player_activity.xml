@@ -7,7 +7,8 @@
     android:keepScreenOn="true"
     android:background="#000">
 
-  <euphoria.psycho.player.SimplePlayerView android:id="@+id/player_view"
+  <euphoria.psycho.SimplePlayerView
+      android:id="@+id/player_view"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       app:show_shuffle_button="true"

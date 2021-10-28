@@ -94,5 +94,6 @@
 
         <service android:name="euphoria.psycho.tasks.HLSDownloadService" />
         <service android:name="euphoria.psycho.downloader.DownloaderService" />
+        <service android:name="euphoria.psycho.bilibili.BilibiliService" />
     </application>
 </manifest>

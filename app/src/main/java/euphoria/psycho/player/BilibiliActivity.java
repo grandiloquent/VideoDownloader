@@ -36,7 +36,7 @@ import static euphoria.psycho.player.PlayerHelper.hideSystemUI;
 import static euphoria.psycho.player.PlayerHelper.rotateScreen;
 import static euphoria.psycho.player.PlayerHelper.showSystemUI;
 import static euphoria.psycho.player.PlayerHelper.switchPlayState;
-
+//
 public class BilibiliActivity extends BaseVideoActivity implements
         GestureDetector.OnGestureListener,
         TimeBar.OnScrubListener,
