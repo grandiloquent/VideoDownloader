@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +57,26 @@ public class BilibiliDatabase extends SQLiteOpenHelper {
         });
     }
 
+    public void deleteBilibiliTask(BilibiliTask bilibiliTask) {
+        ContentValues values = new ContentValues();
+        getWritableDatabase().delete("tasks", "id=?", new String[]{
+                Integer.toString(bilibiliTask.Id)
+        });
+    }
+
     public void insertBilibiliTask(BilibiliTask bilibiliTask) {
+        Cursor cursor = getReadableDatabase().rawQuery("select id, filename from tasks where url = ?", new String[]{
+                bilibiliTask.Url
+        });
+        if (cursor.moveToNext()) {
+            Log.e("B5aOx2", String.format("insertBilibiliTask, %s", 123));
+            if (!new File(cursor.getString(1)).exists()) {
+                getWritableDatabase().delete("tasks", "id=?", new String[]{
+                        Integer.toString(cursor.getInt(0))
+                });
+            }
+        }
+        cursor.close();
         ContentValues values = new ContentValues();
         values.put("url", bilibiliTask.Url);
         values.put("title", bilibiliTask.Title);

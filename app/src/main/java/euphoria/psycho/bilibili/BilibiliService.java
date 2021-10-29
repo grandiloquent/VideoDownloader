@@ -9,9 +9,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemClock;
-import android.util.Log;
+
+import com.coremedia.iso.boxes.Container;
+import com.googlecode.mp4parser.authoring.Movie;
+import com.googlecode.mp4parser.authoring.Track;
+import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
+import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -51,7 +57,6 @@ public class BilibiliService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e("B5aOx2", String.format("onCreate, %s", ""));
         mNotificationManager = getSystemService(NotificationManager.class);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
@@ -112,7 +117,7 @@ public class BilibiliService extends Service {
                 Builder builder = getBuilder();
                 builder.setSmallIcon(android.R.drawable.stat_sys_download)
                         .setContentTitle(title)
-                        .setContentText(content)
+                        .setSubText(content)
                         .setWhen(System.currentTimeMillis())
                         .setShowWhen(true)
                         .setOngoing(true)
@@ -125,13 +130,30 @@ public class BilibiliService extends Service {
         public void run() {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             notify("准备下载B站视频", mBilibiliTask.Url);
+            download(0);
+            download(1);
+            try {
+                Movie countVideo = MovieCreator.build(mBilibiliTask.BilibiliThreads[0].Filename);
+                Movie countAudioEnglish = MovieCreator.build(mBilibiliTask.BilibiliThreads[1].Filename);
+                Track audioTrackEnglish = countAudioEnglish.getTracks().get(0);
+                countVideo.addTrack(audioTrackEnglish);
+                Container out = new DefaultMp4Builder().build(countVideo);
+                FileOutputStream fos = new FileOutputStream(new File("output.mp4"));
+                out.writeContainer(fos.getChannel());
+                fos.close();
+            } catch (Exception ignored) {
+            }
+
+        }
+
+        private void download(int index) {
             URL url;
             try {
-                url = new URL(mBilibiliTask.BilibiliThreads[0].Url);
+                url = new URL(mBilibiliTask.BilibiliThreads[index].Url);
                 HttpURLConnection c = (HttpURLConnection) url.openConnection();
                 c.setRequestProperty("Referer", "https://www.bilibili.com/");
                 c.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36");
-                File videoFile = new File(mBilibiliTask.BilibiliThreads[0].Filename);
+                File videoFile = new File(mBilibiliTask.BilibiliThreads[index].Filename);
                 if (videoFile.exists()) {
                     c.setRequestProperty("Range", "bytes=" + videoFile.length() + "-");
                 }
@@ -159,7 +181,6 @@ public class BilibiliService extends Service {
                     try {
                         in = c.getInputStream();
                     } catch (IOException e) {
-                        Log.e("B5aOx2", String.format("run, %s", e.getMessage()));
                         notify("下载失败", mBilibiliTask.Url);
                         return;
                     }
@@ -199,8 +220,8 @@ public class BilibiliService extends Service {
                                 if (speedSampleStart != 0) {
                                     final int percent = (int) ((currentBytes * 100) / totalBytes);
                                     final long remainingMillis = ((totalBytes - currentBytes) * 1000) / speed;
-                                    notifyProgress("正在下载" + mBilibiliTask.Filename,
-                                            "剩余时间" + BilibiliUtils.formatDuration(remainingMillis), percent);
+                                    notifyProgress(
+                                            "剩余时间" + BilibiliUtils.formatDuration(remainingMillis), "正在下载B站视频", percent);
                                 }
                                 speedSampleStart = now;
                                 speedSampleBytes = currentBytes;
@@ -217,7 +238,6 @@ public class BilibiliService extends Service {
                     }
                 }
             } catch (Exception e) {
-                Log.e("B5aOx2", String.format("run, %s", e.getMessage()));
                 notify("下载失败", mBilibiliTask.Url);
             }
         }
