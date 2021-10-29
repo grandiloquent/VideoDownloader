@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.PlayerActivity;
+import euphoria.psycho.explorer.R;
 
 public class BilibiliService extends Service {
 
@@ -114,7 +115,7 @@ public class BilibiliService extends Service {
                     mBilibiliDatabase.updateBilibiliTask(mBilibiliTask);
                     return;
                 }
-                notify("开始下载B站视频", mBilibiliTask.Url);
+                notify(getString(R.string.start_downloading_the_b_station_video), mBilibiliTask.Url);
                 RandomAccessFile out = new RandomAccessFile(videoFile, "rw");
                 long currentBytes = 0;
                 long totalBytes = c.getContentLengthLong();
@@ -212,7 +213,7 @@ public class BilibiliService extends Service {
             mHandler.post(() -> {
                 Builder builder = getBuilder();
                 builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                        .setContentTitle("下载失败")
+                        .setContentTitle(getString(R.string.download_failed))
                         .setContentText(mBilibiliTask.Url)
                         .setWhen(System.currentTimeMillis())
                         .setShowWhen(true)
@@ -238,17 +239,17 @@ public class BilibiliService extends Service {
         @Override
         public void run() {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            notify("准备下载B站视频", mBilibiliTask.Url);
+            notify(getString(R.string.ready_to_download_station_b_video), mBilibiliTask.Url);
             download(0);
-            notify("已成功下载视频", mBilibiliTask.Url);
+            notify(getString(R.string.video_downloaded_successfully), mBilibiliTask.Url);
             download(1);
-            notify("开始合并视频", mBilibiliTask.Url);
+            notify(getString(R.string.start_merging_videos), mBilibiliTask.Url);
             try {
-                Movie countVideo = MovieCreator.build(mBilibiliTask.BilibiliThreads[0].Filename);
-                Movie countAudioEnglish = MovieCreator.build(mBilibiliTask.BilibiliThreads[1].Filename);
-                Track audioTrackEnglish = countAudioEnglish.getTracks().get(0);
-                countVideo.addTrack(audioTrackEnglish);
-                Container out = new DefaultMp4Builder().build(countVideo);
+                Movie video = MovieCreator.build(mBilibiliTask.BilibiliThreads[0].Filename);
+                Movie audio = MovieCreator.build(mBilibiliTask.BilibiliThreads[1].Filename);
+                Track audioTrack = audio.getTracks().get(0);
+                video.addTrack(audioTrack);
+                Container out = new DefaultMp4Builder().build(video);
                 FileOutputStream fos = new FileOutputStream(new File(mBilibiliTask.Filename));
                 out.writeContainer(fos.getChannel());
                 fos.close();
@@ -260,7 +261,7 @@ public class BilibiliService extends Service {
                 intent.putExtra(PlayerActivity.KEY_VIDEO_FILE, mBilibiliTask.Filename);
                 Builder builder = getBuilder();
                 builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                        .setContentTitle("已成功合并视频")
+                        .setContentTitle(getString(R.string.videos_successfully_merged))
                         .setContentText(mBilibiliTask.Url)
                         .setWhen(System.currentTimeMillis())
                         .setShowWhen(true)

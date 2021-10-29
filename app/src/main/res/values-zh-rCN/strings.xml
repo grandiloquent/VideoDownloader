@@ -29,5 +29,10 @@
     <string name="settings">设置</string>
     <string name="whether_to_use_the_browser_to_open_the_video_link">是否使用浏览器打开视频链接</string>
     <string name="unable_to_extract_video">无法解析视频</string>
-
+    <string name="start_downloading_the_b_station_video">开始下载B站视频</string>
+    <string name="video_downloaded_successfully">已成功下载视频</string>
+    <string name="start_merging_videos">开始合并视频</string>
+<string name="videos_successfully_merged">已成功合并视频</string>
+<string name="ready_to_download_station_b_video">准备下载B站视频</string>
+<string name="download_failed">下载失败</string>
 </resources>

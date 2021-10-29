@@ -48,4 +48,10 @@
 
     <string name="error_unsupported_audio">Media includes audio tracks, but none are playable by this device</string>
 
+    <string name="start_downloading_the_b_station_video">Start downloading the B station video</string>
+    <string name="video_downloaded_successfully">Video downloaded successfully</string>
+    <string name="start_merging_videos">Start merging videos</string>
+<string name="videos_successfully_merged">Videos successfully merged</string>
+<string name="ready_to_download_station_b_video">Ready to download station B video</string>
+<string name="download_failed">download failed</string>
 </resources>
