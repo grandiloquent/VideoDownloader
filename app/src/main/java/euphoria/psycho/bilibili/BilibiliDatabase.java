@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +47,14 @@ public class BilibiliDatabase extends SQLiteOpenHelper {
                 "    on threads (url);");
     }
 
+    public void updateBilibiliTask(BilibiliTask bilibiliTask) {
+        ContentValues values = new ContentValues();
+        values.put("status", bilibiliTask.Status);
+        getWritableDatabase().update("tasks", values, "id=?", new String[]{
+                Integer.toString(bilibiliTask.Id)
+        });
+    }
+
     public void insertBilibiliTask(BilibiliTask bilibiliTask) {
         ContentValues values = new ContentValues();
         values.put("url", bilibiliTask.Url);
@@ -56,6 +63,7 @@ public class BilibiliDatabase extends SQLiteOpenHelper {
         values.put("create_at", System.currentTimeMillis());
         values.put("update_at", System.currentTimeMillis());
         long id = getWritableDatabase().insert("tasks", null, values);
+        if (id == -1) return;
         for (BilibiliThread thread : bilibiliTask.BilibiliThreads) {
             ContentValues v = new ContentValues();
             v.put("task_id", id);
@@ -70,9 +78,8 @@ public class BilibiliDatabase extends SQLiteOpenHelper {
 
     public List<BilibiliTask> queryUnfinishedTasks() {
         List<BilibiliTask> tasks = new ArrayList<>();
-        Cursor cursor = getReadableDatabase().rawQuery("select * from tasks where status > -1", null);
+        Cursor cursor = getReadableDatabase().rawQuery("select * from tasks where status > -1 or status is null", null);
         while (cursor.moveToNext()) {
-            Log.e("B5aOx2", String.format("queryUnfinishedTasks, %s", ""));
             BilibiliTask bilibiliTask = new BilibiliTask();
             bilibiliTask.Id = cursor.getInt(0);
             bilibiliTask.Url = cursor.getString(1);
@@ -81,7 +88,8 @@ public class BilibiliDatabase extends SQLiteOpenHelper {
             bilibiliTask.Status = cursor.getInt(4);
             bilibiliTask.CreateAt = cursor.getInt(5);
             bilibiliTask.UpdateAt = cursor.getInt(6);
-            Cursor threadCursor = getReadableDatabase().rawQuery("select * from thread where task_id = ?", new String[]{
+            String sql = "select * from threads where task_id = ?";
+            Cursor threadCursor = getReadableDatabase().rawQuery(sql, new String[]{
                     Integer.toString(bilibiliTask.Id)
             });
             List<BilibiliThread> threads = new ArrayList<>();

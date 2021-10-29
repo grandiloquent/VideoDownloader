@@ -48,6 +48,8 @@ dependencies {
     }
     implementation 'com.google.android.exoplayer:exoplayer:2.15.1'
     implementation group: 'androidx.recyclerview', name: 'recyclerview', version: '1.2.0'
+    implementation group: 'com.googlecode.mp4parser', name: 'isoparser', version: '1.1.22'
+
 //    implementation platform('com.google.firebase:firebase-bom:28.4.0')
 //    implementation 'com.google.firebase:firebase-crashlytics'
 //    implementation 'com.google.firebase:firebase-analytics'
