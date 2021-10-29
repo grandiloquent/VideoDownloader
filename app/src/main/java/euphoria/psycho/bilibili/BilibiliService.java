@@ -3,6 +3,7 @@ package euphoria.psycho.bilibili;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -28,14 +29,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import androidx.annotation.Nullable;
+import euphoria.psycho.PlayerActivity;
 
 public class BilibiliService extends Service {
 
     public static final String BILIBILI_CHANNEL = "Bilibili";
+    private final Handler mHandler = new Handler();
     private NotificationManager mNotificationManager;
     private ExecutorService mExecutorService;
     private int mStartId;
-    private final Handler mHandler = new Handler();
     private BilibiliDatabase mBilibiliDatabase;
 
     private Builder getBuilder() {
@@ -86,66 +88,6 @@ public class BilibiliService extends Service {
             mBilibiliTask = bilibiliTask;
         }
 
-        private void notify(String title, String content) {
-            mHandler.post(() -> {
-                Builder builder = getBuilder();
-                builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .setWhen(System.currentTimeMillis())
-                        .setShowWhen(true)
-                        .setOngoing(true);
-                mNotificationManager.notify(mStartId, builder.build());
-            });
-        }
-
-        private void notifyFailed(String title, String content) {
-            mHandler.post(() -> {
-                Builder builder = getBuilder();
-                builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .setWhen(System.currentTimeMillis())
-                        .setShowWhen(true)
-                ;
-                mNotificationManager.notify(mStartId, builder.build());
-            });
-        }
-
-        private void notifyProgress(String title, String content, int progress) {
-            mHandler.post(() -> {
-                Builder builder = getBuilder();
-                builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                        .setContentTitle(title)
-                        .setSubText(content)
-                        .setWhen(System.currentTimeMillis())
-                        .setShowWhen(true)
-                        .setOngoing(true)
-                        .setProgress(100, progress, false);
-                mNotificationManager.notify(mStartId, builder.build());
-            });
-        }
-
-        @Override
-        public void run() {
-            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            notify("准备下载B站视频", mBilibiliTask.Url);
-            download(0);
-            download(1);
-            try {
-                Movie countVideo = MovieCreator.build(mBilibiliTask.BilibiliThreads[0].Filename);
-                Movie countAudioEnglish = MovieCreator.build(mBilibiliTask.BilibiliThreads[1].Filename);
-                Track audioTrackEnglish = countAudioEnglish.getTracks().get(0);
-                countVideo.addTrack(audioTrackEnglish);
-                Container out = new DefaultMp4Builder().build(countVideo);
-                FileOutputStream fos = new FileOutputStream(new File(mBilibiliTask.Filename));
-                out.writeContainer(fos.getChannel());
-                fos.close();
-            } catch (Exception ignored) {
-            }
-
-        }
-
         private void download(int index) {
             URL url;
             try {
@@ -158,11 +100,16 @@ public class BilibiliService extends Service {
                     c.setRequestProperty("Range", "bytes=" + videoFile.length() + "-");
                 }
                 int status = c.getResponseCode();
+                // If the requested range exceeds
+                // the size of the file to be downloaded
+                // the server will return this code
+                // so we should think that the file has been downloaded correctly
+                // and immediately terminate the execution of the function
                 if (status == 416) {
                     return;
                 }
                 if (status != 200 && status != 206) {
-                    notifyFailed("下载失败", String.format("服务器返回代码%s", status));
+                    notifyFailed();
                     mBilibiliTask.Status = BilibiliStatus.ERROR_STATUS_CODE;
                     mBilibiliDatabase.updateBilibiliTask(mBilibiliTask);
                     return;
@@ -176,12 +123,14 @@ public class BilibiliService extends Service {
                     totalBytes += currentBytes;
                     out.seek(currentBytes);
                 }
-                InputStream in = null;
+                InputStream in;
                 try {
                     try {
                         in = c.getInputStream();
                     } catch (IOException e) {
-                        notify("下载失败", mBilibiliTask.Url);
+                        notifyFailed();
+                        mBilibiliTask.Status = BilibiliStatus.ERROR_STATUS_HTTP_DATA;
+                        mBilibiliDatabase.updateBilibiliTask(mBilibiliTask);
                         return;
                     }
                     final byte[] buffer = new byte[8192];
@@ -198,7 +147,9 @@ public class BilibiliService extends Service {
                         try {
                             len = in.read(buffer);
                         } catch (IOException e) {
-                            notify("下载失败", mBilibiliTask.Url);
+                            notifyFailed();
+                            mBilibiliTask.Status = BilibiliStatus.ERROR_STATUS_HTTP_DATA;
+                            mBilibiliDatabase.updateBilibiliTask(mBilibiliTask);
                             return;
                         }
                         if (len == -1) {
@@ -227,7 +178,9 @@ public class BilibiliService extends Service {
                                 speedSampleBytes = currentBytes;
                             }
                         } catch (IOException e) {
-                            notify("下载失败", mBilibiliTask.Url);
+                            notifyFailed();
+                            mBilibiliTask.Status = BilibiliStatus.ERROR_STATUS_FILE;
+                            mBilibiliDatabase.updateBilibiliTask(mBilibiliTask);
                         }
                     }
 
@@ -238,8 +191,83 @@ public class BilibiliService extends Service {
                     }
                 }
             } catch (Exception e) {
-                notify("下载失败", mBilibiliTask.Url);
+                notifyFailed();
             }
+        }
+
+        private void notify(String title, String content) {
+            mHandler.post(() -> {
+                Builder builder = getBuilder();
+                builder.setSmallIcon(android.R.drawable.stat_sys_download)
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setWhen(System.currentTimeMillis())
+                        .setShowWhen(true)
+                        .setOngoing(true);
+                mNotificationManager.notify(mStartId, builder.build());
+            });
+        }
+
+        private void notifyFailed() {
+            mHandler.post(() -> {
+                Builder builder = getBuilder();
+                builder.setSmallIcon(android.R.drawable.stat_sys_download)
+                        .setContentTitle("下载失败")
+                        .setContentText(mBilibiliTask.Url)
+                        .setWhen(System.currentTimeMillis())
+                        .setShowWhen(true)
+                ;
+                mNotificationManager.notify(mStartId, builder.build());
+            });
+        }
+
+        private void notifyProgress(String title, String content, int progress) {
+            mHandler.post(() -> {
+                Builder builder = getBuilder();
+                builder.setSmallIcon(android.R.drawable.stat_sys_download)
+                        .setContentTitle(title)
+                        .setSubText(content)
+                        .setWhen(System.currentTimeMillis())
+                        .setShowWhen(true)
+                        .setOngoing(true)
+                        .setProgress(100, progress, false);
+                mNotificationManager.notify(mStartId, builder.build());
+            });
+        }
+
+        @Override
+        public void run() {
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            notify("准备下载B站视频", mBilibiliTask.Url);
+            download(0);
+            notify("已成功下载视频", mBilibiliTask.Url);
+            download(1);
+            notify("开始合并视频", mBilibiliTask.Url);
+            try {
+                Movie countVideo = MovieCreator.build(mBilibiliTask.BilibiliThreads[0].Filename);
+                Movie countAudioEnglish = MovieCreator.build(mBilibiliTask.BilibiliThreads[1].Filename);
+                Track audioTrackEnglish = countAudioEnglish.getTracks().get(0);
+                countVideo.addTrack(audioTrackEnglish);
+                Container out = new DefaultMp4Builder().build(countVideo);
+                FileOutputStream fos = new FileOutputStream(new File(mBilibiliTask.Filename));
+                out.writeContainer(fos.getChannel());
+                fos.close();
+            } catch (Exception ignored) {
+            }
+            mHandler.post(() -> {
+                Intent intent = new Intent(BilibiliService.this, PlayerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(PlayerActivity.KEY_VIDEO_FILE, mBilibiliTask.Filename);
+                Builder builder = getBuilder();
+                builder.setSmallIcon(android.R.drawable.stat_sys_download)
+                        .setContentTitle("已成功合并视频")
+                        .setContentText(mBilibiliTask.Url)
+                        .setWhen(System.currentTimeMillis())
+                        .setShowWhen(true)
+                        .setContentIntent(PendingIntent.getActivity(BilibiliService.this,
+                                0, intent, 0));
+                mNotificationManager.notify(mStartId, builder.build());
+            });
         }
     }
 }
