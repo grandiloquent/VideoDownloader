@@ -2,14 +2,12 @@ package euphoria.psycho.explorer;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import euphoria.psycho.bilibili.BilibiliService;
 import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
@@ -80,9 +78,8 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
         checkUpdate();
-        //tryPlayVideo(this);
-        Intent intent = new Intent(this, BilibiliService.class);
-        startService(intent);
+        // tryPlayVideo(this);
+
     }
 
     @Override

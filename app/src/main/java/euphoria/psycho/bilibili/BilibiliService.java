@@ -35,7 +35,7 @@ public class BilibiliService extends Service {
     private NotificationManager mNotificationManager;
     private ExecutorService mExecutorService;
     private int mStartId;
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
     private BilibiliDatabase mBilibiliDatabase;
 
     private Builder getBuilder() {
@@ -138,7 +138,7 @@ public class BilibiliService extends Service {
                 Track audioTrackEnglish = countAudioEnglish.getTracks().get(0);
                 countVideo.addTrack(audioTrackEnglish);
                 Container out = new DefaultMp4Builder().build(countVideo);
-                FileOutputStream fos = new FileOutputStream(new File("output.mp4"));
+                FileOutputStream fos = new FileOutputStream(new File(mBilibiliTask.Filename));
                 out.writeContainer(fos.getChannel());
                 fos.close();
             } catch (Exception ignored) {

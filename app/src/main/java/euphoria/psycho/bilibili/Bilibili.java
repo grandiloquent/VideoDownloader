@@ -1,5 +1,6 @@
 package euphoria.psycho.bilibili;
 
+import android.content.Intent;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
@@ -36,11 +37,13 @@ public class Bilibili extends BaseExtractor<String[]> {
         BilibiliTask bilibiliTask = new BilibiliTask();
         bilibiliTask.Filename = BilibiliUtils.getBilibiliVideoFile(mMainActivity, getInputUri()).getAbsolutePath();
         bilibiliTask.Url = getInputUri();
-        bilibiliTask.BilibiliThreads=new BilibiliThread[]{videoThread,audioThread};
+        bilibiliTask.BilibiliThreads = new BilibiliThread[]{videoThread, audioThread};
         new BilibiliDatabase(mMainActivity).insertBilibiliTask(bilibiliTask);
         //        Intent intent = new Intent(mMainActivity, BilibiliActivity.class);
 //        intent.putExtra(BilibiliActivity.EXTRA_PLAYLSIT, videoUris);
 //        mMainActivity.startActivity(intent);
+        Intent intent = new Intent(mMainActivity, BilibiliService.class);
+        mMainActivity.startService(intent);
     }
 
     public static boolean handle(String uri, MainActivity mainActivity) {
