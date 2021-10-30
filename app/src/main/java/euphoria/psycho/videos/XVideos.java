@@ -1,6 +1,7 @@
 package euphoria.psycho.videos;
 
 import android.content.Intent;
+import android.text.Html;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -54,6 +55,7 @@ public class XVideos extends BaseExtractor<String> {
     }
 
     public static void fetchVideos(String url) {
+        if (url.contains("/0/")) return;
         String htmlCode = getString(url, new String[][]{
                 {"User-Agent", NetShare.PC_USER_AGENT}
         });
@@ -66,7 +68,7 @@ public class XVideos extends BaseExtractor<String> {
         String videoDuration = StringShare.substring(htmlCode, "<meta property=\"og:duration\" content=\"", "\"");
         JSONObject video = new JSONObject();
         try {
-            video.put("title", videoTitle);
+            video.put("title", Html.fromHtml(videoTitle).toString());
             video.put("thumbnail", videoThumb);
             video.put("url", url);
             int duration = 0;

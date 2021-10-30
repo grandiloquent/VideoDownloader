@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -69,7 +68,6 @@ public class BilibiliDatabase extends SQLiteOpenHelper {
                 bilibiliTask.Url
         });
         if (cursor.moveToNext()) {
-            Log.e("B5aOx2", String.format("insertBilibiliTask, %s", 123));
             if (!new File(cursor.getString(1)).exists()) {
                 getWritableDatabase().delete("tasks", "id=?", new String[]{
                         Integer.toString(cursor.getInt(0))

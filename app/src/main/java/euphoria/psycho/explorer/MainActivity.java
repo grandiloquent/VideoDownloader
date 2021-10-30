@@ -8,6 +8,8 @@ import android.os.Process;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import java.util.regex.Pattern;
+
 import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
@@ -16,6 +18,7 @@ import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
+import euphoria.psycho.videos.XVideos;
 import euphoria.psycho.videos.XiGua;
 import euphoria.psycho.videos.YouTube;
 
@@ -165,12 +168,15 @@ public class MainActivity extends Activity implements ClientInterface {
         if (XiGua.handle(uri, this)) {
             return true;
         }
-//        if (mWebView.getUrl().contains("xvideos.com")) {
-//            Pattern pattern = Pattern.compile("xvideos\\.com/video\\d+");
-//            if (pattern.matcher(uri).find()) {
-//                XVideos.fetchVideos(uri);
-//            }
-//        }
+        if (mWebView.getUrl().contains("xvideos.com")) {
+            Pattern pattern = Pattern.compile("xvideos\\.com/video\\d+");
+            if (pattern.matcher(uri).find()) {
+                new Thread(() -> {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    XVideos.fetchVideos(uri);
+                }).start();
+            }
+        }
         return Ck52.handle(uri, this);
     }
 

@@ -30,7 +30,7 @@ import euphoria.psycho.videos.MgTv;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
-import euphoria.psycho.videos.Tencent;
+import euphoria.psycho.tencent.Tencent;
 import euphoria.psycho.videos.TikTok;
 import euphoria.psycho.videos.Twitter;
 import euphoria.psycho.videos.XVideos;

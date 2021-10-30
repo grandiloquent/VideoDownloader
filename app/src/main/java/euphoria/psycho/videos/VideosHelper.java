@@ -123,6 +123,7 @@ public class VideosHelper {
                 return null;
             }
         } catch (Exception exception) {
+            Log.e("B5aOx2", String.format("getString, %s", exception));
             Log.e("B5aOx2", String.format("An error occurred while requesting %s, %s", uri, exception.getMessage()));
         }
         return null;
