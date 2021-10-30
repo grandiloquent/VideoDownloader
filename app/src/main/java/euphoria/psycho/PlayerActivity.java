@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
@@ -273,17 +272,13 @@ public class PlayerActivity extends Activity {
     }
 
     private void onCompletion(MediaPlayer mediaPlayer) {
-        Log.e("B5aOx2", "onCompletion");
-
     }
 
     private boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
-        Log.e("B5aOx2", "onError " + i);
         return true;
     }
 
     private boolean onInfo(MediaPlayer mediaPlayer, int i, int i1) {
-        Log.e("B5aOx2", "onInfo");
         return true;
     }
 
@@ -314,7 +309,6 @@ public class PlayerActivity extends Activity {
     }
 
     private void onPrepared(MediaPlayer mediaPlayer) {
-        Log.e("B5aOx2", "onPrepared");
         mDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mediaPlayer.getDuration()));
         mTimeBar.setDuration(mediaPlayer.getDuration());
         mMediaPlayer.start();
@@ -345,12 +339,9 @@ public class PlayerActivity extends Activity {
     }
 
     private void onSeekComplete(MediaPlayer mediaPlayer) {
-        Log.e("B5aOx2", "onSeekComplete");
     }
 
     private void onTimedMetaDataAvailable(MediaPlayer mediaPlayer, TimedMetaData timedMetaData) {
-        Log.e("B5aOx2", "onTimedMetaDataAvailable");
-
     }
 
     private void onVideoSizeChanged(MediaPlayer mediaPlayer, int videoWidth, int videoHeight) {
@@ -372,7 +363,6 @@ public class PlayerActivity extends Activity {
             mMediaPlayer.setDataSource(this, Uri.parse(mPlayList.get(mPlayIndex)), headers);
             mMediaPlayer.prepareAsync();
         } else {
-            Log.e("B5aOx2", String.format("play, %s", mPlayList.get(mPlayIndex)));
             mMediaPlayer.setDataSource(mPlayList.get(mPlayIndex));
             mMediaPlayer.prepareAsync();
         }

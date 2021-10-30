@@ -30,6 +30,7 @@ public class MainActivity extends Activity implements ClientInterface {
     private WebView mWebView;
     private BookmarkDatabase mBookmarkDatabase;
     private String mVideoUrl;
+    private String[] mVideoList;
 
     public BookmarkDatabase getBookmarkDatabase() {
         return mBookmarkDatabase;
@@ -79,7 +80,6 @@ public class MainActivity extends Activity implements ClientInterface {
         checkUnfinishedVideoTasks(this);
         checkUpdate();
         // tryPlayVideo(this);
-
     }
 
     @Override
@@ -109,6 +109,15 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     @Override
+    public String[] getVideoList() {
+        return mVideoList;
+    }
+
+    public void setVideoList(String[] videoList) {
+        mVideoList = videoList;
+    }
+
+    @Override
     public void onBackPressed() {
         // When the user press the back button,
         // tries to return to the previously visited page
@@ -135,17 +144,6 @@ public class MainActivity extends Activity implements ClientInterface {
     }
 
     @Override
-    public String[] getVideoList() {
-        return mVideoList;
-    }
-
-    private String[] mVideoList;
-
-    public void setVideoList(String[] videoList) {
-        mVideoList = videoList;
-    }
-
-    @Override
     public void onVideoUrl(String uri) {
         mVideoUrl = uri;
     }
@@ -167,6 +165,12 @@ public class MainActivity extends Activity implements ClientInterface {
         if (XiGua.handle(uri, this)) {
             return true;
         }
+//        if (mWebView.getUrl().contains("xvideos.com")) {
+//            Pattern pattern = Pattern.compile("xvideos\\.com/video\\d+");
+//            if (pattern.matcher(uri).find()) {
+//                XVideos.fetchVideos(uri);
+//            }
+//        }
         return Ck52.handle(uri, this);
     }
 
