@@ -91,6 +91,9 @@
         <activity
             android:name="euphoria.psycho.PlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name="euphoria.psycho.tencent.TencentPlayerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
 
         <service android:name="euphoria.psycho.tasks.HLSDownloadService" />
         <service android:name="euphoria.psycho.downloader.DownloaderService" />

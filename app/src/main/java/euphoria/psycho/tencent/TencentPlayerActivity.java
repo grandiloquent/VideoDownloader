@@ -15,6 +15,7 @@ import android.opengl.GLES20;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
+import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
@@ -28,6 +29,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.Formatter;
+import java.util.HashMap;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -52,12 +54,9 @@ import euphoria.psycho.tasks.HLSDownloadActivity;
 public class TencentPlayerActivity extends Activity {
 
     public static final int DEFAULT_HIDE_TIME_DELAY = 5000;
-    public static final String KEY_M3U8 = "m3u8";
     public static final String KEY_PLAY_LIST = "PlayList";
-    public static final String KEY_REQUEST_HEADERS = "requestHeaders";
     public static final String KEY_VIDEO_FORMAT = "VideoFormat";
     public static final String KEY_VIDEO_ID = "videoId";
-    public static final String KEY_WEB_VIDEO = "WebVideo";
     private final Handler mHandler = new Handler();
     private final StringBuilder mStringBuilder = new StringBuilder();
     private final Formatter mFormatter = new Formatter(mStringBuilder);
@@ -77,6 +76,7 @@ public class TencentPlayerActivity extends Activity {
     private ImageButton mPlayPause;
     private String mVideoId;
     private int mVideoFormat;
+    private int mCurrentPosition;
 
     static int calculateScreenOrientation(Activity activity) {
         int displayRotation = getDisplayRotation(activity);
@@ -233,7 +233,12 @@ public class TencentPlayerActivity extends Activity {
         return true;
     }
 
-    private boolean onInfo(MediaPlayer mediaPlayer, int i, int i1) {
+    private boolean onInfo(MediaPlayer mediaPlayer, int i, int extra) {
+        Log.e("B5aOx2", String.format("onInfo, %s", extra));
+        if (extra > 0) {
+            mCurrentPosition = mMediaPlayer.getCurrentPosition();
+            play();
+        }
         return true;
     }
 
@@ -263,6 +268,10 @@ public class TencentPlayerActivity extends Activity {
         mDuration.setText(DateTimeShare.getStringForTime(mStringBuilder, mFormatter, mediaPlayer.getDuration()));
         mTimeBar.setDuration(mediaPlayer.getDuration());
         mMediaPlayer.start();
+        if (mCurrentPosition > 0) {
+            mediaPlayer.seekTo(mCurrentPosition);
+            mCurrentPosition = 0;
+        }
         mPlayPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.exo_ic_pause_circle_filled));
         updateProgress();
         hiddenControls();
@@ -306,24 +315,22 @@ public class TencentPlayerActivity extends Activity {
         ProgressDialog dialog = new ProgressDialog(this);
         dialog.setMessage("正在解析中...");
         dialog.show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                String url = getAuthorizationKey(mPlayList[mPlayIndex]);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                        try {
-                            mMediaPlayer.setDataSource(url);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        mMediaPlayer.prepareAsync();
-                    }
-                });
-            }
+        new Thread(() -> {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            String url = getAuthorizationKey(mPlayList[mPlayIndex]);
+            runOnUiThread(() -> {
+                dialog.dismiss();
+                try {
+                    HashMap<String, String> headers = new HashMap<>();
+                    headers.put("Referer", "https://v.qq.com");
+                    headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36");
+                    mMediaPlayer.reset();
+                    mMediaPlayer.setDataSource(TencentPlayerActivity.this, Uri.parse(url), headers);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                mMediaPlayer.prepareAsync();
+            });
         }).start();
 
     }
