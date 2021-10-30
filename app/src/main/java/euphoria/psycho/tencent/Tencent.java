@@ -34,14 +34,14 @@ public class Tencent extends BaseExtractor<String[]> {
         return Native.fetchTencent(uri,
                 PreferenceShare.getPreferences().getString(SettingsFragment.KEY_TENCENT, null));
     }
-    
+
     @Override
     protected void processVideo(String[] videoUris) {
         Intent intent = new Intent(mMainActivity, TencentPlayerActivity.class);
         intent.putExtra(TencentPlayerActivity.KEY_PLAY_LIST,
                 Arrays.copyOf(videoUris, videoUris.length - 3));
-        intent.putExtra(TencentActivity.EXTRA_VIDEO_ID, videoUris[videoUris.length - 2]);
-        intent.putExtra(TencentActivity.EXTRA_VIDEO_FORMAT, Integer.parseInt(videoUris[videoUris.length - 1]));
+        intent.putExtra(TencentPlayerActivity.KEY_VIDEO_ID, videoUris[videoUris.length - 2]);
+        intent.putExtra(TencentPlayerActivity.KEY_VIDEO_FORMAT, Integer.parseInt(videoUris[videoUris.length - 1]));
         mMainActivity.startActivity(intent);
     }
 }

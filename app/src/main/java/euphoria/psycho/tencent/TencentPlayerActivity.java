@@ -2,7 +2,7 @@ package euphoria.psycho.tencent;
 
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Process;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
@@ -25,16 +26,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Formatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -46,22 +39,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import euphoria.psycho.SimpleTimeBar;
+import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.explorer.SettingsFragment;
 import euphoria.psycho.player.TimeBar;
 import euphoria.psycho.player.TimeBar.OnScrubListener;
 import euphoria.psycho.share.DateTimeShare;
-import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.share.WebViewShare;
+import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.tasks.HLSDownloadActivity;
-
-import static euphoria.psycho.videos.VideosHelper.USER_AGENT;
 
 public class TencentPlayerActivity extends Activity {
 
     public static final int DEFAULT_HIDE_TIME_DELAY = 5000;
     public static final String KEY_M3U8 = "m3u8";
-    public static final String KEY_REQUEST_HEADERS = "requestHeaders";
     public static final String KEY_PLAY_LIST = "PlayList";
+    public static final String KEY_REQUEST_HEADERS = "requestHeaders";
+    public static final String KEY_VIDEO_FORMAT = "VideoFormat";
+    public static final String KEY_VIDEO_ID = "videoId";
     public static final String KEY_WEB_VIDEO = "WebVideo";
     private final Handler mHandler = new Handler();
     private final StringBuilder mStringBuilder = new StringBuilder();
@@ -80,6 +75,8 @@ public class TencentPlayerActivity extends Activity {
     private String[] mPlayList;
     private int mPlayIndex;
     private ImageButton mPlayPause;
+    private String mVideoId;
+    private int mVideoFormat;
 
     static int calculateScreenOrientation(Activity activity) {
         int displayRotation = getDisplayRotation(activity);
@@ -147,6 +144,19 @@ public class TencentPlayerActivity extends Activity {
         egl.eglTerminate(display);
     }
 
+    private String getAuthorizationKey(String uri) {
+        String url = StringShare.substringBeforeLast(uri, "?");
+        String fileName = StringShare.substringAfterLast(url, "/");
+        String cookie = PreferenceShare.getPreferences().getString(SettingsFragment.KEY_TENCENT, null);
+        String key = Native.fetchTencentKey(
+                fileName,
+                mVideoId,
+                mVideoFormat,
+                cookie
+        );
+        return url + "?vkey=" + key;
+    }
+
     private void hiddenControls() {
         mTimeBar.setVisibility(View.GONE);
         mBottomBar.setVisibility(View.GONE);
@@ -165,20 +175,16 @@ public class TencentPlayerActivity extends Activity {
 
     private void initializePlayer() {
         mMediaPlayer = new MediaPlayer();
-        try {
-            mMediaPlayer.setOnBufferingUpdateListener(this::onBufferingUpdate);
-            mMediaPlayer.setOnCompletionListener(this::onCompletion);
-            mMediaPlayer.setOnErrorListener(this::onError);
-            mMediaPlayer.setOnInfoListener(this::onInfo);
-            mMediaPlayer.setOnPreparedListener(this::onPrepared);
-            mMediaPlayer.setOnSeekCompleteListener(this::onSeekComplete);
-            mMediaPlayer.setOnTimedMetaDataAvailableListener(this::onTimedMetaDataAvailable);
-            mMediaPlayer.setOnVideoSizeChangedListener(this::onVideoSizeChanged);
-            mMediaPlayer.setSurface(mSurface);
-            play();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mMediaPlayer.setOnBufferingUpdateListener(this::onBufferingUpdate);
+        mMediaPlayer.setOnCompletionListener(this::onCompletion);
+        mMediaPlayer.setOnErrorListener(this::onError);
+        mMediaPlayer.setOnInfoListener(this::onInfo);
+        mMediaPlayer.setOnPreparedListener(this::onPrepared);
+        mMediaPlayer.setOnSeekCompleteListener(this::onSeekComplete);
+        mMediaPlayer.setOnTimedMetaDataAvailableListener(this::onTimedMetaDataAvailable);
+        mMediaPlayer.setOnVideoSizeChangedListener(this::onVideoSizeChanged);
+        mMediaPlayer.setSurface(mSurface);
+        play();
     }
 
     private void onActionFileDownload(View view) {
@@ -240,11 +246,7 @@ public class TencentPlayerActivity extends Activity {
             mPlayIndex = 0;
         }
         mMediaPlayer.reset();
-        try {
-            play();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        play();
     }
 
     private void onPlayPause(View view) {
@@ -275,11 +277,7 @@ public class TencentPlayerActivity extends Activity {
             mPlayIndex = 0;
         }
         mMediaPlayer.reset();
-        try {
-            play();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        play();
     }
 
     private void onRoot(View view) {
@@ -304,9 +302,30 @@ public class TencentPlayerActivity extends Activity {
         mTextureView.setLayoutParams(layoutParams);
     }
 
-    private void play() throws IOException {
-        mMediaPlayer.setDataSource(mPlayList[mPlayIndex]);
-        mMediaPlayer.prepareAsync();
+    private void play() {
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage("正在解析中...");
+        dialog.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                String url = getAuthorizationKey(mPlayList[mPlayIndex]);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.dismiss();
+                        try {
+                            mMediaPlayer.setDataSource(url);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        mMediaPlayer.prepareAsync();
+                    }
+                });
+            }
+        }).start();
+
     }
 
     private void scheduleHideControls() {
@@ -432,6 +451,8 @@ public class TencentPlayerActivity extends Activity {
         ImageButton prev = findViewById(R.id.prev);
         ImageButton next = findViewById(R.id.next);
         mPlayList = getIntent().getStringArrayExtra(KEY_PLAY_LIST);
+        mVideoId = getIntent().getStringExtra(KEY_VIDEO_ID);
+        mVideoFormat = getIntent().getIntExtra(KEY_VIDEO_FORMAT, 0);
         if (mPlayList != null) {
             if (mPlayList.length < 2) {
                 prev.setAlpha(75);
