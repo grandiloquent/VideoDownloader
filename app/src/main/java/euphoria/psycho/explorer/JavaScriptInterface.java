@@ -10,8 +10,6 @@ import android.os.Process;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import java.nio.charset.StandardCharsets;
-
 import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
@@ -76,21 +74,18 @@ public class JavaScriptInterface {
                 videoUri = Native.fetch57Ck(uri);
             }
             String finalVideoUri = videoUri;
-            mMainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    dialog.dismiss();
-                    if (finalVideoUri == null || finalVideoUri.length() == 0) {
-                        Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    if (videoUri.contains("m3u8")) {
-                        Intent intent = new Intent(mMainActivity, HLSDownloadActivity.class);
-                        intent.setData(Uri.parse(finalVideoUri));
-                        mMainActivity.startActivity(intent);
-                    } else {
-                        WebViewShare.downloadFile(mMainActivity, KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
-                    }
+            mMainActivity.runOnUiThread(() -> {
+                dialog.dismiss();
+                if (finalVideoUri == null || finalVideoUri.length() == 0) {
+                    Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (videoUri.contains("m3u8")) {
+                    Intent intent = new Intent(mMainActivity, HLSDownloadActivity.class);
+                    intent.setData(Uri.parse(finalVideoUri));
+                    mMainActivity.startActivity(intent);
+                } else {
+                    WebViewShare.downloadFile(mMainActivity, KeyShare.md5(videoUri) + ".mp4", videoUri.toString(), USER_AGENT);
                 }
             });
         }).start();

@@ -175,7 +175,6 @@ public class Request implements Comparable<Request> {
         boolean result = false;
         if (statusCode >= 200 && statusCode < 400) {
             long size = Long.parseLong(connection.getHeaderField("Content-Length"));
-            //mVideoTask.TotalSize += size;
             emitSynchronizeTask(TaskStatus.PARSE_CONTENT_LENGTH);
             setBookmark(videoFile.getName(), size);
             InputStream is = connection.getInputStream();
@@ -237,7 +236,6 @@ public class Request implements Comparable<Request> {
         return 0;
     }
 
-    //
     private boolean mergeVideo() {
         emitSynchronizeTask(TaskStatus.MERGE_VIDEO);
         try {
@@ -251,6 +249,7 @@ public class Request implements Comparable<Request> {
                 }
                 fc.force(true);
             }
+            FileShare.recursivelyDeleteFile(new File(mVideoTask.Directory));
             emitSynchronizeTask(TaskStatus.MERGE_VIDEO_FINISHED);
             return true;
         } catch (IOException e) {
