@@ -89,10 +89,6 @@ public class MainActivity extends Activity implements ClientInterface {
         // the permissions required  to run the app
         if (checkPermissions(this)) return;
         initialize();
-//        String uri = "https://cdn.workgreat14.live//mp43/.mp4?st=fv07kCsUR7yKlhecxSeT5w&e=1635455404";
-//        Intent intent = new Intent(this, HLSDownloadActivity.class);
-//        intent.setData(Uri.parse(uri));
-//        startActivity(intent);
     }
 
     @Override
@@ -139,6 +135,7 @@ public class MainActivity extends Activity implements ClientInterface {
                 finish();
                 return;
             }
+
         }
         initialize();
     }
