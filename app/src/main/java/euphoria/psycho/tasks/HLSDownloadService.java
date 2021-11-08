@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.List;
@@ -27,7 +28,6 @@ public class HLSDownloadService extends Service implements RequestEventListener 
     private RequestQueue mQueue;
     private NotificationManager mNotificationManager;
 
-
     public void checkUncompletedVideoTasks() {
         // Query all tasks that have not been completed
         List<VideoTask> videoTasks = VideoManager
@@ -44,7 +44,6 @@ public class HLSDownloadService extends Service implements RequestEventListener 
         }
     }
 
-    //
     private VideoTask createTask(String uri, String fileName, String content) {
         VideoTask videoTask = new VideoTask();
         videoTask.Uri = uri;
@@ -62,6 +61,7 @@ public class HLSDownloadService extends Service implements RequestEventListener 
         return videoTask;
     }
 
+
     private void submitRequest(String uri) {
         new Thread(() -> {
             // Calculate the hash value of the m3u8 content
@@ -71,7 +71,12 @@ public class HLSDownloadService extends Service implements RequestEventListener 
             if (hlsInfo == null) {
                 if (mQueue.count().getRunningTasks() == 0) {
                     tryStop();
+                } else {
+                    Intent updateActivity = new Intent(this, HLSDownloadActivity.class);
+                    updateActivity.putExtra(HLSDownloadActivity.KEY_UPDATE, true);
+                    startActivity(updateActivity);
                 }
+                Log.e("B5aOx2", String.format("submitRequest, %s", uri));
                 toastTaskFailed(getString(R.string.failed_to_get_video_list));
                 return;
             }
@@ -103,13 +108,15 @@ public class HLSDownloadService extends Service implements RequestEventListener 
         }).start();
     }
 
+
     private void submitTask(VideoTask videoTask) {
         VideoManager.post(() -> {
-            Request request = new Request(HLSDownloadService.this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+            HLSDownloadRequest request = new HLSDownloadRequest(HLSDownloadService.this, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
             request.setRequestQueue(mQueue);
             mQueue.add(request);
         });
     }
+
 
     private void toastTaskFailed(String message) {
         VideoManager.post(() -> {
@@ -117,18 +124,16 @@ public class HLSDownloadService extends Service implements RequestEventListener 
         });
     }
 
+
     private void toastTaskFinished() {
         VideoManager.post(() -> {
             Toast.makeText(HLSDownloadService.this, "视频已下载", Toast.LENGTH_SHORT).show();
         });
     }
 
+
     private void tryStop() {
-        if (VERSION.SDK_INT >= VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_REMOVE);
-        } else {
-            stopForeground(true);
-        }
+        stopForeground(STOP_FOREGROUND_REMOVE);
         stopSelf();
         // Send a task finished broadcast
         // to the activity for display the download progress
@@ -140,11 +145,13 @@ public class HLSDownloadService extends Service implements RequestEventListener 
         VideoHelper.startVideoListActivity(this);
     }
 
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 
     @Override
     public void onCreate() {
@@ -161,14 +168,16 @@ public class HLSDownloadService extends Service implements RequestEventListener 
                         .build());
     }
 
+
     @Override
     public void onDestroy() {
         mQueue.removeRequestEventListener(this);
         super.onDestroy();
     }
 
+
     @Override
-    public void onRequestEvent(Request Request, int event) {
+    public void onRequestEvent(HLSDownloadRequest Request, int event) {
         if (event == RequestEvent.REQUEST_QUEUED) {
             showNotification(this, mNotificationManager, mQueue.count());
         } else if (event == RequestEvent.REQUEST_FINISHED) {
@@ -181,6 +190,7 @@ public class HLSDownloadService extends Service implements RequestEventListener 
             toastTaskFinished();
         }
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -204,4 +214,5 @@ public class HLSDownloadService extends Service implements RequestEventListener 
         submitRequest(uri.toString());
         return super.onStartCommand(intent, flags, startId);
     }
+
 }

@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
-import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
@@ -95,7 +94,6 @@ public class WebActivity extends Activity {
 
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                Log.e("B5aOx2", String.format("onConsoleMessage, %s", consoleMessage.message()));
                 return super.onConsoleMessage(consoleMessage);
             }
 

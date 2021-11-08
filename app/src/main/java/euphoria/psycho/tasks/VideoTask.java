@@ -15,7 +15,7 @@ public class VideoTask {
     public long TotalSize;
     public long CreateAt;
     public long UpdateAt;
-    public Request Request;
+    public HLSDownloadRequest Request;
     public boolean IsPaused;
 
     @Override

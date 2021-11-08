@@ -10,17 +10,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RequestQueue {
 
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
-    private final Set<Request> mCurrentRequests = new HashSet<>();
+    private final Set<HLSDownloadRequest> mCurrentRequests = new HashSet<>();
     private final NetworkDispatcher[] mDispatchers;
     private final List<RequestEventListener> mEventListeners = new ArrayList<>();
-    private final PriorityBlockingQueue<Request> mNetworkQueue = new PriorityBlockingQueue<>();
+    private final PriorityBlockingQueue<HLSDownloadRequest> mNetworkQueue = new PriorityBlockingQueue<>();
     private final AtomicInteger mSequenceGenerator = new AtomicInteger();
 
     public RequestQueue() {
         mDispatchers = new NetworkDispatcher[DEFAULT_NETWORK_THREAD_POOL_SIZE];
     }
 
-    public void add(Request request) {
+    public void add(HLSDownloadRequest request) {
         // Tag the request as belonging to this queue and add it to the set of current requests.
         request.setRequestQueue(this);
         synchronized (mCurrentRequests) {
@@ -39,7 +39,7 @@ public class RequestQueue {
         }
     }
 
-    public Set<Request> getCurrentRequests() {
+    public Set<HLSDownloadRequest> getCurrentRequests() {
         return mCurrentRequests;
     }
 
@@ -73,7 +73,7 @@ public class RequestQueue {
     }
 
     public interface RequestEventListener {
-        void onRequestEvent(Request Request, int event);
+        void onRequestEvent(HLSDownloadRequest Request, int event);
     }
 
     public @interface RequestEvent {
@@ -96,7 +96,7 @@ public class RequestQueue {
         int REQUEST_QUEUED = 0;
     }
 
-    void sendRequestEvent(Request request, @RequestEvent int event) {
+    void sendRequestEvent(HLSDownloadRequest request, @RequestEvent int event) {
         synchronized (mEventListeners) {
             for (RequestEventListener listener : mEventListeners) {
                 listener.onRequestEvent(request, event);
@@ -109,7 +109,7 @@ public class RequestQueue {
         int total = 0;
         synchronized (mCurrentRequests) {
             total = mCurrentRequests.size();
-            for (Request request : mCurrentRequests) {
+            for (HLSDownloadRequest request : mCurrentRequests) {
                 if (request.getVideoTask().Status != 7 && request.getVideoTask().Status > -1) {
                     running++;
                 }
@@ -123,8 +123,8 @@ public class RequestQueue {
     // so we should synchronize operations
     void removeVideoTask(VideoTask videoTask) {
         synchronized (mCurrentRequests) {
-            Request src = null;
-            for (Request request : mCurrentRequests) {
+            HLSDownloadRequest src = null;
+            for (HLSDownloadRequest request : mCurrentRequests) {
                 if (request.getVideoTask().FileName.equals(videoTask.FileName)) {
                     src = request;
                     break;
@@ -139,7 +139,7 @@ public class RequestQueue {
     List<VideoTask> getVideoTasks() {
         List<VideoTask> videoTasks = new ArrayList<>();
         synchronized (mCurrentRequests) {
-            for (Request request : mCurrentRequests) {
+            for (HLSDownloadRequest request : mCurrentRequests) {
                 videoTasks.add(request.getVideoTask());
             }
         }
@@ -147,14 +147,14 @@ public class RequestQueue {
     }
     boolean taskExists(String fileName) {
         synchronized (mCurrentRequests) {
-            for (Request request : mCurrentRequests) {
+            for (HLSDownloadRequest request : mCurrentRequests) {
                 if (request.getVideoTask().FileName.equals(fileName)) return true;
             }
             return false;
         }
     }
 
-    void finish(Request request) {
+    void finish(HLSDownloadRequest request) {
         // Remove from the set of requests currently being processed.
 //        synchronized (mCurrentRequests) {
 //            mCurrentRequests.remove(request);

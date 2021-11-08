@@ -23,7 +23,7 @@ import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.utils.BlobCache;
 
-public class Request implements Comparable<Request> {
+public class HLSDownloadRequest implements Comparable<HLSDownloadRequest> {
 
     public static final int BUFFER_SIZE = 8192;
     private final String mBaseUri;
@@ -37,7 +37,7 @@ public class Request implements Comparable<Request> {
     private Integer mSequence;
     private RequestQueue mRequestQueue;
 
-    public Request(Context context, VideoTask videoTask, VideoTaskListener listener, Handler handler) {
+    public HLSDownloadRequest(Context context, VideoTask videoTask, VideoTaskListener listener, Handler handler) {
         mVideoTask = videoTask;
         mListener = listener;
         mHandler = handler;
@@ -85,7 +85,7 @@ public class Request implements Comparable<Request> {
         return mSequence;
     }
 
-    public final Request setSequence(int sequence) {
+    public final HLSDownloadRequest setSequence(int sequence) {
         mSequence = sequence;
         return this;
     }
@@ -175,7 +175,6 @@ public class Request implements Comparable<Request> {
         boolean result = false;
         if (statusCode >= 200 && statusCode < 400) {
             long size = Long.parseLong(connection.getHeaderField("Content-Length"));
-            emitSynchronizeTask(TaskStatus.PARSE_CONTENT_LENGTH);
             setBookmark(videoFile.getName(), size);
             InputStream is = connection.getInputStream();
             FileOutputStream out = new FileOutputStream(videoFile);
@@ -318,7 +317,7 @@ public class Request implements Comparable<Request> {
     }
 
     @Override
-    public int compareTo(Request other) {
+    public int compareTo(HLSDownloadRequest other) {
         return this.mSequence - other.mSequence;
     }
 

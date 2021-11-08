@@ -5,10 +5,10 @@ import android.os.Process;
 import java.util.concurrent.BlockingQueue;
 
 public class NetworkDispatcher extends Thread {
-    private final BlockingQueue<Request> mQueue;
+    private final BlockingQueue<HLSDownloadRequest> mQueue;
     private volatile boolean mQuit = false;
 
-    public NetworkDispatcher(BlockingQueue<Request> queue) {
+    public NetworkDispatcher(BlockingQueue<HLSDownloadRequest> queue) {
         mQueue = queue;
     }//
 
@@ -19,11 +19,11 @@ public class NetworkDispatcher extends Thread {
 
     private void processRequest() throws InterruptedException {
         // Take a request from the queue.
-        Request request = mQueue.take();
+        HLSDownloadRequest request = mQueue.take();
         processRequest(request);
     }
 
-    private void processRequest(Request request) {
+    private void processRequest(HLSDownloadRequest request) {
         request.sendEvent(RequestQueue.RequestEvent.REQUEST_NETWORK_DISPATCH_STARTED);
         try {
             request.start();

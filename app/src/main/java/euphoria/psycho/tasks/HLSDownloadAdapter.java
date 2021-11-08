@@ -16,12 +16,12 @@ import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.share.Logger;
 
-public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
+public class HLSDownloadAdapter extends BaseAdapter implements VideoTaskListener {
     private final HLSDownloadActivity mVideoActivity;
     private final List<VideoTask> mVideoTasks = new ArrayList<>();
     private final List<ViewHolder> mViewHolders = new ArrayList<>();
 
-    public VideoAdapter(HLSDownloadActivity videoActivity) {
+    public HLSDownloadAdapter(HLSDownloadActivity videoActivity) {
         mVideoActivity = videoActivity;
     }
 
@@ -126,7 +126,7 @@ public class VideoAdapter extends BaseAdapter implements VideoTaskListener {
         viewHolder.subtitle.setText(R.string.waiting);
         viewHolder.progressBar.setProgress(0);
         viewHolder.layout.setOnClickListener(null);
-        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download);
+        viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download_light);
         VideoHelper.renderPauseButton(context, viewHolder, videoTask);
     }
 

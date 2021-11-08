@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 
 import java.io.File;
@@ -18,7 +19,6 @@ import androidx.annotation.RequiresApi;
 import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.Logger;
 
 public class VideoHelper {
 
@@ -103,7 +103,7 @@ public class VideoHelper {
                 videoTask.IsPaused = false;
                 VideoManager.getInstance().getQueue().removeVideoTask(videoTask);
                 videoTask.DownloadedFiles = 0;
-                Request request = new Request(context, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
+                HLSDownloadRequest request = new HLSDownloadRequest(context, videoTask, VideoManager.getInstance(), VideoManager.getInstance().getHandler());
                 request.setRequestQueue(VideoManager.getInstance().getQueue());
                 VideoManager.getInstance().getQueue().add(request);
             }
@@ -186,8 +186,8 @@ public class VideoHelper {
     }
 
 
-    public static void updateList(View progressBar, View listView, VideoAdapter videoAdapter) {
-        Logger.e(String.format("updateList, %s", ""));
+    public static void updateList(View progressBar, View listView, HLSDownloadAdapter videoAdapter) {
+        Log.e("B5aOx2", String.format("updateList, %s", ""));
         progressBar.setVisibility(View.GONE);
         listView.setVisibility(View.VISIBLE);
         videoAdapter.update(VideoManager.getInstance().getQueue().getVideoTasks());

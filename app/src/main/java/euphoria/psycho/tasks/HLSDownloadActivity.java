@@ -25,7 +25,7 @@ public class HLSDownloadActivity extends Activity implements RequestEventListene
     public static final String KEY_UPDATE = "update";
     private final List<LifeCycle> mLifeCycles = new ArrayList<>();
     private ListView mListView;
-    private VideoAdapter mVideoAdapter;
+    private HLSDownloadAdapter mVideoAdapter;
     private View mProgressBar;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -36,7 +36,7 @@ public class HLSDownloadActivity extends Activity implements RequestEventListene
                 mListView.setVisibility(View.VISIBLE);
                 mVideoAdapter.update(VideoManager.getInstance().getQueue().getCurrentRequests()
                         .stream()
-                        .map(Request::getVideoTask)
+                        .map(HLSDownloadRequest::getVideoTask)
                         .collect(Collectors.toList()));
             } else {
                 finish();
@@ -45,12 +45,12 @@ public class HLSDownloadActivity extends Activity implements RequestEventListene
     };
 
     public void addLifeCycle(LifeCycle lifeCycle) {
-                mLifeCycles.add(lifeCycle);
+        mLifeCycles.add(lifeCycle);
     }
 
 
     public static void registerBroadcastReceiver(Context context, BroadcastReceiver receiver) {
-                IntentFilter filter = new IntentFilter();
+        IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_REFRESH);
         filter.addAction(ACTION_FINISH);
         context.registerReceiver(receiver, filter);
@@ -58,12 +58,12 @@ public class HLSDownloadActivity extends Activity implements RequestEventListene
 
 
     public void removeLifeCycle(LifeCycle lifeCycle) {
-                mLifeCycles.remove(lifeCycle);
+        mLifeCycles.remove(lifeCycle);
     }
 
 
     private void startService() {
-                String[] videoList = getIntent().getStringArrayExtra(HLSDownloadService.KEY_VIDEO_LIST);
+        String[] videoList = getIntent().getStringArrayExtra(HLSDownloadService.KEY_VIDEO_LIST);
         Uri videoUri = getIntent().getData();
         if (videoList == null && videoUri == null) {
             return;
@@ -77,11 +77,11 @@ public class HLSDownloadActivity extends Activity implements RequestEventListene
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-                super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_s);
         mProgressBar = findViewById(R.id.progress_bar);
         mListView = findViewById(R.id.list_view);
-        mVideoAdapter = new VideoAdapter(this);
+        mVideoAdapter = new HLSDownloadAdapter(this);
         mListView.setAdapter(mVideoAdapter);
         startService();
         registerBroadcastReceiver(this, mBroadcastReceiver);
@@ -94,7 +94,7 @@ public class HLSDownloadActivity extends Activity implements RequestEventListene
 
     @Override
     protected void onDestroy() {
-                for (int i = 0; i < mLifeCycles.size(); i++) {
+        for (int i = 0; i < mLifeCycles.size(); i++) {
             mLifeCycles.get(i).onDestroy();
         }
         unregisterReceiver(mBroadcastReceiver);
@@ -105,21 +105,21 @@ public class HLSDownloadActivity extends Activity implements RequestEventListene
 
     @Override
     protected void onPause() {
-                VideoManager.getInstance().removeVideoTaskListener(mVideoAdapter);
+        VideoManager.getInstance().removeVideoTaskListener(mVideoAdapter);
         super.onPause();
     }
 
 
     @Override
     protected void onResume() {
-                super.onResume();
+        super.onResume();
         VideoManager.getInstance().addVideoTaskListener(mVideoAdapter);
     }
 
 
     @Override
-    public void onRequestEvent(Request Request, int event) {
-                if (event == RequestEvent.REQUEST_QUEUED) {
+    public void onRequestEvent(HLSDownloadRequest Request, int event) {
+        if (event == RequestEvent.REQUEST_QUEUED) {
             VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
         }
     }
