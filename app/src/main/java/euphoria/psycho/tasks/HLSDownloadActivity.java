@@ -3,10 +3,10 @@ package euphoria.psycho.tasks;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,23 +17,28 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.Nullable;
+import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.explorer.R;
 
 public class HLSDownloadActivity extends Activity implements HLSDownloadListener {
 
     private ListView mListView;
     private HLSDownloadAdapter mVideoAdapter;
-    private Handler mHandler = new Handler();
+    private Handler mHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_s);
+        mHandler = new Handler();
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new HLSDownloadAdapter(mHandler);
         mListView.setAdapter(mVideoAdapter);
@@ -107,6 +112,31 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             viewHolder.button = v.findViewById(R.id.button);
         }
 
+        private void renderComplete(Handler handler, ViewHolder viewHolder, File videoFile) {
+            HLSDownloadManager.getInstance(viewHolder.title.getContext())
+                    .removeHLSDownloadRequestListener(this);
+            handler.post(() -> {
+                viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
+                viewHolder.subtitle.setText(R.string.merge_complete);
+                Glide.with(viewHolder.title.getContext())
+                        .load(videoFile)
+                        .fitCenter()
+                        .into(viewHolder.thumbnail);
+                viewHolder.button.setOnClickListener(view -> {
+                    Intent intent = new Intent(viewHolder.title.getContext(), PlayerActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(PlayerActivity.KEY_VIDEO_FILE, videoFile.getAbsolutePath());
+                    viewHolder.title.getContext().startActivity(intent);
+                });
+            });
+        }
+
+        private static void renderStart(Handler handler, ViewHolder viewHolder) {
+            handler.post(() -> {
+                viewHolder.subtitle.setText("开始下载");
+            });
+        }
+
         @Override
         public int getCount() {
             return mRequests.size();
@@ -119,13 +149,11 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
 
         @Override
         public long getItemId(int i) {
-            Log.e("B5aOx2", String.format("getItemId, %s", ""));
             return i;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            Log.e("B5aOx2", String.format("getView, %s", ""));
             ViewHolder viewHolder;
             if (convertView == null) {
                 convertView = LayoutInflater.from(parent.getContext())
@@ -149,19 +177,37 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
 
         @Override
         public void onProgress(HLSDownloadRequest hlsDownloadRequest) {
+            int status = hlsDownloadRequest.getStatus();
+            String uniqueId = hlsDownloadRequest.getTask().getUniqueId();
             for (ViewHolder viewHolder : mViewHolders) {
-                if (hlsDownloadRequest.getTask().getUniqueId().equals(viewHolder.tag)) {
-                    int sequence = hlsDownloadRequest.getTask().getSequence() + 1;
-                    int total = hlsDownloadRequest.getTask().getHLSDownloadTaskSegments().size();
-                   mHandler.post(() -> {
-                       viewHolder.subtitle.setText(String.format("%s/%s", sequence
-                               , total));
-                       viewHolder.progressBar.setProgress((int) ((sequence * 1.0 / total) * 100));
-                   });
+                if (uniqueId.equals(viewHolder.tag)) {
+                    switch (status) {
+                        case HLSDownloadRequest.STATUS_START:
+                            renderStart(mHandler, viewHolder);
+                            break;
+                        case HLSDownloadRequest.STATUS_MERGE_VIDEO:
+                            mHandler.post(() -> {
+                                viewHolder.subtitle.setText(R.string.merge_start);
+                            });
+                            break;
+                        case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
+                            renderComplete(mHandler, viewHolder, hlsDownloadRequest.getTask().getVideoFile());
+                            break;
+                        default:
+                            int sequence = hlsDownloadRequest.getTask().getSequence() + 1;
+                            int total = hlsDownloadRequest.getTask().getHLSDownloadTaskSegments().size();
+                            mHandler.post(() -> {
+                                viewHolder.subtitle.setText(String.format("%s/%s", sequence
+                                        , total));
+                                viewHolder.progressBar.setProgress((int) ((sequence * 1.0 / total) * 100));
+                            });
+                            break;
+                    }
                     return;
                 }
             }
         }
+
     }
 
     private static class ViewHolder {

@@ -16,16 +16,17 @@ import euphoria.psycho.share.StringShare;
 
 public class HLSDownloadRequest implements Runnable {
 
-    public static final int STATUS_CONTENT_LENGTH = 2;
     public static final int STATUS_ERROR = -2;
     public static final int STATUS_ERROR_IO_INPUT = -3;
     public static final int STATUS_ERROR_IO_OUTPUT = -4;
     public static final int STATUS_MERGE_FAILED = -5;
-    public static final int STATUS_FATAL_ERROR = 1;
+    public static final int STATUS_FATAL_ERROR = -1;
     public static final int STATUS_FILE_CACHED = 1;
+    public static final int STATUS_CONTENT_LENGTH = 2;
     public static final int STATUS_PAUSED = 3;
     public static final int STATUS_MERGE_VIDEO = 4;
     public static final int STATUS_MERGE_COMPLETED = 5;
+    public static final int STATUS_START = 6;
 
     private final String mBaseUri;
     private final HLSDownloadRequestListener mListener;
@@ -51,17 +52,31 @@ public class HLSDownloadRequest implements Runnable {
         mPaused = paused;
     }
 
+    private void emitSynchronizationEvent(int status) {
+        mStatus = status;
+        mListener.onProgress(this);
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        emitSynchronizationEvent(STATUS_START);
         List<HLSDownloadTaskSegment> segments = mTask.getHLSDownloadTaskSegments();
         for (HLSDownloadTaskSegment ts : segments) {
+            if (mPaused) {
+                emitSynchronizationEvent(STATUS_PAUSED);
+                return;
+            }
             mTask.setSequence(ts.Sequence);
             File file = new File(mTask.getDirectory(), StringShare.substringBefore(ts.Uri, "?"));
             if (file.exists()) {
                 if (ts.Total > 0 && file.length() == ts.Total) {
-                    mStatus = STATUS_FILE_CACHED;
-                    mListener.onProgress(this);
+                    emitSynchronizationEvent(STATUS_FILE_CACHED);
                     continue;
                 }
             }
@@ -70,17 +85,14 @@ public class HLSDownloadRequest implements Runnable {
                 HttpURLConnection c = (HttpURLConnection) url.openConnection();
                 int status = c.getResponseCode();
                 if (status < 200 || status >= 400) {
-                    mStatus = STATUS_FATAL_ERROR;
-                    mListener.onProgress(this);
+                    emitSynchronizationEvent(STATUS_FATAL_ERROR);
                     return;
                 }
                 ts.Total = c.getContentLengthLong();
-                mStatus = STATUS_CONTENT_LENGTH;
-                mListener.onProgress(this);
+                emitSynchronizationEvent(STATUS_CONTENT_LENGTH);
                 if (file.exists()) {
                     if (ts.Total > 0 && file.length() == ts.Total) {
-                        mStatus = STATUS_FILE_CACHED;
-                        mListener.onProgress(this);
+                        emitSynchronizationEvent(STATUS_FILE_CACHED);
                         continue;
                     }
                 }
@@ -89,16 +101,14 @@ public class HLSDownloadRequest implements Runnable {
                 final byte[] buffer = new byte[8192];
                 while (true) {
                     if (mPaused) {
-                        mStatus = STATUS_PAUSED;
-                        mListener.onProgress(this);
+                        emitSynchronizationEvent(STATUS_PAUSED);
                         return;
                     }
                     int len;
                     try {
                         len = in.read(buffer);
                     } catch (IOException e) {
-                        mStatus = STATUS_ERROR_IO_INPUT;
-                        mListener.onProgress(this);
+                        emitSynchronizationEvent(STATUS_ERROR_IO_INPUT);
                         return;
                     }
                     if (len == -1) {
@@ -109,22 +119,28 @@ public class HLSDownloadRequest implements Runnable {
                         //mVideoTask.DownloadedSize += len;
                         //updateProgress(fileName);
                     } catch (IOException e) {
-                        mStatus = STATUS_ERROR_IO_OUTPUT;
-                        mListener.onProgress(this);
+                        emitSynchronizationEvent(STATUS_ERROR_IO_OUTPUT);
                         return;
                     }
                 }
 
             } catch (Exception exc) {
-                mStatus = STATUS_ERROR;
-                mListener.onProgress(this);
+                emitSynchronizationEvent(STATUS_ERROR);
+                return;
             }
         }
-        mStatus = STATUS_MERGE_VIDEO;
-        mListener.onProgress(this);
+        emitSynchronizationEvent(STATUS_MERGE_VIDEO);
         try {
+            if (mPaused) {
+                emitSynchronizationEvent(STATUS_PAUSED);
+                return;
+            }
             try (FileChannel fc = new FileOutputStream(mTask.getVideoFile()).getChannel()) {
                 for (HLSDownloadTaskSegment ts : segments) {
+                    if (mPaused) {
+                        emitSynchronizationEvent(STATUS_PAUSED);
+                        return;
+                    }
                     File file = new File(mTask.getDirectory(), StringShare.substringBefore(ts.Uri, "?"));
                     try (FileChannel fci = new FileInputStream(file).getChannel()) {
                         fci.transferTo(0, fci.size(), fc);
@@ -132,11 +148,9 @@ public class HLSDownloadRequest implements Runnable {
                 }
                 fc.force(true);
             }
-            mStatus = STATUS_MERGE_COMPLETED;
-            mListener.onProgress(this);
+            emitSynchronizationEvent(STATUS_MERGE_COMPLETED);
         } catch (IOException e) {
-            mStatus = STATUS_MERGE_FAILED;
-            mListener.onProgress(this);
+            emitSynchronizationEvent(STATUS_MERGE_FAILED);
         }
 
     }

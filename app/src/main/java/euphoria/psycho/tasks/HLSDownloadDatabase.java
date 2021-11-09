@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,6 +106,13 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
                 taskSegment.UniqueId,
                 taskSegment.Uri
         });
+    }
+
+    public void updateTask(HLSDownloadTask task) {
+        ContentValues values = new ContentValues();
+        values.put("status", task.getStatus());
+        getWritableDatabase().update("task", values, " unique_id = ?", new String[]{
+                task.getUniqueId()});
     }
 
     @Override

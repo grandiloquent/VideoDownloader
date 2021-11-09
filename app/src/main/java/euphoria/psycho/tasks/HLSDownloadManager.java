@@ -76,13 +76,20 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
     @Override
     public void onProgress(HLSDownloadRequest hlsDownloadRequest) {
         synchronized (this) {
-            if (hlsDownloadRequest.getStatus() == HLSDownloadRequest.STATUS_CONTENT_LENGTH) {
-                getDatabase().updateTaskSegment(hlsDownloadRequest.getTask()
-                        .getHLSDownloadTaskSegments().get(
-                                hlsDownloadRequest.getTask().getSequence()
-                        ));
+            switch (hlsDownloadRequest.getStatus()) {
+                case HLSDownloadRequest.STATUS_CONTENT_LENGTH:
+                    getDatabase().updateTaskSegment(hlsDownloadRequest.getTask()
+                            .getHLSDownloadTaskSegments().get(
+                                    hlsDownloadRequest.getTask().getSequence()
+                            ));
+                    break;
+                case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
+                    mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
+                    break;
+                default:
+                    mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
+                    break;
             }
-            mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
         }
     }
 
