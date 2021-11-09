@@ -1,79 +1,29 @@
 package euphoria.psycho.tasks;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
-import euphoria.psycho.tasks.RequestQueue.RequestEvent;
-import euphoria.psycho.tasks.RequestQueue.RequestEventListener;
 
-public class HLSDownloadActivity extends Activity implements RequestEventListener {
-    public static final String ACTION_FINISH = "euphoria.psycho.tasks.FINISH";
-    public static final String ACTION_REFRESH = "euphoria.psycho.tasks.REFRESH";
-    public static final String KEY_UPDATE = "update";
-    private final List<LifeCycle> mLifeCycles = new ArrayList<>();
+public class HLSDownloadActivity extends Activity implements HLSDownloadRequestListener {
+
+    private View mProgressBar;
     private ListView mListView;
     private HLSDownloadAdapter mVideoAdapter;
-    private View mProgressBar;
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ACTION_REFRESH)) {
-                mProgressBar.setVisibility(View.GONE);
-                mListView.setVisibility(View.VISIBLE);
-                mVideoAdapter.update(VideoManager.getInstance().getQueue().getCurrentRequests()
-                        .stream()
-                        .map(HLSDownloadRequest::getVideoTask)
-                        .collect(Collectors.toList()));
-            } else {
-                finish();
-            }
-        }
-    };
+    @Override
+    public void onSubmit(HLSDownloadRequest request) {
 
-    public void addLifeCycle(LifeCycle lifeCycle) {
-        mLifeCycles.add(lifeCycle);
     }
 
-
-    public static void registerBroadcastReceiver(Context context, BroadcastReceiver receiver) {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_REFRESH);
-        filter.addAction(ACTION_FINISH);
-        context.registerReceiver(receiver, filter);
+    @Override
+    public void onFinish(HLSDownloadRequest request) {
     }
-
-
-    public void removeLifeCycle(LifeCycle lifeCycle) {
-        mLifeCycles.remove(lifeCycle);
-    }
-
-
-    private void startService() {
-        String[] videoList = getIntent().getStringArrayExtra(HLSDownloadService.KEY_VIDEO_LIST);
-        Uri videoUri = getIntent().getData();
-        if (videoList == null && videoUri == null) {
-            return;
-        }
-        Intent service = new Intent(this, HLSDownloadService.class);
-        service.putExtra(HLSDownloadService.KEY_VIDEO_LIST, videoList);
-        service.setData(videoUri);
-        startService(service);
-    }
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,47 +31,30 @@ public class HLSDownloadActivity extends Activity implements RequestEventListene
         setContentView(R.layout.activity_video_s);
         mProgressBar = findViewById(R.id.progress_bar);
         mListView = findViewById(R.id.list_view);
-        mVideoAdapter = new HLSDownloadAdapter(this);
+        mVideoAdapter = new HLSDownloadAdapter();
         mListView.setAdapter(mVideoAdapter);
-        startService();
-        registerBroadcastReceiver(this, mBroadcastReceiver);
-        VideoManager.newInstance(this).getQueue().addRequestEventListener(this);
-        if (getIntent().getBooleanExtra(KEY_UPDATE, false)) {
-            VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
+    }
+
+    private class HLSDownloadAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return 0;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            return null;
         }
     }
-
-
-    @Override
-    protected void onDestroy() {
-        for (int i = 0; i < mLifeCycles.size(); i++) {
-            mLifeCycles.get(i).onDestroy();
-        }
-        unregisterReceiver(mBroadcastReceiver);
-        VideoManager.getInstance().getQueue().removeRequestEventListener(this);
-        super.onDestroy();
-    }
-
-
-    @Override
-    protected void onPause() {
-        VideoManager.getInstance().removeVideoTaskListener(mVideoAdapter);
-        super.onPause();
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        VideoManager.getInstance().addVideoTaskListener(mVideoAdapter);
-    }
-
-
-    @Override
-    public void onRequestEvent(HLSDownloadRequest Request, int event) {
-        if (event == RequestEvent.REQUEST_QUEUED) {
-            VideoHelper.updateList(mProgressBar, mListView, mVideoAdapter);
-        }
-    }
-
 }
