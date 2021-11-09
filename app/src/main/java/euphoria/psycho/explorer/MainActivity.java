@@ -1,17 +1,22 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
+import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
+
+import java.io.IOException;
 
 import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.tasks.HLSDownloadTask;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -21,7 +26,6 @@ import euphoria.psycho.videos.YouTube;
 
 import static euphoria.psycho.explorer.Helper.KEY_LAST_ACCESSED;
 import static euphoria.psycho.explorer.Helper.checkPermissions;
-import static euphoria.psycho.explorer.Helper.checkUnfinishedVideoTasks;
 import static euphoria.psycho.explorer.Helper.configureWebView;
 import static euphoria.psycho.explorer.Helper.loadStartPage;
 
@@ -77,9 +81,31 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView(this, mWebView);
         loadStartPage(this, mWebView);
-        checkUnfinishedVideoTasks(this);
+        //checkUnfinishedVideoTasks(this);
         checkUpdate();
         // tryPlayVideo(this);
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage("正在下载中...");
+        dialog.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                try {
+                    HLSDownloadTask task = new HLSDownloadTask(MainActivity.this)
+                            .build("https://hls3-l3.xvideos-cdn.com/a6ca65727b70c76a41500cf2c62b1f65cfe55e19-1636436235/videos/hls/09/15/9c/09159c730f5097165cc4651eabef8958/hls-250p.m3u8");
+                    Log.e("B5aOx2", String.format("run, %s", task.toString()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.dismiss();
+                    }
+                });
+            }
+        }).start();
     }
 
     @Override

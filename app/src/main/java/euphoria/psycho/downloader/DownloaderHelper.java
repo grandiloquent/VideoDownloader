@@ -18,7 +18,6 @@ import euphoria.psycho.explorer.R;
 import euphoria.psycho.explorer.VideoListActivity;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.KeyShare;
-import euphoria.psycho.tasks.HLSUtils;
 
 public class DownloaderHelper {
 
@@ -83,7 +82,7 @@ public class DownloaderHelper {
         String m3u8String = null;
         String fileName = null;
         try {
-            m3u8String = HLSUtils.getString(uri);
+            m3u8String = "";//HLSUtils.getString(uri);
         } catch (Exception ignored) {
         }
         if (m3u8String == null) {

@@ -10,20 +10,11 @@ import android.widget.ListView;
 import androidx.annotation.Nullable;
 import euphoria.psycho.explorer.R;
 
-public class HLSDownloadActivity extends Activity implements HLSDownloadRequestListener {
+public class HLSDownloadActivity extends Activity implements HLSDownloadListener, HLSDownloadRequestListener {
 
     private View mProgressBar;
     private ListView mListView;
     private HLSDownloadAdapter mVideoAdapter;
-
-    @Override
-    public void onSubmit(HLSDownloadRequest request) {
-
-    }
-
-    @Override
-    public void onFinish(HLSDownloadRequest request) {
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,6 +24,18 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadRequestL
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new HLSDownloadAdapter();
         mListView.setAdapter(mVideoAdapter);
+    }
+
+    @Override
+    public void onFinish(HLSDownloadRequest request) {
+    }
+
+    @Override
+    public void onProgress(HLSDownloadRequest hlsDownloadRequest) {
+    }
+
+    @Override
+    public void onSubmit(HLSDownloadRequest request) {
     }
 
     private class HLSDownloadAdapter extends BaseAdapter {

@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
-import euphoria.psycho.tasks.VideoHelper;
 import euphoria.psycho.videos.AcFun;
 import euphoria.psycho.bilibili.Bilibili;
 import euphoria.psycho.videos.CCTV;
@@ -78,7 +77,9 @@ public class ListenerDelegate {
     }
 
     private void onPlaylist() {
-        VideoHelper.startVideoListActivity(mMainActivity);
+        Intent intent = new Intent(mMainActivity, VideoListActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mMainActivity.startActivity(intent);
     }
 
     private void onAddLink(View view) {

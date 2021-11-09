@@ -1,4 +1,6 @@
 package euphoria.psycho.tasks;
-public class HLSDownloadListener{
+public interface HLSDownloadListener{
+    void onSubmit(HLSDownloadRequest request);
 
+    void onFinish(HLSDownloadRequest request);
 }

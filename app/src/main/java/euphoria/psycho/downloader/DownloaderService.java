@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import euphoria.psycho.downloader.RequestQueue.RequestEvent;
 import euphoria.psycho.downloader.RequestQueue.RequestEventListener;
 import euphoria.psycho.explorer.R;
+import euphoria.psycho.explorer.VideoListActivity;
 
 import static euphoria.psycho.downloader.DownloaderHelper.showNotification;
 
@@ -38,9 +39,9 @@ public class DownloaderService extends Service implements RequestEventListener {
     }
 
     private void toastTaskFailed(String message) {
-        euphoria.psycho.tasks.VideoManager.post(() -> {
-            Toast.makeText(DownloaderService.this, message, Toast.LENGTH_SHORT).show();
-        });
+//        euphoria.psycho.tasks.VideoManager.post(() -> {
+//            Toast.makeText(DownloaderService.this, message, Toast.LENGTH_SHORT).show();
+//        });
     }
 
     private void toastTaskFinished() {
@@ -63,7 +64,9 @@ public class DownloaderService extends Service implements RequestEventListener {
         // Try to open the video list
         // because the new version of the Android system
         // may restrict the app to open activity from the service
-        euphoria.psycho.tasks.VideoHelper.startVideoListActivity(this);
+        Intent intent = new Intent(this, VideoListActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(intent);
     }
 
     @Nullable
