@@ -1,22 +1,19 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
-import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
-
-import java.io.IOException;
 
 import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.tasks.HLSDownloadTask;
+import euphoria.psycho.tasks.HLSDownloadActivity;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -84,28 +81,8 @@ public class MainActivity extends Activity implements ClientInterface {
         //checkUnfinishedVideoTasks(this);
         checkUpdate();
         // tryPlayVideo(this);
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("正在下载中...");
-        dialog.show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try {
-                    HLSDownloadTask task = new HLSDownloadTask(MainActivity.this)
-                            .build("https://cdn.workgreat14.live//m3u8/465113/465113.m3u8?st=0sjgrFRgpOKCaAw-_oU0qw&e=1636445840");
-                    Log.e("B5aOx2", String.format("run, %s", task.toString()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                    }
-                });
-            }
-        }).start();
+        Intent intent = new Intent(this, HLSDownloadActivity.class);
+        startActivity(intent);
     }
 
     @Override

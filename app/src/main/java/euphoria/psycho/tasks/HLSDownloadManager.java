@@ -15,6 +15,7 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
     private final ExecutorService mExecutor;
     private List<HLSDownloadRequest> mRequests = new ArrayList<>();
     private List<HLSDownloadListener> mListeners = new ArrayList<>();
+    private List<HLSDownloadRequestListener> mRequestListeners = new ArrayList<>();
     private HLSDownloadDatabase mDatabase;
 
     public HLSDownloadManager(Context context) {
@@ -44,8 +45,45 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
         return sManager;
     }
 
+    public HLSDownloadManager addHLSDownloadListener(HLSDownloadListener listener) {
+        synchronized (this) {
+            mListeners.add(listener);
+        }
+        return this;
+    }
+
+    public HLSDownloadManager removeHLSDownloadListener(HLSDownloadListener listener) {
+        synchronized (this) {
+            mListeners.remove(listener);
+        }
+        return this;
+    }
+
+    public HLSDownloadManager addHLSDownloadRequestListener(HLSDownloadRequestListener listener) {
+        synchronized (this) {
+            mRequestListeners.add(listener);
+        }
+        return this;
+    }
+
+    public HLSDownloadManager removeHLSDownloadRequestListener(HLSDownloadRequestListener listener) {
+        synchronized (this) {
+            mRequestListeners.remove(listener);
+        }
+        return this;
+    }
+
     @Override
     public void onProgress(HLSDownloadRequest hlsDownloadRequest) {
+        synchronized (this) {
+            if (hlsDownloadRequest.getStatus() == HLSDownloadRequest.STATUS_CONTENT_LENGTH) {
+                getDatabase().updateTaskSegment(hlsDownloadRequest.getTask()
+                        .getHLSDownloadTaskSegments().get(
+                                hlsDownloadRequest.getTask().getSequence()
+                        ));
+            }
+            mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
+        }
     }
 
     public void submit(HLSDownloadTask task) {
@@ -58,5 +96,9 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
             mExecutor.submit(request);
             mListeners.forEach(r -> r.onSubmit(request));
         }
+    }
+
+    public List<HLSDownloadRequest> getRequests() {
+        return mRequests;
     }
 }

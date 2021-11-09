@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import euphoria.psycho.share.KeyShare;
 
 public class HLSDownloadTask {
@@ -21,6 +22,7 @@ public class HLSDownloadTask {
     private int mStatus;
     private long mCreateAt;
     private long mUpdateAt;
+    private int mSequence;
     private List<HLSDownloadTaskSegment> mHLSDownloadTaskSegments = new ArrayList<>();
 
     public HLSDownloadTask(Context context) {
@@ -34,15 +36,17 @@ public class HLSDownloadTask {
             return null;
         }
         mUniqueId = KeyShare.md5(m3u8Content);
-        HLSDownloadTask task = HLSDownloadManager.getInstance(getContext()).getDatabase().getTask(mUniqueId);
-        if (task != null) {
-            return task;
-        }
         mDirectory = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), mUniqueId);
         if (!mDirectory.exists())
             mDirectory.mkdirs();
         mVideoFile = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), mUniqueId + ".mp4");
-        String[] segments = m3u8Content.split("\n");
+        HLSDownloadTask task = HLSDownloadManager.getInstance(getContext()).getDatabase().getTask(mUniqueId);
+        if (task != null) {
+            task.setDirectory(mDirectory);
+            task.setVideoFile(mVideoFile);
+            return task;
+        }
+        String[] segments = getSplit(m3u8Content);
         int sequence = 0;
         for (int i = 0; i < segments.length; i++) {
             if (segments[i].startsWith("#EXTINF:")) {
@@ -58,6 +62,11 @@ public class HLSDownloadTask {
         HLSDownloadManager.getInstance(getContext())
                 .getDatabase().insertTask(this);
         return this;
+    }
+
+    @NonNull
+    private String[] getSplit(String m3u8Content) {
+        return m3u8Content.split("\n");
     }
 
     public Context getContext() {
@@ -94,6 +103,14 @@ public class HLSDownloadTask {
 
     public void setId(int id) {
         mId = id;
+    }
+
+    public int getSequence() {
+        return mSequence;
+    }
+
+    public void setSequence(int sequence) {
+        mSequence = sequence;
     }
 
     public int getStatus() {

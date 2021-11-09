@@ -3,11 +3,13 @@ package euphoria.psycho.tasks;
 import android.os.Process;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.util.List;
 
 import euphoria.psycho.share.StringShare;
@@ -18,9 +20,13 @@ public class HLSDownloadRequest implements Runnable {
     public static final int STATUS_ERROR = -2;
     public static final int STATUS_ERROR_IO_INPUT = -3;
     public static final int STATUS_ERROR_IO_OUTPUT = -4;
+    public static final int STATUS_MERGE_FAILED = -5;
     public static final int STATUS_FATAL_ERROR = 1;
     public static final int STATUS_FILE_CACHED = 1;
     public static final int STATUS_PAUSED = 3;
+    public static final int STATUS_MERGE_VIDEO = 4;
+    public static final int STATUS_MERGE_COMPLETED = 5;
+
     private final String mBaseUri;
     private final HLSDownloadRequestListener mListener;
     private final HLSDownloadTask mTask;
@@ -50,14 +56,13 @@ public class HLSDownloadRequest implements Runnable {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         List<HLSDownloadTaskSegment> segments = mTask.getHLSDownloadTaskSegments();
         for (HLSDownloadTaskSegment ts : segments) {
+            mTask.setSequence(ts.Sequence);
             File file = new File(mTask.getDirectory(), StringShare.substringBefore(ts.Uri, "?"));
             if (file.exists()) {
                 if (ts.Total > 0 && file.length() == ts.Total) {
                     mStatus = STATUS_FILE_CACHED;
                     mListener.onProgress(this);
                     continue;
-                } else {
-                    file.delete();
                 }
             }
             try {
@@ -72,11 +77,20 @@ public class HLSDownloadRequest implements Runnable {
                 ts.Total = c.getContentLengthLong();
                 mStatus = STATUS_CONTENT_LENGTH;
                 mListener.onProgress(this);
+                if (file.exists()) {
+                    if (ts.Total > 0 && file.length() == ts.Total) {
+                        mStatus = STATUS_FILE_CACHED;
+                        mListener.onProgress(this);
+                        continue;
+                    }
+                }
                 InputStream in = c.getInputStream();
                 FileOutputStream out = new FileOutputStream(file);
                 final byte[] buffer = new byte[8192];
                 while (true) {
                     if (mPaused) {
+                        mStatus = STATUS_PAUSED;
+                        mListener.onProgress(this);
                         return;
                     }
                     int len;
@@ -106,5 +120,24 @@ public class HLSDownloadRequest implements Runnable {
                 mListener.onProgress(this);
             }
         }
+        mStatus = STATUS_MERGE_VIDEO;
+        mListener.onProgress(this);
+        try {
+            try (FileChannel fc = new FileOutputStream(mTask.getVideoFile()).getChannel()) {
+                for (HLSDownloadTaskSegment ts : segments) {
+                    File file = new File(mTask.getDirectory(), StringShare.substringBefore(ts.Uri, "?"));
+                    try (FileChannel fci = new FileInputStream(file).getChannel()) {
+                        fci.transferTo(0, fci.size(), fc);
+                    }
+                }
+                fc.force(true);
+            }
+            mStatus = STATUS_MERGE_COMPLETED;
+            mListener.onProgress(this);
+        } catch (IOException e) {
+            mStatus = STATUS_MERGE_FAILED;
+            mListener.onProgress(this);
+        }
+
     }
 }
