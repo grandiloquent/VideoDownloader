@@ -2,7 +2,6 @@ package euphoria.psycho.tasks;
 
 import android.content.Context;
 import android.os.Environment;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,13 +24,15 @@ public class HLSDownloadTask {
     private List<HLSDownloadTaskSegment> mHLSDownloadTaskSegments = new ArrayList<>();
 
     public HLSDownloadTask(Context context) {
-        //mDirectory = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         mContext = context;
     }
 
     public HLSDownloadTask build(String uri) throws IOException {
         mUri = uri;
         String m3u8Content = HLSDownloadHelpers.getString(uri);
+        if (m3u8Content == null) {
+            return null;
+        }
         mUniqueId = KeyShare.md5(m3u8Content);
         HLSDownloadTask task = HLSDownloadManager.getInstance(getContext()).getDatabase().getTask(mUniqueId);
         if (task != null) {

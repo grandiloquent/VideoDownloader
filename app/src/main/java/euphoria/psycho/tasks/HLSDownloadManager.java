@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class HLSDownloadManager {
+public class HLSDownloadManager implements HLSDownloadRequestListener {
 
     private static HLSDownloadManager sManager;
     private final ExecutorService mExecutor;
@@ -44,11 +44,16 @@ public class HLSDownloadManager {
         return sManager;
     }
 
-    public void submit(HLSDownloadRequest request) {
+    @Override
+    public void onProgress(HLSDownloadRequest hlsDownloadRequest) {
+    }
+
+    public void submit(HLSDownloadTask task) {
         synchronized (this) {
-            if (mRequests.contains(request)) {
+            if (mRequests.stream().anyMatch(m -> m.getTask().getUniqueId().equals(task.getUniqueId()))) {
                 return;
             }
+            HLSDownloadRequest request = new HLSDownloadRequest(task, this);
             mRequests.add(request);
             mExecutor.submit(request);
             mListeners.forEach(r -> r.onSubmit(request));

@@ -5,7 +5,7 @@ public class HLSDownloadTaskSegment {
     public String UniqueId;
     public String Uri;
     public int Sequence;
-    public int Total;
+    public long Total;
     public int Status;
     public long CreateAt;
     public long UpdateAt;

@@ -93,7 +93,7 @@ public class MainActivity extends Activity implements ClientInterface {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
                     HLSDownloadTask task = new HLSDownloadTask(MainActivity.this)
-                            .build("https://hls3-l3.xvideos-cdn.com/a6ca65727b70c76a41500cf2c62b1f65cfe55e19-1636436235/videos/hls/09/15/9c/09159c730f5097165cc4651eabef8958/hls-250p.m3u8");
+                            .build("https://cdn.workgreat14.live//m3u8/465113/465113.m3u8?st=0sjgrFRgpOKCaAw-_oU0qw&e=1636445840");
                     Log.e("B5aOx2", String.format("run, %s", task.toString()));
                 } catch (IOException e) {
                     e.printStackTrace();

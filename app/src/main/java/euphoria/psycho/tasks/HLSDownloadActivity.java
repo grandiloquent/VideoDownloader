@@ -38,7 +38,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
     public void onSubmit(HLSDownloadRequest request) {
     }
 
-    private class HLSDownloadAdapter extends BaseAdapter {
+    private static class HLSDownloadAdapter extends BaseAdapter {
 
         @Override
         public int getCount() {

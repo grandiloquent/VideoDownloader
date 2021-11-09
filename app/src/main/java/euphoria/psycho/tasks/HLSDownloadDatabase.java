@@ -14,9 +14,10 @@ import androidx.annotation.Nullable;
 public class HLSDownloadDatabase extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private Context mContext;
+
     public HLSDownloadDatabase(@Nullable Context context, @Nullable String name) {
         super(context, name, null, DATABASE_VERSION);
-        mContext=context;
+        mContext = context;
     }
 
     public void insertTask(HLSDownloadTask downloadTask) {
@@ -84,7 +85,7 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
                 segment.UniqueId = c.getString(1);
                 segment.Uri = c.getString(2);
                 segment.Sequence = c.getInt(3);
-                segment.Total = c.getInt(4);
+                segment.Total = c.getLong(4);
                 segment.Status = c.getInt(5);
                 segment.CreateAt = c.getLong(6);
                 segment.UpdateAt = c.getLong(7);
@@ -95,6 +96,16 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
         }
         cursor.close();
         return downloadTask;
+    }
+
+    public void updateTaskSegment(HLSDownloadTaskSegment taskSegment) {
+        ContentValues values = new ContentValues();
+        values.put("status", taskSegment.Status);
+        values.put("total", taskSegment.Total);
+        getWritableDatabase().update("task_segment", values, " unique_id = ?  and uri = ?", new String[]{
+                taskSegment.UniqueId,
+                taskSegment.Uri
+        });
     }
 
     @Override
