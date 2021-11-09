@@ -82,8 +82,11 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
                             .getHLSDownloadTaskSegments().get(
                                     hlsDownloadRequest.getTask().getSequence()
                             ));
+                    mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
                     break;
                 case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
+                    getDatabase().updateTask(hlsDownloadRequest.getTask().getUniqueId(),
+                            HLSDownloadRequest.STATUS_MERGE_COMPLETED);
                     mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
                     break;
                 default:

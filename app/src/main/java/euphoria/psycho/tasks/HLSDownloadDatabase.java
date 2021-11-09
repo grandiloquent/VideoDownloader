@@ -20,7 +20,7 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
         mContext = context;
     }
 
-    public void insertTask(HLSDownloadTask downloadTask) {
+    public synchronized void insertTask(HLSDownloadTask downloadTask) {
         ContentValues values = new ContentValues();
         values.put("uri", downloadTask.getUri());
         values.put("status", downloadTask.getStatus());
@@ -66,7 +66,7 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
                 ")");
     }
 
-    public HLSDownloadTask getTask(String uniqueId) {
+    public synchronized HLSDownloadTask getTask(String uniqueId) {
         Cursor cursor = getReadableDatabase().rawQuery("select * from task where unique_id = ?", new String[]{uniqueId});
         HLSDownloadTask downloadTask = null;
         if (cursor.moveToNext()) {
@@ -98,7 +98,7 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
         return downloadTask;
     }
 
-    public void updateTaskSegment(HLSDownloadTaskSegment taskSegment) {
+    public synchronized void updateTaskSegment(HLSDownloadTaskSegment taskSegment) {
         ContentValues values = new ContentValues();
         values.put("status", taskSegment.Status);
         values.put("total", taskSegment.Total);
@@ -108,11 +108,11 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
         });
     }
 
-    public void updateTask(HLSDownloadTask task) {
+    public synchronized void updateTask(String uniqueId, int status) {
         ContentValues values = new ContentValues();
-        values.put("status", task.getStatus());
+        values.put("status", status);
         getWritableDatabase().update("task", values, " unique_id = ?", new String[]{
-                task.getUniqueId()});
+                uniqueId});
     }
 
     @Override

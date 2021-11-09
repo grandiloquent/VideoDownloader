@@ -50,9 +50,17 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             try {
                 HLSDownloadTask task = new HLSDownloadTask(context)
-                        .build("https://cdn.workgreat14.live//m3u8/465113/465113.m3u8?st=0sjgrFRgpOKCaAw-_oU0qw&e=1636445840");
+                        .build("https://t7.cdn2020.com/video/m3u8/2021/05/10/949f9957/index.m3u8");
                 HLSDownloadManager.getInstance(context)
                         .submit(task);
+                HLSDownloadTask task1 = new HLSDownloadTask(context)
+                        .build("https://t7.cdn2020.com/video/m3u8/2021/06/08/5a5ece75/index.m3u8");
+                HLSDownloadManager.getInstance(context)
+                        .submit(task1);
+                HLSDownloadTask task2 = new HLSDownloadTask(context)
+                        .build("https://t12.cdn2020.com:12337/video/m3u8/2021/11/09/83a84de9/index.m3u8");
+                HLSDownloadManager.getInstance(context)
+                        .submit(task2);
             } catch (IOException e) {
                 e.printStackTrace();
             }
