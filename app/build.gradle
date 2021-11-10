@@ -3,13 +3,13 @@ apply plugin: 'com.android.application'
 //apply plugin: 'com.google.firebase.crashlytics'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "euphoria.psycho.explorer"
         minSdkVersion 24
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
-        versionName "1.1.2"
+        versionName "1.1.3"
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_STL=c++_shared'

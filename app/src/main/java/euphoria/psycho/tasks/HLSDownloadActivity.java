@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -29,7 +30,6 @@ import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.R;
 
 public class HLSDownloadActivity extends Activity implements HLSDownloadListener {
-    private ListView mListView;
     private HLSDownloadAdapter mVideoAdapter;
     private Handler mHandler;
 
@@ -43,12 +43,26 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             try {
                 HLSDownloadTask task = new HLSDownloadTask(context).build(uri);
-                if (!task.getVideoFile().exists())
+                if (task == null) {
+                    context.runOnUiThread(() -> {
+                        dialog.dismiss();
+                        Toast.makeText(context, "创建任务失败", Toast.LENGTH_LONG).show();
+                    });
+                    return;
+                }
+                if (task.getStatus() == 5 && task.getVideoFile().exists()) {
+                    context.runOnUiThread(() -> {
+                        dialog.dismiss();
+                        Toast.makeText(context, "视频已下载", Toast.LENGTH_LONG).show();
+                    });
+                } else {
                     HLSDownloadManager.getInstance(context).submit(task);
+                    context.runOnUiThread(dialog::dismiss);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            context.runOnUiThread(dialog::dismiss);
+
         }).start();
     }
 
@@ -57,9 +71,9 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_s);
         mHandler = new Handler();
-        mListView = findViewById(R.id.list_view);
+        ListView listView = findViewById(R.id.list_view);
         mVideoAdapter = new HLSDownloadAdapter(mHandler);
-        mListView.setAdapter(mVideoAdapter);
+        listView.setAdapter(mVideoAdapter);
         mHandler.post(() -> mVideoAdapter.update(HLSDownloadManager.getInstance(this).getRequests()));
         createDownloadTask(this);
     }
@@ -91,8 +105,8 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
 
     private static class HLSDownloadAdapter extends BaseAdapter implements HLSDownloadRequestListener {
         private final List<ViewHolder> mViewHolders = new ArrayList<>();
-        private List<HLSDownloadRequest> mRequests = new ArrayList<>();
-        private Handler mHandler;
+        private final List<HLSDownloadRequest> mRequests = new ArrayList<>();
+        private final Handler mHandler;
 
         public HLSDownloadAdapter(Handler handler) {
             mHandler = handler;
@@ -162,12 +176,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                                 , total));
                         viewHolder.progressBar.setProgress((int) ((sequence * 1.0 / total) * 100));
                     });
-//                    viewHolder.title.setText(task.getUniqueId());
-//                    viewHolder.subtitle.setText(R.string.waiting);
-//                    viewHolder.progressBar.setProgress(0);
-//                    viewHolder.layout.setOnClickListener(null);
-//                    viewHolder.thumbnail.setImageResource(R.drawable.ic_action_file_download_light);
-//                    viewHolder.tag = task.getUniqueId();
                     break;
                 case HLSDownloadRequest.STATUS_PAUSED:
                     mHandler.post(() -> {
