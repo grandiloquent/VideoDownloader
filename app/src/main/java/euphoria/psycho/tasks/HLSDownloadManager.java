@@ -26,6 +26,20 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
         ).getAbsolutePath());
     }
 
+    public HLSDownloadManager addHLSDownloadListener(HLSDownloadListener listener) {
+        synchronized (this) {
+            mListeners.add(listener);
+        }
+        return this;
+    }
+
+    public HLSDownloadManager addHLSDownloadRequestListener(HLSDownloadRequestListener listener) {
+        synchronized (this) {
+            mRequestListeners.add(listener);
+        }
+        return this;
+    }
+
     public void finish(HLSDownloadRequest request) {
         synchronized (this) {
             if (mRequests.contains(request)) {
@@ -45,11 +59,8 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
         return sManager;
     }
 
-    public HLSDownloadManager addHLSDownloadListener(HLSDownloadListener listener) {
-        synchronized (this) {
-            mListeners.add(listener);
-        }
-        return this;
+    public List<HLSDownloadRequest> getRequests() {
+        return mRequests;
     }
 
     public HLSDownloadManager removeHLSDownloadListener(HLSDownloadListener listener) {
@@ -59,18 +70,23 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
         return this;
     }
 
-    public HLSDownloadManager addHLSDownloadRequestListener(HLSDownloadRequestListener listener) {
-        synchronized (this) {
-            mRequestListeners.add(listener);
-        }
-        return this;
-    }
-
     public HLSDownloadManager removeHLSDownloadRequestListener(HLSDownloadRequestListener listener) {
         synchronized (this) {
             mRequestListeners.remove(listener);
         }
         return this;
+    }
+
+    public void submit(HLSDownloadTask task) {
+        synchronized (this) {
+            if (mRequests.stream().anyMatch(m -> m.getTask().getUniqueId().equals(task.getUniqueId()))) {
+                return;
+            }
+            HLSDownloadRequest request = new HLSDownloadRequest(task, this);
+            mRequests.add(request);
+            mExecutor.submit(request);
+            mListeners.forEach(r -> r.onSubmit(request));
+        }
     }
 
     @Override
@@ -92,21 +108,5 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
                 mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
                 break;
         }
-    }
-
-    public void submit(HLSDownloadTask task) {
-        synchronized (this) {
-            if (mRequests.stream().anyMatch(m -> m.getTask().getUniqueId().equals(task.getUniqueId()))) {
-                return;
-            }
-            HLSDownloadRequest request = new HLSDownloadRequest(task, this);
-            mRequests.add(request);
-            mExecutor.submit(request);
-            mListeners.forEach(r -> r.onSubmit(request));
-        }
-    }
-
-    public List<HLSDownloadRequest> getRequests() {
-        return mRequests;
     }
 }

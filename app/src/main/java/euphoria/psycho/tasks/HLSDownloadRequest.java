@@ -17,16 +17,16 @@ import euphoria.psycho.share.StringShare;
 
 public class HLSDownloadRequest implements Runnable {
 
+    public static final int STATUS_CONTENT_LENGTH = 2;
     public static final int STATUS_ERROR = -2;
     public static final int STATUS_ERROR_IO_INPUT = -3;
     public static final int STATUS_ERROR_IO_OUTPUT = -4;
-    public static final int STATUS_MERGE_FAILED = -5;
     public static final int STATUS_FATAL_ERROR = -1;
     public static final int STATUS_FILE_CACHED = 1;
-    public static final int STATUS_CONTENT_LENGTH = 2;
-    public static final int STATUS_PAUSED = 3;
-    public static final int STATUS_MERGE_VIDEO = 4;
     public static final int STATUS_MERGE_COMPLETED = 5;
+    public static final int STATUS_MERGE_FAILED = -5;
+    public static final int STATUS_MERGE_VIDEO = 4;
+    public static final int STATUS_PAUSED = 3;
     public static final int STATUS_START = 6;
 
     private final String mBaseUri;
@@ -34,7 +34,6 @@ public class HLSDownloadRequest implements Runnable {
     private final HLSDownloadTask mTask;
     private volatile boolean mPaused;
     private int mStatus;
-
     public HLSDownloadRequest(HLSDownloadTask task, HLSDownloadRequestListener listener) {
         mTask = task;
         mListener = listener;
@@ -47,6 +46,10 @@ public class HLSDownloadRequest implements Runnable {
 
     public HLSDownloadTask getTask() {
         return mTask;
+    }
+
+    public boolean isPaused() {
+        return mPaused;
     }
 
     public void setPaused(boolean paused) {
