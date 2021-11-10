@@ -1,7 +1,6 @@
 package euphoria.psycho.tasks;
 
 import android.content.Context;
-import android.os.Environment;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +9,9 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import euphoria.psycho.share.KeyShare;
+
+import static euphoria.psycho.tasks.HLSDownloadHelpers.createVideoDownloadDirectory;
+import static euphoria.psycho.tasks.HLSDownloadHelpers.createVideoFile;
 
 public class HLSDownloadTask {
 
@@ -31,19 +33,20 @@ public class HLSDownloadTask {
 
     public HLSDownloadTask build(String uri) throws IOException {
         mUri = uri;
-        String m3u8Content = HLSDownloadHelpers.getString(uri);
+        String m3u8Content;
+        try {
+            m3u8Content = HLSDownloadHelpers.getString(uri);
+        } catch (Exception e) {
+            return null;
+        }
         if (m3u8Content == null) {
             return null;
         }
         mUniqueId = KeyShare.md5(m3u8Content);
-        mDirectory = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), mUniqueId);
-        if (!mDirectory.exists())
-            mDirectory.mkdirs();
-        mVideoFile = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), mUniqueId + ".mp4");
+        mDirectory = createVideoDownloadDirectory(mContext, mUniqueId);
+        mVideoFile = createVideoFile(mContext, mUniqueId);
         HLSDownloadTask task = HLSDownloadManager.getInstance(getContext()).getDatabase().getTask(mUniqueId);
         if (task != null) {
-            task.setDirectory(mDirectory);
-            task.setVideoFile(mVideoFile);
             return task;
         }
         String[] segments = getSplit(m3u8Content);
@@ -64,10 +67,6 @@ public class HLSDownloadTask {
         return this;
     }
 
-    @NonNull
-    private String[] getSplit(String m3u8Content) {
-        return m3u8Content.split("\n");
-    }
 
     public Context getContext() {
         return mContext;
@@ -151,6 +150,11 @@ public class HLSDownloadTask {
 
     public void setVideoFile(File videoFile) {
         mVideoFile = videoFile;
+    }
+
+    @NonNull
+    private String[] getSplit(String m3u8Content) {
+        return m3u8Content.split("\n");
     }
 
     @Override

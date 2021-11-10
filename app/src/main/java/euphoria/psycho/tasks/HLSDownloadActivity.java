@@ -2,7 +2,6 @@ package euphoria.psycho.tasks;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,10 +28,10 @@ import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.explorer.R;
 
 public class HLSDownloadActivity extends Activity implements HLSDownloadListener {
-
     private ListView mListView;
     private HLSDownloadAdapter mVideoAdapter;
     private Handler mHandler;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,30 +41,8 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
         mListView = findViewById(R.id.list_view);
         mVideoAdapter = new HLSDownloadAdapter(mHandler);
         mListView.setAdapter(mVideoAdapter);
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("正在下载中...");
-        dialog.show();
-        Context context = this;
-        new Thread(() -> {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            try {
-                HLSDownloadTask task = new HLSDownloadTask(context)
-                        .build("https://t7.cdn2020.com/video/m3u8/2021/05/10/949f9957/index.m3u8");
-                HLSDownloadManager.getInstance(context)
-                        .submit(task);
-                HLSDownloadTask task1 = new HLSDownloadTask(context)
-                        .build("https://t7.cdn2020.com/video/m3u8/2021/06/08/5a5ece75/index.m3u8");
-                HLSDownloadManager.getInstance(context)
-                        .submit(task1);
-                HLSDownloadTask task2 = new HLSDownloadTask(context)
-                        .build("https://t12.cdn2020.com:12337/video/m3u8/2021/11/09/83a84de9/index.m3u8");
-                HLSDownloadManager.getInstance(context)
-                        .submit(task2);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            runOnUiThread(dialog::dismiss);
-        }).start();
+        mHandler.post(() -> mVideoAdapter.update(HLSDownloadManager.getInstance(this).getRequests()));
+        createDownloadTask(this);
     }
 
     @Override
@@ -74,7 +51,23 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
         HLSDownloadManager.getInstance(this)
                 .addHLSDownloadListener(this)
                 .addHLSDownloadRequestListener(mVideoAdapter);
+    }
 
+    public static void createDownloadTask(Activity context) {
+        String uri = context.getIntent().getDataString();
+        if (uri == null) return;
+        ProgressDialog dialog = new ProgressDialog(context);
+        dialog.setMessage("创建任务...");
+        dialog.show();
+        new Thread(() -> {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            try {
+                HLSDownloadManager.getInstance(context).submit(new HLSDownloadTask(context).build(uri));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            context.runOnUiThread(() -> dialog.dismiss());
+        }).start();
     }
 
     @Override
@@ -88,7 +81,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
     @Override
     public void onFinish(HLSDownloadRequest request) {
     }
-
 
     @Override
     public void onSubmit(HLSDownloadRequest request) {
@@ -108,7 +100,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             mRequests.clear();
             mRequests.addAll(requests);
             notifyDataSetChanged();
-
         }
 
         private static void bindViewHolder(ViewHolder viewHolder, View v) {
@@ -121,8 +112,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
         }
 
         private void renderComplete(Handler handler, ViewHolder viewHolder, File videoFile) {
-            HLSDownloadManager.getInstance(viewHolder.title.getContext())
-                    .removeHLSDownloadRequestListener(this);
             handler.post(() -> {
                 viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
                 viewHolder.subtitle.setText(R.string.merge_complete);
@@ -186,7 +175,8 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
         @Override
         public void onProgress(HLSDownloadRequest hlsDownloadRequest) {
             int status = hlsDownloadRequest.getStatus();
-            String uniqueId = hlsDownloadRequest.getTask().getUniqueId();
+            HLSDownloadTask task = hlsDownloadRequest.getTask();
+            String uniqueId = task.getUniqueId();
             for (ViewHolder viewHolder : mViewHolders) {
                 if (uniqueId.equals(viewHolder.tag)) {
                     switch (status) {
@@ -199,11 +189,11 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                             });
                             break;
                         case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
-                            renderComplete(mHandler, viewHolder, hlsDownloadRequest.getTask().getVideoFile());
+                            renderComplete(mHandler, viewHolder, task.getVideoFile());
                             break;
                         default:
-                            int sequence = hlsDownloadRequest.getTask().getSequence() + 1;
-                            int total = hlsDownloadRequest.getTask().getHLSDownloadTaskSegments().size();
+                            int sequence = task.getSequence() + 1;
+                            int total = task.getHLSDownloadTaskSegments().size();
                             mHandler.post(() -> {
                                 viewHolder.subtitle.setText(String.format("%s/%s", sequence
                                         , total));
@@ -215,7 +205,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                 }
             }
         }
-
     }
 
     private static class ViewHolder {
@@ -227,5 +216,4 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
         public ImageView thumbnail;
         public ImageButton button;
     }
-
 }

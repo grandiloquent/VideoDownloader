@@ -2,7 +2,6 @@ package euphoria.psycho.explorer;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
@@ -13,7 +12,6 @@ import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
-import euphoria.psycho.tasks.HLSDownloadActivity;
 import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
@@ -25,6 +23,7 @@ import static euphoria.psycho.explorer.Helper.KEY_LAST_ACCESSED;
 import static euphoria.psycho.explorer.Helper.checkPermissions;
 import static euphoria.psycho.explorer.Helper.configureWebView;
 import static euphoria.psycho.explorer.Helper.loadStartPage;
+import static euphoria.psycho.tasks.HLSDownloadHelpers.checkUnfinishedVideoTasks;
 
 public class MainActivity extends Activity implements ClientInterface {
 
@@ -78,11 +77,9 @@ public class MainActivity extends Activity implements ClientInterface {
         // Set the corresponding parameters of WebView
         configureWebView(this, mWebView);
         loadStartPage(this, mWebView);
-        //checkUnfinishedVideoTasks(this);
+        checkUnfinishedVideoTasks(this);
         checkUpdate();
         // tryPlayVideo(this);
-        Intent intent = new Intent(this, HLSDownloadActivity.class);
-        startActivity(intent);
     }
 
     @Override

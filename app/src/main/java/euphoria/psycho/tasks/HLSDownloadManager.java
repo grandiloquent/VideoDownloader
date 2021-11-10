@@ -75,24 +75,22 @@ public class HLSDownloadManager implements HLSDownloadRequestListener {
 
     @Override
     public void onProgress(HLSDownloadRequest hlsDownloadRequest) {
-        synchronized (this) {
-            switch (hlsDownloadRequest.getStatus()) {
-                case HLSDownloadRequest.STATUS_CONTENT_LENGTH:
-                    getDatabase().updateTaskSegment(hlsDownloadRequest.getTask()
-                            .getHLSDownloadTaskSegments().get(
-                                    hlsDownloadRequest.getTask().getSequence()
-                            ));
-                    mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
-                    break;
-                case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
-                    getDatabase().updateTask(hlsDownloadRequest.getTask().getUniqueId(),
-                            HLSDownloadRequest.STATUS_MERGE_COMPLETED);
-                    mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
-                    break;
-                default:
-                    mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
-                    break;
-            }
+        switch (hlsDownloadRequest.getStatus()) {
+            case HLSDownloadRequest.STATUS_CONTENT_LENGTH:
+                getDatabase().updateTaskSegment(hlsDownloadRequest.getTask()
+                        .getHLSDownloadTaskSegments().get(
+                                hlsDownloadRequest.getTask().getSequence()
+                        ));
+                mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
+                break;
+            case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
+                getDatabase().updateTask(hlsDownloadRequest.getTask().getUniqueId(),
+                        HLSDownloadRequest.STATUS_MERGE_COMPLETED);
+                mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
+                break;
+            default:
+                mRequestListeners.forEach(m -> m.onProgress(hlsDownloadRequest));
+                break;
         }
     }
 

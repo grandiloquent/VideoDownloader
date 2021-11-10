@@ -6,6 +6,8 @@ public class Native {
         System.loadLibrary("hello-libs");
     }
 
+    public native static boolean deleteDirectory(String dir);
+
     public native static String fetch91Porn(String url);
 
     public native static String fetchAcFun(String url);

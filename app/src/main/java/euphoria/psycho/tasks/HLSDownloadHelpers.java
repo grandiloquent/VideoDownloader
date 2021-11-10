@@ -1,15 +1,47 @@
 package euphoria.psycho.tasks;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build.VERSION_CODES;
+import android.os.Environment;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
+import androidx.annotation.RequiresApi;
 import euphoria.psycho.share.Logger;
 import euphoria.psycho.share.NetShare;
 
 public class HLSDownloadHelpers {
+    public static void checkUnfinishedVideoTasks(Context context) {
+        Intent service = new Intent(context, HLSDownloadService.class);
+        service.setAction(HLSDownloadService.CHECK_UNFINISHED_VIDEO_TASKS);
+        context.startService(service);
+    }
+
+    @RequiresApi(api = VERSION_CODES.O)
+    public static void createNotificationChannel(Context context, String id, CharSequence name) {
+        NotificationChannel channel = new NotificationChannel(id, name, NotificationManager.IMPORTANCE_LOW);
+        context.getSystemService(NotificationManager.class)
+                .createNotificationChannel(channel);
+    }
+
+    public static File createVideoDownloadDirectory(Context context, String uniqueId) {
+        File directory = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), uniqueId);
+        if (!directory.exists())
+            directory.mkdirs();
+        return directory;
+    }
+
+    public static File createVideoFile(Context context, String uniqueId) {
+        return new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), uniqueId + ".mp4");
+    }
 
     public static String getString(String uri) throws IOException {
         URL url = new URL(uri);
