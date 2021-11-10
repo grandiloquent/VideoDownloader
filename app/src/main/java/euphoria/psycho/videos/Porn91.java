@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.WebActivity;
+import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.tasks.HLSDownloadActivity;
 import euphoria.psycho.tasks.HLSDownloadService;
@@ -38,7 +39,8 @@ public class Porn91 extends BaseExtractor<String> {
                 videoList.add(matcher.group());
             }
             startVideoService(mMainActivity, videoList.parallelStream()
-                    .map(v -> Native.fetch91Porn(StringShare.substringAfter(v, "91porn.com"),true))
+                    .map(v -> Native.fetch91Porn(StringShare.substringAfter(v, "91porn.com"), PreferenceShare.getPreferences()
+                            .getBoolean("in_china",false)))
                     .collect(Collectors.toList()));
         }).start();
 
@@ -65,7 +67,8 @@ public class Porn91 extends BaseExtractor<String> {
     //
     @Override
     protected String fetchVideoUri(String uri) {
-        return Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"),true);
+        return Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"),PreferenceShare.getPreferences()
+                .getBoolean("in_china",false));
     }
 
     @Override

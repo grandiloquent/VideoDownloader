@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.share.KeyShare;
+import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
 import euphoria.psycho.tasks.HLSDownloadActivity;
@@ -142,7 +143,8 @@ public class WebActivity extends Activity {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 String videoUri;
                 if (uri.contains("91porn.com")) {
-                    videoUri = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"),true);
+                    videoUri = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"), PreferenceShare.getPreferences()
+                            .getBoolean("in_china",false));
                 } else if (uri.contains("xvideos.com")) {
                     videoUri = Native.fetchXVideos(uri);
                 } else {
