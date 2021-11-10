@@ -25,6 +25,7 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 import euphoria.psycho.PlayerActivity;
+import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.R;
 
 public class HLSDownloadActivity extends Activity implements HLSDownloadListener {
@@ -62,11 +63,13 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             try {
-                HLSDownloadManager.getInstance(context).submit(new HLSDownloadTask(context).build(uri));
+                HLSDownloadTask task = new HLSDownloadTask(context).build(uri);
+                if (!task.getVideoFile().exists())
+                    HLSDownloadManager.getInstance(context).submit(task);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            context.runOnUiThread(() -> dialog.dismiss());
+            context.runOnUiThread(dialog::dismiss);
         }).start();
     }
 
@@ -190,6 +193,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                             break;
                         case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
                             renderComplete(mHandler, viewHolder, task.getVideoFile());
+                            Native.deleteDirectory(task.getDirectory().getAbsolutePath());
                             break;
                         default:
                             int sequence = task.getSequence() + 1;

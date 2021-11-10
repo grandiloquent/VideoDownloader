@@ -8,7 +8,7 @@ public class Native {
 
     public native static boolean deleteDirectory(String dir);
 
-    public native static String fetch91Porn(String url);
+    public native static String fetch91Porn(String url,boolean isInChina);
 
     public native static String fetchAcFun(String url);
 

@@ -67,7 +67,7 @@ public class JavaScriptInterface {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             String videoUri;
             if (uri.contains("91porn.com")) {
-                videoUri = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"));
+                videoUri = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"),true);
             } else if (uri.contains("xvideos.com")) {
                 videoUri = Native.fetchXVideos(uri);
             } else {

@@ -38,7 +38,7 @@ public class Porn91 extends BaseExtractor<String> {
                 videoList.add(matcher.group());
             }
             startVideoService(mMainActivity, videoList.parallelStream()
-                    .map(v -> Native.fetch91Porn(StringShare.substringAfter(v, "91porn.com")))
+                    .map(v -> Native.fetch91Porn(StringShare.substringAfter(v, "91porn.com"),true))
                     .collect(Collectors.toList()));
         }).start();
 
@@ -65,7 +65,7 @@ public class Porn91 extends BaseExtractor<String> {
     //
     @Override
     protected String fetchVideoUri(String uri) {
-        return Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"));
+        return Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"),true);
     }
 
     @Override
