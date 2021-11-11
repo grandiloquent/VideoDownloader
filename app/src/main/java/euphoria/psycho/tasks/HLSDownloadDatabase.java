@@ -35,7 +35,7 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
             downloadTask.setCreateAt(cursor.getLong(4));
             downloadTask.setUpdateAt(cursor.getLong(5));
             downloadTask.setDirectory(createVideoDownloadDirectory(mContext, downloadTask.getUniqueId()));
-            downloadTask.setVideoFile(createVideoFile(mContext, downloadTask.getUniqueId()));
+            downloadTask.setVideoFile(createVideoFile(mContext, downloadTask.getUniqueId(), downloadTask.getFileName()));
             List<HLSDownloadTaskSegment> segments = new ArrayList<>();
             Cursor c = getReadableDatabase().rawQuery("select * from task_segment where unique_id = ? order by sequence", new String[]{uniqueId});
             while (c.moveToNext()) {
@@ -64,6 +64,7 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
         values.put("create_at", System.currentTimeMillis());
         values.put("update_at", System.currentTimeMillis());
         values.put("unique_id", downloadTask.getUniqueId());
+        values.put("file_name", downloadTask.getFileName());
         getWritableDatabase().insert("task", null, values);
         downloadTask.getHLSDownloadTaskSegments().forEach(
                 ts -> {
@@ -105,11 +106,12 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
             downloadTask.setId(cursor.getInt(0));
             downloadTask.setUri(cursor.getString(1));
             downloadTask.setUniqueId(cursor.getString(2));
-            downloadTask.setStatus(cursor.getInt(3));
-            downloadTask.setCreateAt(cursor.getLong(4));
-            downloadTask.setUpdateAt(cursor.getLong(5));
+            downloadTask.setFileName(cursor.getString(3));
+            downloadTask.setStatus(cursor.getInt(4));
+            downloadTask.setCreateAt(cursor.getLong(5));
+            downloadTask.setUpdateAt(cursor.getLong(6));
             downloadTask.setDirectory(createVideoDownloadDirectory(mContext, downloadTask.getUniqueId()));
-            downloadTask.setVideoFile(createVideoFile(mContext, downloadTask.getUniqueId()));
+            downloadTask.setVideoFile(createVideoFile(mContext, downloadTask.getUniqueId(), downloadTask.getFileName()));
             List<HLSDownloadTaskSegment> segments = new ArrayList<>();
             Cursor c = getReadableDatabase().rawQuery("select * from task_segment where unique_id = ? order by sequence", new String[]{downloadTask.getUniqueId()});
             while (c.moveToNext()) {
@@ -139,6 +141,7 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
                 "    id        integer primary key,\n" +
                 "    uri       text not null unique,\n" +
                 "    unique_id text not null unique,\n" +
+                "    file_name text,\n" +
                 "    status    integer,\n" +
                 "    create_at integer,\n" +
                 "    update_at integer" +

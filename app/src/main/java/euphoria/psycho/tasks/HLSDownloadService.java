@@ -20,6 +20,8 @@ public class HLSDownloadService extends Service {
 
 
     public static final String CHECK_UNFINISHED_VIDEO_TASKS = "CHECK_UNFINISHED_VIDEO_TASKS";
+    public static final String CLOSE_SERVICE = "CLOSE_SERVICE";
+
     public static final String DOWNLOAD_VIDEO = "DOWNLOAD_VIDEO";
     public static final String KEY_VIDEO_LIST = "VIDEO_LIST";
     private NotificationManager mNotificationManager;
@@ -65,19 +67,26 @@ public class HLSDownloadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction().equals(CHECK_UNFINISHED_VIDEO_TASKS)) {
-            List<HLSDownloadTask> tasks = HLSDownloadManager.getInstance(this)
-                    .getDatabase().queryUnfinishedTasks();
-            if (tasks.size() > 0) {
-                for (HLSDownloadTask task : tasks) {
-                    HLSDownloadManager.getInstance(this).submit(task);
-                }
-                launchHLSDownloadActivity(this);
-                showNotification();
-            } else {
-                tryStopService();
+        String intentAction = intent.getAction();
+        if (intentAction != null) {
+            switch (intentAction) {
+                case CLOSE_SERVICE:
+                    tryStopService();
+                    break;
+                case CHECK_UNFINISHED_VIDEO_TASKS:
+                    List<HLSDownloadTask> tasks = HLSDownloadManager.getInstance(this)
+                            .getDatabase().queryUnfinishedTasks();
+                    if (tasks.size() > 0) {
+                        for (HLSDownloadTask task : tasks) {
+                            HLSDownloadManager.getInstance(this).submit(task);
+                        }
+                        launchHLSDownloadActivity(this);
+                        showNotification();
+                    } else {
+                        tryStopService();
+                    }
+                    break;
             }
-
         }
         return super.onStartCommand(intent, flags, startId);
     }

@@ -9,7 +9,7 @@ import euphoria.psycho.explorer.MainActivity;
 import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.WebActivity;
 
-public class Ck52 extends BaseExtractor<String> {
+public class Ck52 extends BaseExtractor<String[]> {
     private static final Pattern MATCH_52CK = Pattern.compile("/vodplay/[\\d-]+\\.html");
 
     protected Ck52(String inputUri, MainActivity mainActivity) {
@@ -17,18 +17,18 @@ public class Ck52 extends BaseExtractor<String> {
     }
 
     @Override
-    protected String fetchVideoUri(String uri) {
+    protected String[] fetchVideoUri(String uri) {
         return Native.fetch57Ck(uri);
     }
 
     @Override
-    protected void processVideo(String videoUri) {
-        if (videoUri.length() == 0) {
+    protected void processVideo(String[] videoUris) {
+        if (videoUris.length == 0) {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
         Intent starter = new Intent(mMainActivity, WebActivity.class);
-        starter.putExtra("extra.URI", videoUri);
+        starter.putExtra("extra.URI", videoUris[0]);
         mMainActivity.startActivity(starter);
     }
 

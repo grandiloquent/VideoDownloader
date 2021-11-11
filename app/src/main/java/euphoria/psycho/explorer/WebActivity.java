@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
+import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
@@ -51,9 +52,7 @@ public class WebActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
-
         // Set up the WebView control
-
         mWebView = findViewById(R.id.web);
         mWebView.clearCache(true);
         JavaInterface javaInterface = new JavaInterface();
@@ -68,6 +67,7 @@ public class WebActivity extends Activity {
                 if (videoUri == null) {
                     return;
                 }
+                Log.e("B5aOx2", String.format("onPageFinished, %s", videoUri));
                 javaInterface.parse(videoUri);
             }
 
@@ -95,6 +95,7 @@ public class WebActivity extends Activity {
 
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                Log.e("B5aOx2", String.format("onConsoleMessage, %s", consoleMessage.message()));
                 return super.onConsoleMessage(consoleMessage);
             }
 
@@ -127,13 +128,16 @@ public class WebActivity extends Activity {
 
     private class JavaInterface {
         @JavascriptInterface
-        public void download(String videoUri) {
+        public void download(String videoUri, String title) {
             if (videoUri.contains("m3u8")) {
                 Intent intent = new Intent(WebActivity.this, HLSDownloadActivity.class);
                 intent.setData(Uri.parse(videoUri));
+                if (title != null) {
+                    intent.putExtra(HLSDownloadActivity.EXTRA_FILE_NAME, title);
+                }
                 WebActivity.this.startActivity(intent);
             } else {
-                WebViewShare.downloadFile(WebActivity.this, KeyShare.toHex(videoUri.toString().getBytes(StandardCharsets.UTF_8)), videoUri.toString(), USER_AGENT);
+                WebViewShare.downloadFile(WebActivity.this, (title == null ? KeyShare.toHex(videoUri.getBytes(StandardCharsets.UTF_8)) : title) + ".mp4", videoUri, USER_AGENT);
             }
         }
 
@@ -141,25 +145,26 @@ public class WebActivity extends Activity {
         public void parse(String uri) {
             new Thread(() -> {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                String videoUri;
+                String[] videoUris;
                 if (uri.contains("91porn.com")) {
-                    videoUri = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"), PreferenceShare.getPreferences()
-                            .getBoolean("in_china",false));
+                    videoUris = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"), PreferenceShare.getPreferences()
+                            .getBoolean("in_china", false));
                 } else if (uri.contains("xvideos.com")) {
-                    videoUri = Native.fetchXVideos(uri);
+                    videoUris = Native.fetchXVideos(uri);
                 } else {
-                    videoUri = Native.fetch57Ck(uri);
+                    videoUris = Native.fetch57Ck(uri);
                 }
-                String finalVideoUri = videoUri;
+                String[] finalVideoUris = videoUris;
                 runOnUiThread(() -> {
-                    if (finalVideoUri == null || finalVideoUri.length() == 0) {
+                    if (finalVideoUris == null || finalVideoUris.length < 2) {
                         Toast.makeText(WebActivity.this, "无法解析视频", Toast.LENGTH_LONG).show();
                         return;
                     }
                     JSONObject obj = new JSONObject();
                     try {
                         JSONArray jsonArray = new JSONArray();
-                        jsonArray.put(finalVideoUri);
+                        jsonArray.put(finalVideoUris[1]);
+                        obj.put("title", finalVideoUris[0]);
                         obj.put("videos", jsonArray);
                     } catch (JSONException e) {
                         e.printStackTrace();

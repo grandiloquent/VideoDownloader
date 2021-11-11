@@ -2,6 +2,7 @@ package euphoria.psycho.videos;
 
 import android.content.Intent;
 import android.text.Html;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -23,7 +24,7 @@ import euphoria.psycho.share.StringShare;
 
 import static euphoria.psycho.videos.VideosHelper.getString;
 
-public class XVideos extends BaseExtractor<String> {
+public class XVideos extends BaseExtractor<String[]> {
 
     public XVideos(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
@@ -39,18 +40,20 @@ public class XVideos extends BaseExtractor<String> {
     }
 
     @Override
-    protected String fetchVideoUri(String uri) {
+    protected String[] fetchVideoUri(String uri) {
         return Native.fetchXVideos(uri);
     }
 
     @Override
-    protected void processVideo(String videoUri) {
-        if (videoUri.length() == 0) {
+    protected void processVideo(String[] videoUris) {
+        Log.e("B5aOx2", String.format("processVideo, %s", videoUris[0]));
+        if (videoUris.length < 2) {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
         Intent starter = new Intent(mMainActivity, WebActivity.class);
-        starter.putExtra("extra.URI", videoUri);
+        starter.putExtra("extra.URI", videoUris[1]);
+        starter.putExtra("extra.FILENAME", videoUris[0]);
         mMainActivity.startActivity(starter);
     }
 

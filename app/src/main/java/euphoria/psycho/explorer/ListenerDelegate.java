@@ -16,20 +16,19 @@ import java.io.File;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import euphoria.psycho.bilibili.Bilibili;
 import euphoria.psycho.explorer.BookmarkDatabase.Bookmark;
 import euphoria.psycho.share.DialogShare;
+import euphoria.psycho.share.StringShare;
+import euphoria.psycho.tencent.Tencent;
 import euphoria.psycho.videos.AcFun;
-import euphoria.psycho.bilibili.Bilibili;
 import euphoria.psycho.videos.CCTV;
-import euphoria.psycho.videos.Ck52;
 import euphoria.psycho.videos.DouYin;
 import euphoria.psycho.videos.Iqiyi;
 import euphoria.psycho.videos.KuaiShou;
 import euphoria.psycho.videos.MgTv;
-import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
-import euphoria.psycho.tencent.Tencent;
 import euphoria.psycho.videos.TikTok;
 import euphoria.psycho.videos.Twitter;
 import euphoria.psycho.videos.XVideos;
@@ -104,10 +103,10 @@ public class ListenerDelegate {
             if (XiGua.handle(uri, mMainActivity)) {
                 return;
             }
-            if (uri.equals("https://91porn.com/index.php") || uri.startsWith("https://91porn.com/v.php")) {
-                new Porn91(uri, mMainActivity).fetchVideoList(uri);
-                return;
-            }
+//            if (uri.equals("https://91porn.com/index.php") || uri.startsWith("https://91porn.com/v.php")) {
+//                new Porn91(uri, mMainActivity).fetchVideoList(uri);
+//                return;
+//            }
             if (!uri.startsWith("https://") && !uri.startsWith("http://"))
                 mMainActivity.getWebView().loadUrl("https://" + uri);
             else
@@ -117,7 +116,14 @@ public class ListenerDelegate {
 
     private void onDownloadFile(View view) {
         String url = mMainActivity.getWebView().getUrl();
-        if (Porn91.handle(url, mMainActivity)) {
+        if (StringShare.matchOne(new String[]{
+                "/vodplay/[\\d-]+\\.html",
+                "(?<=<a href=\")https://91porn.com/view_video.php\\?[^\"]+(?=\")",
+                "xvideos\\.com/video\\d+"
+        }, url)) {
+            Intent starter = new Intent(mMainActivity, WebActivity.class);
+            starter.putExtra("extra.URI", url);
+            mMainActivity.startActivity(starter);
             return;
         }
         if (YouTube.handle(url, mMainActivity)) {
@@ -128,9 +134,6 @@ public class ListenerDelegate {
             return;
         }
         if (AcFun.handle(url, mMainActivity)) return;
-        if (XVideos.handle(url, mMainActivity)) {
-            return;
-        }
         if (Bilibili.handle(url, mMainActivity)) {
             return;
         }
@@ -155,13 +158,10 @@ public class ListenerDelegate {
         if (XiGua.handle(url, mMainActivity)) {
             return;
         }
-        if (Ck52.handle(url, mMainActivity)) {
-            return;
-        }
-        if (url.equals("https://91porn.com/index.php") || url.startsWith("https://91porn.com/v.php")) {
-            new Porn91(url, mMainActivity).fetchVideoList(url);
-            return;
-        }
+//        if (url.equals("https://91porn.com/index.php") || url.startsWith("https://91porn.com/v.php")) {
+//            new Porn91(url, mMainActivity).fetchVideoList(url);
+//            return;
+//        }
         if (mMainActivity.getVideoUrl() != null) {
             mMainActivity.getWebView().loadUrl(mMainActivity.getVideoUrl());
         }

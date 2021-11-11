@@ -10,7 +10,6 @@ import android.os.Process;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import euphoria.psycho.share.KeyShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.share.WebViewShare;
@@ -60,34 +59,35 @@ public class JavaScriptInterface {
     }
 
     @JavascriptInterface
-    public void download(String uri) {
+    public void download(String uri, String title) {
         ProgressDialog dialog = new ProgressDialog(mMainActivity);
         dialog.setMessage("解析...");
         dialog.show();
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            String videoUri;
+            String[] videoUris;
             if (uri.contains("91porn.com")) {
-                videoUri = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"), PreferenceShare.getPreferences()
-                        .getBoolean("in_china",false));
+                videoUris = Native.fetch91Porn(StringShare.substringAfter(uri, "91porn.com"), PreferenceShare.getPreferences()
+                        .getBoolean("in_china", false));
             } else if (uri.contains("xvideos.com")) {
-                videoUri = Native.fetchXVideos(uri);
+                videoUris = Native.fetchXVideos(uri);
             } else {
-                videoUri = Native.fetch57Ck(uri);
+                videoUris = Native.fetch57Ck(uri);
             }
-            String finalVideoUri = videoUri;
+            String[] finalVideoUri = videoUris;
             mMainActivity.runOnUiThread(() -> {
                 dialog.dismiss();
-                if (finalVideoUri == null || finalVideoUri.length() == 0) {
+                if (finalVideoUri == null || finalVideoUri.length < 2) {
                     Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
                     return;
                 }
-                if (videoUri.contains("m3u8")) {
+                if (finalVideoUri[1].contains("m3u8")) {
                     Intent intent = new Intent(mMainActivity, HLSDownloadActivity.class);
-                    intent.setData(Uri.parse(finalVideoUri));
+                    intent.setData(Uri.parse(finalVideoUri[1]));
+                    intent.putExtra(HLSDownloadActivity.EXTRA_FILE_NAME, finalVideoUri[0]);
                     mMainActivity.startActivity(intent);
                 } else {
-                    WebViewShare.downloadFile(mMainActivity, KeyShare.md5(videoUri) + ".mp4", videoUri.toString(), USER_AGENT);
+                    WebViewShare.downloadFile(mMainActivity, finalVideoUri[0] + ".mp4", finalVideoUri[1].toString(), USER_AGENT);
                 }
             });
         }).start();

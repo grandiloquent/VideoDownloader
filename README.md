@@ -4,6 +4,13 @@
 
 <img src="images/3.gif" width="33.3%"><img src="images/1.gif" width="33.3%">
 
+## 更新历史
+
+* 1.1.3
+
+    * 优化下载 m3u8 格式视频的逻辑
+    * 下载 91porn、57ck、xvideos 平台视频，使用标题保存文件，更便于辨识
+
 ## 支持的视频平台
 
 * [x] 快手

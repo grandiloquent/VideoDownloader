@@ -8,15 +8,15 @@ public class Native {
 
     public native static boolean deleteDirectory(String dir);
 
-    public native static String fetch91Porn(String url,boolean isInChina);
+    public native static String[] fetch91Porn(String url,boolean isInChina);
 
     public native static String fetchAcFun(String url);
 
-    public native static String fetch57Ck(String url);
+    public native static String[] fetch57Ck(String url);
 
     public native static String fetchKuaiShou(String url);
 
-    public native static String fetchXVideos(String url);
+    public native static String[] fetchXVideos(String url);
 
     public native static String fetchDouYin(String url);
 

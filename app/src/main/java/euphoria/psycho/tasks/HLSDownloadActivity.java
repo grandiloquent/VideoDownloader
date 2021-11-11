@@ -33,19 +33,22 @@ import euphoria.psycho.explorer.R;
 public class HLSDownloadActivity extends Activity implements HLSDownloadListener {
     private HLSDownloadAdapter mVideoAdapter;
     private Handler mHandler;
+    public static final String EXTRA_FILE_NAME = "FILE_NAME";
 
     // Generate a video download task through the m3u8 file address
     // and submit the task to the thread pool
     public static void createDownloadTask(Activity context) {
         String uri = context.getIntent().getDataString();
         if (uri == null) return;
+        String fileName = context.getIntent().getStringExtra(EXTRA_FILE_NAME);
         ProgressDialog dialog = new ProgressDialog(context);
         dialog.setMessage(context.getString(R.string.create_task));
         dialog.show();
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             try {
-                HLSDownloadTask task = new HLSDownloadTask(context).build(uri);
+                HLSDownloadTask task = new HLSDownloadTask(context)
+                        .setFileName(fileName).build(uri);
                 if (task == null) {
                     context.runOnUiThread(() -> {
                         dialog.dismiss();
@@ -92,6 +95,16 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
 
     @Override
     public void onFinish(HLSDownloadRequest request) {
+        request.setPaused(true);
+        boolean matched = HLSDownloadManager.getInstance(this)
+                .getRequests().stream().anyMatch(
+                        r -> !r.isPaused()
+                );
+        if (!matched) {
+            Intent service = new Intent(this, HLSDownloadService.class);
+            service.setAction(HLSDownloadService.CLOSE_SERVICE);
+            startService(service);
+        }
     }
 
     @Override

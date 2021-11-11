@@ -1,6 +1,7 @@
 package euphoria.psycho.share;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -236,5 +237,11 @@ public class StringShare {
         if (end == -1) return null;
         return string.substring(start, end);
     }
-
+    public static boolean matchOne(String[] patterns, String value) {
+        for (String pattern : patterns) {
+            Pattern p = Pattern.compile(pattern);
+            if (p.matcher(value).find()) return true;
+        }
+        return false;
+    }
 }

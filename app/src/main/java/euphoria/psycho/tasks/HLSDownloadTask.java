@@ -19,6 +19,7 @@ public class HLSDownloadTask {
     private File mDirectory;
     private File mVideoFile;
     private String mUniqueId;
+    private String mFileName;
     private int mId;
     private String mUri;
     private int mStatus;
@@ -44,7 +45,7 @@ public class HLSDownloadTask {
         }
         mUniqueId = KeyShare.md5(m3u8Content);
         mDirectory = createVideoDownloadDirectory(mContext, mUniqueId);
-        mVideoFile = createVideoFile(mContext, mUniqueId);
+        mVideoFile = createVideoFile(mContext, mUniqueId, mFileName);
         HLSDownloadTask task = HLSDownloadManager.getInstance(getContext()).getDatabase().getTask(mUniqueId);
         if (task != null) {
             return task;
@@ -90,6 +91,11 @@ public class HLSDownloadTask {
 
     public List<HLSDownloadTaskSegment> getHLSDownloadTaskSegments() {
         return mHLSDownloadTaskSegments;
+    }
+
+    public HLSDownloadTask setFileName(String fileName) {
+        mFileName = fileName;
+        return this;
     }
 
     public void setHLSDownloadTaskSegments(List<HLSDownloadTaskSegment> HLSDownloadTaskSegments) {
@@ -150,6 +156,10 @@ public class HLSDownloadTask {
 
     public void setVideoFile(File videoFile) {
         mVideoFile = videoFile;
+    }
+
+    public String getFileName() {
+        return mFileName;
     }
 
     @NonNull
