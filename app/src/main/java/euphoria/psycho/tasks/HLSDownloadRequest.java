@@ -34,6 +34,7 @@ public class HLSDownloadRequest implements Runnable {
     private final HLSDownloadTask mTask;
     private volatile boolean mPaused;
     private int mStatus;
+
     public HLSDownloadRequest(HLSDownloadTask task, HLSDownloadRequestListener listener) {
         mTask = task;
         mListener = listener;
@@ -69,6 +70,10 @@ public class HLSDownloadRequest implements Runnable {
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        if (mTask.getStatus() == 5 && mTask.getVideoFile().exists()) {
+            emitSynchronizationEvent(STATUS_MERGE_COMPLETED);
+            return;
+        }
         emitSynchronizationEvent(STATUS_START);
         List<HLSDownloadTaskSegment> segments = mTask.getHLSDownloadTaskSegments();
         for (HLSDownloadTaskSegment ts : segments) {

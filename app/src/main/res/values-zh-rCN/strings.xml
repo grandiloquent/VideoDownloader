@@ -35,4 +35,9 @@
     <string name="videos_successfully_merged">已成功合并视频</string>
     <string name="ready_to_download_station_b_video">准备下载B站视频</string>
     <string name="download_failed">下载失败</string>
+    <string name="pause">暂停</string>
+    <string name="start_download">开始下载</string>
+
+    <string name="video_downloaded">视频已下载</string>
+    <string name="create_task">创建任务...</string>
 </resources>

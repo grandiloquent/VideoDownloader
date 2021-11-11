@@ -2,6 +2,7 @@ package euphoria.psycho.tasks;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,11 +34,13 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
     private HLSDownloadAdapter mVideoAdapter;
     private Handler mHandler;
 
+    // Generate a video download task through the m3u8 file address
+    // and submit the task to the thread pool
     public static void createDownloadTask(Activity context) {
         String uri = context.getIntent().getDataString();
         if (uri == null) return;
         ProgressDialog dialog = new ProgressDialog(context);
-        dialog.setMessage("创建任务...");
+        dialog.setMessage(context.getString(R.string.create_task));
         dialog.show();
         new Thread(() -> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -46,19 +49,12 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                 if (task == null) {
                     context.runOnUiThread(() -> {
                         dialog.dismiss();
-                        Toast.makeText(context, "创建任务失败", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getString(R.string.failed_to_create_task), Toast.LENGTH_LONG).show();
                     });
                     return;
                 }
-                if (task.getStatus() == 5 && task.getVideoFile().exists()) {
-                    context.runOnUiThread(() -> {
-                        dialog.dismiss();
-                        Toast.makeText(context, "视频已下载", Toast.LENGTH_LONG).show();
-                    });
-                } else {
-                    HLSDownloadManager.getInstance(context).submit(task);
-                    context.runOnUiThread(dialog::dismiss);
-                }
+                HLSDownloadManager.getInstance(context).submit(task);
+                context.runOnUiThread(dialog::dismiss);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -131,7 +127,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             mHandler.post(() -> {
                 viewHolder.layout.setOnClickListener(null);
                 viewHolder.tag = request.getTask().getUniqueId();
-                viewHolder.subtitle.setText("开始下载");
+                viewHolder.subtitle.setText(R.string.start_download);
             });
         }
 
@@ -139,17 +135,23 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             handler.post(() -> {
                 viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
                 viewHolder.subtitle.setText(R.string.merge_complete);
+                viewHolder.progressBar.setProgress(100);
                 Glide.with(viewHolder.title.getContext())
                         .load(videoFile)
                         .fitCenter()
                         .into(viewHolder.thumbnail);
                 viewHolder.button.setOnClickListener(view -> {
-                    Intent intent = new Intent(viewHolder.title.getContext(), PlayerActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(PlayerActivity.KEY_VIDEO_FILE, videoFile.getAbsolutePath());
-                    viewHolder.title.getContext().startActivity(intent);
+                    playVideo(view.getContext(), videoFile.getAbsolutePath());
                 });
             });
+        }
+
+
+        private void playVideo(Context context, String videoFile) {
+            Intent intent = new Intent(context, PlayerActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(PlayerActivity.KEY_VIDEO_FILE, videoFile);
+            context.startActivity(intent);
         }
 
         private void renderTask(HLSDownloadRequest hlsDownloadRequest, ViewHolder viewHolder) {
@@ -179,7 +181,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                     break;
                 case HLSDownloadRequest.STATUS_PAUSED:
                     mHandler.post(() -> {
-                        viewHolder.subtitle.setText("暂停");
+                        viewHolder.subtitle.setText(R.string.pause);
                     });
                     break;
             }

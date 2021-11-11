@@ -2,6 +2,7 @@ package euphoria.psycho.tasks;
 
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -36,8 +37,10 @@ public class HLSDownloadService extends Service {
         } else {
             builder = new Builder(this);
         }
+        Intent i = new Intent(this, HLSDownloadActivity.class);
         builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                .setContentTitle("下载");
+                .setContentTitle("下载")
+                .setContentIntent(PendingIntent.getActivity(this, 1, i, 0));
         mNotificationManager.notify(1, builder.build());
     }
 
@@ -58,13 +61,10 @@ public class HLSDownloadService extends Service {
             createNotificationChannel(this, DOWNLOAD_VIDEO, "下载视频频道");
         }
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //Native.deleteDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
         if (intent.getAction().equals(CHECK_UNFINISHED_VIDEO_TASKS)) {
             List<HLSDownloadTask> tasks = HLSDownloadManager.getInstance(this)
                     .getDatabase().queryUnfinishedTasks();
