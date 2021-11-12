@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.Html;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
             downloadTask.setCreateAt(cursor.getLong(5));
             downloadTask.setUpdateAt(cursor.getLong(6));
             downloadTask.setDirectory(createVideoDownloadDirectory(mContext, downloadTask.getUniqueId()));
-            downloadTask.setVideoFile(createVideoFile(mContext, downloadTask.getUniqueId(), downloadTask.getFileName()));
+            downloadTask.setVideoFile(createVideoFile(mContext, downloadTask.getUniqueId(), Html.fromHtml(downloadTask.getFileName(),Html.FROM_HTML_MODE_LEGACY).toString()));
             List<HLSDownloadTaskSegment> segments = new ArrayList<>();
             Cursor c = getReadableDatabase().rawQuery("select * from task_segment where unique_id = ? order by sequence", new String[]{uniqueId});
             while (c.moveToNext()) {

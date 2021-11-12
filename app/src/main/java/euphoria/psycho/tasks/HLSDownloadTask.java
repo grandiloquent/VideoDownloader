@@ -1,7 +1,7 @@
 package euphoria.psycho.tasks;
 
 import android.content.Context;
-import android.util.Log;
+import android.text.Html;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class HLSDownloadTask {
         }
         mUniqueId = KeyShare.md5(m3u8Content);
         mDirectory = createVideoDownloadDirectory(mContext, mUniqueId);
-        mVideoFile = createVideoFile(mContext, mUniqueId, mFileName);
+        mVideoFile = createVideoFile(mContext, mUniqueId, Html.fromHtml(mFileName,Html.FROM_HTML_MODE_LEGACY).toString());
         HLSDownloadTask task = HLSDownloadManager.getInstance(getContext()).getDatabase().getTask(mUniqueId);
         if (task != null) {
             return task;
