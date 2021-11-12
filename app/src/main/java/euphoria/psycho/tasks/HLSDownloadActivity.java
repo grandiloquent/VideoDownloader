@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +55,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                     });
                     return;
                 }
+                
                 HLSDownloadManager.getInstance(context).submit(task);
                 context.runOnUiThread(dialog::dismiss);
             } catch (IOException e) {
@@ -122,7 +122,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
         }
 
         public void update(List<HLSDownloadRequest> requests) {
-            Log.e("B5aOx2", String.format("update, %s", ""));
+            
             mRequests.clear();
             mRequests.addAll(requests);
             notifyDataSetChanged();
@@ -177,7 +177,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                     });
                     break;
                 case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
-                    Log.e("B5aOx2", String.format("------------------> %s", ""));
+                    
                     renderComplete(mHandler, viewHolder, task.getVideoFile());
                     Native.deleteDirectory(task.getDirectory().getAbsolutePath());
                     break;
@@ -271,7 +271,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
 //            });
 //            viewHolder.thumbnail.setBackgroundDrawable(null);
 //            viewHolder.thumbnail.setBackground(null);
-            if (request.getTask().getStatus() == HLSDownloadRequest.STATUS_MERGE_COMPLETED) {
+            if (request.getStatus() == HLSDownloadRequest.STATUS_MERGE_COMPLETED) {
                 viewHolder.progressBar.setVisibility(View.INVISIBLE);
                 Glide.with(viewHolder.title.getContext())
                         .load(request.getTask().getVideoFile())

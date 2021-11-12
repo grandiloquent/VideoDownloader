@@ -31,9 +31,10 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
             downloadTask.setId(cursor.getInt(0));
             downloadTask.setUri(cursor.getString(1));
             downloadTask.setUniqueId(cursor.getString(2));
-            downloadTask.setStatus(cursor.getInt(3));
-            downloadTask.setCreateAt(cursor.getLong(4));
-            downloadTask.setUpdateAt(cursor.getLong(5));
+            downloadTask.setFileName(cursor.getString(3));
+            downloadTask.setStatus(cursor.getInt(4));
+            downloadTask.setCreateAt(cursor.getLong(5));
+            downloadTask.setUpdateAt(cursor.getLong(6));
             downloadTask.setDirectory(createVideoDownloadDirectory(mContext, downloadTask.getUniqueId()));
             downloadTask.setVideoFile(createVideoFile(mContext, downloadTask.getUniqueId(), downloadTask.getFileName()));
             List<HLSDownloadTaskSegment> segments = new ArrayList<>();
