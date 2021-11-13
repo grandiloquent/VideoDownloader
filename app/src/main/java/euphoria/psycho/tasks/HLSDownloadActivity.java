@@ -30,9 +30,9 @@ import euphoria.psycho.explorer.Native;
 import euphoria.psycho.explorer.R;
 
 public class HLSDownloadActivity extends Activity implements HLSDownloadListener {
+    public static final String EXTRA_FILE_NAME = "FILE_NAME";
     private HLSDownloadAdapter mVideoAdapter;
     private Handler mHandler;
-    public static final String EXTRA_FILE_NAME = "FILE_NAME";
 
     // Generate a video download task through the m3u8 file address
     // and submit the task to the thread pool
@@ -55,7 +55,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                     });
                     return;
                 }
-                
                 HLSDownloadManager.getInstance(context).submit(task);
                 context.runOnUiThread(dialog::dismiss);
             } catch (IOException e) {
@@ -113,16 +112,15 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
     }
 
     private static class HLSDownloadAdapter extends BaseAdapter implements HLSDownloadRequestListener {
-        private final List<ViewHolder> mViewHolders = new ArrayList<>();
-        private final List<HLSDownloadRequest> mRequests = new ArrayList<>();
         private final Handler mHandler;
+        private final List<HLSDownloadRequest> mRequests = new ArrayList<>();
+        private final List<ViewHolder> mViewHolders = new ArrayList<>();
 
         public HLSDownloadAdapter(Handler handler) {
             mHandler = handler;
         }
 
         public void update(List<HLSDownloadRequest> requests) {
-            
             mRequests.clear();
             mRequests.addAll(requests);
             notifyDataSetChanged();
@@ -135,16 +133,18 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             // viewHolder.button = v.findViewById(R.id.button);
         }
 
-        private void renderStart(HLSDownloadRequest request, ViewHolder viewHolder) {
-            mHandler.post(() -> {
-                viewHolder.tag = request.getTask().getUniqueId();
-            });
+        private void playVideo(Context context, String videoFile) {
+            Intent intent = new Intent(context, PlayerActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(PlayerActivity.KEY_VIDEO_FILE, videoFile);
+            context.startActivity(intent);
         }
 
         private void renderComplete(Handler handler, ViewHolder viewHolder, File videoFile) {
             handler.post(() -> {
                 //viewHolder.button.setImageResource(R.drawable.ic_action_play_arrow);
                 viewHolder.progressBar.setVisibility(View.INVISIBLE);
+                viewHolder.thumbnail.setVisibility(View.VISIBLE);
                 Glide.with(viewHolder.title.getContext())
                         .load(videoFile)
                         .fitCenter()
@@ -158,12 +158,10 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             });
         }
 
-
-        private void playVideo(Context context, String videoFile) {
-            Intent intent = new Intent(context, PlayerActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(PlayerActivity.KEY_VIDEO_FILE, videoFile);
-            context.startActivity(intent);
+        private void renderStart(HLSDownloadRequest request, ViewHolder viewHolder) {
+            mHandler.post(() -> {
+                viewHolder.tag = request.getTask().getUniqueId();
+            });
         }
 
         private void renderTask(HLSDownloadRequest hlsDownloadRequest, ViewHolder viewHolder) {
@@ -177,7 +175,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                     });
                     break;
                 case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
-                    
                     renderComplete(mHandler, viewHolder, task.getVideoFile());
                     Native.deleteDirectory(task.getDirectory().getAbsolutePath());
                     break;
@@ -196,34 +193,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             }
         }
 
-        private void renderTask1(HLSDownloadRequest hlsDownloadRequest, ViewHolder viewHolder) {
-            HLSDownloadTask task = hlsDownloadRequest.getTask();
-            switch (hlsDownloadRequest.getStatus()) {
-                case HLSDownloadRequest.STATUS_START:
-                    renderStart(hlsDownloadRequest, viewHolder);
-                    break;
-                case HLSDownloadRequest.STATUS_MERGE_VIDEO:
-                    mHandler.post(() -> {
-                    });
-                    break;
-                case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
-                    renderComplete(mHandler, viewHolder, task.getVideoFile());
-                    Native.deleteDirectory(task.getDirectory().getAbsolutePath());
-                    break;
-                case HLSDownloadRequest.STATUS_FILE_CACHED:
-                case HLSDownloadRequest.STATUS_CONTENT_LENGTH:
-                    int sequence = task.getSequence() + 1;
-                    int total = task.getHLSDownloadTaskSegments().size();
-                    mHandler.post(() -> {
-                        viewHolder.progressBar.setProgress((int) ((sequence * 1.0 / total) * 100));
-                    });
-                    break;
-                case HLSDownloadRequest.STATUS_PAUSED:
-                    mHandler.post(() -> {
-                    });
-                    break;
-            }
-        }
 
         @Override
         public int getCount() {
@@ -255,9 +224,34 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
             }
             HLSDownloadRequest request = getItem(position);
             viewHolder.title.setText(request.getTask().getFileName());
-
             viewHolder.progressBar.setProgress(0);
+
+            if (viewHolder.tag != null && !viewHolder.tag.equals(request.getTask().getUniqueId())) {
+//                Log.e("B5aOx2", String.format("getView, position = %s;\n mRequests.size() = %s;\n request.getTask().getFileName() = %s;\n request.getTask().getUniqueId() = %s;\n request.getStatus() = %s;\n mViewHolders.size() = %s;\n viewHolder.tag = %s",
+//                        position,
+//                        mRequests.size(),
+//                        request.getTask().getFileName(),
+//                        request.getTask().getUniqueId(),
+//                        request.getStatus(),
+//                        mViewHolders.size(),
+//                        viewHolder.tag));
+                viewHolder.thumbnail.setVisibility(View.INVISIBLE);
+                viewHolder.progressBar.setVisibility(View.VISIBLE);
+                viewHolder.thumbnail.setOnClickListener(null);
+            }
             viewHolder.tag = request.getTask().getUniqueId();
+
+            if (request.getStatus() == HLSDownloadRequest.STATUS_MERGE_COMPLETED) {
+                viewHolder.progressBar.setVisibility(View.INVISIBLE);
+                viewHolder.thumbnail.setVisibility(View.VISIBLE);
+                Glide.with(viewHolder.title.getContext())
+                        .load(request.getTask().getVideoFile())
+                        .fitCenter()
+                        .into(viewHolder.thumbnail);
+                viewHolder.thumbnail.setOnClickListener(view -> {
+                    playVideo(view.getContext(), request.getTask().getVideoFile().getAbsolutePath());
+                });
+            }
 //            viewHolder.button.setOnClickListener(view -> {
 //                if (!request.isPaused()) {
 //                    request.setPaused(true);
@@ -271,16 +265,6 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
 //            });
 //            viewHolder.thumbnail.setBackgroundDrawable(null);
 //            viewHolder.thumbnail.setBackground(null);
-            if (request.getStatus() == HLSDownloadRequest.STATUS_MERGE_COMPLETED) {
-                viewHolder.progressBar.setVisibility(View.INVISIBLE);
-                Glide.with(viewHolder.title.getContext())
-                        .load(request.getTask().getVideoFile())
-                        .fitCenter()
-                        .into(viewHolder.thumbnail);
-                viewHolder.thumbnail.setOnClickListener(view -> {
-                    playVideo(view.getContext(), request.getTask().getVideoFile().getAbsolutePath());
-                });
-            }
             return convertView;
         }
 

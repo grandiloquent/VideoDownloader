@@ -79,7 +79,8 @@ public class MainActivity extends Activity implements ClientInterface {
         loadStartPage(this, mWebView);
         checkUnfinishedVideoTasks(this);
         checkUpdate();
-
+//        Native.deleteDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
+//        getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).mkdir();
         // tryPlayVideo(this);
     }
 
