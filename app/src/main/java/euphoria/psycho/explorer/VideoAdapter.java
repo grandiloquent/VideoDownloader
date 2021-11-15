@@ -9,22 +9,28 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.exoplayer2.util.Util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
+
+import euphoria.psycho.explorer.VideoListActivity.Video;
 
 public class VideoAdapter extends BaseAdapter {
     private final Context mContext;
     private final LayoutInflater mInflater;
-    private final List<File> mVideos = new ArrayList<>();
+    private final List<Video> mVideos = new ArrayList<>();
+    private final StringBuilder mStringBuilder = new StringBuilder();
+    private final Formatter mFormatter = new Formatter(mStringBuilder);
 
     public VideoAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
         mContext = context;
     }
 
-    public void update(List<File> videos) {
+    public void update(List<Video> videos) {
         mVideos.clear();
         mVideos.addAll(videos);
         notifyDataSetChanged();
@@ -36,7 +42,7 @@ public class VideoAdapter extends BaseAdapter {
     }
 
     @Override
-    public File getItem(int position) {
+    public Video getItem(int position) {
         return mVideos.get(position);
     }
 
@@ -53,14 +59,17 @@ public class VideoAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.title = convertView.findViewById(R.id.title);
             viewHolder.thumbnail = convertView.findViewById(R.id.thumbnail);
+            viewHolder.duration = convertView.findViewById(R.id.duration);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.title.setText(mVideos.get(position).getName());
+        viewHolder.title.setText(mVideos.get(position).Filename);
+        viewHolder.duration.setText(Util.getStringForTime(mStringBuilder, mFormatter, mVideos.get(position).Duration));
         Glide
                 .with(mContext)
-                .load(mVideos.get(position))
+                .load(new File(mVideos.get(position).Directory,
+                        mVideos.get(position).Filename))
                 .centerCrop()
                 //.placeholder(R.drawable.loading_spinner)
                 .into(viewHolder.thumbnail);
@@ -75,5 +84,6 @@ public class VideoAdapter extends BaseAdapter {
     public static class ViewHolder {
         public TextView title;
         public ImageView thumbnail;
+        public TextView duration;
     }
 }

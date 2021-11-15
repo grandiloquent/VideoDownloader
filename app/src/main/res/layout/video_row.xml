@@ -4,11 +4,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <euphoria.psycho.explorer.SquareImageView
-        android:id="@+id/thumbnail"
+    <euphoria.psycho.explorer.SquareFrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#000000" />
+        android:background="#f2f2f2">
+
+        <ImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside" />
+
+        <TextView
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|bottom"
+            android:background="#000"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+
+    </euphoria.psycho.explorer.SquareFrameLayout>
+
 
     <TextView
         android:id="@+id/title"

@@ -2,7 +2,6 @@ package euphoria.psycho.explorer;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
@@ -84,9 +83,9 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Native.deleteDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
 //        getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).mkdir();
         // tryPlayVideo(this);
-        Intent videoListActivity = new Intent(this
-                , VideoListActivity.class);
-        startActivity(videoListActivity);
+//        Intent videoListActivity = new Intent(this
+//                , VideoListActivity.class);
+//        startActivity(videoListActivity);
     }
 
     @Override

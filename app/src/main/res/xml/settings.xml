@@ -10,4 +10,8 @@
         android:defaultValue="true"
         android:key="in_china"
         android:title="是否为中国大陆用户" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="load_external_storage_card"
+        android:title="预览视频时，是否加载扩展储存根目录下载 Videos 目录中视频" />
 </PreferenceScreen>

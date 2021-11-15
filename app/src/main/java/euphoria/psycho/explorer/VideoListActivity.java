@@ -28,6 +28,7 @@ import android.widget.GridView;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -35,7 +36,6 @@ import androidx.annotation.Nullable;
 import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
-import euphoria.psycho.share.IntentShare;
 import euphoria.psycho.share.StringShare;
 
 public class VideoListActivity extends Activity {
@@ -74,7 +74,8 @@ public class VideoListActivity extends Activity {
     private void actionDelete(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
                 .getMenuInfo();
-        File videoFile = mVideoAdapter.getItem(info.position);
+        File videoFile = new File(mVideoAdapter.getItem(info.position).Directory,
+                mVideoAdapter.getItem(info.position).Filename);
         File directory = videoFile.getParentFile();
         if (directory == null) {
             return;
@@ -85,55 +86,63 @@ public class VideoListActivity extends Activity {
         } else {
             videoFile.delete();
         }
-        List<File> videos = getVideos();
+        List<Video> videos = getVideos();
         mVideoAdapter.update(videos);
     }
 
     // Share the video
     private void actionShare(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-                .getMenuInfo();
-        File videoFile = mVideoAdapter.getItem(info.position);
-        startActivity(IntentShare.createShareVideoIntent(Uri.fromFile(videoFile)));
+//        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+//                .getMenuInfo();
+//        File videoFile = mVideoAdapter.getItem(info.position);
+//        startActivity(IntentShare.createShareVideoIntent(Uri.fromFile(videoFile)));
     }
 
-    private List<File> getVideos() {
-        List<File> files = FileShare.recursivelyListFiles(
-                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-                ".mp4"
-        );
-        files.sort((o1, o2) -> {
-            final long result = o2.lastModified() - o1.lastModified();
-            if (result < 0) {
-                return -1;
-            } else if (result > 0) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-        String sdcard = getExternalStoragePath(this);
-        if (sdcard != null) {
-            File videoDirectory = new File(sdcard, "Videos");
-            if (videoDirectory.exists()) {
-                List<File> videos = files = FileShare.recursivelyListFiles(
-                        videoDirectory,
-                        ".mp4"
-                );
-                videos.sort((o1, o2) -> {
-                    final long result = o2.length() - o1.length();
-                    if (result < 0) {
-                        return -1;
-                    } else if (result > 0) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                });
-                files.addAll(videos);
+    private List<Video> getVideos() {
+        List<Video> videos = mVideoDatabase.queryDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), true);
+        if (isLoadExternalStorageCard()) {
+            String sdcard = getExternalStoragePath(this);
+            if (sdcard != null) {
+                videos.addAll(mVideoDatabase.queryDirectory(sdcard, false));
             }
         }
-        return files;
+        return videos;
+//        List<File> files = FileShare.recursivelyListFiles(
+//                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+//                ".mp4"
+//        );
+//        files.sort((o1, o2) -> {
+//            final long result = o2.lastModified() - o1.lastModified();
+//            if (result < 0) {
+//                return -1;
+//            } else if (result > 0) {
+//                return 1;
+//            } else {
+//                return 0;
+//            }
+//        });
+//        String sdcard = getExternalStoragePath(this);
+//        if (sdcard != null) {
+//            File videoDirectory = new File(sdcard, "Videos");
+//            if (videoDirectory.exists()) {
+//                List<File> videos = files = FileShare.recursivelyListFiles(
+//                        videoDirectory,
+//                        ".mp4"
+//                );
+//                videos.sort((o1, o2) -> {
+//                    final long result = o2.length() - o1.length();
+//                    if (result < 0) {
+//                        return -1;
+//                    } else if (result > 0) {
+//                        return 1;
+//                    } else {
+//                        return 0;
+//                    }
+//                });
+//                files.addAll(videos);
+//            }
+//        }
+//        return files;
     }
 
     private void initialize() {
@@ -147,7 +156,7 @@ public class VideoListActivity extends Activity {
 //        mVideoAdapter.update(videos);
         ContextShare.initialize(this);
         mGridView.setOnItemClickListener((parent, view, position, id) -> {
-            PlayerActivity.launchActivity(VideoListActivity.this, mVideoAdapter.getItem(position));
+            PlayerActivity.launchActivity(VideoListActivity.this, new File(mVideoAdapter.getItem(position).Directory, mVideoAdapter.getItem(position).Filename));
         });
     }
 
@@ -155,12 +164,14 @@ public class VideoListActivity extends Activity {
         return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(EXTRA_LOAD_EXTERNAL_STORAGE_CARD, false);
     }
 
+    private VideoDatabase mVideoDatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize();
         if (getIntent().getBooleanExtra("update", false)) {
-            List<File> videos = getVideos();
+            List<Video> videos = getVideos();
             mVideoAdapter.update(videos);
         }
         if (isLoadExternalStorageCard() && VERSION.SDK_INT >= VERSION_CODES.R) {
@@ -171,30 +182,29 @@ public class VideoListActivity extends Activity {
                 startActivity(intent);
             }
         }
+        mVideoDatabase = new VideoDatabase(VideoListActivity.this,
+                new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "videos.db").getAbsolutePath())
+        ;
         ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("正在下载中...");
+        dialog.setMessage("加载...");
         dialog.show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                new VideoDatabase(VideoListActivity.this,
-                        new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "videos.db").getAbsolutePath())
-                        .scanDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                    }
-                });
+        new Thread(() -> {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            mVideoDatabase.scanDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
+            if (isLoadExternalStorageCard()) {
+                String sdcard = getExternalStoragePath(this);
+                if (sdcard != null) {
+                    mVideoDatabase.scanDirectory(sdcard);
+                }
             }
+            runOnUiThread(() -> dialog.dismiss());
         }).start();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        List<File> videos = getVideos();
+        List<Video> videos = getVideos();
         mVideoAdapter.update(videos);
     }
 
@@ -212,7 +222,7 @@ public class VideoListActivity extends Activity {
         super.onCreateContextMenu(menu, v, menuInfo);
     }
 
-    private class VideoDatabase extends SQLiteOpenHelper {
+    private static class VideoDatabase extends SQLiteOpenHelper {
 
         public VideoDatabase(@Nullable Context context, @Nullable String name) {
             super(context, name, null, 1);
@@ -253,6 +263,25 @@ public class VideoListActivity extends Activity {
             }
         }
 
+        public List<Video> queryDirectory(String directory, boolean order) {
+            List<Video> videos = new ArrayList<>();
+            Cursor cursor = getReadableDatabase().rawQuery("select * from video where directory = ? " + (order ? "order by create_at desc" : "order by duration desc"), new String[]{
+                    directory
+            });
+            while (cursor.moveToNext()) {
+                Video video = new Video();
+                video.Id = cursor.getInt(0);
+                video.Directory = cursor.getString(1);
+                video.Filename = cursor.getString(2);
+                video.Length = cursor.getInt(3);
+                video.Duration = cursor.getLong(4);
+                video.CreateAt = cursor.getLong(5);
+                video.UpdateAt = cursor.getLong(6);
+                videos.add(video);
+            }
+            return videos;
+        }
+
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("create table if not exists video (\n" +
@@ -273,10 +302,10 @@ public class VideoListActivity extends Activity {
         }
     }
 
-    public class Video {
+    public static class Video {
         public int Id;
-        public int Directory;
-        public int Filename;
+        public String Directory;
+        public String Filename;
         public int Length;
         public long Duration;
         public long CreateAt;
