@@ -221,6 +221,8 @@ public class VideoListActivity extends Activity {
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("确定要删除 " + videoFile.getName() + " 吗？")
                     .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+                        actionDelete(videoFile);
+                        mVideoDatabase.remove(videoFile);
                         dialogInterface.dismiss();
                     }).setNegativeButton(android.R.string.cancel, (dialogInterface, which) -> {
                         dialogInterface.dismiss();
@@ -243,6 +245,7 @@ public class VideoListActivity extends Activity {
                         if (!n.exists()) {
                             videoFile.renameTo(n);
                         }
+                        mVideoDatabase.remove(videoFile);
                         getVideos();
                         dialogInterface.dismiss();
                     }).setNegativeButton(android.R.string.cancel, (dialogInterface, which) -> {
@@ -286,6 +289,12 @@ public class VideoListActivity extends Activity {
             return videos;
         }
 
+        public void remove(File  video){
+           getWritableDatabase().delete("video","directory = ? and filename = ?", new String[]{
+                    video.getParentFile().getAbsolutePath(),
+                    video.getName()
+            });
+        }
         public void scanDirectory(String directory) {
             File[] videos = new File(directory)
                     .listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith(".mp4"));
@@ -320,6 +329,8 @@ public class VideoListActivity extends Activity {
 
             }
         }
+
+
 
         @Override
         public void onCreate(SQLiteDatabase db) {
