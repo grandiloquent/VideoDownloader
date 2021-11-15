@@ -240,7 +240,7 @@ public class VideoListActivity extends Activity {
                     .setTitle("重命名文件")
                     .setView(editText)
                     .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
-                        File n = new File(videoFile.getParentFile(), editText.getText().toString() +
+                        File n = new File(videoFile.getParentFile(), FileShare.getValidFileName(editText.getText().toString().trim()) +
                                 "." + StringShare.substringAfterLast(videoFile.getName(), "."));
                         if (!n.exists()) {
                             videoFile.renameTo(n);
@@ -289,12 +289,13 @@ public class VideoListActivity extends Activity {
             return videos;
         }
 
-        public void remove(File  video){
-           getWritableDatabase().delete("video","directory = ? and filename = ?", new String[]{
+        public void remove(File video) {
+            getWritableDatabase().delete("video", "directory = ? and filename = ?", new String[]{
                     video.getParentFile().getAbsolutePath(),
                     video.getName()
             });
         }
+
         public void scanDirectory(String directory) {
             File[] videos = new File(directory)
                     .listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith(".mp4"));
@@ -329,7 +330,6 @@ public class VideoListActivity extends Activity {
 
             }
         }
-
 
 
         @Override
