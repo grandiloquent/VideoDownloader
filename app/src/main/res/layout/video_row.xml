@@ -21,6 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right|bottom"
             android:background="#000"
+            android:padding="3dp"
             android:textColor="#fff"
             android:textSize="12sp" />
 
