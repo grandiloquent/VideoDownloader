@@ -2,9 +2,11 @@ package euphoria.psycho.explorer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
+import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -82,6 +84,9 @@ public class MainActivity extends Activity implements ClientInterface {
 //        Native.deleteDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
 //        getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).mkdir();
         // tryPlayVideo(this);
+        Intent videoListActivity = new Intent(this
+                , VideoListActivity.class);
+        startActivity(videoListActivity);
     }
 
     @Override
@@ -132,7 +137,8 @@ public class MainActivity extends Activity implements ClientInterface {
             boolean result = grantResults[i] == PackageManager.PERMISSION_GRANTED;
             // If the user does not provide a necessary permission,
             // exit the program
-            if (!result) {
+            if (!result && !permissions[i].equals("android.permission.MANAGE_EXTERNAL_STORAGE")) {
+                Log.e("B5aOx2", String.format("onRequestPermissionsResult, %s", permissions[i]));
                 Toast.makeText(this, R.string.need_permissions, Toast.LENGTH_LONG).show();
                 finish();
                 return;

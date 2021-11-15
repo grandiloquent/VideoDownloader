@@ -20,7 +20,6 @@ import java.util.List;
 
 import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.share.NetShare;
-import euphoria.psycho.share.PackageShare;
 import euphoria.psycho.share.PermissionShare;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.WebViewShare;
@@ -43,15 +42,6 @@ public class Helper {
                 })
                 .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
                 .show();
-    }
-
-    static void checkChrome(Context context) {
-        new Thread(() -> {
-            if (PreferenceShare.getPreferences().getBoolean("chrome", false) ||
-                    PackageShare.isAppInstalled(context, "com.android.chrome")) {
-                PreferenceShare.getEditor().putBoolean("chrome", true).apply();
-            }
-        }).start();
     }
 
     static boolean checkPermissions(Activity activity) {

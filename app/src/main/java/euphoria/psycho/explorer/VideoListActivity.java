@@ -1,9 +1,23 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Process;
+import android.os.storage.StorageManager;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
@@ -12,9 +26,12 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.GridView;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
@@ -22,8 +39,36 @@ import euphoria.psycho.share.IntentShare;
 import euphoria.psycho.share.StringShare;
 
 public class VideoListActivity extends Activity {
+    public static final String EXTRA_LOAD_EXTERNAL_STORAGE_CARD = "load_external_storage_card";
     private VideoAdapter mVideoAdapter;
     private GridView mGridView;
+
+    public static String getExternalStoragePath(Context context) {
+        StorageManager mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+        Class<?> storageVolumeClazz = null;
+        try {
+            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
+            Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
+            Method getPath = storageVolumeClazz.getMethod("getPath");
+            Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
+            Object result = getVolumeList.invoke(mStorageManager);
+            if (result == null) return null;
+            final int length = Array.getLength(result);
+            for (int i = 0; i < length; i++) {
+                Object storageVolumeElement = Array.get(result, i);
+                String path = (String) getPath.invoke(storageVolumeElement);
+                Object removableObject = isRemovable.invoke(storageVolumeElement);
+                if (removableObject == null) return null;
+                boolean removable = (Boolean) removableObject;
+                if (removable) {
+                    return path;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     // Delete the entire directory where the video file is
     private void actionDelete(MenuItem item) {
@@ -67,14 +112,28 @@ public class VideoListActivity extends Activity {
                 return 0;
             }
         });
+        String sdcard = getExternalStoragePath(this);
+        if (sdcard != null) {
+            File videoDirectory = new File(sdcard, "Videos");
+            if (videoDirectory.exists()) {
+                List<File> videos = files = FileShare.recursivelyListFiles(
+                        videoDirectory,
+                        ".mp4"
+                );
+                videos.sort((o1, o2) -> {
+                    final long result = o2.length() - o1.length();
+                    if (result < 0) {
+                        return -1;
+                    } else if (result > 0) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                });
+                files.addAll(videos);
+            }
+        }
         return files;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        List<File> videos = getVideos();
-        mVideoAdapter.update(videos);
     }
 
     private void initialize() {
@@ -88,10 +147,13 @@ public class VideoListActivity extends Activity {
 //        mVideoAdapter.update(videos);
         ContextShare.initialize(this);
         mGridView.setOnItemClickListener((parent, view, position, id) -> {
-            PlayerActivity.launchActivity(VideoListActivity.this,mVideoAdapter.getItem(position));
+            PlayerActivity.launchActivity(VideoListActivity.this, mVideoAdapter.getItem(position));
         });
     }
 
+    private boolean isLoadExternalStorageCard() {
+        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(EXTRA_LOAD_EXTERNAL_STORAGE_CARD, false);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +163,39 @@ public class VideoListActivity extends Activity {
             List<File> videos = getVideos();
             mVideoAdapter.update(videos);
         }
+        if (isLoadExternalStorageCard() && VERSION.SDK_INT >= VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+        }
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage("正在下载中...");
+        dialog.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                new VideoDatabase(VideoListActivity.this,
+                        new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "videos.db").getAbsolutePath())
+                        .scanDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.dismiss();
+                    }
+                });
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        List<File> videos = getVideos();
+        mVideoAdapter.update(videos);
     }
 
     @Override
@@ -115,5 +210,76 @@ public class VideoListActivity extends Activity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         getMenuInflater().inflate(R.menu.videos, menu);
         super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    private class VideoDatabase extends SQLiteOpenHelper {
+
+        public VideoDatabase(@Nullable Context context, @Nullable String name) {
+            super(context, name, null, 1);
+        }
+
+        public void scanDirectory(String directory) {
+            File[] videos = new File(directory)
+                    .listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith(".mp4"));
+            if (videos == null || videos.length == 0) return;
+            for (File video : videos) {
+                Cursor cursor = getReadableDatabase().rawQuery("select * from video where directory = ? and filename = ?", new String[]{
+                        video.getParentFile().getAbsolutePath(),
+                        video.getName()
+                });
+                if (cursor.moveToNext()) {
+                    cursor.close();
+                    continue;
+                }
+                cursor.close();
+                try {
+                    ContentValues values = new ContentValues();
+                    values.put("directory", video.getParentFile().getAbsolutePath());
+                    values.put("filename", video.getName());
+                    values.put("length", video.length());
+                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                    retriever.setDataSource(video.getAbsolutePath());
+                    String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                    values.put("duration", Long.parseLong(time));
+                    retriever.release();
+                    values.put("create_at", System.currentTimeMillis());
+                    values.put("update_at", System.currentTimeMillis());
+                    getWritableDatabase().insert(
+                            "video", null, values
+                    );
+                } catch (Exception ignore) {
+                }
+
+            }
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL("create table if not exists video (\n" +
+                    "    id integer primary key autoincrement ,\n" +
+                    "    directory text,\n" +
+                    "    filename text,\n" +
+                    "    length text,\n" +
+                    "    duration integer,\n" +
+                    "    create_at integer,\n" +
+                    "    update_at integer\n" +
+                    ");");
+            db.execSQL("create unique index video_directory_filename_uindex\n" +
+                    "\ton video (directory, filename);");
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        }
+    }
+
+    public class Video {
+        public int Id;
+        public int Directory;
+        public int Filename;
+        public int Length;
+        public long Duration;
+        public long CreateAt;
+        public long UpdateAt;
     }
 }
