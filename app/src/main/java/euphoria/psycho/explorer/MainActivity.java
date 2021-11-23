@@ -2,6 +2,7 @@ package euphoria.psycho.explorer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
@@ -13,8 +14,8 @@ import euphoria.psycho.downloader.DownloadTaskDatabase;
 import euphoria.psycho.downloader.DownloaderService;
 import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
+import euphoria.psycho.share.StringShare;
 import euphoria.psycho.videos.Ck52;
-import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
 import euphoria.psycho.videos.XiGua;
@@ -154,7 +155,13 @@ public class MainActivity extends Activity implements ClientInterface {
 
     @Override
     public boolean shouldOverrideUrlLoading(String uri) {
-        if (Porn91.handle(uri, this)) {
+        if (StringShare.matchOne(new String[]{
+                "/vodplay/[\\d-]+\\.html",
+                "https://91porn.com/view_video.php",
+        }, uri)) {
+            Intent starter = new Intent(this, WebActivity.class);
+            starter.putExtra("extra.URI", uri);
+            startActivity(starter);
             return true;
         }
         if (YouTube.handle(uri, this)) {

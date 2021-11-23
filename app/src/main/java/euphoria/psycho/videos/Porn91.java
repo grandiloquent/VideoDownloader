@@ -21,7 +21,6 @@ public class Porn91 extends BaseExtractor<String[]> {
     public Porn91(String inputUri, MainActivity mainActivity) {
         super(inputUri, mainActivity);
     }
-
 //    public void fetchVideoList(String uri) {
 //        new Thread(() -> {
 //            String response = getString(uri, null);
@@ -68,7 +67,7 @@ public class Porn91 extends BaseExtractor<String[]> {
 
     @Override
     protected void processVideo(String[] videoUris) {
-        if (videoUris.length > 0) {
+        if (videoUris.length < 2) {
             Toast.makeText(mMainActivity, "无法解析视频", Toast.LENGTH_LONG).show();
             return;
         }
