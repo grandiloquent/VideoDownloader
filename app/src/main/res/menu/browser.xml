@@ -4,8 +4,30 @@
     <item
         android:id="@+id/search"
         android:icon="@android:drawable/ic_menu_search"
+        android:title="@android:string/search_go"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always" />
+    <group
+        android:id="@+id/sort_by"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/order_create_at"
+            android:title="日期" />
+        <item
+            android:id="@+id/order_duration"
+            android:title="时长" />
+        <item
+            android:id="@+id/order_size"
+            android:title="大小" />
+    </group>
 
-        android:title="Search"
-        app:showAsAction="always"
-        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/order_decrease"
+            android:title="递减" />
+        <item
+            android:id="@+id/order_increase"
+            android:title="递增" />
+    </group>
+
 </menu>

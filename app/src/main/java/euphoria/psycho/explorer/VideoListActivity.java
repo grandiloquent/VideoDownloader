@@ -49,6 +49,13 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
     private GridView mGridView;
     private VideoDatabase mVideoDatabase;
 
+
+    private static final String KEY_LAST_SORTED_BY = "lastSortedBy";
+    private int mLastSortedBy;
+
+    private static final String KEY_SORT_DIRECTION = "sortDirection";
+    private int mSortDirection;
+
     public static String getExternalStoragePath(Context context) {
         StorageManager mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         Class<?> storageVolumeClazz = null;
@@ -74,16 +81,6 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
             e.printStackTrace();
         }
         return null;
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        return false;
     }
 
     // Delete the entire directory where the video file is
@@ -124,11 +121,11 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
                         mVideoDatabase.scanDirectory(new File(sdcard, "Videos").getAbsolutePath());
                     }
                 }
-                videos.addAll(mVideoDatabase.queryDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), true));
+                videos.addAll(mVideoDatabase.queryDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), mLastSortedBy));
                 if (isLoadExternalStorageCard()) {
                     String sdcard = getExternalStoragePath(this);
                     if (sdcard != null) {
-                        videos.addAll(mVideoDatabase.queryDirectory(new File(sdcard, "Videos").getAbsolutePath(), false));
+                        videos.addAll(mVideoDatabase.queryDirectory(new File(sdcard, "Videos").getAbsolutePath(), mLastSortedBy));
                     }
                 }
                 runOnUiThread(() -> {
@@ -201,6 +198,8 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().show();
+        mLastSortedBy = PreferenceManager.getDefaultSharedPreferences(this).getInt(KEY_LAST_SORTED_BY, 2);
+        mSortDirection = PreferenceManager.getDefaultSharedPreferences(this).getInt(KEY_SORT_DIRECTION, 1);
         initialize();
         if (getIntent().getBooleanExtra("update", false)) {
             getVideos();
@@ -219,21 +218,43 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
     }
 
     @Override
+    protected void onPause() {
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(KEY_LAST_SORTED_BY, mLastSortedBy).putInt(KEY_SORT_DIRECTION, mSortDirection).apply();
+        super.onPause();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         getVideos();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.browser, menu);
-        MenuItem searchItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        //searchView.setIconifiedByDefault(false);
-//        searchView.setOnQueryTextListener(this);
-//        searchView.setIconified(false);
-        return super.onCreateOptionsMenu(menu);
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.order_size) {
+            item.setChecked(true);
+            mLastSortedBy = 3 * mSortDirection;
+            getVideos();
+        } else if (item.getItemId() == R.id.order_create_at) {
+            item.setChecked(true);
+            mLastSortedBy = 2 * mSortDirection;
+            getVideos();
+        } else if (item.getItemId() == R.id.order_duration) {
+            item.setChecked(true);
+            mLastSortedBy = 1 * mSortDirection;
+            getVideos();
+        } else if (item.getItemId() == R.id.order_increase) {
+            item.setChecked(true);
+            mSortDirection = 1;
+            mLastSortedBy = Math.abs(mLastSortedBy);
+            getVideos();
+        } else if (item.getItemId() == R.id.order_decrease) {
+            item.setChecked(true);
+            mSortDirection = -1;
+            mLastSortedBy = Math.abs(mLastSortedBy) * mSortDirection;
+            getVideos();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -289,15 +310,69 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         super.onCreateContextMenu(menu, v, menuInfo);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.browser, menu);
+        MenuItem searchItem = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setIconifiedByDefault(false);
+        searchView.setOnQueryTextListener(this);
+        if (Math.abs(mLastSortedBy) == 1)
+            menu.findItem(R.id.order_duration).setChecked(true);
+        else if (Math.abs(mLastSortedBy) == 2)
+            menu.findItem(R.id.order_create_at).setChecked(true);
+        else if (Math.abs(mLastSortedBy) == 3)
+            menu.findItem(R.id.order_size).setChecked(true);
+        if (mSortDirection == 1)
+            menu.findItem(R.id.order_increase).setChecked(true);
+        else
+            menu.findItem(R.id.order_decrease).setChecked(true);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
     private static class VideoDatabase extends SQLiteOpenHelper {
 
         public VideoDatabase(@Nullable Context context, @Nullable String name) {
             super(context, name, null, 1);
         }
 
-        public List<Video> queryDirectory(String directory, boolean order) {
+        // sortBy
+        public List<Video> queryDirectory(String directory, int sortBy) {
+            StringBuilder stringBuilder = new StringBuilder("select * from video where directory = ? ");
+            switch (sortBy) {
+                case 1:
+                    stringBuilder.append("order by duration");
+                    break;
+                case -1:
+                    stringBuilder.append("order by duration desc");
+                    break;
+                case 3:
+                    stringBuilder.append("order by length");
+                    break;
+                case -3:
+                    stringBuilder.append("order by length desc");
+                    break;
+                case 2:
+                    stringBuilder.append("order by create_at");
+                    break;
+                case -2:
+                    stringBuilder.append("order by create_at desc");
+                    break;
+            }
+            // + (order ? "" : "order by duration desc")
             List<Video> videos = new ArrayList<>();
-            Cursor cursor = getReadableDatabase().rawQuery("select * from video where directory = ? " + (order ? "order by create_at desc" : "order by duration desc"), new String[]{
+            Cursor cursor = getReadableDatabase().rawQuery(stringBuilder.toString(), new String[]{
                     directory
             });
             while (cursor.moveToNext()) {
@@ -305,7 +380,7 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
                 video.Id = cursor.getInt(0);
                 video.Directory = cursor.getString(1);
                 video.Filename = cursor.getString(2);
-                video.Length = cursor.getInt(3);
+                video.Length = cursor.getLong(3);
                 video.Duration = cursor.getLong(4);
                 video.CreateAt = cursor.getLong(5);
                 video.UpdateAt = cursor.getLong(6);
@@ -345,7 +420,7 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
                     String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
                     values.put("duration", Long.parseLong(time));
                     retriever.release();
-                    values.put("create_at", System.currentTimeMillis());
+                    values.put("create_at", video.lastModified());
                     values.put("update_at", System.currentTimeMillis());
                     getWritableDatabase().insert(
                             "video", null, values
@@ -363,7 +438,7 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
                     "    id integer primary key autoincrement ,\n" +
                     "    directory text,\n" +
                     "    filename text,\n" +
-                    "    length text,\n" +
+                    "    length integer,\n" +
                     "    duration integer,\n" +
                     "    create_at integer,\n" +
                     "    update_at integer\n" +
@@ -381,7 +456,7 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         public int Id;
         public String Directory;
         public String Filename;
-        public int Length;
+        public long Length;
         public long Duration;
         public long CreateAt;
         public long UpdateAt;
