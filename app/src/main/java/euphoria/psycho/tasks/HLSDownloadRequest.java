@@ -1,7 +1,6 @@
 package euphoria.psycho.tasks;
 
 import android.os.Process;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -159,7 +158,6 @@ public class HLSDownloadRequest implements Runnable {
             }
             emitSynchronizationEvent(STATUS_MERGE_COMPLETED);
         } catch (IOException e) {
-            Log.e("B5aOx2", String.format("run, %s", ""));
             emitSynchronizationEvent(STATUS_MERGE_FAILED);
         }
 

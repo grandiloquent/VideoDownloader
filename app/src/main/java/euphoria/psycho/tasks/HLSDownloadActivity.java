@@ -176,7 +176,7 @@ public class HLSDownloadActivity extends Activity implements HLSDownloadListener
                     break;
                 case HLSDownloadRequest.STATUS_MERGE_COMPLETED:
                     renderComplete(mHandler, viewHolder, task.getVideoFile());
-                    Native.deleteDirectory(task.getDirectory().getAbsolutePath());
+                      Native.deleteDirectory(task.getDirectory().getAbsolutePath());
                     break;
                 case HLSDownloadRequest.STATUS_FILE_CACHED:
                 case HLSDownloadRequest.STATUS_CONTENT_LENGTH:

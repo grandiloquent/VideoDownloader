@@ -100,8 +100,9 @@ public class HLSDownloadDatabase extends SQLiteOpenHelper {
         });
     }
 
-    public List<HLSDownloadTask> queryUnfinishedTasks() {
-        Cursor cursor = getReadableDatabase().rawQuery("select * from task where status != 5", null);
+    public List<HLSDownloadTask> queryTasks() {
+        //  where status != 5 queryUnfinishedTasks
+        Cursor cursor = getReadableDatabase().rawQuery("select * from task", null);
         List<HLSDownloadTask> tasks = new ArrayList<>();
         while (cursor.moveToNext()) {
             HLSDownloadTask downloadTask = downloadTask = new HLSDownloadTask(mContext);

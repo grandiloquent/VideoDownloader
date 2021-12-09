@@ -30,14 +30,13 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
     }
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.e("B5aOx2", String.format("onSharedPreferenceChanged, %s", key));
         if (key.equals("videos_max")) {
             ProgressDialog dialog = new ProgressDialog(getContext());
             dialog.setMessage("更新视频列表...");
             dialog.show();
             new Thread(() -> {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Porn91.fetchVideos(sharedPreferences.getInt("videos_max", 1));
+                Porn91.fetchVideos(Integer.parseInt(sharedPreferences.getString("videos_max", "1")));
                 getActivity().runOnUiThread(() -> dialog.dismiss());
             }).start();
         }

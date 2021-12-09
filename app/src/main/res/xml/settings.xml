@@ -15,6 +15,8 @@
         android:key="load_external_storage_card"
         android:title="预览视频时，是否加载扩展储存根目录下载 Videos 目录中视频" />
     <EditTextPreference
+        android:digits="0123456789"
+        android:defaultValue="1"
         android:dialogTitle="更新视频列表"
         android:inputType="number"
         android:key="videos_max"

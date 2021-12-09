@@ -9,10 +9,12 @@ import android.content.Intent;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.util.List;
 
 import androidx.annotation.Nullable;
+import euphoria.psycho.explorer.Native;
 
 import static euphoria.psycho.tasks.HLSDownloadHelpers.createNotificationChannel;
 
@@ -75,11 +77,17 @@ public class HLSDownloadService extends Service {
                     break;
                 case CHECK_UNFINISHED_VIDEO_TASKS:
                     List<HLSDownloadTask> tasks = HLSDownloadManager.getInstance(this)
-                            .getDatabase().queryUnfinishedTasks();
-                    if (tasks.size() > 0) {
-                        for (HLSDownloadTask task : tasks) {
-                            HLSDownloadManager.getInstance(this).submit(task);
+                            .getDatabase().queryTasks();
+                    int j = 0;
+                    for (int i = 0; i < tasks.size(); i++) {
+                        if (tasks.get(i).getStatus() == 5) {
+                            Native.deleteDirectory(tasks.get(i).getDirectory().getAbsolutePath());
+                            continue;
                         }
+                        HLSDownloadManager.getInstance(this).submit(tasks.get(i));
+                        j++;
+                    }
+                    if (j > 0) {
                         launchHLSDownloadActivity(this);
                         showNotification();
                     } else {
