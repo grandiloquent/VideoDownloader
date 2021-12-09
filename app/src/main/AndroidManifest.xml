@@ -67,7 +67,8 @@
         <activity android:name=".BookmarkActivity" />
         <activity
             android:name=".VideoListActivity"
-            android:label="@string/video_list_name" />
+            android:label="@string/video_list_name"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"  />
         <activity
             android:name="euphoria.psycho.tasks.HLSDownloadActivity"
             android:label="@string/download_video" />

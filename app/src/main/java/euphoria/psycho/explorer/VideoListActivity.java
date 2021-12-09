@@ -1,6 +1,5 @@
 package euphoria.psycho.explorer;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
@@ -21,6 +20,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -36,12 +36,14 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import euphoria.psycho.PlayerActivity;
 import euphoria.psycho.share.ContextShare;
 import euphoria.psycho.share.FileShare;
 import euphoria.psycho.share.StringShare;
 
-public class VideoListActivity extends Activity {
+public class VideoListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     public static final String EXTRA_LOAD_EXTERNAL_STORAGE_CARD = "load_external_storage_card";
     private VideoAdapter mVideoAdapter;
     private GridView mGridView;
@@ -72,6 +74,16 @@ public class VideoListActivity extends Activity {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
     }
 
     // Delete the entire directory where the video file is
@@ -188,6 +200,7 @@ public class VideoListActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().show();
         initialize();
         if (getIntent().getBooleanExtra("update", false)) {
             getVideos();
@@ -209,6 +222,18 @@ public class VideoListActivity extends Activity {
     protected void onResume() {
         super.onResume();
         getVideos();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.browser, menu);
+        MenuItem searchItem = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        //searchView.setIconifiedByDefault(false);
+//        searchView.setOnQueryTextListener(this);
+//        searchView.setIconified(false);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
