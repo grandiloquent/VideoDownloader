@@ -1,7 +1,6 @@
 package euphoria.psycho.explorer;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,7 +16,6 @@ import euphoria.psycho.downloader.DownloaderTask;
 import euphoria.psycho.share.PreferenceShare;
 import euphoria.psycho.share.StringShare;
 import euphoria.psycho.videos.Ck52;
-import euphoria.psycho.videos.Porn91;
 import euphoria.psycho.videos.PornHub;
 import euphoria.psycho.videos.PornOne;
 import euphoria.psycho.videos.XiGua;
@@ -85,7 +83,7 @@ public class MainActivity extends Activity implements ClientInterface {
         checkUpdate();
 //        Native.deleteDirectory(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
 //        getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).mkdir();
-        // tryPlayVideo(this);
+        //tryPlayVideo(this);
 //        Intent videoListActivity = new Intent(this
 //                , VideoListActivity.class);
 //        startActivity(videoListActivity);
