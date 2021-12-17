@@ -493,7 +493,7 @@ public class PlayerActivity extends Activity implements OnTouchListener {
         ImageButton actionFileDownload = findViewById(R.id.action_file_download);
         ImageButton actionFullscreen = findViewById(R.id.action_fullscreen);
         mScaledTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
-        mRoot.setOnTouchListener(this);
+        mTextureView.setOnTouchListener(this);
         ImageButton prev = findViewById(R.id.prev);
         ImageButton next = findViewById(R.id.next);
         String videoFile = getIntent().getStringExtra(KEY_VIDEO_FILE);
@@ -574,7 +574,7 @@ public class PlayerActivity extends Activity implements OnTouchListener {
             case MotionEvent.ACTION_UP: {
                 mMediaPlayer.seekTo(mCurrentPosition + mDelta * 1000);
                 mMediaPlayer.start();
-                hiddenControls();
+                scheduleHideControls();
             }
         }
         return true;
