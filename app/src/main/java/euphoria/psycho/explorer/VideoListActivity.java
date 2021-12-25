@@ -45,15 +45,12 @@ import euphoria.psycho.share.StringShare;
 
 public class VideoListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     public static final String EXTRA_LOAD_EXTERNAL_STORAGE_CARD = "load_external_storage_card";
+    private static final String KEY_LAST_SORTED_BY = "lastSortedBy";
+    private static final String KEY_SORT_DIRECTION = "sortDirection";
     private VideoAdapter mVideoAdapter;
     private GridView mGridView;
     private VideoDatabase mVideoDatabase;
-
-
-    private static final String KEY_LAST_SORTED_BY = "lastSortedBy";
     private int mLastSortedBy;
-
-    private static final String KEY_SORT_DIRECTION = "sortDirection";
     private int mSortDirection;
 
     public static String getExternalStoragePath(Context context) {
@@ -95,6 +92,19 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         } else {
             videoFile.delete();
         }
+        getVideos();
+    }
+
+    private void actionMove(File videoFile) {
+        File directory = videoFile.getParentFile();
+        if (directory == null) {
+            return;
+        }
+        directory = new File(directory, "Recycle");
+        if (!directory.exists())
+            directory.mkdir();
+        videoFile.renameTo(new File(directory, videoFile.getName()));
+        mVideoDatabase.remove(videoFile);
         getVideos();
     }
 
@@ -230,34 +240,6 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
     }
 
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.order_size) {
-            item.setChecked(true);
-            mLastSortedBy = 3 * mSortDirection;
-            getVideos();
-        } else if (item.getItemId() == R.id.order_create_at) {
-            item.setChecked(true);
-            mLastSortedBy = 2 * mSortDirection;
-            getVideos();
-        } else if (item.getItemId() == R.id.order_duration) {
-            item.setChecked(true);
-            mLastSortedBy = 1 * mSortDirection;
-            getVideos();
-        } else if (item.getItemId() == R.id.order_increase) {
-            item.setChecked(true);
-            mSortDirection = 1;
-            mLastSortedBy = Math.abs(mLastSortedBy);
-            getVideos();
-        } else if (item.getItemId() == R.id.order_decrease) {
-            item.setChecked(true);
-            mSortDirection = -1;
-            mLastSortedBy = Math.abs(mLastSortedBy) * mSortDirection;
-            getVideos();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
                 .getMenuInfo();
@@ -301,6 +283,11 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
             dialog.show();
         }
+        if (item.getItemId() == R.id.action_move) {
+            File videoFile = new File(mVideoAdapter.getItem(info.position).Directory,
+                    mVideoAdapter.getItem(info.position).Filename);
+            actionMove(videoFile);
+        }
         return super.onContextItemSelected(item);
     }
 
@@ -329,6 +316,34 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         else
             menu.findItem(R.id.order_decrease).setChecked(true);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.order_size) {
+            item.setChecked(true);
+            mLastSortedBy = 3 * mSortDirection;
+            getVideos();
+        } else if (item.getItemId() == R.id.order_create_at) {
+            item.setChecked(true);
+            mLastSortedBy = 2 * mSortDirection;
+            getVideos();
+        } else if (item.getItemId() == R.id.order_duration) {
+            item.setChecked(true);
+            mLastSortedBy = 1 * mSortDirection;
+            getVideos();
+        } else if (item.getItemId() == R.id.order_increase) {
+            item.setChecked(true);
+            mSortDirection = 1;
+            mLastSortedBy = Math.abs(mLastSortedBy);
+            getVideos();
+        } else if (item.getItemId() == R.id.order_decrease) {
+            item.setChecked(true);
+            mSortDirection = -1;
+            mLastSortedBy = Math.abs(mLastSortedBy) * mSortDirection;
+            getVideos();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

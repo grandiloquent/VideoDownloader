@@ -3,7 +3,6 @@
     <string name="ask">Ask</string>
     <string name="bookmark2_button">Bookmark</string>
     <string name="channel_download_videos">Download Videos</string>
-    <string name="clear">清空数据库</string>
     <string name="copy_button">Copy</string>
     <string name="delete">Delete</string>
     <string name="download">download</string>
@@ -58,5 +57,4 @@
     <string name="start_download">start download</string>
     <string name="video_downloaded">Video downloaded</string>
     <string name="create_task">Create task...</string>
-<string name="linear_burn._in_this_mode (which_is_actually_a_combination_of_multiply_and_color_burn),_photoshop_analyzes_each_channel_and_then_darkens_your_image_by_decreasing_the_brightness_between_the_base_and_blend_colors (layer_order_doesn’t_matter);_the_darker_the_blend_color,_the_darker_the_result._linear_burn_produces_the_darkest_colors_of_any_darken_blend_mode,_though_with_a_bit_more_contrast_than_the_others._it_has_a_tendency_to_turn_dark_pixels_solid_black,_which_makes_it_ideal_for_grungy,_textured_collages_like_the_one_in_figure 7-11._keyboard_shortcut:_shift-option-a (shift+alt+a).">Linear Burn. In this mode (which is actually a combination of Multiply and Color Burn), Photoshop analyzes each channel and then darkens your image by decreasing the brightness between the base and blend colors (layer order doesn’t matter); the darker the blend color, the darker the result. Linear Burn produces the darkest colors of any darken blend mode, though with a bit more contrast than the others. It has a tendency to turn dark pixels solid black, which makes it ideal for grungy, textured collages like the one in Figure 7-11. Keyboard shortcut: Shift-Option-A (Shift+Alt+A).</string>
 </resources>
