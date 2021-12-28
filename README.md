@@ -1,3 +1,5 @@
+此项目已停止更新，请关注 https://github.com/grandiloquent/91porn-client
+
 # 视频浏览器
 
 一个可以解析和下载各大平台视频的Android手机软件。
